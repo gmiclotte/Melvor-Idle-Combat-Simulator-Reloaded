@@ -5767,7 +5767,7 @@ window.addEventListener('message', (event) => {
         // console.log('Loading sim with provided URLS');
         let tryLoad = true;
         let wrongVersion = false;
-        if (gameVersion !== 'Alpha v0.16.1') {
+        if (gameVersion !== 'Alpha v0.16.3') {
           wrongVersion = true;
           tryLoad = window.confirm('Melvor Combat Simulator\nA different game version was detected. Loading the combat sim may cause unexpected behaviour or result in inaccurate simulation results.\n Try loading it anyways?');
         }
