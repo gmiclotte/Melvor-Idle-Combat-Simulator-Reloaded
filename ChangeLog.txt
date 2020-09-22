@@ -24,7 +24,7 @@ New: The user interface has been overhauled significantly
 New: Implemented the Combat Triangle
 New: Implemented Pets, which can be selected from the new Pets tab.
 New: Implemented Auroras, Curses and Ancient Magicks, selectable from their indivdual tabs in the Spells tab.
-New: Implemented new plot type: Pet Chance. Calculates the probability to recieve the pet in the given time unit.
+New: Implemented new plot type: Pet Chance. Calculates the probability to receive the pet in the given time unit.
 New: Implemented new special attack effects: Decreased Ranged Evasion, Stun that only has a chance to apply, Bleed that only has a chance to apply
 New: Implemented maxHitpoints
   Adjusted regeneration calculation, burn damage calculation to scale on max HP.
@@ -47,7 +47,7 @@ Fixed a bug where incorrect player stats were being used for simulations when us
 
 v0.9.0:
 Updated Combat Sim for game version Alpha v0.15.4
-New: The Combat simulator has now been multithreaded, and should now no longer freeze the game or tab when simulating. 
+New: The Combat simulator has now been multithreaded, and should now no longer freeze the game or tab when simulating.
   - There may be a significant decrease in simulation time for those with mult-core CPUs, and it should be possible to run longer simulations
 New: Added a Cancel Button for simulations that are currently running
 New: Added Buttons for choosing which of your gear sets to import from the game
@@ -90,7 +90,7 @@ Fix: Fixed a rounding issue on damage to enemies with player specials attacks th
 Fix: Fixed HP Regen calculation, it was previously only adding the regen for one monster to all trials.
 Fix: Equipping Bolts while having a bow equipped no longer unequips the bow.
 Fix: Added a check for if ranged weapons have the right ammo equipped before simulation.
- 
+
 v0.7.0:
 Melvor Combat sim has been updated for game version Alpha v0.15
 The simulation method has been completely rewritten this update to accomadate new combat mechanics.
@@ -118,7 +118,7 @@ Slayer crossbow applies its bonus strength to dungeons if the slayer task option
 
 v0.6.4:
 Updated for game version Alpha v0.14.2
-No changes to combat mechanics. 
+No changes to combat mechanics.
 Updated internal game version to remove notification for wrong version.
 
 v0.6.3:

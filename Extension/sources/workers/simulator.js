@@ -119,10 +119,10 @@ const combatTriangle = {
 };
 
 onmessage = (event) => {
-  // console.log('Message Recieved from Simulator');
+  // console.log('Message Received from Simulator');
   switch (event.data.action) {
-    case 'RECIEVE_GAMEDATA':
-      // console.log('Recieved Game Data.');
+    case 'RECEIVE_GAMEDATA':
+      // console.log('Received Game Data.');
       // console.log(event.data);
       protectFromValue = event.data.protectFromValue;
       numberMultiplier = event.data.numberMultiplier;

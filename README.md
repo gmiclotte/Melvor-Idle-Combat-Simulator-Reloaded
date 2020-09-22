@@ -1,5 +1,5 @@
 # Melvor-Idle-Combat-Simulator v0.10.1
-A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).  
+A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
 This extension was built for version: Alpha v0.16.1 of Melvor Idle.
 
 ## How to Install
@@ -76,7 +76,7 @@ Currently not available on the chrome webstore, but you can download the sources
         - This can be used to determine most combat potion charge usages, ammunition usage and rune usage.
      - Attacks Taken per X: Average number of calls to attackPlayer() per X.
         - This can be used to determine potion charge usage for combat potions that consume charges on enemy attacks.
-     - Y Pet Chance per X: The probability to recieve Y pet in the given X time period.
+     - Y Pet Chance per X: The probability to receive Y pet in the given X time period.
         - Pets are rolled only when you earn experience of the given type, with expeption to the slayer pet, which is only rolled upon the completion of slayer tasks.
 6. Click on a bar to view detailed information about that monster/dungeon.
     - You can click Inspect Dungeon to view the simulation results for individual monsters inside a dungeon. Note that the average time in this view is the time required to defeat the quantity of that monster in the dungeon.
@@ -99,5 +99,5 @@ In addition the calculation for hitpoints used per second assumes there is no ca
 ### Lightmode
 ![combatSim](Media/lightMode.png)
 ## Suggestions and Feedback
-Found a bug or want to request a feature?  
+Found a bug or want to request a feature?
 Feel free to message me on the [Melvor Idle Discord](https://discord.gg/TWDT7PM) or [submit a report](https://github.com/coolrox95/Melvor-Idle-Combat-Simulator/issues/new) to this repository.

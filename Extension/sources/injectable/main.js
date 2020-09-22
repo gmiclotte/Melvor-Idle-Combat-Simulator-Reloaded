@@ -3448,7 +3448,7 @@ class McsSimulator {
       console.log(event);
     };
     worker.postMessage({
-      action: 'RECIEVE_GAMEDATA',
+      action: 'RECEIVE_GAMEDATA',
       protectFromValue: protectFromValue,
       numberMultiplier: numberMultiplier,
       enemySpecialAttacks: enemySpecialAttacks,
@@ -4241,12 +4241,12 @@ class McsSimulator {
   }
 
   /**
-   * Processes a message recieved from one of the simulation workers
+   * Processes a message received from one of the simulation workers
    * @param {MessageEvent} event The event data of the worker
    * @param {number} workerID The ID of the worker that sent the message
    */
   processWorkerMessage(event, workerID) {
-    // console.log(`Recieved Message from worker: ${workerID}`);
+    // console.log(`Received Message from worker: ${workerID}`);
     switch (event.data.action) {
       case 'FINISHED_SIM':
         // Send next job in queue to worker
@@ -5037,7 +5037,7 @@ class McsSimulator {
     }
   }
   /**
-   * Updates the chance to recieve signet when killing monsters
+   * Updates the chance to receive signet when killing monsters
    */
   updateSignetChance() {
     if (this.parent.isViewingDungeon) {
@@ -5778,9 +5778,9 @@ window.addEventListener('message', (event) => {
     return;
   }
   if (event.data.type && (event.data.type === 'MCS_FROM_CONTENT')) {
-    // console.log('Message recieved from content script');
+    // console.log('Message received from content script');
     switch (event.data.action) {
-      case 'RECIEVE_URLS':
+      case 'RECEIVE_URLS':
         // console.log('Loading sim with provided URLS');
         let tryLoad = true;
         let wrongVersion = false;
