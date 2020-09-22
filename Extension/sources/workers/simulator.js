@@ -138,9 +138,9 @@ onmessage = (event) => {
       // console.log(`Simulation started for monster with ID: ${event.data.monsterID}`);
       const startTime = performance.now();
       cancelStatus = false;
-      simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.Ntrials, event.data.simOptions.Nhitmax).then((simResult)=>{
+      simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.Ntrials, event.data.simOptions.Nhitmax).then((simResult) => {
         const timeTaken = performance.now() - startTime;
-        postMessage({action: 'FINISHED_SIM', monsterID: event.data.monsterID, simResult: simResult, selfTime: timeTaken});
+        postMessage({ action: 'FINISHED_SIM', monsterID: event.data.monsterID, simResult: simResult, selfTime: timeTaken });
       });
       break;
     case 'CANCEL_SIMULATION':
@@ -314,7 +314,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
   }
   // Pre-populate pet rolls
   stats.petRolls[playerStats.attackSpeed - playerStats.attackSpeedDecrease] = 0;
-  enemyStats.specialIDs.forEach((id)=>{
+  enemyStats.specialIDs.forEach((id) => {
     const specialAttack = enemySpecialAttacks[id];
     if (specialAttack.attackSpeedDebuff) {
       const slowedSpeed = Math.floor(playerStats.attackSpeed * (1 + specialAttack.attackSpeedDebuff / 100)) - playerStats.attackSpeedDecrease;
@@ -523,7 +523,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
                   applyBleed = true;
                 }
                 if (applyBleed) {
-                // Start bleed effect
+                  // Start bleed effect
                   enemy.isBleeding = true;
                   enemy.bleedMaxCount = playerStats.specialData.bleedCount;
                   enemy.bleedInterval = playerStats.specialData.bleedInterval;
@@ -733,7 +733,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
               applyBleed = true;
             }
             if (applyBleed) {
-            // Start bleed effect
+              // Start bleed effect
               enemy.isBleeding = true;
               enemy.bleedMaxCount = playerStats.specialData.bleedCount;
               enemy.bleedInterval = playerStats.specialData.bleedInterval;
@@ -902,7 +902,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
               if (enemy.isCursed && enemy.curse.type === 'Confusion') {
                 enemy.hitpoints -= Math.floor(enemy.hitpoints * enemy.curse.confusionMult);
               }
-              if (playerStats.activeItems.Guardian_Amulet && player.reductionBuff < 12) {};
+              if (playerStats.activeItems.Guardian_Amulet && player.reductionBuff < 12) { };
               // Apply Stun
               if (currentSpecial.canStun && !player.isStunned) {
                 player.isStunned = true;
@@ -1198,7 +1198,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
     simResult.attacksMadePerSecond = stats.playerAttackCalls / Ntrials / simResult.killTimeS;
 
     // Throw pet rolls in here to be further processed later
-    simResult.petRolls = Object.keys(stats.petRolls).map((attackSpeed)=>{
+    simResult.petRolls = Object.keys(stats.petRolls).map((attackSpeed) => {
       return {
         speed: parseInt(attackSpeed),
         rollsPerSecond: stats.petRolls[attackSpeed] / Ntrials / simResult.killTimeS,
@@ -1311,8 +1311,8 @@ function setEvasionDebuffs(enemyStats, enemy) {
  * @return {Promise<boolean>}
  */
 async function cancelCheck() {
-  return new Promise((resolve)=>{
-    setTimeout(()=>{
+  return new Promise((resolve) => {
+    setTimeout(() => {
       resolve(cancelStatus);
     });
   });

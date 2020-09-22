@@ -25,9 +25,11 @@ window.addEventListener('message', (event) => {
     switch (event.data.action) {
       case 'REQUEST_URLS':
         // Send URLS of web accessible resources to page
-        const urls = {crossedOut: chrome.runtime.getURL('icons/crossedOut.svg'),
-          simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js')};
-        window.postMessage({type: 'MCS_FROM_CONTENT', action: 'RECIEVE_URLS', urls: urls});
+        const urls = {
+          crossedOut: chrome.runtime.getURL('icons/crossedOut.svg'),
+          simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js')
+        };
+        window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'RECIEVE_URLS', urls: urls });
         break;
     }
   }

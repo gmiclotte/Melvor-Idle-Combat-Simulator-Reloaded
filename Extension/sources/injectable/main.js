@@ -29,7 +29,8 @@ class McsApp {
    */
   constructor(urls) {
     // Plot Type Options
-    this.plotTypeDropdownOptions = ['XP per ',
+    this.plotTypeDropdownOptions = [
+      'XP per ',
       'HP XP per ',
       'Prayer XP per ',
       'Slayer XP per ',
@@ -47,7 +48,8 @@ class McsApp {
       'Pet Chance per ',
       // 'Simulation Time',
     ];
-    this.plotTypeIsTime = [true,
+    this.plotTypeIsTime = [
+      true,
       true,
       true,
       true,
@@ -65,7 +67,8 @@ class McsApp {
       true,
       // false,
     ];
-    this.plotTypeDropdownValues = ['xpPerSecond',
+    this.plotTypeDropdownValues = [
+      'xpPerSecond',
       'hpxpPerSecond',
       'prayerXpPerSecond',
       'slayerXpPerSecond',
@@ -83,7 +86,8 @@ class McsApp {
       'petChance',
       // 'simulationTime',
     ];
-    this.zoneInfoNames = ['XP/',
+    this.zoneInfoNames = [
+      'XP/',
       'HP XP/',
       'Prayer XP/',
       'Slayer XP/',
@@ -270,12 +274,12 @@ class McsApp {
     this.botContent.style.flexWrap = 'nowrap';
     this.botContent.id = 'MCS Bot Content';
     // Add listeners for changing page to not the sim
-    document.getElementsByClassName('nav-main-link').forEach((element)=>{
+    document.getElementsByClassName('nav-main-link').forEach((element) => {
       if (element.href.includes('changePage')) {
-        element.addEventListener('click', ()=>this.hideSim());
+        element.addEventListener('click', () => this.hideSim());
       }
     });
-    document.getElementsByClassName('btn btn-sm btn-light btn-combat-minibar-hp')[0].addEventListener('click', ()=>this.hideSim());
+    document.getElementsByClassName('btn btn-sm btn-light btn-combat-minibar-hp')[0].addEventListener('click', () => this.hideSim());
     // This code will insert a tab into the actual sidebar
     const newHeading = document.createElement('li');
     newHeading.className = 'nav-main-heading mcsNoSelect';
@@ -314,10 +318,10 @@ class McsApp {
       this.mainTabCard = new McsCard(this.topContent, '350px', '', '150px', true);
       const mainTabNames = ['Equipment', 'Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'Sim. Options', 'GP Options'];
       const mainTabImages = [this.emptyItems.Helmet.media, media.combat, media.spellbook, media.prayer, media.emptyPotion, media.pet, media.settings, media.gp];
-      const mainTabCallbacks = mainTabNames.map((_name, index)=>{
-        return ()=>this.mainTabOnClick(index);
+      const mainTabCallbacks = mainTabNames.map((_name, index) => {
+        return () => this.mainTabOnClick(index);
       });
-      this.mainTabIDs = mainTabNames.map((name)=>{
+      this.mainTabIDs = mainTabNames.map((name) => {
         return `MCS ${name} Tab`;
       });
       this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks, 25);
@@ -337,11 +341,11 @@ class McsApp {
         [CONSTANTS.equipmentSlot.Platelegs],
         [CONSTANTS.equipmentSlot.Gloves, CONSTANTS.equipmentSlot.Boots, CONSTANTS.equipmentSlot.Ring],
       ];
-      gearRows.forEach((gearRow)=>{
+      gearRows.forEach((gearRow) => {
         const rowSources = [];
         const rowIDs = [];
         const rowPopups = [];
-        gearRow.forEach((gearID)=>{
+        gearRow.forEach((gearID) => {
           rowSources.push(this.emptyItems[this.slotKeys[gearID]].media);
           rowIDs.push(`MCS ${this.slotKeys[gearID]} Gear Image`);
           rowPopups.push(this.createGearPopup(gearID));
@@ -349,7 +353,7 @@ class McsApp {
         this.gearSelectCard.addMultiPopupMenu(rowSources, rowIDs, 40, 40, rowPopups);
       });
       this.gearSelectCard.addSectionTitle('Import Gear Set');
-      this.gearSelectCard.addMultiButton(['1', '2', '3'], 25, 80, [()=>this.importButtonOnClick(0), ()=>this.importButtonOnClick(1), ()=>this.importButtonOnClick(2)]);
+      this.gearSelectCard.addMultiButton(['1', '2', '3'], 25, 80, [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)]);
       this.gearSelectCard.addSectionTitle('Combat Style');
       // Style dropdown (Specially Coded)
       const combatStyleCCContainer = this.gearSelectCard.createCCContainer(24);
@@ -387,10 +391,10 @@ class McsApp {
       this.selectedSpellTab = 0;
       const spellTypeNames = ['Standard', 'Curses', 'Auroras', 'Ancient Magicks'];
       const spellTypeImages = [media.spellbook, media.curse, media.aurora, media.ancient];
-      const spellTabCallbacks = spellTypeNames.map((_name, index)=>{
-        return ()=>this.spellTabOnClick(index);
+      const spellTabCallbacks = spellTypeNames.map((_name, index) => {
+        return () => this.spellTabOnClick(index);
       });
-      this.spellTabIDs = spellTypeNames.map((name)=>{
+      this.spellTabIDs = spellTypeNames.map((name) => {
         return `MCS ${name} Tab`;
       });
       this.spellTabContainer = this.spellSelectCard.addTabMenu(spellTypeNames, spellTypeImages, spellTabCallbacks, 25);
@@ -400,7 +404,7 @@ class McsApp {
       this.spellTabCards.push(this.createSpellSelectCard('Curses', 'curse'));
       this.spellTabCards.push(this.createSpellSelectCard('Auroras', 'aurora'));
       this.spellTabCards.push(this.createSpellSelectCard('Ancient Magicks', 'ancient'));
-      this.spellTabCards.forEach((card, cardID)=>{
+      this.spellTabCards.forEach((card, cardID) => {
         if (cardID !== 0) {
           card.container.style.display = 'none';
         }
@@ -461,7 +465,7 @@ class McsApp {
         const prayerTooltip = new McsTooltipBuilder(prayerTooltips[prayerID]);
         prayerTooltip.addTitle(this.getPrayerName(prayerID));
         prayerTooltip.addDivider();
-        prayer.vars.forEach((prayerBonus, j)=>{
+        prayer.vars.forEach((prayerBonus, j) => {
           if (prayerBonusNumeric[prayerBonus]) {
             prayerTooltip.addText(`+${prayer.values[j]}% ${prayerBonusDictionary[prayerBonus]}`);
           } else {
@@ -528,23 +532,23 @@ class McsApp {
     // Pet selection card
     {
       this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-      const combatPets = PETS.filter((_pet, petID)=>{
+      const combatPets = PETS.filter((_pet, petID) => {
         return this.combatPetsIds.includes(petID);
       });
       this.petSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
       this.mainTabCards.push(this.petSelectCard);
       this.petSelectCard.addSectionTitle('Pets');
-      const petImageSources = combatPets.map((pet)=>{
+      const petImageSources = combatPets.map((pet) => {
         return pet.media;
       });
-      const petNames = combatPets.map((pet)=>{
+      const petNames = combatPets.map((pet) => {
         return pet.name;
       });
-      const petButtonCallbacks = combatPets.map((_pet, subID)=>{
-        return (e)=>this.petButtonOnClick(e, this.combatPetsIds[subID]);
+      const petButtonCallbacks = combatPets.map((_pet, subID) => {
+        return (e) => this.petButtonOnClick(e, this.combatPetsIds[subID]);
       });
       const petTooltips = this.petSelectCard.addMultiImageButton(petImageSources, petNames, 'Medium', petButtonCallbacks);
-      petTooltips.forEach((tooltipDiv, subID)=>{
+      petTooltips.forEach((tooltipDiv, subID) => {
         const petTTBuilder = new McsTooltipBuilder(tooltipDiv);
         petTTBuilder.addTitle(petNames[subID]);
         petTTBuilder.addDivider();
@@ -564,7 +568,8 @@ class McsApp {
     {
       this.equipStatCard = new McsCard(this.topContent, '250px', '', '50px', true);
       this.equipStatCard.addSectionTitle('Equipment Stats');
-      this.equipStatKeys = ['attackSpeed',
+      this.equipStatKeys = [
+        'attackSpeed',
         'strengthBonus',
         'attBon0',
         'attBon1',
@@ -580,8 +585,10 @@ class McsApp {
         'attackLevelRequired',
         'defenceLevelRequired',
         'rangedLevelRequired',
-        'magicLevelRequired'];
-      const equipStatNames = ['Attack Speed',
+        'magicLevelRequired'
+      ];
+      const equipStatNames = [
+        'Attack Speed',
         'Strength Bonus',
         'Stab Bonus',
         'Slash Bonus',
@@ -597,8 +604,10 @@ class McsApp {
         'Level Required',
         'Level Required',
         'Level Required',
-        'Level Required'];
-      const equipStatIcons = ['combat',
+        'Level Required'
+      ];
+      const equipStatIcons = [
+        'combat',
         'strength',
         'attack',
         'strength',
@@ -614,7 +623,8 @@ class McsApp {
         'attack',
         'defence',
         'ranged',
-        'magic'];
+        'magic'
+      ];
       for (let i = 0; i < equipStatNames.length; i++) {
         this.equipStatCard.addNumberOutput(equipStatNames[i], 0, 20, iconSources[equipStatIcons[i]], `MCS ${this.equipStatKeys[i]} ES Output`);
       }
@@ -623,7 +633,8 @@ class McsApp {
     {
       this.combatStatCard = new McsCard(this.topContent, '250px', '', '50px', true);
       this.combatStatCard.addSectionTitle('Combat Stats');
-      const combatStatNames = ['Attack Speed',
+      const combatStatNames = [
+        'Attack Speed',
         'Min Hit',
         'Max Hit',
         'Accuracy Rating',
@@ -631,9 +642,11 @@ class McsApp {
         'Evasion Rating',
         'Evasion Rating',
         'Max Hitpoints',
-        'Damage Reduction'];
+        'Damage Reduction'
+      ];
       const combatStatIcons = ['', '', '', '', 'combat', 'ranged', 'magic', '', ''];
-      this.combatStatKeys = ['attackSpeed',
+      this.combatStatKeys = [
+        'attackSpeed',
         'minHit',
         'maxHit',
         'maxAttackRoll',
@@ -641,7 +654,8 @@ class McsApp {
         'maxRngDefRoll',
         'maxMagDefRoll',
         'maxHitpoints',
-        'damageReduction'];
+        'damageReduction'
+      ];
       for (let i = 0; i < combatStatNames.length; i++) {
         this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? iconSources[combatStatIcons[i]] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
       }
@@ -799,7 +813,7 @@ class McsApp {
     this.exportOptionsCard.setContainerWidths();
     this.zoneInfoCard.setContainerWidths();
     this.subInfoCard.setContainerWidths();
-    this.mainTabCards.forEach((card, cardID)=>{
+    this.mainTabCards.forEach((card, cardID) => {
       card.setContainerWidths();
       if (cardID !== 0) {
         card.container.style.display = 'none';
@@ -842,20 +856,20 @@ class McsApp {
    */
   addGearMultiButton(card, gearID, filterFunction, sortKey = 'itemID') {
     const menuItems = this.gearSubsets[gearID].filter(filterFunction);
-    menuItems.sort((a, b)=>{
+    menuItems.sort((a, b) => {
       return ((a[sortKey]) ? a[sortKey] : 0) - ((b[sortKey]) ? b[sortKey] : 0);
     });
-    const buttonMedia = menuItems.map((item)=>{
+    const buttonMedia = menuItems.map((item) => {
       return item.media;
     });
-    const buttonIds = menuItems.map((item)=>{
+    const buttonIds = menuItems.map((item) => {
       return `${this.getItemName(item.itemID)}`;
     });
-    const buttonCallbacks = menuItems.map((item)=>{
-      return ()=>this.equipItemButton(gearID, item.itemID);
+    const buttonCallbacks = menuItems.map((item) => {
+      return () => this.equipItemButton(gearID, item.itemID);
     });
     const multiTooltips = card.addMultiImageButton(buttonMedia, buttonIds, 'Small', buttonCallbacks, 440);
-    multiTooltips.forEach((tooltip, i)=>{
+    multiTooltips.forEach((tooltip, i) => {
       const itemTTBuilder = new McsTooltipBuilder(tooltip);
       itemTTBuilder.addTitle(this.getItemName(menuItems[i].itemID));
     });
@@ -872,42 +886,42 @@ class McsApp {
     const newCard = new McsCard(this.spellTabContainer, '', '', '100px');
     newCard.addSectionTitle(title);
     const spellArray = this.simulator.spells[spellType].array;
-    const spellImages = spellArray.map((spell)=>{
+    const spellImages = spellArray.map((spell) => {
       return spell.media;
     });
-    const spellNames = spellArray.map((spell)=>{
+    const spellNames = spellArray.map((spell) => {
       return spell.name;
     });
-    const spellCallbacks = spellArray.map((_spell, spellID)=>{
-      return (event)=>this.spellButtonOnClick(event, spellID, spellType);
+    const spellCallbacks = spellArray.map((_spell, spellID) => {
+      return (event) => this.spellButtonOnClick(event, spellID, spellType);
     });
     const spellTooltips = newCard.addMultiImageButton(spellImages, spellNames, 'Medium', spellCallbacks);
-    spellTooltips.forEach((tooltip, spellID)=>{
+    spellTooltips.forEach((tooltip, spellID) => {
       const spellTTBuilder = new McsTooltipBuilder(tooltip);
       spellTTBuilder.addTitle(spellNames[spellID]);
       spellTTBuilder.addDivider();
       switch (spellType) {
         case 'aurora':
-        {
-          spellTTBuilder.addText(spellArray[spellID].description.replace(/^.*?<br>/, ''));
-          break;
-        }
+          {
+            spellTTBuilder.addText(spellArray[spellID].description.replace(/^.*?<br>/, ''));
+            break;
+          }
         case 'curse':
         case 'ancient':
-        {
-          spellArray[spellID].description.split('<br>').forEach((lineText, lineNum, lines)=>{
-            spellTTBuilder.addText(lineText);
-            if ((lineNum + 1) !== lines.length) {
-              spellTTBuilder.addLineBreak();
-            }
-          });
-          break;
-        }
+          {
+            spellArray[spellID].description.split('<br>').forEach((lineText, lineNum, lines) => {
+              spellTTBuilder.addText(lineText);
+              if ((lineNum + 1) !== lines.length) {
+                spellTTBuilder.addLineBreak();
+              }
+            });
+            break;
+          }
         case 'standard':
-        {
-          spellTTBuilder.addText(`Max Hit: ${spellArray[spellID].maxHit * numberMultiplier}`);
-          break;
-        }
+          {
+            spellTTBuilder.addText(`Max Hit: ${spellArray[spellID].maxHit * numberMultiplier}`);
+            break;
+          }
       }
     });
     return newCard;
@@ -1024,60 +1038,60 @@ class McsApp {
     const noSplit = [6, 7, 10];
     if (triSplit.includes(gearID)) {
       gearSelectCard.addSectionTitle('Melee');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterIfHasKey('defenceLevelRequired', item), 'defenceLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('defenceLevelRequired', item), 'defenceLevelRequired');
       gearSelectCard.addSectionTitle('Ranged');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterIfHasKey('rangedLevelRequired', item), 'rangedLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('rangedLevelRequired', item), 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Magic');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterIfHasKey('magicLevelRequired', item), 'magicLevelRequired');
-      if (this.gearSubsets[gearID].filter((item)=>this.filterIfHasNoLevelReq(item)).length > 1) {
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('magicLevelRequired', item), 'magicLevelRequired');
+      if (this.gearSubsets[gearID].filter((item) => this.filterIfHasNoLevelReq(item)).length > 1) {
         gearSelectCard.addSectionTitle('Other');
-        this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterIfHasNoLevelReq(item), 'name');
+        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasNoLevelReq(item), 'name');
       }
     } else if (noSplit.includes(gearID)) {
       gearSelectCard.addSectionTitle(this.slotKeys[gearID]);
-      this.addGearMultiButton(gearSelectCard, gearID, ()=>this.returnTrue());
+      this.addGearMultiButton(gearSelectCard, gearID, () => this.returnTrue());
     } else if (gearID === 4) {
       gearSelectCard.addSectionTitle('1H Melee');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByTwoHanded(false, item) && this.filterByWeaponType('Melee', item);
       }, 'attackLevelRequired');
       gearSelectCard.addSectionTitle('2H Melee');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByTwoHanded(true, item) && this.filterByWeaponType('Melee', item);
       }, 'attackLevelRequired');
       gearSelectCard.addSectionTitle('Bows');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByAmmoReq(0, item) && this.filterByWeaponType('Ranged', item);
       }, 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Crossbows');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByAmmoReq(1, item) && this.filterByWeaponType('Ranged', item);
       }, 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Javelins');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByAmmoReq(2, item) && this.filterByWeaponType('Ranged', item);
       }, 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Throwing Knives');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByAmmoReq(3, item) && this.filterByWeaponType('Ranged', item);
       }, 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('1H Magic');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByTwoHanded(false, item) && this.filterByWeaponType('Magic', item);
       }, 'magicLevelRequired');
       gearSelectCard.addSectionTitle('2H Magic');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>{
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => {
         return this.filterByTwoHanded(true, item) && this.filterByWeaponType('Magic', item);
       }, 'magicLevelRequired');
     } else if (gearID === 9) {
       gearSelectCard.addSectionTitle('Arrows');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterByAmmoType(0, item), 'rangedLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(0, item), 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Bolts');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterByAmmoType(1, item), 'rangedLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(1, item), 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Javelins');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterByAmmoType(2, item), 'rangedLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(2, item), 'rangedLevelRequired');
       gearSelectCard.addSectionTitle('Throwing Knives');
-      this.addGearMultiButton(gearSelectCard, gearID, (item)=>this.filterByAmmoType(3, item), 'rangedLevelRequired');
+      this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(3, item), 'rangedLevelRequired');
     } else {
       throw Error('Invalid gearID');
     }
@@ -1325,7 +1339,7 @@ class McsApp {
     document.getElementById('MCS Magic Style Dropdown').selectedIndex = magicStyle - 6;
     // Update spells
     // Set all active spell UI to be disabled
-    Object.keys(this.simulator.spells).forEach((spellType)=>{
+    Object.keys(this.simulator.spells).forEach((spellType) => {
       const spellOpts = this.simulator.spells[spellType];
       if (spellOpts.isSelected) {
         document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'mcsImageButton';
@@ -1359,7 +1373,7 @@ class McsApp {
       this.simulator.spells.aurora.selectedID = -1;
     }
     // Update spell UI
-    Object.keys(this.simulator.spells).forEach((spellType)=>{
+    Object.keys(this.simulator.spells).forEach((spellType) => {
       const spellOpts = this.simulator.spells[spellType];
       if (spellOpts.isSelected) {
         document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'mcsImageButton mcsButtonImageSelected';
@@ -1417,7 +1431,7 @@ class McsApp {
       document.getElementById('MCS Potion Tier Dropdown').selectedIndex = potionTier;
     }
     // Import PETS
-    petUnlocked.forEach((owned, petID)=>{
+    petUnlocked.forEach((owned, petID) => {
       this.simulator.petOwned[petID] = owned;
       if (this.combatPetsIds.includes(petID)) {
         let newClass = 'mcsImageButton';
@@ -1836,7 +1850,7 @@ class McsApp {
     this.selectedTimeUnit = this.timeOptions[event.currentTarget.selectedIndex];
     this.selectedTimeShorthand = this.timeShorthand[event.currentTarget.selectedIndex];
     // Update zone info card time units
-    this.zoneInfoNames.forEach((name, index)=>{
+    this.zoneInfoNames.forEach((name, index) => {
       let newName = '';
       if (name === ' Pet Chance/') newName = this.skillShorthand[this.simulator.petSkill] + name + this.selectedTimeShorthand;
       else if (this.plotTypeIsTime[index]) newName = name + this.selectedTimeShorthand;
@@ -1978,13 +1992,13 @@ class McsApp {
     const newState = !this.monsterToggleState;
     this.monsterToggleState = newState;
     // Create List of non-dungeon monsters
-    combatAreas.forEach((area)=>{
-      area.monsters.forEach((monsterID)=>{
+    combatAreas.forEach((area) => {
+      area.monsters.forEach((monsterID) => {
         this.simulator.monsterSimFilter[monsterID] = newState;
       });
     });
-    slayerAreas.forEach((area)=>{
-      area.monsters.forEach((monsterID)=>{
+    slayerAreas.forEach((area) => {
+      area.monsters.forEach((monsterID) => {
         this.simulator.monsterSimFilter[monsterID] = newState;
       });
     });
@@ -2078,7 +2092,7 @@ class McsApp {
    * @param {number} magicLevel The magic level the player has
    */
   updateSpellOptions(magicLevel) {
-    const setSpellsPerLevel = (spell, index, type) =>{
+    const setSpellsPerLevel = (spell, index, type) => {
       const spellOption = this.simulator.spells[type];
       if (spell.magicLevelRequired > magicLevel) {
         document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
@@ -2097,10 +2111,10 @@ class McsApp {
         document.getElementById(`MCS ${spell.name} Button Image`).src = spell.media;
       }
     };
-    SPELLS.forEach((spell, index)=>setSpellsPerLevel(spell, index, 'standard'));
-    AURORAS.forEach((spell, index)=>setSpellsPerLevel(spell, index, 'aurora'));
-    CURSES.forEach((spell, index)=>setSpellsPerLevel(spell, index, 'curse'));
-    ANCIENT.forEach((spell, index)=>setSpellsPerLevel(spell, index, 'ancient'));
+    SPELLS.forEach((spell, index) => setSpellsPerLevel(spell, index, 'standard'));
+    AURORAS.forEach((spell, index) => setSpellsPerLevel(spell, index, 'aurora'));
+    CURSES.forEach((spell, index) => setSpellsPerLevel(spell, index, 'curse'));
+    ANCIENT.forEach((spell, index) => setSpellsPerLevel(spell, index, 'ancient'));
     this.checkForElisAss();
   }
 
@@ -2109,7 +2123,7 @@ class McsApp {
    */
   checkForElisAss() {
     const spellOption = this.simulator.spells.aurora;
-    AURORAS.forEach((spell, index)=>{
+    AURORAS.forEach((spell, index) => {
       if (spell.requiredItem !== -1) {
         if (this.gearSelected.includes(spell.requiredItem) && this.simulator.playerLevels.Magic >= spell.magicLevelRequired) {
           document.getElementById(`MCS ${spell.name} Button Image`).src = spell.media;
@@ -2130,7 +2144,7 @@ class McsApp {
    * @param {number} prayerLevel The prayer level the player has
    */
   updatePrayerOptions(prayerLevel) {
-    PRAYER.forEach((prayer, i)=>{
+    PRAYER.forEach((prayer, i) => {
       if (prayer.prayerLevel > prayerLevel) {
         document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
         if (this.simulator.prayerSelected[i]) {
@@ -2497,7 +2511,7 @@ class McsPlotter {
     // Use a dropdown menu for the plot title
     const skillTypeSelect = document.createElement('select');
     skillTypeSelect.className = 'mcsDropdown';
-    this.parent.skillKeys.forEach((skillName, index)=>{
+    this.parent.skillKeys.forEach((skillName, index) => {
       const newOption = document.createElement('option');
       newOption.textContent = skillName;
       newOption.value = skillName;
@@ -2511,7 +2525,7 @@ class McsPlotter {
 
     const plotTypeSelect = document.createElement('select');
     plotTypeSelect.className = 'mcsDropdown';
-    this.parent.plotTypeDropdownOptions.forEach((value, index)=>{
+    this.parent.plotTypeDropdownOptions.forEach((value, index) => {
       const newOption = document.createElement('option');
       newOption.textContent = value;
       newOption.value = this.parent.plotTypeDropdownValues[index];
@@ -2523,7 +2537,7 @@ class McsPlotter {
 
     this.timeDropdown = document.createElement('select');
     this.timeDropdown.className = 'mcsDropdown';
-    this.parent.timeOptions.forEach((value, index)=>{
+    this.parent.timeOptions.forEach((value, index) => {
       const newOption = document.createElement('option');
       newOption.textContent = value;
       newOption.value = this.parent.timeMultipliers[index];
@@ -2800,7 +2814,7 @@ class McsPlotter {
       if (i < (Ndivs + 1)) {
         this.tickText[i].style.display = 'block';
         this.tickText[i].style.bottom = `${i * 100 / Ndivs - 2.5}%`;
-        this.tickText[i].textContent = `${(i * closestRatio).toLocaleString(undefined, {maximumFractionDigits: divDecimals, minimumFractionDigits: divDecimals})}${formatEnd}`;
+        this.tickText[i].textContent = `${(i * closestRatio).toLocaleString(undefined, { maximumFractionDigits: divDecimals, minimumFractionDigits: divDecimals })}${formatEnd}`;
       } else {
         this.tickText[i].style.display = 'none';
       }
@@ -3064,7 +3078,7 @@ class McsSimulator {
       },
     };
     // Pet Selection
-    this.petOwned = PETS.map(()=>{
+    this.petOwned = PETS.map(() => {
       return false;
     });
     // Style Selection
@@ -3411,8 +3425,8 @@ class McsSimulator {
           const workerContent = new XMLHttpRequest();
           workerContent.open('GET', this.workerURL);
           workerContent.send();
-          workerContent.addEventListener('load', (event)=>{
-            const blob = new Blob([event.currentTarget.responseText], {type: 'application/javascript'});
+          workerContent.addEventListener('load', (event) => {
+            const blob = new Blob([event.currentTarget.responseText], { type: 'application/javascript' });
             this.workerURL = URL.createObjectURL(blob);
             resolve(new Worker(this.workerURL));
           });
@@ -3433,7 +3447,8 @@ class McsSimulator {
       console.log('An error occured in a simulation worker');
       console.log(event);
     };
-    worker.postMessage({action: 'RECIEVE_GAMEDATA',
+    worker.postMessage({
+      action: 'RECIEVE_GAMEDATA',
       protectFromValue: protectFromValue,
       numberMultiplier: numberMultiplier,
       enemySpecialAttacks: enemySpecialAttacks,
@@ -3648,7 +3663,7 @@ class McsSimulator {
    * Resets the aurora bonuses to default
    */
   resetAuroraBonus() {
-    Object.keys(this.auroraBonus).forEach((key)=>{
+    Object.keys(this.auroraBonus).forEach((key) => {
       this.auroraBonus[key] = 0;
     });
   }
@@ -3745,7 +3760,7 @@ class McsSimulator {
     this.equipStats.slayerXPBonus = 0;
     this.equipStats.chanceToDoubleLoot = 0;
     this.equipStats.maxHitpointsBonus = 0;
-    this.equipStats.increasedMinSpellDmg.forEach((_element, index, array)=>{
+    this.equipStats.increasedMinSpellDmg.forEach((_element, index, array) => {
       array[index] = 0;
     });
   }
@@ -3923,7 +3938,7 @@ class McsSimulator {
       area.monsters.forEach((monsterID) => {
         if (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) {
           this.monsterSimData[monsterID].inQueue = true;
-          this.simulationQueue.push({monsterID: monsterID});
+          this.simulationQueue.push({ monsterID: monsterID });
         }
       });
     });
@@ -3932,7 +3947,7 @@ class McsSimulator {
       area.monsters.forEach((monsterID) => {
         if (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) {
           this.monsterSimData[monsterID].inQueue = true;
-          this.simulationQueue.push({monsterID: monsterID});
+          this.simulationQueue.push({ monsterID: monsterID });
         }
       });
     });
@@ -3943,13 +3958,13 @@ class McsSimulator {
           const monsterID = DUNGEONS[i].monsters[j];
           if (!this.monsterSimData[monsterID].inQueue) {
             this.monsterSimData[monsterID].inQueue = true;
-            this.simulationQueue.push({monsterID: monsterID});
+            this.simulationQueue.push({ monsterID: monsterID });
           }
         }
       }
     }
     // An attempt to sort jobs my relative complexity so they go from highest to lowest.
-    this.simulationQueue = this.simulationQueue.sort((jobA, jobB)=>{
+    this.simulationQueue = this.simulationQueue.sort((jobA, jobB) => {
       const jobAComplex = this.enemyStats[jobA.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobA.monsterID]);
       const jobBComplex = this.enemyStats[jobB.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobB.monsterID]);
       return jobBComplex - jobAComplex;
@@ -4132,17 +4147,19 @@ class McsSimulator {
     if (this.currentJob < this.simulationQueue.length && !this.simCancelled) {
       const monsterID = this.simulationQueue[this.currentJob].monsterID;
       this.modifyCurrentSimStatsForMonster(monsterID);
-      this.simulationWorkers[workerID].worker.postMessage({action: 'START_SIMULATION',
+      this.simulationWorkers[workerID].worker.postMessage({
+        action: 'START_SIMULATION',
         monsterID: monsterID,
         monsterStats: this.enemyStats[monsterID],
         playerStats: this.currentSim.playerStats,
-        simOptions: this.currentSim.options});
+        simOptions: this.currentSim.options
+      });
       this.simulationWorkers[workerID].inUse = true;
       this.currentJob++;
     } else {
       // Check if none of the workers are in use
       let allDone = true;
-      this.simulationWorkers.forEach((simWorker)=>{
+      this.simulationWorkers.forEach((simWorker) => {
         if (simWorker.inUse) {
           allDone = false;
         }
@@ -4201,7 +4218,7 @@ class McsSimulator {
       this.currentSim.playerStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (rangedAttackBonus + 64) * (1 + (this.currentSim.prayerBonus.rangedAccuracy / 100)) * (1 + this.currentSim.herbloreBonus.rangedAccuracy / 100));
       const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + attackStyleBonus);
       this.currentSim.playerStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + rangedStrengthBonus / 80 + effectiveStrengthLevel * rangedStrengthBonus / 640) * (1 + (this.currentSim.prayerBonus.rangedDamage / 100)) * (1 + this.currentSim.herbloreBonus.rangedStrength / 100)));
-    } else if (this.currentSim.playerStats.activeItems.Big_Ron ) {
+    } else if (this.currentSim.playerStats.activeItems.Big_Ron) {
       // Melee
       let meleeStrengthBonus = this.currentSim.equipStats.strengthBonus;
       if (this.currentSim.playerStats.activeItems.Big_Ron && MONSTERS[monsterID].isBoss) {
@@ -4216,9 +4233,9 @@ class McsSimulator {
    */
   cancelSimulation() {
     this.simCancelled = true;
-    this.simulationWorkers.forEach((simWorker)=>{
+    this.simulationWorkers.forEach((simWorker) => {
       if (simWorker.inUse) {
-        simWorker.worker.postMessage({action: 'CANCEL_SIMULATION'});
+        simWorker.worker.postMessage({ action: 'CANCEL_SIMULATION' });
       }
     });
   }
@@ -5108,28 +5125,28 @@ class McsSimulator {
     }
     if (xpSkills.includes(this.petSkill)) {
       const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
-      this.monsterSimData.forEach((simResult)=>{
+      this.monsterSimData.forEach((simResult) => {
         if (!simResult.simSuccess) {
           simResult.petChance = 0;
           return;
         }
         const timePeriod = (this.timeMultiplier === -1) ? simResult.killTimeS : this.timeMultiplier;
-        simResult.petChance = 1 - simResult.petRolls.reduce((chanceToNotGet, petRoll)=>{
+        simResult.petChance = 1 - simResult.petRolls.reduce((chanceToNotGet, petRoll) => {
           return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * petRoll.rollsPerSecond);
         }, 1);
         simResult.petChance *= 100;
       });
-      this.condensedDungeonMonsters.forEach((condensedArray, index)=>{
+      this.condensedDungeonMonsters.forEach((condensedArray, index) => {
         const dungeonResult = this.dungeonSimData[index];
         if (!dungeonResult.simSuccess) {
           dungeonResult.petChance = 0;
           return;
         }
         const timePeriod = (this.timeMultiplier === -1) ? dungeonResult.killTimeS : this.timeMultiplier;
-        dungeonResult.petChance = 1 - condensedArray.reduce((cumChanceToNotGet, monster)=>{
+        dungeonResult.petChance = 1 - condensedArray.reduce((cumChanceToNotGet, monster) => {
           const monsterResult = this.monsterSimData[monster.id];
           const timeRatio = monster.quantity * monsterResult.killTimeS / this.dungeonSimData[index].killTimeS;
-          const chanceToNotGet = monsterResult.petRolls.reduce((product, petRoll)=>{
+          const chanceToNotGet = monsterResult.petRolls.reduce((product, petRoll) => {
             return product * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * timeRatio * petRoll.rollsPerSecond);
           }, 1);
           return cumChanceToNotGet * chanceToNotGet;
@@ -5139,8 +5156,8 @@ class McsSimulator {
     } else if (this.petSkill === 'Slayer' && this.currentSim.isSlayerTask) {
       // Slayer pet is currently only rolled once for the players attack speed per kill
       const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
-      const computeForArea = (area)=>{
-        area.monsters.forEach((mID)=>{
+      const computeForArea = (area) => {
+        area.monsters.forEach((mID) => {
           const simResult = this.monsterSimData[mID];
           if (!simResult.simSuccess) {
             simResult.petChance = 0;
@@ -5154,14 +5171,14 @@ class McsSimulator {
       };
       combatAreas.forEach(computeForArea);
       slayerAreas.forEach(computeForArea);
-      this.dungeonSimData.forEach((simResult)=>{
+      this.dungeonSimData.forEach((simResult) => {
         simResult.petChance = 0;
       });
     } else {
-      this.monsterSimData.forEach((simResult)=>{
+      this.monsterSimData.forEach((simResult) => {
         simResult.petChance = 0;
       });
-      this.dungeonSimData.forEach((simResult)=>{
+      this.dungeonSimData.forEach((simResult) => {
         simResult.petChance = 0;
       });
     }
@@ -5200,10 +5217,10 @@ class McsCard {
    * @memberof McsCard
    */
   setContainerWidths() {
-    const maxWidth = Math.max(...[...this.container.getElementsByClassName('mcsCCContainer')].map((container)=>{
+    const maxWidth = Math.max(...[...this.container.getElementsByClassName('mcsCCContainer')].map((container) => {
       return container.offsetWidth;
     }));
-    [...this.container.getElementsByClassName('mcsCCContainer')].forEach((container)=>{
+    [...this.container.getElementsByClassName('mcsCCContainer')].forEach((container) => {
       container.style.width = `${maxWidth}px`;
     });
   }
@@ -5277,7 +5294,7 @@ class McsCard {
   addTabMenu(tabNames, tabImages, tabCallbacks, imageSize) {
     const newCCContainer = document.createElement('div');
     newCCContainer.className = 'mcsTabButtonContainer';
-    tabNames.forEach((name, index)=>{
+    tabNames.forEach((name, index) => {
       const newTab = document.createElement('button');
       newTab.type = 'button';
       newTab.id = `MCS ${name} Tab`;
@@ -5328,10 +5345,10 @@ class McsCard {
    * @param {HTMLElement} popupMenuElement Element that should be displayed when the showElement is clicked
    */
   registerPopupMenu(showElement, popupMenuElement) {
-    showElement.addEventListener('click', ()=>{
+    showElement.addEventListener('click', () => {
       let firstClick = true;
       if (popupMenuElement.style.display === 'none') {
-        const outsideClickListener = (event)=>{
+        const outsideClickListener = (event) => {
           if (firstClick) {
             firstClick = false;
             return;
@@ -5750,9 +5767,9 @@ function mcsFormatNum(number, digits) {
     } else {
       end = `e${powerCount * 3}`;
     }
-    return `${parseFloat(output).toLocaleString(undefined, {minimumSignificantDigits: digits})}${end}`;
+    return `${parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits })}${end}`;
   }
-  return parseFloat(output).toLocaleString(undefined, {minimumSignificantDigits: digits});
+  return parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits });
 }
 // Define the message listeners from the content script
 window.addEventListener('message', (event) => {
@@ -5796,7 +5813,7 @@ if (typeof isLoaded !== 'undefined') {
   const melvorCombatSimLoader = setInterval(() => {
     if (isLoaded) {
       clearInterval(melvorCombatSimLoader);
-      window.postMessage({type: 'MCS_FROM_PAGE', action: 'REQUEST_URLS'});
+      window.postMessage({ type: 'MCS_FROM_PAGE', action: 'REQUEST_URLS' });
     }
   }, 200);
 }
