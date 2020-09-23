@@ -3630,7 +3630,7 @@ class McsSimulator {
    */
   computeAuroraBonus() {
     this.resetAuroraBonus();
-    if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.aurora.isSelected && !this.spells.ancient.isSelected) {
+    if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.aurora.isSelected) {
       const auroraID = this.spells.aurora.selectedID;
       switch (auroraID) {
         case CONSTANTS.aurora.Surge_I:
