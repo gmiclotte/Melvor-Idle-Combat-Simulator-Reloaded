@@ -183,7 +183,6 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
   playerStats.maxHit = Math.floor(playerStats.maxHit * damageModifier);
   // Determine if player always hits for maxHit
   const alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit;
-  const damageRollRange = playerStats.maxHit - playerStats.minHit;
   // Start Monte Carlo simulation
   let enemyKills = 0;
   let xpToAdd = 0;
@@ -502,7 +501,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
                 if (alwaysMaxHit) {
                   damageToEnemy = playerStats.maxHit;
                 } else {
-                  damageToEnemy = Math.ceil(Math.random() * damageRollRange) + playerStats.minHit;
+                  damageToEnemy = rollForDamage(playerStats);
                 }
                 damageToEnemy *= playerStats.specialData.damageMultiplier;
               }
@@ -593,7 +592,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
               if (alwaysMaxHit) {
                 damageToEnemy = playerStats.maxHit;
               } else {
-                damageToEnemy = Math.ceil(Math.random() * damageRollRange) + playerStats.minHit;
+                damageToEnemy = rollForDamage(playerStats);
               }
               if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
               if (playerStats.activeItems.Deadeye_Amulet) {
@@ -711,7 +710,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
             if (alwaysMaxHit) {
               damageToEnemy = playerStats.maxHit;
             } else {
-              damageToEnemy = Math.ceil(Math.random() * damageRollRange) + playerStats.minHit;
+              damageToEnemy = rollForDamage(playerStats);
             }
             damageToEnemy *= playerStats.specialData.damageMultiplier;
           }
@@ -1284,6 +1283,15 @@ function setEnemyCurseValues(enemy, curseID, effectValue) {
 }
 
 /**
+ * Rolls for damage for a regular attack
+ * @param {playerStats} playerStats
+ * @returns {number} damage
+ */
+function rollForDamage(playerStats) {
+  return Math.ceil(Math.random() * (playerStats.maxHit - playerStats.minHit)) + playerStats.minHit;
+}
+
+/**
  * Modifies the stats of the enemy by the curse
  * @param {enemyStats} enemyStats
  * @param {Object} enemy
@@ -1306,6 +1314,7 @@ function setEvasionDebuffs(enemyStats, enemy) {
     enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.curse.rangedEvasionDebuff);
   }
 }
+
 /**
  * Checks if the simulation has been messaged to be cancelled
  * @return {Promise<boolean>}
