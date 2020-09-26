@@ -2980,13 +2980,16 @@ class McsPlotter {
  * @property {number} attackType Attack Type Melee:0, Ranged:1, Magic:2
  * @property {number} maxAttackRoll Accuracy Rating
  * @property {number} maxHit Maximum Hit of Normal Attack
+ * @property {number} minHit Minimum Hit of Normal Attack
  * @property {number} maxDefRoll Melee Evasion Rating
  * @property {number} maxMagDefRoll Magic Evasion Rating
  * @property {number} maxRngDefRoll Ranged Evasion Rating
  * @property {number} xpBonus Fractional bonus to combat xp gain
+ * @property {number} maxHitpoints Maximum HP
  * @property {number} avgHPRegen Average HP gained per regen interval
  * @property {number} damageReduction Damage Reduction in %
  * @property {boolean} diamondLuck If player has diamond luck potion active
+ * @property {boolean} usingAncient If player is using ancient magick
  * @property {boolean} hasSpecialAttack If player can special attack
  * @property {Object} specialData Data of player special attack
  * @property {number} startingGP Initial GP of player
@@ -3556,7 +3559,6 @@ class McsSimulator {
       } else {
         this.combatStats.maxHit = ANCIENT[this.spells.ancient.selectedID].maxHit * numberMultiplier;
       }
-      // Minimum Hit
       this.combatStats.attackSpeed = this.equipStats.attackSpeed;
     } else {
       // Melee
@@ -3771,6 +3773,7 @@ class McsSimulator {
     this.simStartTime = performance.now();
     this.simCancelled = false;
     // Start by grabbing the player stats
+    /** @type {playerStats} */
     const playerStats = {
       attackSpeed: this.combatStats.attackSpeed,
       attackType: this.combatStats.attackType,
@@ -3963,7 +3966,7 @@ class McsSimulator {
         }
       }
     }
-    // An attempt to sort jobs my relative complexity so they go from highest to lowest.
+    // An attempt to sort jobs by relative complexity so they go from highest to lowest.
     this.simulationQueue = this.simulationQueue.sort((jobA, jobB) => {
       const jobAComplex = this.enemyStats[jobA.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobA.monsterID]);
       const jobBComplex = this.enemyStats[jobB.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobB.monsterID]);
@@ -5771,6 +5774,7 @@ function mcsFormatNum(number, digits) {
   }
   return parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits });
 }
+
 // Define the message listeners from the content script
 window.addEventListener('message', (event) => {
   // We only accept messages from ourselves
@@ -5807,6 +5811,7 @@ window.addEventListener('message', (event) => {
     }
   }
 }, false);
+
 // Wait for page to finish loading, then create an instance of the combat sim
 let melvorCombatSim;
 if (typeof isLoaded !== 'undefined') {
