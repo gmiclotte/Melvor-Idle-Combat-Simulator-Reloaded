@@ -272,22 +272,29 @@
       this.botContent.className = 'mcsTabContent';
       this.botContent.style.flexWrap = 'nowrap';
 
-      this.mcsContainer = document.createElement('div');
-      this.mcsContainer.id = 'mcs-container';
-      this.mcsContainer.appendChild(this.topContent);
-      this.mcsContainer.appendChild(this.botContent);
+      this.mcsModal = document.createElement('div');
+      this.mcsModal.id = 'mcsModal';
+      this.mcsModal.className = 'modal';
 
-      // Add listeners for changing page to not the sim
-      document.getElementsByClassName('nav-main-link').forEach((element) => {
-        if (element.href.includes('changePage')) {
-          element.addEventListener('click', () => this.hideSim());
-        }
-      });
-      document.getElementsByClassName('btn btn-sm btn-light btn-combat-minibar-hp')[0].addEventListener('click', () => this.hideSim());
+      const modalDialog = document.createElement('div');
+      modalDialog.className = 'modal-dialog';
+      this.mcsModal.appendChild(modalDialog);
+
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal-content';
+      modalDialog.appendChild(modalContent);
+
+      const modalHeader = $(`<div class="block block-themed block-transparent mb-0"><div class="block-header bg-primary-dark">
+        <h3 class="block-title">Combat Simulator</h3>
+        <div class="block-options"><button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
+        <i class="fa fa-fw fa-times"></i></button></div></div></div>`);
+      $(modalContent).append(modalHeader);
+      modalContent.appendChild(this.topContent);
+      modalContent.appendChild(this.botContent);
 
       // Insert Tools menu and MCS tab into the sidebar
       this.newHeading = document.createElement('li');
-      this.newHeading.id = 'mcs-tools-menu';
+      this.newHeading.id = 'mcsToolsMenu';
       this.newHeading.className = 'nav-main-heading mcsNoSelect';
       this.newHeading.textContent = 'Tools';
       this.headingEye = document.createElement('i');
@@ -298,13 +305,13 @@
       this.eyeHidden = false;
 
       this.tabDiv = document.createElement('li');
-      this.tabDiv.id = 'mcs-button';
+      this.tabDiv.id = 'mcsButton';
       this.tabDiv.style.cursor = 'pointer';
       this.tabDiv.className = 'nav-main-item mcsNoSelect';
 
       const elem2 = document.createElement('a');
       elem2.className = 'nav-main-link nav-compact';
-      elem2.onclick = () => this.tabOnClick();
+      elem2.onclick = () => $(this.mcsModal).modal('show');
       this.tabDiv.appendChild(elem2);
       const elem3 = document.createElement('img');
       elem3.className = 'nav-img';
@@ -672,7 +679,7 @@
         this.combatStatCard.addButton('Simulate', (event) => this.simulateButtonOnClick(event), 200, 25);
         this.combatStatCard.addButton('Cancel', () => this.cancelButtonOnClick(), 200, 25, 'Sim');
         this.combatStatCard.addButton('Export Data', (event) => this.exportDataOnClick(event), 200, 25);
-        this.combatStatCard.addButton('Show Export Options >', (event) => this.exportOptionsOnClick(event), 200, 25);
+        this.combatStatCard.addButton('Show Export Options', (event) => this.exportOptionsOnClick(event), 200, 25);
       }
       // Export Options Card
       {
@@ -812,7 +819,7 @@
       this.viewedDungeonID = -1;
 
       // Now that everything is done we add it to the document
-      document.getElementById('main-container').appendChild(this.mcsContainer);
+      document.getElementById('page-container').appendChild(this.mcsModal);
       // Adjust the widths of the containers
       this.equipStatCard.setContainerWidths();
       this.combatStatCard.setContainerWidths();
@@ -828,10 +835,7 @@
         }
       });
       // Push an update to the displays
-      this.topContent.style.display = 'none';
-      this.botContent.style.display = 'none';
-      this.exportOptionsCard.container.style.display = 'none';
-      this.isVisible = false;
+      this.exportOptionsCard.outerContainer.style.display = 'none';
       this.plotter.timeDropdown.selectedIndex = 1;
       document.getElementById('MCS Cancel Sim Button').style.display = 'none';
       document.getElementById('MCS Edit Subset Button').style.display = 'none';
@@ -844,7 +848,7 @@
       this.updatePrayerOptions(1);
       // Set up spells
       const standardOpts = this.simulator.spells.standard;
-      document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'mcsImageButton mcsButtonImageSelected';
+      document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-dark btn-dark';
       this.simulator.computeEquipStats();
       this.updateEquipStats();
       this.simulator.computeCombatStats();
@@ -1146,32 +1150,7 @@
     setTabIDToUnSelected(tabID) {
       document.getElementById(tabID).className = 'mcsTabButton';
     }
-    /**
-     * Callback for when sidebar option is clicked
-     */
-    tabOnClick() {
-      if (!this.isVisible) {
-        changePage(3);
-        $('#settings-container').attr('class', 'content d-none');
-        $('#header-title').text('Combat Simulator');
-        $('#header-icon').attr('src', 'assets/media/skills/combat/combat.svg');
-        $('#header-theme').attr('class', 'content-header bg-combat');
-        $('#page-header').attr('class', 'bg-combat');
-        this.topContent.style.display = '';
-        this.botContent.style.display = '';
-        this.isVisible = true;
-      }
-    }
-    /**
-     * Callback for when another thing with changepage is toggled
-     */
-    hideSim() {
-      if (this.isVisible) {
-        this.topContent.style.display = 'none';
-        this.botContent.style.display = 'none';
-        this.isVisible = false;
-      }
-    }
+
     /**
      * Callback for when sidebar eye is clicked
      */
@@ -1350,7 +1329,7 @@
       Object.keys(this.simulator.spells).forEach((spellType) => {
         const spellOpts = this.simulator.spells[spellType];
         if (spellOpts.isSelected) {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'mcsImageButton';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
         }
       });
       if (isSpellAncient) {
@@ -1384,7 +1363,7 @@
       Object.keys(this.simulator.spells).forEach((spellType) => {
         const spellOpts = this.simulator.spells[spellType];
         if (spellOpts.isSelected) {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'mcsImageButton mcsButtonImageSelected';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark btn-dark';
         }
       });
       this.updateSpellOptions(skillLevel[CONSTANTS.skill.Magic]);
@@ -1394,11 +1373,11 @@
       for (let i = 0; i < PRAYER.length; i++) {
         const prayButton = document.getElementById(`MCS ${this.getPrayerName(i)} Button`);
         if (activePrayer[i]) {
-          prayButton.className = 'mcsImageButton mcsButtonImageSelected';
+          prayButton.className = 'btn btn-outline-dark btn-dark';
           this.simulator.prayerSelected[i] = true;
           this.simulator.activePrayers++;
         } else {
-          prayButton.className = 'mcsImageButton';
+          prayButton.className = 'btn btn-outline-dark';
           this.simulator.prayerSelected[i] = false;
         }
       }
@@ -1421,7 +1400,7 @@
       }
       // Deselect potion if selected
       if (this.simulator.potionSelected) {
-        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'mcsImageButton';
+        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark';
         this.simulator.potionSelected = false;
         this.simulator.potionID = -1;
       }
@@ -1429,7 +1408,7 @@
       if (potionID !== -1) {
         this.simulator.potionSelected = true;
         this.simulator.potionID = potionID;
-        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'mcsImageButton mcsButtonImageSelected';
+        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark btn-dark';
       }
       // Set potion tier if applicable
       if (potionTier !== -1) {
@@ -1442,8 +1421,8 @@
       petUnlocked.forEach((owned, petID) => {
         this.simulator.petOwned[petID] = owned;
         if (this.combatPetsIds.includes(petID)) {
-          let newClass = 'mcsImageButton';
-          if (owned) newClass += ' mcsButtonImageSelected';
+          let newClass = 'btn btn-outline-dark';
+          if (owned) newClass += ' btn-dark';
           document.getElementById(`MCS ${PETS[petID].name} Button`).className = newClass;
         }
         if (petID === 4 && owned) document.getElementById('MCS Rock').style.display = '';
@@ -1481,13 +1460,13 @@
       if (this.simulator.prayerSelected[prayerID]) {
         this.simulator.activePrayers--;
         this.simulator.prayerSelected[prayerID] = false;
-        event.currentTarget.className = 'mcsImageButton';
+        event.currentTarget.className = 'btn btn-outline-dark';
         prayerChanged = true;
       } else {
         if (this.simulator.activePrayers < 2) {
           this.simulator.activePrayers++;
           this.simulator.prayerSelected[prayerID] = true;
-          event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
           prayerChanged = true;
         } else {
           notifyPlayer(CONSTANTS.skill.Prayer, 'You can only have 2 prayers active at once.', 'danger');
@@ -1521,16 +1500,16 @@
         if (this.simulator.potionID === potionID) { // Deselect Potion
           this.simulator.potionSelected = false;
           this.simulator.potionID = -1;
-          event.currentTarget.className = 'mcsImageButton';
+          event.currentTarget.className = 'btn btn-outline-dark';
         } else { // Change Potion
-          document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'mcsImageButton';
+          document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark';
           this.simulator.potionID = potionID;
-          event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
         }
       } else { // Select Potion
         this.simulator.potionSelected = true;
         this.simulator.potionID = potionID;
-        event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+        event.currentTarget.className = 'btn btn-outline-dark btn-dark';
       }
       this.simulator.computePotionBonus();
       this.simulator.computeCombatStats();
@@ -1563,23 +1542,23 @@
         if (spellOpts.selectedID === spellID && spellType !== 'standard' && spellType !== 'ancient') {
           spellOpts.isSelected = false;
           spellOpts.selectedID = -1;
-          event.currentTarget.className = 'mcsImageButton';
+          event.currentTarget.className = 'btn btn-outline-dark';
         } else {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'mcsImageButton';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
           spellOpts.selectedID = spellID;
-          event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
         }
       } else {
         switch (spellType) {
           case 'ancient':
             const standardOpts = this.simulator.spells.standard;
             standardOpts.isSelected = false;
-            document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'mcsImageButton';
+            document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
             standardOpts.selectedID = -1;
             if (this.simulator.spells.curse.isSelected) {
               const curseOpts = this.simulator.spells.curse;
               curseOpts.isSelected = false;
-              document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`).className = 'mcsImageButton';
+              document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
               curseOpts.selectedID = -1;
               notifyPlayer(CONSTANTS.skill.Magic, 'Curse Deselected, they cannot be used with Ancient Magicks', 'danger');
             }
@@ -1587,7 +1566,7 @@
           case 'standard':
             const ancientOpts = this.simulator.spells.ancient;
             ancientOpts.isSelected = false;
-            document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`).className = 'mcsImageButton';
+            document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
             ancientOpts.selectedID = -1;
             break;
         }
@@ -1597,7 +1576,7 @@
         } else {
           spellOpts.isSelected = true;
           spellOpts.selectedID = spellID;
-          event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
         }
       }
       // Update combat stats for new spell
@@ -1613,10 +1592,10 @@
     petButtonOnClick(event, petID) {
       if (this.simulator.petOwned[petID]) {
         this.simulator.petOwned[petID] = false;
-        event.currentTarget.className = 'mcsImageButton';
+        event.currentTarget.className = 'btn btn-outline-dark';
       } else {
         this.simulator.petOwned[petID] = true;
-        event.currentTarget.className = 'mcsImageButton mcsButtonImageSelected';
+        event.currentTarget.className = 'btn btn-outline-dark btn-dark';
       }
       this.simulator.computeCombatStats();
       this.updateCombatStats();
@@ -1791,6 +1770,7 @@
       this.simulator.setLootListToSaleList();
       this.updateLootListRadios();
       this.gpOptionsCard.container.style.display = 'flex';
+      this.gpOptionsCard.container.style.flexDirection = 'column';
     }
     // Callback Functions for the GP Options Card
     /**
@@ -1886,10 +1866,10 @@
      */
     exportOptionsOnClick() {
       if (this.isExportDisplayed) {
-        this.exportOptionsCard.container.style.display = 'none';
+        this.exportOptionsCard.outerContainer.style.display = 'none';
         this.exportOptionsButton.textContent = 'Show Export Options >';
       } else {
-        this.exportOptionsCard.container.style.display = '';
+        this.exportOptionsCard.outerContainer.style.display = '';
         this.exportOptionsButton.textContent = 'Hide Export Options <';
       }
       this.isExportDisplayed = !this.isExportDisplayed;
@@ -2107,11 +2087,11 @@
           if (spellOption.selectedID === index) {
             spellOption.selectedID = -1;
             spellOption.isSelected = false;
-            document.getElementById(`MCS ${spell.name} Button`).className = 'mcsImageButton';
+            document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-dark';
             if (type === 'standard' || type === 'ancient') {
               this.simulator.spells.standard.isSelected = true;
               this.simulator.spells.standard.selectedID = 0;
-              document.getElementById(`MCS ${SPELLS[0].name} Button`).className = 'mcsImageButton mcsButtonImageSelected';
+              document.getElementById(`MCS ${SPELLS[0].name} Button`).className = 'btn btn-outline-dark btn-dark';
             }
             notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires level ${spell.magicLevelRequired} Magic.`, 'danger');
           }
@@ -2140,7 +2120,7 @@
             if (spellOption.selectedID === index) {
               spellOption.selectedID = -1;
               spellOption.isSelected = false;
-              document.getElementById(`MCS ${spell.name} Button`).className = 'mcsImageButton';
+              document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-dark';
               notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires ${this.getItemName(spell.requiredItem)}.`, 'danger');
             }
           }
@@ -2157,7 +2137,7 @@
           document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
           if (this.simulator.prayerSelected[i]) {
             this.simulator.prayerSelected[i] = false;
-            document.getElementById(`MCS ${this.getPrayerName(i)} Button`).className = 'mcsImageButton';
+            document.getElementById(`MCS ${this.getPrayerName(i)} Button`).className = 'btn btn-outline-dark';
             notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(i)} has been de-selected. It requires level ${prayer.prayerLevel} Prayer.`, 'danger');
           }
         } else {
@@ -2460,7 +2440,9 @@
       this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
       this.newHeading.remove();
       this.tabDiv.remove();
-      this.mcsContainer.remove();
+      $(this.mcsModal).modal('hide');
+      $(this.mcsModal).modal('dispose');
+      this.mcsModal.remove();
     }
   }
   /**
@@ -2517,7 +2499,7 @@
       }
 
       this.plotContainer = document.createElement('div');
-      this.plotContainer.className = 'mcsPlotContainer mcsOuter';
+      this.plotContainer.className = 'mcsPlotContainer mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark';
       this.plotContainer.id = 'MCS Plotter';
 
       this.plotTitle = document.createElement('div');
@@ -5216,18 +5198,20 @@
      * @param {boolean} outer This card is an outside card
      */
     constructor(parentElement, width, height, inputWidth, outer = false) {
-      this.container = document.createElement('div');
-      this.container.className = `mcsCardContainer${outer ? ' mcsOuter' : ''}`;
+      this.outerContainer = document.createElement('div');
+      this.outerContainer.className = `mcsCardContainer${outer ? ' mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark' : ''}`;
       if (width !== '') {
-        this.container.style.width = width;
+        this.outerContainer.style.width = width;
       }
       if (height !== '') {
-        this.container.style.height = height;
+        this.outerContainer.style.height = height;
       }
-      parentElement.appendChild(this.container);
+      this.container = document.createElement('div');
+      this.container.className = 'mcsCardContentContainer';
+      this.outerContainer.appendChild(this.container);
+      parentElement.appendChild(this.outerContainer);
       this.inputWidth = inputWidth;
       this.dropDowns = [];
-      this.buttons = [];
       this.numOutputs = [];
     }
     /**
@@ -5239,7 +5223,7 @@
         return container.offsetWidth;
       }));
       [...this.container.getElementsByClassName('mcsCCContainer')].forEach((container) => {
-        container.style.width = `${maxWidth}px`;
+        // container.style.width = `${maxWidth}px`;
       });
     }
     /**
@@ -5254,13 +5238,14 @@
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${buttonText} ${(idTag === '') ? '' : `${idTag} `}Button`;
-      newButton.className = 'mcsButton';
-      newButton.style.width = `${width}px`;
-      newButton.style.height = `${height}px`;
+      newButton.className = 'btn btn-secondary mb-1';
+      newButton.style.width = `100%`;
       newButton.textContent = buttonText;
       newButton.onclick = onclickCallback;
-      this.container.appendChild(newButton);
-      this.buttons.push(newButton);
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'col-12';
+      buttonContainer.appendChild(newButton);
+      this.container.appendChild(buttonContainer);
     }
 
     /**
@@ -5291,7 +5276,7 @@
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${idText} Button`;
-      newButton.className = 'mcsImageButton';
+      newButton.className = 'btn btn-outline-dark';
       newButton.onclick = onclickCallback;
       const newImage = document.createElement('img');
       newImage.className = `mcsButtonImage mcsImage${size}`;
@@ -5577,7 +5562,6 @@
         newButton.style.height = '100%';
         newButton.textContent = buttonText[i];
         newButton.onclick = buttonCallbacks[i];
-        this.buttons.push(newButton);
         newCCContainer.appendChild(newButton);
       }
       this.container.appendChild(newCCContainer);
@@ -5642,9 +5626,9 @@
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsCCContainer';
       newCCContainer.style.height = `${height}px`;
-      const fillerDiv = document.createElement('div');
-      fillerDiv.className = 'mcsFlexFiller';
-      newCCContainer.appendChild(fillerDiv);
+      // const fillerDiv = document.createElement('div');
+      // fillerDiv.className = 'mcsFlexFiller';
+      // newCCContainer.appendChild(fillerDiv);
       return newCCContainer;
     }
     /**
@@ -5829,6 +5813,7 @@
           window.removeEventListener('message', onMessage);
           if (melvorCombatSim) {
             melvorCombatSim.destroy();
+            melvorCombatSim = undefined;
           }
           break;
       }
