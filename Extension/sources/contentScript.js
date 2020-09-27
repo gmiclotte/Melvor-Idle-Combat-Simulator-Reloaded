@@ -27,7 +27,7 @@ window.addEventListener('message', (event) => {
         // Send URLS of web accessible resources to page
         const urls = {
           crossedOut: chrome.runtime.getURL('icons/crossedOut.svg'),
-          simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js')
+          simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js'),
         };
         window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'RECEIVE_URLS', urls: urls });
         break;
@@ -46,7 +46,8 @@ for (let i = 0; i < injectableNames.length; i++) {
 function injectScript(scriptName) {
   const scriptID = `MCS ${scriptName}`;
   // Check if script already exists, if so delete it
-  if (document.contains(document.getElementById(scriptID))) {
+  if (document.getElementById(scriptID)) {
+    window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'UNLOAD' });
     document.getElementById(scriptID).remove();
   }
   // Inject script
