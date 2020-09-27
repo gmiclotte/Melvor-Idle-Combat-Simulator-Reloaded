@@ -16,8 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 (() => {
-  const uid = new Date().getTime();
-
   /**
    * Container Class for the Combat Simulator.
    * A single instance of this is initiated on load.
@@ -275,7 +273,7 @@
       this.botContent.style.flexWrap = 'nowrap';
 
       this.mcsContainer = document.createElement('div');
-      this.mcsContainer.id = `mcs-container-${uid}`;
+      this.mcsContainer.id = 'mcs-container';
       this.mcsContainer.appendChild(this.topContent);
       this.mcsContainer.appendChild(this.botContent);
 
@@ -288,19 +286,19 @@
       document.getElementsByClassName('btn btn-sm btn-light btn-combat-minibar-hp')[0].addEventListener('click', () => this.hideSim());
 
       // Insert Tools menu and MCS tab into the sidebar
-      const newHeading = document.createElement('li');
-      newHeading.id = `mcs-tools-menu-${uid}`;
-      newHeading.className = 'nav-main-heading mcsNoSelect';
-      newHeading.textContent = 'Tools';
+      this.newHeading = document.createElement('li');
+      this.newHeading.id = 'mcs-tools-menu';
+      this.newHeading.className = 'nav-main-heading mcsNoSelect';
+      this.newHeading.textContent = 'Tools';
       this.headingEye = document.createElement('i');
       this.headingEye.className = 'far fa-eye text-muted ml-1';
       this.headingEye.onclick = (e) => this.headingEyeOnClick(e);
       this.headingEye.style.cursor = 'pointer';
-      newHeading.appendChild(this.headingEye);
+      this.newHeading.appendChild(this.headingEye);
       this.eyeHidden = false;
 
       this.tabDiv = document.createElement('li');
-      this.tabDiv.id = `mcs-button-${uid}`;
+      this.tabDiv.id = 'mcs-button';
       this.tabDiv.style.cursor = 'pointer';
       this.tabDiv.className = 'nav-main-item mcsNoSelect';
 
@@ -319,7 +317,7 @@
 
       document.getElementsByClassName('nav-main-heading').forEach((heading) => {
         if (heading.textContent === 'Minigame') {
-          heading.parentElement.insertBefore(newHeading, heading);
+          heading.parentElement.insertBefore(this.newHeading, heading);
           heading.parentElement.insertBefore(this.tabDiv, heading);
         }
       });
@@ -2456,6 +2454,13 @@
       document.getElementById('MCS Simulate Button').disabled = false;
       document.getElementById('MCS Simulate Button').textContent = 'Simulate';
       document.getElementById('MCS Cancel Sim Button').style.display = 'none';
+    }
+
+    destroy() {
+      this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
+      this.newHeading.remove();
+      this.tabDiv.remove();
+      this.mcsContainer.remove();
     }
   }
   /**
@@ -5785,6 +5790,8 @@
     return parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits });
   }
 
+  /** @type {McsApp} */
+  let melvorCombatSim;
   // Define the message listeners from the content script
   function onMessage(event) {
     // We only accept messages from ourselves
@@ -5804,7 +5811,7 @@
           }
           if (tryLoad) {
             try {
-              new McsApp(event.data.urls);
+              melvorCombatSim = new McsApp(event.data.urls);
               if (wrongVersion) {
                 console.log('Melvor Combat Sim v0.10.1 Loaded, but simulation results may be inaccurate.');
               } else {
@@ -5820,9 +5827,9 @@
           break;
         case 'UNLOAD':
           window.removeEventListener('message', onMessage);
-          document.getElementById(`mcs-tools-menu-${uid}`).remove();
-          document.getElementById(`mcs-button-${uid}`).remove();
-          document.getElementById(`mcs-container-${uid}`).remove();
+          if (melvorCombatSim) {
+            melvorCombatSim.destroy();
+          }
           break;
       }
     }
