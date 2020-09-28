@@ -572,6 +572,26 @@
         });
         this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
       }
+      // Individual info card
+      {
+        this.zoneInfoCard = new McsCard(this.topContent, '275px', '', '100px', true);
+        this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
+        this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
+        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '80px');
+        this.subInfoCard.addImage(media.combat, 48, 'MCS Info Image');
+        const zoneInfoLabelNames = [];
+        for (let i = 0; i < this.zoneInfoNames.length; i++) {
+          if (this.plotTypeIsTime[i]) {
+            zoneInfoLabelNames.push(this.zoneInfoNames[i] + this.timeShorthand[1]);
+          } else {
+            zoneInfoLabelNames.push(this.zoneInfoNames[i]);
+          }
+        }
+        for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
+          this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
+        }
+        this.subInfoCard.addButton('Inspect Dungeon', (e) => this.inspectDungeonOnClick(e), 250, 25);
+      }
       const iconSources = {
         combat: 'assets/media/skills/combat/combat.svg',
         attack: 'assets/media/skills/combat/attack.svg',
@@ -684,10 +704,10 @@
       // Export Options Card
       {
         this.isExportDisplayed = false;
-        this.exportOptionsCard = new McsCard(this.topContent, '350px', '', '100px', true);
+        this.exportOptionsCard = new McsCard(this.topContent, '300px', '', '100px', true);
         this.exportOptionsCard.addSectionTitle('Export Options');
-        this.exportOptionsCard.addRadio('Export Dungeon Monsters?', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
-        this.exportOptionsCard.addRadio('Export Non-Simulated?', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
+        this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
+        this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
         this.exportOptionsCard.addSectionTitle('Data to Export');
         this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
         for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
@@ -742,13 +762,12 @@
         lab1.className = 'mcsMultiHeader';
         lab1.style.borderRight = 'solid thin';
         lab1.textContent = 'Item';
-        lab1.style.width = '220px';
+        lab1.style.paddingRight = '120px';
         labelCont.appendChild(lab1);
         const lab2 = document.createElement('div');
         lab2.className = 'mcsMultiHeader';
-        lab2.textContent = 'Sell?';
-        lab2.style.width = '100px';
-        lab2.style.marginRight = '17px';
+        lab2.textContent = 'Sell';
+        lab2.style.width = '127px';
         labelCont.appendChild(lab2);
         this.gpOptionsCard.container.appendChild(labelCont);
         this.gpSearchResults = new McsCard(this.gpOptionsCard.container, '', '130px', '100px');
@@ -763,26 +782,6 @@
       // Bar Chart Card
       this.monsterToggleState = true;
       this.dungeonToggleState = true;
-      // Individual info card, nested into sim/plot card
-      {
-        this.zoneInfoCard = new McsCard(this.botContent, '275px', '', '100px', true);
-        this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
-        this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
-        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '100px');
-        this.subInfoCard.addImage(media.combat, 48, 'MCS Info Image');
-        const zoneInfoLabelNames = [];
-        for (let i = 0; i < this.zoneInfoNames.length; i++) {
-          if (this.plotTypeIsTime[i]) {
-            zoneInfoLabelNames.push(this.zoneInfoNames[i] + this.timeShorthand[1]);
-          } else {
-            zoneInfoLabelNames.push(this.zoneInfoNames[i]);
-          }
-        }
-        for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
-          this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
-        }
-        this.subInfoCard.addButton('Inspect Dungeon', (e) => this.inspectDungeonOnClick(e), 250, 25);
-      }
       this.plotter = new McsPlotter(this, urls.crossedOut);
       // Setup plotter bar clicking
       this.selectedBar = 0;
@@ -855,7 +854,7 @@
       this.updateCombatStats();
       this.updatePlotData();
       // Export Options element
-      this.exportOptionsButton = document.getElementById('MCS Show Export Options > Button');
+      this.exportOptionsButton = document.getElementById('MCS Show Export Options Button');
       // Saving and loading of Gear Sets
       this.gearSets = [];
     }
@@ -880,7 +879,7 @@
       const buttonCallbacks = menuItems.map((item) => {
         return () => this.equipItemButton(gearID, item.itemID);
       });
-      const multiTooltips = card.addMultiImageButton(buttonMedia, buttonIds, 'Small', buttonCallbacks, 440);
+      const multiTooltips = card.addMultiImageButton(buttonMedia, buttonIds, 'Small', buttonCallbacks, 420);
       multiTooltips.forEach((tooltip, i) => {
         const itemTTBuilder = new McsTooltipBuilder(tooltip);
         itemTTBuilder.addTitle(this.getItemName(menuItems[i].itemID));
@@ -1867,10 +1866,10 @@
     exportOptionsOnClick() {
       if (this.isExportDisplayed) {
         this.exportOptionsCard.outerContainer.style.display = 'none';
-        this.exportOptionsButton.textContent = 'Show Export Options >';
+        this.exportOptionsButton.textContent = 'Show Export Options';
       } else {
         this.exportOptionsCard.outerContainer.style.display = '';
-        this.exportOptionsButton.textContent = 'Hide Export Options <';
+        this.exportOptionsButton.textContent = 'Hide Export Options';
       }
       this.isExportDisplayed = !this.isExportDisplayed;
     }
@@ -2458,8 +2457,6 @@
       this.parent = parent;
       this.barWidth = 20;
       this.barGap = 1;
-      this.yAxisWidth = 80;
-      this.xAxisHeight = 80;
       this.barNames = [];
       this.barImageSrc = [];
       this.barBottomNames = [];
@@ -2503,7 +2500,8 @@
       this.plotContainer.id = 'MCS Plotter';
 
       this.plotTitle = document.createElement('div');
-      this.plotTitle.className = 'mcsPlotTitle';
+      this.plotTitle.className = 'mcsPlotRow';
+      this.plotTitle.style.marginBottom = '12px';
       this.plotContainer.appendChild(this.plotTitle);
       // Use a dropdown menu for the plot title
       const skillTypeSelect = document.createElement('select');
@@ -2552,7 +2550,6 @@
       this.yAxis = document.createElement('div');
       this.yAxis.id = 'MCS Plotter Y-Axis';
       this.yAxis.className = 'mcsYAxis';
-      this.yAxis.setAttribute('style', `width: ${this.yAxisWidth}px;`);
       this.plotTopContainer.appendChild(this.yAxis);
 
       this.plotBox = document.createElement('div');
@@ -2626,53 +2623,34 @@
         botLength += this.barBottomLength[i];
         divi++;
       }
-      // Do Leave Inspection button
+      const plotButtonsRow = document.createElement('div');
+      plotButtonsRow.className = 'mcsPlotRow';
+      plotButtonsRow.style.top = '100%';
+      this.plotContainer.appendChild(plotButtonsRow);
+      // Add toggle buttons
+      this.toggleMonsterButton = document.createElement('button');
+      this.toggleMonsterButton.className = 'btn btn-primary m-1 mb-2';
+      this.toggleMonsterButton.textContent = 'Toggle Monsters';
+      this.toggleMonsterButton.onclick = () => {
+        this.parent.toggleMonsterSims(false);
+      };
+      plotButtonsRow.appendChild(this.toggleMonsterButton);
+      this.toggleDungeonButton = document.createElement('button');
+      this.toggleDungeonButton.className = 'btn btn-primary m-1 mb-2';
+      this.toggleDungeonButton.textContent = 'Toggle Dungeons';
+      this.toggleDungeonButton.onclick = () => {
+        this.parent.toggleDungeonSims(false);
+      };
+      plotButtonsRow.appendChild(this.toggleDungeonButton);
+      // Add Leave Inspection button
       this.stopInspectButton = document.createElement('button');
-      this.stopInspectButton.className = 'mcsButton';
+      this.stopInspectButton.className = 'btn btn-primary m-1 mb-2';
       this.stopInspectButton.textContent = 'Stop Inspecting';
-      this.stopInspectButton.style.position = 'absolute';
-      this.stopInspectButton.style.bottom = '5px';
-      this.stopInspectButton.style.right = '5px';
-      this.stopInspectButton.style.whiteSpace = 'nowrap';
       this.stopInspectButton.style.display = 'none';
       this.stopInspectButton.onclick = () => {
         this.parent.stopInspectOnClick();
       };
-      this.xAxis.appendChild(this.stopInspectButton);
-      // Add toggle buttons
-      this.toggleMonsterButton = document.createElement('button');
-      this.toggleMonsterButton.className = 'mcsButton';
-      this.toggleMonsterButton.textContent = 'Toggle Monsters';
-      this.toggleMonsterButton.style.position = 'sticky';
-      this.toggleMonsterButton.style.top = '100%';
-      this.toggleMonsterButton.style.width = '150px';
-      this.toggleMonsterButton.style.left = '85px';
-      this.toggleMonsterButton.style.whiteSpace = 'nowrap';
-      this.toggleMonsterButton.onclick = () => {
-        this.parent.toggleMonsterSims(false);
-      };
-      this.plotContainer.appendChild(this.toggleMonsterButton);
-      this.toggleDungeonButton = document.createElement('button');
-      this.toggleDungeonButton.className = 'mcsButton';
-      this.toggleDungeonButton.textContent = 'Toggle Dungeons';
-      this.toggleDungeonButton.style.position = 'sticky';
-      this.toggleDungeonButton.style.top = '100%';
-      this.toggleDungeonButton.style.width = '150px';
-      this.toggleDungeonButton.style.left = '240px';
-      this.toggleDungeonButton.style.whiteSpace = 'nowrap';
-      this.toggleDungeonButton.onclick = () => {
-        this.parent.toggleDungeonSims(false);
-      };
-      this.plotContainer.appendChild(this.toggleDungeonButton);
-      // Do tickmarks
-      this.tickMarks = [];
-      for (let i = 0; i < 20; i++) {
-        this.tickMarks.push(document.createElement('div'));
-        this.tickMarks[i].className = 'mcsTickmark';
-        this.tickMarks[i].style.height = '5%';
-        this.tickMarks[i].style.bottom = `${(i + 1) * 5}%`;
-        this.plotBox.appendChild(this.tickMarks[i]);
-      }
+      plotButtonsRow.appendChild(this.stopInspectButton);
       // Do ticktext
       this.tickText = [];
       for (let i = 0; i < 21; i++) {
@@ -2785,12 +2763,9 @@
       }
       for (let i = 0; i < 20; i++) {
         if (i < (Ndivs - 1)) {
-          this.tickMarks[i].style.display = 'block';
-          this.tickMarks[i].style.bottom = `${(i + 1) * 100 / Ndivs}%`;
           this.gridLine[i].style.display = 'block';
           this.gridLine[i].style.bottom = `${(i + 1) * 100 / Ndivs}%`;
         } else {
-          this.tickMarks[i].style.display = 'none';
           this.gridLine[i].style.display = 'none';
         }
       }
@@ -5200,9 +5175,6 @@
     constructor(parentElement, width, height, inputWidth, outer = false) {
       this.outerContainer = document.createElement('div');
       this.outerContainer.className = `mcsCardContainer${outer ? ' mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark' : ''}`;
-      if (width !== '') {
-        this.outerContainer.style.width = width;
-      }
       if (height !== '') {
         this.outerContainer.style.height = height;
       }
@@ -5238,7 +5210,7 @@
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${buttonText} ${(idTag === '') ? '' : `${idTag} `}Button`;
-      newButton.className = 'btn btn-secondary mb-1';
+      newButton.className = 'btn btn-primary mb-1';
       newButton.style.width = `100%`;
       newButton.textContent = buttonText;
       newButton.onclick = onclickCallback;
@@ -5261,7 +5233,11 @@
       newImage.style.height = `${imageSize}px`;
       newImage.id = imageID;
       newImage.src = imageSource;
-      this.container.appendChild(newImage);
+      const div = document.createElement('div');
+      div.className = 'm-1';
+      div.style.textAlign = 'center';
+      div.appendChild(newImage);
+      this.container.appendChild(div);
       return newImage;
     }
     /**
@@ -5329,7 +5305,7 @@
      * @param {number} containerWidth container width in px
      * @return {Array<HTMLDivElement>} The tooltips of the buttons
      */
-    addMultiImageButton(sources, idtexts, size, onclickCallbacks, containerWidth = 200) {
+    addMultiImageButton(sources, idtexts, size, onclickCallbacks, containerWidth) {
       const toolTips = [];
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsMultiImageButtonContainer';
@@ -5338,7 +5314,9 @@
         toolTips.push(this.addTooltip(newButton));
         newCCContainer.appendChild(newButton);
       }
-      newCCContainer.style.width = `${containerWidth}px`;
+      if (containerWidth) {
+        newCCContainer.style.width = `${containerWidth}px`;
+      }
       this.container.appendChild(newCCContainer);
       return toolTips;
     }
@@ -5382,11 +5360,9 @@
         containerDiv.style.position = 'relative';
         containerDiv.style.cursor = 'pointer';
         const newImage = document.createElement('img');
-        newImage.style.width = `${width}px`;
-        newImage.style.height = `${height}px`;
         newImage.id = `${elIds[i]}`;
         newImage.src = sources[i];
-        newImage.className = 'mcsPopupImage border border-2x border-rounded-equip border-combat-outline';
+        newImage.className = 'combat-equip-img border border-2x border-rounded-equip border-combat-outline p-1';
         containerDiv.appendChild(newImage);
         containerDiv.appendChild(popups[i]);
         newCCContainer.appendChild(containerDiv);
@@ -5552,14 +5528,12 @@
       let newButton;
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsMultiButtonContainer';
-      newCCContainer.style.height = `${height}px`;
       for (let i = 0; i < buttonText.length; i++) {
         newButton = document.createElement('button');
         newButton.type = 'button';
         newButton.id = `MCS ${buttonText[i]} Button`;
-        newButton.className = 'mcsNoMargin mcsButton';
-        newButton.style.width = `${width}px`;
-        newButton.style.height = '100%';
+        newButton.className = 'btn btn-primary m-1';
+        newButton.style.width = '100%';
         newButton.textContent = buttonText[i];
         newButton.onclick = buttonCallbacks[i];
         newCCContainer.appendChild(newButton);
@@ -5585,7 +5559,6 @@
       newCCContainer.id = `MCS ${labelText} Radio Container`;
       const radioContainer = document.createElement('div');
       radioContainer.className = 'mcsRadioContainer';
-      radioContainer.style.width = this.inputWidth;
       newCCContainer.appendChild(radioContainer);
       // Create Radio elements with labels
       for (let i = 0; i < radioLabels.length; i++) {
@@ -5604,16 +5577,21 @@
      */
     createRadio(radioName, radioLabel, radioID, checked, radioCallback) {
       const newDiv = document.createElement('div');
-      newDiv.appendChild(this.createLabel(radioLabel, radioID));
+      newDiv.className = 'custom-control custom-radio custom-control-inline';
       const newRadio = document.createElement('input');
       newRadio.type = 'radio';
       newRadio.id = radioID;
       newRadio.name = radioName;
+      newRadio.className = 'custom-control-input';
       if (checked) {
         newRadio.checked = true;
       }
       newRadio.addEventListener('change', radioCallback);
       newDiv.appendChild(newRadio);
+      const label = this.createLabel(radioLabel, radioID);
+      label.className = 'custom-control-label';
+      label.setAttribute('for', radioID);
+      newDiv.appendChild(label);
       return newDiv;
     }
 

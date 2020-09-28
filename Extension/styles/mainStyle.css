@@ -10,7 +10,7 @@
   flex-wrap: wrap;
   border-style: none;
   justify-content: center;
-  min-height: 470px;
+  min-height: 490px;
 }
 
 .mcsBot {
@@ -70,10 +70,6 @@
   flex-wrap: nowrap;
   align-items: center;
   font-size: 16px;
-  border-color: inherit;
-  max-height: fit-content;
-  width: 100%;
-  border-radius: 0.5rem;
 }
 
 .mcsPlotContainer {
@@ -108,13 +104,13 @@
   display: flex;
   min-height: 80px;
   flex-grow: 0;
-  left: 86px;
+  left: 46px;
 }
 
 .mcsYAxis {
   position: relative;
   height: 100%;
-  min-width: 80px;
+  min-width: 40px;
 }
 
 .mcsPlotBox {
@@ -137,13 +133,8 @@
   white-space: nowrap;
 }
 
-.mcsPlotTitle {
-  margin-top: 5px;
-  font-weight: 900;
-  font-size: larger;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.mcsPlotRow {
+  text-align: center;
   position: sticky;
   left: 0;
 }
@@ -174,15 +165,6 @@
   pointer-events: none;
 }
 
-.mcsButton {
-  background: #5c80d1;
-  border-color: #5c80d1;
-  color: #fff;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-}
-
 .mcsImageButton {
   background-color: #fff;
   margin: 4px;
@@ -196,25 +178,8 @@
   padding: 0px;
 }
 
-.darkMode #mcsModal .btn-secondary {
-  background-color: #343a40;
-  border-color: #343a40;
-}
-
-.darkMode #mcsModal .btn-secondary:hover {
-  background-color: #23272b;
-  border-color: #1d2124;
-}
-
 .mcsImageButton:hover {
   background-color: lightgray;
-}
-
-.mcsPopupImage {
-  background: none;
-  position: relative;
-  margin: 4px;
-  padding: 0px;
 }
 
 .mcsButtonImage {
@@ -237,7 +202,7 @@
 }
 .mcsMultiImageButtonContainer {
   position: relative;
-  width: 176px;
+  width: 192px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -342,6 +307,11 @@
   background-color: inherit;
   border-color: inherit;
   justify-content: right;
+  margin: 4px;
+}
+
+.mcsCCContainer img {
+  margin-right: 4px;
 }
 
 .mcsMultiButtonContainer {
@@ -349,12 +319,9 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: space-evenly;
+  justify-content: right;
   background-color: inherit;
   border-color: inherit;
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 
 .mcsMultiHeader {
@@ -368,12 +335,13 @@
 .mcsNoMargin {
   margin: 0px;
 }
-/* Label */
+
 .mcsLabel {
   text-align: right;
   margin-right: 4px;
   margin-bottom: 0px;
   white-space: nowrap;
+  font-weight: unset;
 }
 
 .mcsDropdown {
@@ -397,8 +365,8 @@
 .mcsSectionTitle {
   text-align: center;
   font-size: 18px;
-  width: 100%;
-  margin-bottom: 0.5rem;
+  max-width: 240px;
+  margin-bottom: 0.25rem;
 }
 
 .mcsNumberInput {
@@ -418,16 +386,6 @@
 .mcsOption {
   background-color: white;
   text-align: right;
-}
-
-.mcsTickmark {
-  position: absolute;
-  width: 2.5%;
-  left: 0px;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-  border-color: inherit;
-  pointer-events: none;
 }
 
 .mcsTicktext {
@@ -482,12 +440,12 @@
 }
 
 .mcsRadioContainer {
-  position: relative;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-evenly;
-  height: 100%;
+  margin-right: -10px;
+}
+
+.mcsRadioContainer .custom-control-inline {
+  margin-right: 10px;
 }
 
 .mcsCheckbox {
