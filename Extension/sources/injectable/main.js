@@ -1,4 +1,4 @@
-/*  Melvor Combat Simulator v0.10.1: Adds a combat simulator to Melvor Idle
+/*  Melvor Combat Simulator: Adds a combat simulator to Melvor Idle
 
     Copyright (C) <2020>  <Coolrox95>
 
@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 (() => {
+  const version = 'v0.11.0'
+
   /**
    * Container Class for the Combat Simulator.
    * A single instance of this is initiated on load.
@@ -285,7 +287,7 @@
       modalDialog.appendChild(modalContent);
 
       const modalHeader = $(`<div class="block block-themed block-transparent mb-0"><div class="block-header bg-primary-dark">
-        <h3 class="block-title">Combat Simulator</h3>
+        <h3 class="block-title">Combat Simulator ${version}</h3>
         <div class="block-options"><button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
         <i class="fa fa-fw fa-times"></i></button></div></div></div>`);
       $(modalContent).append(modalHeader);
@@ -5775,9 +5777,9 @@
             try {
               melvorCombatSim = new McsApp(event.data.urls);
               if (wrongVersion) {
-                console.log('Melvor Combat Sim v0.10.1 Loaded, but simulation results may be inaccurate.');
+                console.log(`Melvor Combat Sim ${version} Loaded, but simulation results may be inaccurate.`);
               } else {
-                console.log('Melvor Combat Sim v0.10.1 Loaded');
+                console.log(`Melvor Combat Sim ${version} Loaded`);
               }
             } catch (error) {
               console.warn('Melvor Combat Sim was not properly loaded due to the following error:');
