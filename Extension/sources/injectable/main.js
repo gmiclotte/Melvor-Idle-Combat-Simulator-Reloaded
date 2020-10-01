@@ -277,7 +277,7 @@
       this.botContent = document.createElement('div');
       this.botContent.className = 'mcsTabContent';
       this.botContent.style.flexWrap = 'nowrap';
-      this.botContent.style.height = '440px';
+      this.botContent.style.minHeight = '452px';
 
       this.mcsModal = document.createElement('div');
       this.mcsModal.id = 'mcsModal';
@@ -357,7 +357,6 @@
       {
         this.gearSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
         this.mainTabCards.push(this.gearSelectCard);
-        this.gearSelectCard.addSectionTitle('Equipment');
         const gearRows = [
           [CONSTANTS.equipmentSlot.Helmet],
           [CONSTANTS.equipmentSlot.Cape, CONSTANTS.equipmentSlot.Amulet, CONSTANTS.equipmentSlot.Quiver],
@@ -376,12 +375,13 @@
           });
           this.gearSelectCard.addMultiPopupMenu(rowSources, rowIDs, 40, 40, rowPopups);
         });
-        this.gearSelectCard.addSectionTitle('Import Gear Set');
-        this.gearSelectCard.addMultiButton(['1', '2', '3'], 25, 80, [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)]);
-        this.gearSelectCard.addSectionTitle('Combat Style');
+        const gearSetCCContainer = this.gearSelectCard.createCCContainer();
+        gearSetCCContainer.appendChild(this.gearSelectCard.createLabel('Import Gear Set', ''));
+        this.gearSelectCard.addMultiButton(['1', '2', '3'], [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], gearSetCCContainer);
+        this.gearSelectCard.container.appendChild(gearSetCCContainer);
         // Style dropdown (Specially Coded)
         const combatStyleCCContainer = this.gearSelectCard.createCCContainer();
-        const combatStyleLabel = this.gearSelectCard.createLabel('Style', '');
+        const combatStyleLabel = this.gearSelectCard.createLabel('Combat Style', '');
         const meleeStyleDropdown = this.gearSelectCard.createDropdown(['Stab', 'Slash', 'Block'], [0, 1, 2], 'MCS Melee Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Melee'));
         const rangedStyleDropdown = this.gearSelectCard.createDropdown(['Accurate', 'Rapid', 'Longrange'], [0, 1, 2], 'MCS Ranged Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Ranged'));
         const magicStyleDropdown = this.gearSelectCard.createDropdown(['Magic', 'Defensive'], [0, 1], 'MCS Magic Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Magic'));
@@ -405,7 +405,6 @@
           }
           this.levelSelectCard.addNumberInput(skillName, `${minLevel}`, 24, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
         });
-        this.levelSelectCard.addInfoText('Virtual levels above 99 may be set for the purpose of pet chance calculation. They do not impact stats.');
       }
       // Spell selection cards
       {
@@ -580,25 +579,6 @@
         });
         this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
       }
-      // Individual info card
-      {
-        this.zoneInfoCard = new McsCard(this.topContent, '275px', '', '100px', true);
-        this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
-        this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
-        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '80px');
-        this.subInfoCard.addImage(media.combat, 48, 'MCS Info Image');
-        const zoneInfoLabelNames = [];
-        for (let i = 0; i < this.zoneInfoNames.length; i++) {
-          if (this.plotTypeIsTime[i]) {
-            zoneInfoLabelNames.push(this.zoneInfoNames[i] + this.timeShorthand[1]);
-          } else {
-            zoneInfoLabelNames.push(this.zoneInfoNames[i]);
-          }
-        }
-        for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
-          this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
-        }
-      }
       const iconSources = {
         combat: 'assets/media/skills/combat/combat.svg',
         attack: 'assets/media/skills/combat/attack.svg',
@@ -758,8 +738,8 @@
       {
         this.gpOptionsCard = new McsCard(this.gpSelectCard.container, '', '', '200px');
         this.gpOptionsCard.addSectionTitle('Item Subset Selection');
-        this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], 25, 150, [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
-        this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], 25, 150, [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
+        this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
+        this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
         this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
         // Top labels
         const labelCont = document.createElement('div');
@@ -786,6 +766,25 @@
         this.gpSearchResults.container.style.overflowX = 'hidden';
         this.gpSearchResults.container.style.marginRight = '0px';
         this.gpSearchResults.container.style.marginBottom = '5px';
+      }
+      // Individual info card
+      {
+        this.zoneInfoCard = new McsCard(this.botContent, '275px', '', '100px', true);
+        this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
+        this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
+        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '80px');
+        this.subInfoCard.addImage(media.combat, 48, 'MCS Info Image');
+        const zoneInfoLabelNames = [];
+        for (let i = 0; i < this.zoneInfoNames.length; i++) {
+          if (this.plotTypeIsTime[i]) {
+            zoneInfoLabelNames.push(this.zoneInfoNames[i] + this.timeShorthand[1]);
+          } else {
+            zoneInfoLabelNames.push(this.zoneInfoNames[i]);
+          }
+        }
+        for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
+          this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
+        }
       }
       // Bar Chart Card
       this.monsterToggleState = true;
@@ -5255,7 +5254,7 @@
       newImage.id = imageID;
       newImage.src = imageSource;
       const div = document.createElement('div');
-      div.className = 'm-1';
+      div.className = 'mb-1';
       div.style.textAlign = 'center';
       div.appendChild(newImage);
       this.container.appendChild(div);
@@ -5544,7 +5543,7 @@
      * @param {number} width The width of the buttons in pixels
      * @param {Array<Function>} buttonCallbacks The callback function for when the buttons are clicked
      */
-    addMultiButton(buttonText, height, width, buttonCallbacks) {
+    addMultiButton(buttonText, buttonCallbacks, container = this.container) {
       let newButton;
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsMultiButtonContainer';
@@ -5558,7 +5557,7 @@
         newButton.onclick = buttonCallbacks[i];
         newCCContainer.appendChild(newButton);
       }
-      this.container.appendChild(newCCContainer);
+      container.appendChild(newCCContainer);
     }
     /**
      * Adds a radio option to the card

@@ -1,5 +1,10 @@
+#mcsModal.show {
+  display: flex !important;
+}
+
 #mcsModal .modal-dialog {
-  max-width: 80%;
+  max-width: 95%;
+  display: inline-block;
 }
 
 .mcsTabContent {
@@ -258,16 +263,13 @@
 }
 
 .mcsGearImageContainer {
-  position: relative;
-  width: 100%;
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  background-color: inherit;
-  border-color: inherit;
-  margin-top: 3px;
-  margin-bottom: 3px;
   justify-content: center;
+}
+
+#mcsModal .combat-equip-img {
+  margin: 2px;
 }
 
 .mcsTooltip {
@@ -317,6 +319,7 @@
   background-color: inherit;
   border-color: inherit;
   justify-content: flex-end;
+  line-height: 20px;
 }
 
 .mcsCCContainer img {
@@ -368,6 +371,7 @@
   text-align: center;
   font-size: 18px;
   max-width: 240px;
+  margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
 
@@ -432,6 +436,7 @@
 .mcsRadioContainer {
   display: flex;
   margin-right: -10px;
+  line-height: 24px;
 }
 
 .mcsRadioContainer .custom-control-inline {
