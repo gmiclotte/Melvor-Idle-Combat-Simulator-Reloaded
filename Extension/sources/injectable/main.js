@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 (() => {
-  const version = 'v0.11.0';
+  const version = 'v0.11.1';
 
   /**
    * Container Class for the Combat Simulator.
