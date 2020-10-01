@@ -683,10 +683,9 @@
           this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? iconSources[combatStatIcons[i]] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
         }
         this.combatStatCard.addSectionTitle('Simulate/Export');
-        this.combatStatCard.addButton('Simulate', (event) => this.simulateButtonOnClick(event));
-        this.combatStatCard.addButton('Cancel', () => this.cancelButtonOnClick(), 'Sim');
-        this.combatStatCard.addButton('Export Data', (event) => this.exportDataOnClick(event));
-        this.combatStatCard.addButton('Show Export Options', (event) => this.exportOptionsOnClick(event));
+        this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
+        this.combatStatCard.addButton('Export Data', () => this.exportDataOnClick());
+        this.combatStatCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
       }
       // Export Options Card
       {
@@ -843,7 +842,6 @@
       // Push an update to the displays
       this.exportOptionsCard.outerContainer.style.display = 'none';
       this.plotter.timeDropdown.selectedIndex = 1;
-      document.getElementById('MCS Cancel Sim Button').style.display = 'none';
       document.getElementById('MCS Edit Subset Button').style.display = 'none';
       this.subInfoCard.container.style.display = 'none';
       this.setTabIDToSelected(this.spellTabIDs[0]);
@@ -1664,29 +1662,20 @@
      * Callback for when the simulate button is clicked
      * @param {MouseEvent} event The onclick event for a button
      */
-    simulateButtonOnClick(event) {
+    simulateButtonOnClick() {
       if (((items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].isRanged) && (items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.gearSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
         notifyPlayer(CONSTANTS.skill.Ranged, 'Incorrect Ammo type equipped for weapon.', 'danger');
       } else {
+        if (this.simulator.simInProgress) {
+          this.simulator.cancelSimulation();
+          const simButton = document.getElementById('MCS Simulate Button');
+          simButton.disabled = true;
+          simButton.textContent = 'Cancelling...';
+        }
         if (!this.simulator.simInProgress && this.simulator.simulationWorkers.length === this.simulator.maxThreads) {
-          document.getElementById('MCS Simulate Button').disabled = true;
-          const cancelButton = document.getElementById('MCS Cancel Sim Button');
-          cancelButton.style.display = '';
-          cancelButton.disabled = false;
-          cancelButton.textContent = 'Cancel';
           this.simulator.simulateCombat();
         }
       }
-    }
-    /**
-     * Callback for when the cancel simulation button is clicked
-     * @memberof McsApp
-     */
-    cancelButtonOnClick() {
-      const cancelButton = document.getElementById('MCS Cancel Sim Button');
-      cancelButton.disabled = true;
-      cancelButton.textContent = 'Cancelling...';
-      this.simulator.cancelSimulation();
     }
     /**
      * Callback for when the sell bones option is changed
@@ -2439,7 +2428,6 @@
       this.updateZoneInfoCard();
       document.getElementById('MCS Simulate Button').disabled = false;
       document.getElementById('MCS Simulate Button').textContent = 'Simulate';
-      document.getElementById('MCS Cancel Sim Button').style.display = 'none';
     }
 
     destroy() {
@@ -3965,7 +3953,7 @@
         return jobBComplex - jobAComplex;
       });
       // Start simulation workers
-      document.getElementById('MCS Simulate Button').textContent = `Simulating... (0/${this.simulationQueue.length})`;
+      document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
       this.initializeSimulationJobs();
     }
 
@@ -4253,7 +4241,7 @@
           const monsterID = event.data.monsterID;
           Object.assign(this.monsterSimData[monsterID], event.data.simResult);
           this.monsterSimData[monsterID].simulationTime = event.data.selfTime;
-          document.getElementById('MCS Simulate Button').textContent = `Simulating... (${this.currentJob - 1}/${this.simulationQueue.length})`;
+          document.getElementById('MCS Simulate Button').textContent = `Cancel (${this.currentJob - 1}/${this.simulationQueue.length})`;
           // console.log(event.data.simResult);
           // Attempt to add another job to the worker
           this.startJob(workerID);
@@ -5226,10 +5214,10 @@
     * @param {Function} onclickCallback Callback to excute when pressed
     * @param {string} idTag Optional ID Tag
     */
-    addButton(buttonText, onclickCallback, idTag = '') {
+    addButton(buttonText, onclickCallback) {
       const newButton = document.createElement('button');
       newButton.type = 'button';
-      newButton.id = `MCS ${buttonText} ${(idTag === '') ? '' : `${idTag} `}Button`;
+      newButton.id = `MCS ${buttonText} Button`;
       newButton.className = 'btn btn-primary m-1';
       newButton.style.width = `100%`;
       newButton.textContent = buttonText;
