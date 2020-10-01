@@ -7,10 +7,10 @@ While this extension has been tested, it is still recommended to create a backup
 After installing the extension, a refresh of the game may be required.
 
 ### Firefox:
-Install from the [Firefox Addons Site](https://addons.mozilla.org/en-US/firefox/addon/melvor-idle-combat-simulator/).
+Currently not available as a signed add-on, but you can [add it as temporary add-on](https://www.youtube.com/watch?v=J7el77F1ckg).
 
 ### Chrome:
-Currently not available on the chrome webstore, but you can download the sources here and add it as a [temporary addon](https://developer.chrome.com/extensions/getstarted).
+Currently not available on the chrome webstore, but you can download the sources here and [add it as an unpacked extension](https://developer.chrome.com/extensions/getstarted).
 1. [Download](https://github.com/visua0/Melvor-Idle-Combat-Simulator/raw/master/Releases/v0.11.0.zip) the latest version of the simulator.
 2. Unzip the files.
 3. Navigate to: chrome://extensions and toggle Developer mode on.
