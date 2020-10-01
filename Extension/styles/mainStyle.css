@@ -58,7 +58,7 @@
 .mcsOuter {
   border-radius: 10px;
   padding: 5px;
-  margin: 5px;
+  margin: 5px !important;
   min-width: 250px;
 }
 
@@ -104,13 +104,13 @@
   display: flex;
   min-height: 80px;
   flex-grow: 0;
-  left: 46px;
+  left: 58px;
 }
 
 .mcsYAxis {
   position: relative;
   height: 100%;
-  min-width: 40px;
+  min-width: 52px;
 }
 
 .mcsPlotBox {
@@ -173,7 +173,7 @@
   border-radius: 0.5rem;
 }
 
-#mcsModal .btn-outline-dark {
+#mcsModal .btn-outline-primary {
   margin: 4px;
   padding: 0px;
 }
@@ -306,7 +306,7 @@
   align-items: center;
   background-color: inherit;
   border-color: inherit;
-  justify-content: right;
+  justify-content: flex-end;
   margin: 4px;
 }
 
@@ -319,7 +319,7 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: right;
+  justify-content: flex-end;
   background-color: inherit;
   border-color: inherit;
 }

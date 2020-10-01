@@ -849,7 +849,7 @@
       this.updatePrayerOptions(1);
       // Set up spells
       const standardOpts = this.simulator.spells.standard;
-      document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-dark btn-dark';
+      document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-primary btn-primary';
       this.simulator.computeEquipStats();
       this.updateEquipStats();
       this.simulator.computeCombatStats();
@@ -1330,7 +1330,7 @@
       Object.keys(this.simulator.spells).forEach((spellType) => {
         const spellOpts = this.simulator.spells[spellType];
         if (spellOpts.isSelected) {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-primary';
         }
       });
       if (isSpellAncient) {
@@ -1364,7 +1364,7 @@
       Object.keys(this.simulator.spells).forEach((spellType) => {
         const spellOpts = this.simulator.spells[spellType];
         if (spellOpts.isSelected) {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark btn-dark';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-primary btn-primary';
         }
       });
       this.updateSpellOptions(skillLevel[CONSTANTS.skill.Magic]);
@@ -1374,11 +1374,11 @@
       for (let i = 0; i < PRAYER.length; i++) {
         const prayButton = document.getElementById(`MCS ${this.getPrayerName(i)} Button`);
         if (activePrayer[i]) {
-          prayButton.className = 'btn btn-outline-dark btn-dark';
+          prayButton.className = 'btn btn-outline-primary btn-primary';
           this.simulator.prayerSelected[i] = true;
           this.simulator.activePrayers++;
         } else {
-          prayButton.className = 'btn btn-outline-dark';
+          prayButton.className = 'btn btn-outline-primary';
           this.simulator.prayerSelected[i] = false;
         }
       }
@@ -1401,7 +1401,7 @@
       }
       // Deselect potion if selected
       if (this.simulator.potionSelected) {
-        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark';
+        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-primary';
         this.simulator.potionSelected = false;
         this.simulator.potionID = -1;
       }
@@ -1409,7 +1409,7 @@
       if (potionID !== -1) {
         this.simulator.potionSelected = true;
         this.simulator.potionID = potionID;
-        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark btn-dark';
+        document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-primary btn-primary';
       }
       // Set potion tier if applicable
       if (potionTier !== -1) {
@@ -1422,8 +1422,8 @@
       petUnlocked.forEach((owned, petID) => {
         this.simulator.petOwned[petID] = owned;
         if (this.combatPetsIds.includes(petID)) {
-          let newClass = 'btn btn-outline-dark';
-          if (owned) newClass += ' btn-dark';
+          let newClass = 'btn btn-outline-primary';
+          if (owned) newClass += ' btn-primary';
           document.getElementById(`MCS ${PETS[petID].name} Button`).className = newClass;
         }
         if (petID === 4 && owned) document.getElementById('MCS Rock').style.display = '';
@@ -1461,13 +1461,13 @@
       if (this.simulator.prayerSelected[prayerID]) {
         this.simulator.activePrayers--;
         this.simulator.prayerSelected[prayerID] = false;
-        event.currentTarget.className = 'btn btn-outline-dark';
+        event.currentTarget.className = 'btn btn-outline-primary';
         prayerChanged = true;
       } else {
         if (this.simulator.activePrayers < 2) {
           this.simulator.activePrayers++;
           this.simulator.prayerSelected[prayerID] = true;
-          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+          event.currentTarget.className = 'btn btn-outline-primary btn-primary';
           prayerChanged = true;
         } else {
           notifyPlayer(CONSTANTS.skill.Prayer, 'You can only have 2 prayers active at once.', 'danger');
@@ -1501,16 +1501,16 @@
         if (this.simulator.potionID === potionID) { // Deselect Potion
           this.simulator.potionSelected = false;
           this.simulator.potionID = -1;
-          event.currentTarget.className = 'btn btn-outline-dark';
+          event.currentTarget.className = 'btn btn-outline-primary';
         } else { // Change Potion
-          document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-dark';
+          document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`).className = 'btn btn-outline-primary';
           this.simulator.potionID = potionID;
-          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+          event.currentTarget.className = 'btn btn-outline-primary btn-primary';
         }
       } else { // Select Potion
         this.simulator.potionSelected = true;
         this.simulator.potionID = potionID;
-        event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+        event.currentTarget.className = 'btn btn-outline-primary btn-primary';
       }
       this.simulator.computePotionBonus();
       this.simulator.computeCombatStats();
@@ -1543,23 +1543,23 @@
         if (spellOpts.selectedID === spellID && spellType !== 'standard' && spellType !== 'ancient') {
           spellOpts.isSelected = false;
           spellOpts.selectedID = -1;
-          event.currentTarget.className = 'btn btn-outline-dark';
+          event.currentTarget.className = 'btn btn-outline-primary';
         } else {
-          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
+          document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`).className = 'btn btn-outline-primary';
           spellOpts.selectedID = spellID;
-          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+          event.currentTarget.className = 'btn btn-outline-primary btn-primary';
         }
       } else {
         switch (spellType) {
           case 'ancient':
             const standardOpts = this.simulator.spells.standard;
             standardOpts.isSelected = false;
-            document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
+            document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`).className = 'btn btn-outline-primary';
             standardOpts.selectedID = -1;
             if (this.simulator.spells.curse.isSelected) {
               const curseOpts = this.simulator.spells.curse;
               curseOpts.isSelected = false;
-              document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
+              document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`).className = 'btn btn-outline-primary';
               curseOpts.selectedID = -1;
               notifyPlayer(CONSTANTS.skill.Magic, 'Curse Deselected, they cannot be used with Ancient Magicks', 'danger');
             }
@@ -1567,7 +1567,7 @@
           case 'standard':
             const ancientOpts = this.simulator.spells.ancient;
             ancientOpts.isSelected = false;
-            document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`).className = 'btn btn-outline-dark';
+            document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`).className = 'btn btn-outline-primary';
             ancientOpts.selectedID = -1;
             break;
         }
@@ -1577,7 +1577,7 @@
         } else {
           spellOpts.isSelected = true;
           spellOpts.selectedID = spellID;
-          event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+          event.currentTarget.className = 'btn btn-outline-primary btn-primary';
         }
       }
       // Update combat stats for new spell
@@ -1593,10 +1593,10 @@
     petButtonOnClick(event, petID) {
       if (this.simulator.petOwned[petID]) {
         this.simulator.petOwned[petID] = false;
-        event.currentTarget.className = 'btn btn-outline-dark';
+        event.currentTarget.className = 'btn btn-outline-primary';
       } else {
         this.simulator.petOwned[petID] = true;
-        event.currentTarget.className = 'btn btn-outline-dark btn-dark';
+        event.currentTarget.className = 'btn btn-outline-primary btn-primary';
       }
       this.simulator.computeCombatStats();
       this.updateCombatStats();
@@ -2088,11 +2088,11 @@
           if (spellOption.selectedID === index) {
             spellOption.selectedID = -1;
             spellOption.isSelected = false;
-            document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-dark';
+            document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-primary';
             if (type === 'standard' || type === 'ancient') {
               this.simulator.spells.standard.isSelected = true;
               this.simulator.spells.standard.selectedID = 0;
-              document.getElementById(`MCS ${SPELLS[0].name} Button`).className = 'btn btn-outline-dark btn-dark';
+              document.getElementById(`MCS ${SPELLS[0].name} Button`).className = 'btn btn-outline-primary btn-primary';
             }
             notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires level ${spell.magicLevelRequired} Magic.`, 'danger');
           }
@@ -2121,7 +2121,7 @@
             if (spellOption.selectedID === index) {
               spellOption.selectedID = -1;
               spellOption.isSelected = false;
-              document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-dark';
+              document.getElementById(`MCS ${spell.name} Button`).className = 'btn btn-outline-primary';
               notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires ${this.getItemName(spell.requiredItem)}.`, 'danger');
             }
           }
@@ -2138,7 +2138,7 @@
           document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
           if (this.simulator.prayerSelected[i]) {
             this.simulator.prayerSelected[i] = false;
-            document.getElementById(`MCS ${this.getPrayerName(i)} Button`).className = 'btn btn-outline-dark';
+            document.getElementById(`MCS ${this.getPrayerName(i)} Button`).className = 'btn btn-outline-primary';
             notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(i)} has been de-selected. It requires level ${prayer.prayerLevel} Prayer.`, 'danger');
           }
         } else {
@@ -5254,7 +5254,7 @@
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${idText} Button`;
-      newButton.className = 'btn btn-outline-dark';
+      newButton.className = 'btn btn-outline-primary';
       newButton.onclick = onclickCallback;
       const newImage = document.createElement('img');
       newImage.className = `mcsButtonImage mcsImage${size}`;
