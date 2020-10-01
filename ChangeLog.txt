@@ -1,276 +1,275 @@
-v0.11.0
-Updated for game version Alpha v0.16.3
-New: Kills/s stat
-Change: Moved the tools menu below the skills menu
-Change: Placed the combat simulator in a modal
-Change: Restyled elements to be more in line with the game
-Fixed: Auroras now work in combination with Ancient Magicks
-Fixed: Monsters in dungeons no longer count as slayer tasks for the Slayer's Crossbow
-Fixed: Hiding skills no longer breaks the menu
+v0.11.0:
+    Updated for Melvor Idle v0.16.3
+
+    Changes:
+    - Added Kills/s stat
+    - Moved the tools menu below the skills menu
+    - Placed the combat simulator in a modal
+    - Restyled elements to be more in line with the game
+
+    Fixes:
+    - Auroras now work in combination with Ancient Magicks
+    - Monsters in dungeons no longer count as slayer tasks for the Slayer's Crossbow
+    - Hiding skills no longer breaks the menu
 
 v0.10.1:
-Melvor Combat Sim has been updated for game version Alpha v0.16.1
-Change: Made ancient magick that guarantee hits only work when the player has > 20000 accuracy rating to match game change.
-Change: Made fighter amulet only work when you are using melee attacks, and adjusted Proc. threshold to 70% of Max Hit to match game change.
-Change: Adjusted how minimum hit works to match game change.
-Fix: Fixed switching from Alt. Magic page to simulator would get Alt. Magic stuck
-Fix: Fixed Import button importing levels that are one higher
-Fix: Fixed Pet Calculation to use your (virtual level + 1) instead of (virtual level) to match game code
-Fix: Fixed increased minimum hit not being reset when calculating combat stats.
-Fix: Fixed pet chance not working for Attack/Strength and Defence.
-Fix: Ancient MAgicks typo in spells menu
+    Melvor Combat Sim has been updated for game version Alpha v0.16.1
+    Change: Made ancient magick that guarantee hits only work when the player has > 20000 accuracy rating to match game change.
+    Change: Made fighter amulet only work when you are using melee attacks, and adjusted Proc. threshold to 70% of Max Hit to match game change.
+    Change: Adjusted how minimum hit works to match game change.
+    Fix: Fixed switching from Alt. Magic page to simulator would get Alt. Magic stuck
+    Fix: Fixed Import button importing levels that are one higher
+    Fix: Fixed Pet Calculation to use your (virtual level + 1) instead of (virtual level) to match game code
+    Fix: Fixed increased minimum hit not being reset when calculating combat stats.
+    Fix: Fixed pet chance not working for Attack/Strength and Defence.
+    Fix: Ancient MAgicks typo in spells menu
 
 v0.10.0:
-Melvor Combat Sim has been updated for game version Alpha v0.16
-New: The user interface has been overhauled significantly
-  The simulator has been moved to its own page instead of being an in game overlay
-  The options for selecting different simulation settings have been moved into a tab based system
-  Gear selection has been changed to a popup menu system, simply click on a gear icon and select what you want to equipment
-  The plot has been shrunk in size slightly to better fit lower resolution monitors
-  Plot type selection has been moved to the top of the plot
-  The simulate and export buttons have been moved from simulation settings so they are constantly visible
-  Several joint menus have been split into individual tabs
-  Rounded the sharp pointy corners
-New: Implemented the Combat Triangle
-New: Implemented Pets, which can be selected from the new Pets tab.
-New: Implemented Auroras, Curses and Ancient Magicks, selectable from their indivdual tabs in the Spells tab.
-New: Implemented new plot type: Pet Chance. Calculates the probability to receive the pet in the given time unit.
-New: Implemented new special attack effects: Decreased Ranged Evasion, Stun that only has a chance to apply, Bleed that only has a chance to apply
-New: Implemented maxHitpoints
-  Adjusted regeneration calculation, burn damage calculation to scale on max HP.
-  Implemented equipment and pets that can increase max HP.
-New: Impemented Hardcore Mode:
-  A hardcore toggle has been added to Simulation settings, it disables regeneration and adjusts the combat triangle
-New: Implemented minimum hit for standard magic spells
-New: Added a 'per Kill' time unit to the existing time units.
-New: Spells and Prayers now obey their basic unlock requirements
-New: Player levels can now be set to virtual values higher than 99
-  This is used to calculate pet chances
-  Virtual levels do not contribute to combat stats
-Change: Adjusted deadeye roll calculation to match in game change
-Change: The standard spell select dropdown menu has been replaced with a tab in the Spells tab
-Removed: The duplicated Gp per Kill plot option has been removed
-Removed: The simulation time plot option has been removed
+    Melvor Combat Sim has been updated for game version Alpha v0.16
+    New: The user interface has been overhauled significantly
+    The simulator has been moved to its own page instead of being an in game overlay
+    The options for selecting different simulation settings have been moved into a tab based system
+    Gear selection has been changed to a popup menu system, simply click on a gear icon and select what you want to equipment
+    The plot has been shrunk in size slightly to better fit lower resolution monitors
+    Plot type selection has been moved to the top of the plot
+    The simulate and export buttons have been moved from simulation settings so they are constantly visible
+    Several joint menus have been split into individual tabs
+    Rounded the sharp pointy corners
+    New: Implemented the Combat Triangle
+    New: Implemented Pets, which can be selected from the new Pets tab.
+    New: Implemented Auroras, Curses and Ancient Magicks, selectable from their indivdual tabs in the Spells tab.
+    New: Implemented new plot type: Pet Chance. Calculates the probability to receive the pet in the given time unit.
+    New: Implemented new special attack effects: Decreased Ranged Evasion, Stun that only has a chance to apply, Bleed that only has a chance to apply
+    New: Implemented maxHitpoints
+    Adjusted regeneration calculation, burn damage calculation to scale on max HP.
+    Implemented equipment and pets that can increase max HP.
+    New: Impemented Hardcore Mode:
+    A hardcore toggle has been added to Simulation settings, it disables regeneration and adjusts the combat triangle
+    New: Implemented minimum hit for standard magic spells
+    New: Added a 'per Kill' time unit to the existing time units.
+    New: Spells and Prayers now obey their basic unlock requirements
+    New: Player levels can now be set to virtual values higher than 99
+    This is used to calculate pet chances
+    Virtual levels do not contribute to combat stats
+    Change: Adjusted deadeye roll calculation to match in game change
+    Change: The standard spell select dropdown menu has been replaced with a tab in the Spells tab
+    Removed: The duplicated Gp per Kill plot option has been removed
+    Removed: The simulation time plot option has been removed
 
 v0.9.1:
-Fixed a bug where incorrect player stats were being used for simulations when using Stormsnap, Slayer's Crossbow and Big Ol Ron.
+    Fixed a bug where incorrect player stats were being used for simulations when using Stormsnap, Slayer's Crossbow and Big Ol Ron.
 
 v0.9.0:
-Updated Combat Sim for game version Alpha v0.15.4
-New: The Combat simulator has now been multithreaded, and should now no longer freeze the game or tab when simulating.
-  - There may be a significant decrease in simulation time for those with mult-core CPUs, and it should be possible to run longer simulations
-New: Added a Cancel Button for simulations that are currently running
-New: Added Buttons for choosing which of your gear sets to import from the game
-New: Added Buttons for toggling all monsters or dungeons
-Change: Default number of trials has been changed to 10000
-Change: Adjusted XP Calculations to account for xp rounding change
-Change: Adjusted Magic Evasion Calculation to reflect game change
-Fix: Changed Gold Emerald Ring Bonus to 7% from 10%
+    Updated Combat Sim for game version Alpha v0.15.4
+    New: The Combat simulator has now been multithreaded, and should now no longer freeze the game or tab when simulating.
+    - There may be a significant decrease in simulation time for those with mult-core CPUs, and it should be possible to run longer simulations
+    New: Added a Cancel Button for simulations that are currently running
+    New: Added Buttons for choosing which of your gear sets to import from the game
+    New: Added Buttons for toggling all monsters or dungeons
+    Change: Default number of trials has been changed to 10000
+    Change: Adjusted XP Calculations to account for xp rounding change
+    Change: Adjusted Magic Evasion Calculation to reflect game change
+    Fix: Changed Gold Emerald Ring Bonus to 7% from 10%
 
 v0.8.4:
-Fix: Fixed Water Surge not recieving max hit bonus from Cloudburst Staff
+    Fix: Fixed Water Surge not recieving max hit bonus from Cloudburst Staff
 
 v0.8.3:
-Updated Combat Sim for game version Alpha v0.15.3
-Change: Adjusted Deadeye Amulet to match game change.
-Change: Adjusted Implementation of Lucky Herb Potions to match game change.
-Fix: Made it so attacks taken per second statistic actually shows up in the UI.
-Fix: Bones will no longer contribute to gp calculations when the Bone Necklace is equipped.
+    Updated Combat Sim for game version Alpha v0.15.3
+    Change: Adjusted Deadeye Amulet to match game change.
+    Change: Adjusted Implementation of Lucky Herb Potions to match game change.
+    Fix: Made it so attacks taken per second statistic actually shows up in the UI.
+    Fix: Bones will no longer contribute to gp calculations when the Bone Necklace is equipped.
 
 v0.8.2:
-Updated Combat Sim for game version Alpha v0.15.2.1
-No changes should have been made to simulator functionality, but the sources have been refactored to fit a style guide.
+    Updated Combat Sim for game version Alpha v0.15.2.1
+    No changes should have been made to simulator functionality, but the sources have been refactored to fit a style guide.
 
 v0.8.1:
-Updated Combat Sim for game version Alpha v0.15.2
-Change: Adjusted how Cloudburst functions to game implementation
-Fix: Fixed Export Function not including Monsters in dungeons if they were disabled
-Fix: Fixed a bug where monster images would stay crossed out on dungeon inspection
+    Updated Combat Sim for game version Alpha v0.15.2
+    Change: Adjusted how Cloudburst functions to game implementation
+    Fix: Fixed Export Function not including Monsters in dungeons if they were disabled
+    Fix: Fixed a bug where monster images would stay crossed out on dungeon inspection
 
 v0.8.0:
-Updated Combat Sim for game version Alpha v0.15.1
-New: Added a Data export button. Clicking this button will copy a tab delimited version of the simulation results to your clipboard.
-New: Added an Export Options Panel, which can be accessed by clicking Show Export Options, and hidden by clicking Hide Export Options.
-		-Export Dungeon Monsters? Toggles whether or not to export the results for individual monsters from dungeons
-		-Export Non-Simulated? Toggles whether or not to export monsters/dungeons that have been turned off as 0 fields.
-		-Data to Export: Toggles the simulation results that should be exported.
-Fix: God Dungeon Boss special attacks are now assigned the correct chances.
-Fix: Added space to Attacks made per X output option
-Fix: Fixed a rounding issue on damage to enemies with player specials attacks that have damage multipliers.
-Fix: Fixed HP Regen calculation, it was previously only adding the regen for one monster to all trials.
-Fix: Equipping Bolts while having a bow equipped no longer unequips the bow.
-Fix: Added a check for if ranged weapons have the right ammo equipped before simulation.
+    Updated Combat Sim for game version Alpha v0.15.1
+    New: Added a Data export button. Clicking this button will copy a tab delimited version of the simulation results to your clipboard.
+    New: Added an Export Options Panel, which can be accessed by clicking Show Export Options, and hidden by clicking Hide Export Options.
+        -Export Dungeon Monsters? Toggles whether or not to export the results for individual monsters from dungeons
+        -Export Non-Simulated? Toggles whether or not to export monsters/dungeons that have been turned off as 0 fields.
+        -Data to Export: Toggles the simulation results that should be exported.
+    Fix: God Dungeon Boss special attacks are now assigned the correct chances.
+    Fix: Added space to Attacks made per X output option
+    Fix: Fixed a rounding issue on damage to enemies with player specials attacks that have damage multipliers.
+    Fix: Fixed HP Regen calculation, it was previously only adding the regen for one monster to all trials.
+    Fix: Equipping Bolts while having a bow equipped no longer unequips the bow.
+    Fix: Added a check for if ranged weapons have the right ammo equipped before simulation.
 
 v0.7.0:
-Melvor Combat sim has been updated for game version Alpha v0.15
-The simulation method has been completely rewritten this update to accomadate new combat mechanics.
-Due to the increase in combat complexity, and the increase in the number of monsters simulations now tend to take longer.
-As a result it is now possible to toggle the simulation of individual monsters or dungeons by clicking on their image under the plot.
+    Melvor Combat sim has been updated for game version Alpha v0.15
+    The simulation method has been completely rewritten this update to accomadate new combat mechanics.
+    Due to the increase in combat complexity, and the increase in the number of monsters simulations now tend to take longer.
+    As a result it is now possible to toggle the simulation of individual monsters or dungeons by clicking on their image under the plot.
 
-New Features:
-New: Player Special attacks are now accounted for
-New: Stun and other enemy and player debuffs are now accounted for
-New: Enemy bleed and player burn are now accounted for
-New: Attacks made per X plot option added. This is the number of times the attackEnemy function is called per X. Useful for determining potion charge, ammunition and rune consumption.
-New: The option to inspect the individual monsters of a dungeon has been added. To access this view, click on the bar of a succesful dungeon simulation, and then click inspect dungeon.
-	Note: The average time required for these monsters is the time to defeat the total quantity of that monster in the dungeon.
-New: Implemented several new items with special effects: Firemaking Skillcape, Fighter Amulet, Warlock Amulet, Guardian Amulet, Deadeye Amulet, Cloudburst Staff, Confetti Crossbow, Stormsnap, Slayer Crossbow and Big Ron
-New: Implemented damage reduction prayers.
-New: Added a Convert Shards option for calculating gp rates. This toggles whether elemental shards from god dungeons should be converted into chests or not.
-New: Added the ability to toggle which dungeons and monsters are simulated by clicking on their images.
-Change: Adjusted Gold Sapphire ring to have a 2 second cooldown as per the in game change.
+    New Features:
+    New: Player Special attacks are now accounted for
+    New: Stun and other enemy and player debuffs are now accounted for
+    New: Enemy bleed and player burn are now accounted for
+    New: Attacks made per X plot option added. This is the number of times the attackEnemy function is called per X. Useful for determining potion charge, ammunition and rune consumption.
+    New: The option to inspect the individual monsters of a dungeon has been added. To access this view, click on the bar of a succesful dungeon simulation, and then click inspect dungeon.
+        Note: The average time required for these monsters is the time to defeat the total quantity of that monster in the dungeon.
+    New: Implemented several new items with special effects: Firemaking Skillcape, Fighter Amulet, Warlock Amulet, Guardian Amulet, Deadeye Amulet, Cloudburst Staff, Confetti Crossbow, Stormsnap, Slayer Crossbow and Big Ron
+    New: Implemented damage reduction prayers.
+    New: Added a Convert Shards option for calculating gp rates. This toggles whether elemental shards from god dungeons should be converted into chests or not.
+    New: Added the ability to toggle which dungeons and monsters are simulated by clicking on their images.
+    Change: Adjusted Gold Sapphire ring to have a 2 second cooldown as per the in game change.
 
-Fix: Topaz chance is no longer non-zero when simulating without Gold Topaz Ring equipped after previously simulating with it.
-Fix: Damage calculations for dungeons are no longer divided by 10.
+    Fix: Topaz chance is no longer non-zero when simulating without Gold Topaz Ring equipped after previously simulating with it.
+    Fix: Damage calculations for dungeons are no longer divided by 10.
 
-Known Issues:
-Slayer crossbow applies its bonus strength to dungeons if the slayer task option is set to true.
+    Known Issues:
+    Slayer crossbow applies its bonus strength to dungeons if the slayer task option is set to true.
 
 v0.6.4:
-Updated for game version Alpha v0.14.2
-No changes to combat mechanics.
-Updated internal game version to remove notification for wrong version.
+    Updated for game version Alpha v0.14.2
+    No changes to combat mechanics.
+    Updated internal game version to remove notification for wrong version.
 
 v0.6.3:
-Melvor Combat Sim has been updated for game version Alpha v0.14.1
-New: Implemented Enemy Special Attacks.
-New: Implemented Time Units for rate based results
-Fix: Fixed monsters that deal magic damage with no defined spell causing simulations to fail.
-Fix: Numbers no longer clip into the border of their boxes.
-Change: Number formatting now attempts to fix the number to 4 digits.
-Change: Prayer XP calculation changed to reflect nerf
-Change: Protect from prayers changed to reflect nerf
-Change: Magic Maximum Hit calculation changed to reflect buff
+    Melvor Combat Sim has been updated for game version Alpha v0.14.1
+    New: Implemented Enemy Special Attacks.
+    New: Implemented Time Units for rate based results
+    Fix: Fixed monsters that deal magic damage with no defined spell causing simulations to fail.
+    Fix: Numbers no longer clip into the border of their boxes.
+    Change: Number formatting now attempts to fix the number to 4 digits.
+    Change: Prayer XP calculation changed to reflect nerf
+    Change: Protect from prayers changed to reflect nerf
+    Change: Magic Maximum Hit calculation changed to reflect buff
 
 v0.6.2:
-Fix: Fixed Prayer Skillcape point cost calculation to be accurate. Previously it set the costs to 1 when prayers had a cost of 0.
+    Fix: Fixed Prayer Skillcape point cost calculation to be accurate. Previously it set the costs to 1 when prayers had a cost of 0.
 
-New: Signet Ring Chance added. This is the probability to get at least 1 Signet Half B while farming for Signet Time (h) hours.
-New: Currently selected potion is now imported when using Import From Game.
+    New: Signet Ring Chance added. This is the probability to get at least 1 Signet Half B while farming for Signet Time (h) hours.
+    New: Currently selected potion is now imported when using Import From Game.
 
 v0.6.1:
-Fix: Adjusted the way loot doubling effects to reflect in game hotfix.
+    Fix: Adjusted the way loot doubling effects to reflect in game hotfix.
 
 v0.6.0:
-Melvor Combat Sim has been updated for game version Alpha v0.13
-New: The divine potion has been implemented
-New: The Lucky herb potion has been implemented
-New: Potential herblore xp has been added. This is based on using lucky herb potions and crafting the most xp efficient potions.
-New: Aorpheats Signet Ring has been implemented
-New: Signet Ring part b has been added to gp calculations
-New: Prayer magic damage bonus has been implemented
+    Melvor Combat Sim has been updated for game version Alpha v0.13
+    New: The divine potion has been implemented
+    New: The Lucky herb potion has been implemented
+    New: Potential herblore xp has been added. This is based on using lucky herb potions and crafting the most xp efficient potions.
+    New: Aorpheats Signet Ring has been implemented
+    New: Signet Ring part b has been added to gp calculations
+    New: Prayer magic damage bonus has been implemented
 
-Fix: Slayer Areas show up in the simulator again
-
+    Fix: Slayer Areas show up in the simulator again
 
 v0.5.0:
-Melvor Combat Sim has been updated for game version Alpha v0.12.2
-New: The tools can now be hidden like combat or skills
-New: Potions have been implemented
-New: Hitpoints level has been added due to its impact on regen rate
-New: Chapeau Noir is accounted for in GP calculations
+    Melvor Combat Sim has been updated for game version Alpha v0.12.2
+    New: The tools can now be hidden like combat or skills
+    New: Potions have been implemented
+    New: Hitpoints level has been added due to its impact on regen rate
+    New: Chapeau Noir is accounted for in GP calculations
 
-Change: Default prayer bonuses adjusted to reflect game changes
-Change: HP Regen calculation has been adjusted to reflect game changes
+    Change: Default prayer bonuses adjusted to reflect game changes
+    Change: HP Regen calculation has been adjusted to reflect game changes
 
-Fix: Removed console logging of internal objects on simulation
-Fix: Simulator shows up in the sidebar again
-Fix: Reflect damage is now only done when enemies do damage, not when they try to hit
+    Fix: Removed console logging of internal objects on simulation
+    Fix: Simulator shows up in the sidebar again
+    Fix: Reflect damage is now only done when enemies do damage, not when they try to hit
 
 v0.4.2:
-Fixed some bugs with simulator accuracy.
-Fix: Magic evasion is now calculated properly.
-Fix: Prayer cape is now accounted for
-Fix: Slayer cape is now accounted for
-Fix: Reflect damage is now accounted for
-Fix: Damage reduction is now actually used in hp/s calculations instead of just being displayed
+    Fixed some bugs with simulator accuracy.
+    Fix: Magic evasion is now calculated properly.
+    Fix: Prayer cape is now accounted for
+    Fix: Slayer cape is now accounted for
+    Fix: Reflect damage is now accounted for
+    Fix: Damage reduction is now actually used in hp/s calculations instead of just being displayed
 
 v0.4.1:
-Melvor Combat sim has been updated for game version Alpha v0.11.2
-Change: Gp/s calculation now accounts for bones always dropping.
+    Melvor Combat sim has been updated for game version Alpha v0.11.2
+    Change: Gp/s calculation now accounts for bones always dropping.
 
 v0.4.0:
-Melvor Combat sim has been updated for game version Alpha v0.11.1
-New: Prayer has been added to the simulator
-	-Prayers available for your prayer level can now be selected from the prayer menu
-	-Importing from the game will select your active prayers
-	-Prayer point use while fighting an enemy/dungeon is tracked.
-	-Prayer experience gains are now tracked.
-New: Slayer has been added to the simulator
-	-Slayer experience gains are now tracked
-	-You can now select whether to calculate slayer xp/s as if it were a slayer task or not.
-	-Monsters which you cannot access due to insufficient slayer level or equipment are now highlighted as red.
-New: Monster/Dungeon Inspection has been added. Simply click on a bar and see a summary of the simulation for the specific monster/dungeon.
-New: Game version detection: The simulator will now detect the currently running game version and display a prompt if it does not match.
+    Melvor Combat sim has been updated for game version Alpha v0.11.1
+    New: Prayer has been added to the simulator
+        -Prayers available for your prayer level can now be selected from the prayer menu
+        -Importing from the game will select your active prayers
+        -Prayer point use while fighting an enemy/dungeon is tracked.
+        -Prayer experience gains are now tracked.
+    New: Slayer has been added to the simulator
+        -Slayer experience gains are now tracked
+        -You can now select whether to calculate slayer xp/s as if it were a slayer task or not.
+        -Monsters which you cannot access due to insufficient slayer level or equipment are now highlighted as red.
+    New: Monster/Dungeon Inspection has been added. Simply click on a bar and see a summary of the simulation for the specific monster/dungeon.
+    New: Game version detection: The simulator will now detect the currently running game version and display a prompt if it does not match.
 
-Change: Quick load has been removed, as the game does this by default.
-Fix: Simulation calculations have been adjusted to account for the combat number adjustment
-Fix: GP/s calculations now account for the internal changes in monster loot logic
-Fix: Bar chart tick marks no longer prevent tooltip display.
+    Change: Quick load has been removed, as the game does this by default.
+    Fix: Simulation calculations have been adjusted to account for the combat number adjustment
+    Fix: GP/s calculations now account for the internal changes in monster loot logic
+    Fix: Bar chart tick marks no longer prevent tooltip display.
 
 v0.3.1:
-New: Added plot title.
-New: Quick-load, the simulator now causes the game to display when it's done loading instead of after 5 seconds.
-Change: The minimization tab is now part of the game's sidebar
-Change: The simulator now starts minimized
-Change: The simulator no longer displays on top of the sidebar.
-Change: You can now scroll down to show content blocked by the simulator.
-Change: The combat area labels are now angled, with brackets around the enemies.
-Fix: Initial plot display is now set properly.
+    New: Added plot title.
+    New: Quick-load, the simulator now causes the game to display when it's done loading instead of after 5 seconds.
+    Change: The minimization tab is now part of the game's sidebar
+    Change: The simulator now starts minimized
+    Change: The simulator no longer displays on top of the sidebar.
+    Change: You can now scroll down to show content blocked by the simulator.
+    Change: The combat area labels are now angled, with brackets around the enemies.
+    Fix: Initial plot display is now set properly.
 
 v0.3.0:
-Patch Notes:
-New: Added GP/s and GP/kill options as simulation outputs
-	-Additional Options have been added for these calculations:
-	-Sell Bones: Sell or keep bone drops
-	-Sell Loot: All (Sells all loot), Subset (Sells the selected subset of loot), None (Keeps all items)
-	-Loot Subset Editing:
-		-Set Default sets to not selling items that are unique to combat
-		-Set Discovered sets to selling items that you have discovered in the item log
-		-Cancel, aborts changing the item subset
-		-Save, confirms changing the item subset
-		-You can also manually select whether to sell or keep each item that can be looted
-New: Added Xp per Attack calculation for predicting arrow/rune costs
-Change: Avg Hit Damage is now Damage per Attack.
-Change: Gear dropdowns are now sorted by level requirements
-Change: Combat sim will now load without a refresh
-Change: HP loss per second is now reduced by passive HP regeneration.
-Fixed: Bar Chart no longer bugs out when there is no simulation data
-Fixed: Issue where combat sim wouldn't load.
+    New: Added GP/s and GP/kill options as simulation outputs
+        -Additional Options have been added for these calculations:
+        -Sell Bones: Sell or keep bone drops
+        -Sell Loot: All (Sells all loot), Subset (Sells the selected subset of loot), None (Keeps all items)
+        -Loot Subset Editing:
+            -Set Default sets to not selling items that are unique to combat
+            -Set Discovered sets to selling items that you have discovered in the item log
+            -Cancel, aborts changing the item subset
+            -Save, confirms changing the item subset
+            -You can also manually select whether to sell or keep each item that can be looted
+    New: Added Xp per Attack calculation for predicting arrow/rune costs
+    Change: Avg Hit Damage is now Damage per Attack.
+    Change: Gear dropdowns are now sorted by level requirements
+    Change: Combat sim will now load without a refresh
+    Change: HP loss per second is now reduced by passive HP regeneration.
+    Fixed: Bar Chart no longer bugs out when there is no simulation data
+    Fixed: Issue where combat sim wouldn't load.
 
 v0.2.1:
-Patch Notes:
-Fixed: Spell Dropdown displaying in wrong place
-Fixed: Wavy menus
-Fixed: Darkmode not setting properly on load
+    Fixed: Spell Dropdown displaying in wrong place
+    Fixed: Wavy menus
+    Fixed: Darkmode not setting properly on load
 
 v0.2.0
-Patch Notes:
-New: Added Darkmode. Darkmode uses the darkmode setting in game.
-Fixed: Bar plot tooltips no longer display : when rounding.
-Fixed: Combat Sim no longer displays on top of loading screen.
+    New: Added Darkmode. Darkmode uses the darkmode setting in game.
+    Fixed: Bar plot tooltips no longer display : when rounding.
+    Fixed: Combat Sim no longer displays on top of loading screen.
 
-Dev Notes:
-Removed mcsStatReadout class in favour of mcsCard
-Removed mcsSimPlotOptions class in favour of mcsCard
-Most HTML elements now have a class assigned from mainStyle.css
-mcsCCContainer now uses flex to align its contents
+    Dev Notes:
+    Removed mcsStatReadout class in favour of mcsCard
+    Removed mcsSimPlotOptions class in favour of mcsCard
+    Most HTML elements now have a class assigned from mainStyle.css
+    mcsCCContainer now uses flex to align its contents
 
 v0.1.2
-Patch Notes:
-Fixed combat styles not importing from game
-Fixed spells not updating correctly when importing from game.
-Fixed attack speed not updating with ranged styles.
-Fixed combat tab container preventing interaction with game.
-Fixed y-axis labels displaying on top of bar chart.
+    Fixed combat styles not importing from game
+    Fixed spells not updating correctly when importing from game.
+    Fixed attack speed not updating with ranged styles.
+    Fixed combat tab container preventing interaction with game.
+    Fixed y-axis labels displaying on top of bar chart.
 
-Dev Notes:
-Created mcsCard class to serve as baseclass for other cards
-Added mainStyle.css to contain classes for HTML elements
-Removed mcsGearSelecter class in favour of mcsCard
-Removed tab container element as it was not needed
+    Dev Notes:
+    Created mcsCard class to serve as baseclass for other cards
+    Added mainStyle.css to contain classes for HTML elements
+    Removed mcsGearSelecter class in favour of mcsCard
+    Removed tab container element as it was not needed
 
 v0.1.1
-Fixed Elements of Melvor UI appearing on top of combat simulator.
-Added Scrolling capabilities for small windows.
-Added Additional Labels to interface.
+    Fixed Elements of Melvor UI appearing on top of combat simulator.
+    Added Scrolling capabilities for small windows.
+    Added Additional Labels to interface.
