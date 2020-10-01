@@ -138,7 +138,7 @@ onmessage = (event) => {
       // console.log(`Simulation started for monster with ID: ${event.data.monsterID}`);
       const startTime = performance.now();
       cancelStatus = false;
-      simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.Ntrials, event.data.simOptions.Nhitmax).then((simResult) => {
+      simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions).then((simResult) => {
         const timeTaken = performance.now() - startTime;
         postMessage({ action: 'FINISHED_SIM', monsterID: event.data.monsterID, simResult: simResult, selfTime: timeTaken });
       });
@@ -153,11 +153,11 @@ onmessage = (event) => {
  * Simulation Method for a single monster
  * @param {enemyStats} enemyStats
  * @param {playerStats} playerStats
- * @param {number} Ntrials
- * @param {number} Nhitmax
+ * @param {number} trials
+ * @param {number} maxActions
  * @return {Promise<Object>}
  */
-async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
+async function simulateMonster(enemyStats, playerStats, trials, maxActions) {
   // Calculate Accuracy
   let playerAccuracy = calculateAccuracy(playerStats, enemyStats);
   let enemyAccuracy;
@@ -220,6 +220,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
     hpxpPerEnemy: 0,
     hpxpPerSecond: 0,
     killTimeS: 0,
+    killsPerSecond: 0,
     prayerXpPerEnemy: 0,
     prayerXpPerSecond: 0,
     ppConsumedPerSecond: 0,
@@ -326,7 +327,7 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
   }
   // var enemyReflectDamage = 0; //Damage caused by reflect
   // Start simulation for each trial
-  while (enemyKills < Ntrials && simSuccess) {
+  while (enemyKills < trials && simSuccess) {
     // Check Cancellation every 250th trial
     if (enemyKills % 250 === 0 && await cancelCheck()) {
       return simResult;
@@ -387,9 +388,9 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
     enemy.magicEvasionBuff = 1;
     enemy.rangedEvasionBuff = 1;
 
-    // Simulate combat until enemy is dead or max hits has been reached
+    // Simulate combat until enemy is dead or max actions has been reached
     while (enemy.hitpoints > 0) {
-      if (player.actionsTaken > Nhitmax) {
+      if (player.actionsTaken > maxActions) {
         simSuccess = false;
         break;
       }
@@ -1172,35 +1173,36 @@ async function simulateMonster(enemyStats, playerStats, Ntrials, Nhitmax) {
     stats.totalHpXP *= playerStats.globalXPMult;
     stats.totalPrayerXP *= playerStats.globalXPMult;
     // Tabulate Simulation results
-    simResult.attacksMade = stats.playerAttackCalls / Ntrials;
-    simResult.avgHitDmg = enemyStats.hitpoints * Ntrials / stats.playerAttackCalls;
-    simResult.avgKillTime = enemySpawnTimer + stats.totalTime / Ntrials;
-    simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / Ntrials - simResult.avgKillTime / hitpointRegenInterval * playerStats.avgHPRegen;
+    simResult.attacksMade = stats.playerAttackCalls / trials;
+    simResult.avgHitDmg = enemyStats.hitpoints * trials / stats.playerAttackCalls;
+    simResult.avgKillTime = enemySpawnTimer + stats.totalTime / trials;
+    simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / trials - simResult.avgKillTime / hitpointRegenInterval * playerStats.avgHPRegen;
     if (simResult.hpPerEnemy < 0) simResult.hpPerEnemy = 0;
     simResult.hpPerSecond = simResult.hpPerEnemy / simResult.avgKillTime * 1000;
 
     simResult.dmgPerSecond = enemyStats.hitpoints / simResult.avgKillTime * 1000;
-    simResult.xpPerEnemy = stats.totalCombatXP / Ntrials;
+    simResult.xpPerEnemy = stats.totalCombatXP / trials;
     simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
 
-    simResult.xpPerSecond = stats.totalCombatXP / Ntrials / simResult.avgKillTime * 1000;
-    simResult.hpxpPerEnemy = stats.totalHpXP / Ntrials;
-    simResult.hpxpPerSecond = stats.totalHpXP / Ntrials / simResult.avgKillTime * 1000;
+    simResult.xpPerSecond = stats.totalCombatXP / trials / simResult.avgKillTime * 1000;
+    simResult.hpxpPerEnemy = stats.totalHpXP / trials;
+    simResult.hpxpPerSecond = stats.totalHpXP / trials / simResult.avgKillTime * 1000;
     simResult.killTimeS = simResult.avgKillTime / 1000;
-    simResult.prayerXpPerEnemy = stats.totalPrayerXP / Ntrials;
-    simResult.prayerXpPerSecond = stats.totalPrayerXP / Ntrials / simResult.avgKillTime * 1000;
+    simResult.killsPerSecond = 1 / simResult.killTimeS;
+    simResult.prayerXpPerEnemy = stats.totalPrayerXP / trials;
+    simResult.prayerXpPerSecond = stats.totalPrayerXP / trials / simResult.avgKillTime * 1000;
 
-    simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / Ntrials / simResult.killTimeS + playerStats.prayerPointsPerHeal / hitpointRegenInterval * 1000;
-    simResult.gpFromDamage = stats.gpGainedFromDamage / Ntrials;
-    simResult.attacksTaken = stats.enemyAttackCalls / Ntrials;
-    simResult.attacksTakenPerSecond = stats.enemyAttackCalls / Ntrials / simResult.killTimeS;
-    simResult.attacksMadePerSecond = stats.playerAttackCalls / Ntrials / simResult.killTimeS;
+    simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / trials / simResult.killTimeS + playerStats.prayerPointsPerHeal / hitpointRegenInterval * 1000;
+    simResult.gpFromDamage = stats.gpGainedFromDamage / trials;
+    simResult.attacksTaken = stats.enemyAttackCalls / trials;
+    simResult.attacksTakenPerSecond = stats.enemyAttackCalls / trials / simResult.killTimeS;
+    simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
 
     // Throw pet rolls in here to be further processed later
     simResult.petRolls = Object.keys(stats.petRolls).map((attackSpeed) => {
       return {
         speed: parseInt(attackSpeed),
-        rollsPerSecond: stats.petRolls[attackSpeed] / Ntrials / simResult.killTimeS,
+        rollsPerSecond: stats.petRolls[attackSpeed] / trials / simResult.killTimeS,
       };
     });
   }

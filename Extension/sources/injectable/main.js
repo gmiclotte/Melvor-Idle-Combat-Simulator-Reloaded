@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 (() => {
-  const version = 'v0.11.0'
+  const version = 'v0.11.0';
 
   /**
    * Container Class for the Combat Simulator.
@@ -41,6 +41,7 @@
         'Prayer Points per ',
         'Damage per ',
         'Average Kill Time (s)',
+        'Kills per ',
         'Damage per Attack',
         'GP per ',
         'Potential Herblore XP per ',
@@ -60,6 +61,7 @@
         true,
         true,
         false,
+        true,
         false,
         true,
         true,
@@ -79,6 +81,7 @@
         'ppConsumedPerSecond',
         'dmgPerSecond',
         'killTimeS',
+        'killsPerSecond',
         'avgHitDmg',
         'gpPerSecond',
         'herbloreXPPerSecond',
@@ -98,6 +101,7 @@
         'Prayer Points/',
         'Damage/',
         'Kill Time(s)',
+        'Kills/',
         'Damage/attack',
         'GP/',
         'Herb XP/',
@@ -273,6 +277,7 @@
       this.botContent = document.createElement('div');
       this.botContent.className = 'mcsTabContent';
       this.botContent.style.flexWrap = 'nowrap';
+      this.botContent.style.height = '440px';
 
       this.mcsModal = document.createElement('div');
       this.mcsModal.id = 'mcsModal';
@@ -313,7 +318,8 @@
 
       const elem2 = document.createElement('a');
       elem2.className = 'nav-main-link nav-compact';
-      elem2.onclick = () => $(this.mcsModal).modal('show');
+      elem2.dataset.toggle = 'modal';
+      elem2.dataset.target = '#mcsModal';
       this.tabDiv.appendChild(elem2);
       const elem3 = document.createElement('img');
       elem3.className = 'nav-img';
@@ -374,8 +380,8 @@
         this.gearSelectCard.addMultiButton(['1', '2', '3'], 25, 80, [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)]);
         this.gearSelectCard.addSectionTitle('Combat Style');
         // Style dropdown (Specially Coded)
-        const combatStyleCCContainer = this.gearSelectCard.createCCContainer(24);
-        const combatStyleLabel = this.gearSelectCard.createLabel('Style: ', '');
+        const combatStyleCCContainer = this.gearSelectCard.createCCContainer();
+        const combatStyleLabel = this.gearSelectCard.createLabel('Style', '');
         const meleeStyleDropdown = this.gearSelectCard.createDropdown(['Stab', 'Slash', 'Block'], [0, 1, 2], 'MCS Melee Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Melee'));
         const rangedStyleDropdown = this.gearSelectCard.createDropdown(['Accurate', 'Rapid', 'Longrange'], [0, 1, 2], 'MCS Ranged Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Ranged'));
         const magicStyleDropdown = this.gearSelectCard.createDropdown(['Magic', 'Defensive'], [0, 1], 'MCS Magic Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Magic'));
@@ -592,7 +598,6 @@
         for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
           this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
         }
-        this.subInfoCard.addButton('Inspect Dungeon', (e) => this.inspectDungeonOnClick(e), 250, 25);
       }
       const iconSources = {
         combat: 'assets/media/skills/combat/combat.svg',
@@ -669,7 +674,7 @@
       }
       // Combat Stat Display Card
       {
-        this.combatStatCard = new McsCard(this.topContent, '250px', '', '50px', true);
+        this.combatStatCard = new McsCard(this.topContent, '250px', '', '60px', true);
         this.combatStatCard.addSectionTitle('Combat Stats');
         const combatStatNames = [
           'Attack Speed',
@@ -698,10 +703,10 @@
           this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? iconSources[combatStatIcons[i]] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
         }
         this.combatStatCard.addSectionTitle('Simulate/Export');
-        this.combatStatCard.addButton('Simulate', (event) => this.simulateButtonOnClick(event), 200, 25);
-        this.combatStatCard.addButton('Cancel', () => this.cancelButtonOnClick(), 200, 25, 'Sim');
-        this.combatStatCard.addButton('Export Data', (event) => this.exportDataOnClick(event), 200, 25);
-        this.combatStatCard.addButton('Show Export Options', (event) => this.exportOptionsOnClick(event), 200, 25);
+        this.combatStatCard.addButton('Simulate', (event) => this.simulateButtonOnClick(event));
+        this.combatStatCard.addButton('Cancel', () => this.cancelButtonOnClick(), 'Sim');
+        this.combatStatCard.addButton('Export Data', (event) => this.exportDataOnClick(event));
+        this.combatStatCard.addButton('Show Export Options', (event) => this.exportOptionsOnClick(event));
       }
       // Export Options Card
       {
@@ -736,8 +741,8 @@
             dropDownOptionNames.push(this.plotTypeDropdownOptions[i]);
           }
         }
-        this.simOptionsCard.addRadio('Slayer Task?', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
-        this.simOptionsCard.addRadio('Hardcore Mode?', 25, 'hardcore', ['Yes', 'No'], [() => this.hardcoreRadioOnChange(true), () => this.hardcoreRadioOnChange(false)], 1);
+        this.simOptionsCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
+        this.simOptionsCard.addRadio('Hardcore Mode', 25, 'hardcore', ['Yes', 'No'], [() => this.hardcoreRadioOnChange(true), () => this.hardcoreRadioOnChange(false)], 1);
       }
       // Gp Options card
       {
@@ -747,7 +752,7 @@
         this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
         this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
         this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], 25, (e) => this.sellLootDropdownOnChange(e));
-        this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e), 250, 25);
+        this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
       }
       // GP/s options card
       {
@@ -755,27 +760,28 @@
         this.gpOptionsCard.addSectionTitle('Item Subset Selection');
         this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], 25, 150, [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
         this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], 25, 150, [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
-        this.gpOptionsCard.addTextInput('Search:', '', 25, (e) => this.searchInputOnInput(e));
+        this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
         // Top labels
         const labelCont = document.createElement('div');
-        labelCont.className = 'mcsMultiButtonContainer';
+        labelCont.className = 'mcsMultiButtonContainer mt-1';
         labelCont.style.borderBottom = 'solid thin';
         const lab1 = document.createElement('div');
         lab1.className = 'mcsMultiHeader';
         lab1.style.borderRight = 'solid thin';
         lab1.textContent = 'Item';
-        lab1.style.paddingRight = '120px';
+        lab1.style.width = '218px';
         labelCont.appendChild(lab1);
         const lab2 = document.createElement('div');
         lab2.className = 'mcsMultiHeader';
         lab2.textContent = 'Sell';
-        lab2.style.width = '127px';
+        lab2.style.width = '124px';
         labelCont.appendChild(lab2);
         this.gpOptionsCard.container.appendChild(labelCont);
         this.gpSearchResults = new McsCard(this.gpOptionsCard.container, '', '130px', '100px');
         for (let i = 0; i < this.simulator.lootList.length; i++) {
           this.gpSearchResults.addRadio(this.simulator.lootList[i].name, 20, `${this.simulator.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
         }
+        this.gpSearchResults.container.style.width = '100%';
         this.gpSearchResults.container.style.overflowY = 'scroll';
         this.gpSearchResults.container.style.overflowX = 'hidden';
         this.gpSearchResults.container.style.marginRight = '0px';
@@ -844,7 +850,7 @@
       this.setTabIDToSelected(this.spellTabIDs[0]);
       this.setTabIDToSelected(this.mainTabIDs[0]);
       this.plotter.petSkillDropdown.style.display = 'none';
-      document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + this.zoneInfoNames[15] + this.selectedTimeShorthand;
+      document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
       this.updateSpellOptions(1);
       this.updatePrayerOptions(1);
       // Set up spells
@@ -1431,10 +1437,10 @@
       // Update hardcore mode
       if (currentGamemode === 1) {
         this.simulator.isHardcore = true;
-        document.getElementById('MCS Hardcore Mode? Radio Yes').checked = true;
+        document.getElementById('MCS Hardcore Mode Radio Yes').checked = true;
       } else {
         this.simulator.isHardcore = false;
-        document.getElementById('MCS Hardcore Mode? Radio No').checked = true;
+        document.getElementById('MCS Hardcore Mode Radio No').checked = true;
       }
       this.updatePrayerOptions(skillLevel[CONSTANTS.skill.Prayer]);
       this.simulator.computeEquipStats();
@@ -1609,7 +1615,7 @@
     maxhitsInputOnChange(event) {
       const newMaxHit = parseInt(event.currentTarget.value);
       if (newMaxHit > 0 && newMaxHit <= 10000) {
-        this.simulator.Nhitmax = newMaxHit;
+        this.simulator.maxActions = newMaxHit;
       }
     }
     /**
@@ -1619,7 +1625,7 @@
     numtrialsInputOnChange(event) {
       const newNumTrials = parseInt(event.currentTarget.value);
       if (newNumTrials > 0 && newNumTrials <= 100000) {
-        this.simulator.Ntrials = newNumTrials;
+        this.simulator.trials = newNumTrials;
       }
     }
     /**
@@ -1652,7 +1658,7 @@
       if (this.plotter.plotType === 'petChance') {
         this.updatePlotData();
       }
-      document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + this.zoneInfoNames[15] + this.selectedTimeShorthand;
+      document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
       this.updateZoneInfoCard();
     }
     /**
@@ -2013,7 +2019,7 @@
           const monsterID = monsterList[dataIndex].id;
           document.getElementById('MCS Zone Info Title').textContent = `${this.getMonsterName(monsterID)}${(monsterList[dataIndex].quantity > 1) ? ` x${monsterList[dataIndex].quantity}` : ''}`;
           document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
-          document.getElementById('MCS Inspect Dungeon Button').style.display = 'none';
+          this.plotter.inspectButton.style.display = 'none';
           const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
           for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
             const dataKey = this.plotTypeDropdownValues[i];
@@ -2028,7 +2034,7 @@
           if (this.barIsDungeon[this.selectedBar]) {
             const dungeonID = this.barMonsterIDs[this.selectedBar];
             document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
-            document.getElementById('MCS Inspect Dungeon Button').style.display = '';
+            this.plotter.inspectButton.style.display = '';
             document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
             const updateInfo = this.simulator.dungeonSimData[dungeonID].simSuccess;
             for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
@@ -2043,7 +2049,7 @@
             const monsterID = this.barMonsterIDs[this.selectedBar];
             document.getElementById('MCS Zone Info Title').textContent = this.getMonsterName(monsterID);
             document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
-            document.getElementById('MCS Inspect Dungeon Button').style.display = 'none';
+            this.plotter.inspectButton.style.display = 'none';
             const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
             for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
               const dataKey = this.plotTypeDropdownValues[i];
@@ -2501,48 +2507,86 @@
       this.plotContainer.className = 'mcsPlotContainer mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark';
       this.plotContainer.id = 'MCS Plotter';
 
-      this.plotTitle = document.createElement('div');
-      this.plotTitle.className = 'mcsPlotRow';
-      this.plotTitle.style.marginBottom = '12px';
-      this.plotContainer.appendChild(this.plotTitle);
+      this.plotHeader = document.createElement('div');
+      this.plotHeader.className = 'mcsPlotHeader';
+      this.plotContainer.appendChild(this.plotHeader);
+
+      const plotHeaderSelects = document.createElement('div');
+      plotHeaderSelects.className = 'd-flex';
+      this.plotHeader.appendChild(plotHeaderSelects);
+
       // Use a dropdown menu for the plot title
       const skillTypeSelect = document.createElement('select');
-      skillTypeSelect.className = 'mcsDropdown';
+      skillTypeSelect.className = 'form-control';
       this.parent.skillKeys.forEach((skillName, index) => {
         const newOption = document.createElement('option');
         newOption.textContent = skillName;
         newOption.value = skillName;
-        newOption.className = 'mcsOption';
         newOption.id = `MCS ${skillName} Option`;
         skillTypeSelect.appendChild(newOption);
       });
       skillTypeSelect.onchange = (event) => this.parent.petSkillDropdownOnChange(event);
-      this.plotTitle.appendChild(skillTypeSelect);
+      plotHeaderSelects.appendChild(skillTypeSelect);
       this.petSkillDropdown = skillTypeSelect;
 
       const plotTypeSelect = document.createElement('select');
-      plotTypeSelect.className = 'mcsDropdown';
+      plotTypeSelect.className = 'form-control';
       this.parent.plotTypeDropdownOptions.forEach((value, index) => {
         const newOption = document.createElement('option');
         newOption.textContent = value;
         newOption.value = this.parent.plotTypeDropdownValues[index];
-        newOption.className = 'mcsOption';
         plotTypeSelect.appendChild(newOption);
       });
       plotTypeSelect.onchange = (event) => this.parent.plottypeDropdownOnChange(event);
-      this.plotTitle.appendChild(plotTypeSelect);
+      plotHeaderSelects.appendChild(plotTypeSelect);
 
       this.timeDropdown = document.createElement('select');
-      this.timeDropdown.className = 'mcsDropdown';
+      this.timeDropdown.className = 'form-control';
       this.parent.timeOptions.forEach((value, index) => {
         const newOption = document.createElement('option');
         newOption.textContent = value;
         newOption.value = this.parent.timeMultipliers[index];
-        newOption.className = 'mcsOption';
         this.timeDropdown.appendChild(newOption);
       });
       this.timeDropdown.onchange = (event) => this.parent.timeUnitDropdownOnChange(event);
-      this.plotTitle.appendChild(this.timeDropdown);
+      plotHeaderSelects.appendChild(this.timeDropdown);
+
+      const plotHeaderButtons = document.createElement('div');
+      this.plotHeader.appendChild(plotHeaderButtons);
+
+      // Add inspection buttons
+      this.inspectButton = document.createElement('button');
+      this.inspectButton.className = 'btn btn-primary m-1';
+      this.inspectButton.textContent = 'Inspect Dungeon';
+      this.inspectButton.style.display = 'none';
+      this.inspectButton.onclick = () => {
+        this.parent.inspectDungeonOnClick();
+      };
+      plotHeaderButtons.appendChild(this.inspectButton);
+      this.stopInspectButton = document.createElement('button');
+      this.stopInspectButton.className = 'btn btn-primary m-1';
+      this.stopInspectButton.textContent = 'Stop Inspecting';
+      this.stopInspectButton.style.display = 'none';
+      this.stopInspectButton.onclick = () => {
+        this.parent.stopInspectOnClick();
+      };
+      plotHeaderButtons.appendChild(this.stopInspectButton);
+
+      // Add toggle buttons
+      this.toggleMonsterButton = document.createElement('button');
+      this.toggleMonsterButton.className = 'btn btn-primary m-1';
+      this.toggleMonsterButton.textContent = 'Toggle Monsters';
+      this.toggleMonsterButton.onclick = () => {
+        this.parent.toggleMonsterSims(false);
+      };
+      plotHeaderButtons.appendChild(this.toggleMonsterButton);
+      this.toggleDungeonButton = document.createElement('button');
+      this.toggleDungeonButton.className = 'btn btn-primary m-1';
+      this.toggleDungeonButton.textContent = 'Toggle Dungeons';
+      this.toggleDungeonButton.onclick = () => {
+        this.parent.toggleDungeonSims(false);
+      };
+      plotHeaderButtons.appendChild(this.toggleDungeonButton);
 
       this.plotTopContainer = document.createElement('div');
       this.plotTopContainer.className = 'mcsPlotTopContainer';
@@ -2625,34 +2669,6 @@
         botLength += this.barBottomLength[i];
         divi++;
       }
-      const plotButtonsRow = document.createElement('div');
-      plotButtonsRow.className = 'mcsPlotRow';
-      plotButtonsRow.style.top = '100%';
-      this.plotContainer.appendChild(plotButtonsRow);
-      // Add toggle buttons
-      this.toggleMonsterButton = document.createElement('button');
-      this.toggleMonsterButton.className = 'btn btn-primary m-1 mb-2';
-      this.toggleMonsterButton.textContent = 'Toggle Monsters';
-      this.toggleMonsterButton.onclick = () => {
-        this.parent.toggleMonsterSims(false);
-      };
-      plotButtonsRow.appendChild(this.toggleMonsterButton);
-      this.toggleDungeonButton = document.createElement('button');
-      this.toggleDungeonButton.className = 'btn btn-primary m-1 mb-2';
-      this.toggleDungeonButton.textContent = 'Toggle Dungeons';
-      this.toggleDungeonButton.onclick = () => {
-        this.parent.toggleDungeonSims(false);
-      };
-      plotButtonsRow.appendChild(this.toggleDungeonButton);
-      // Add Leave Inspection button
-      this.stopInspectButton = document.createElement('button');
-      this.stopInspectButton.className = 'btn btn-primary m-1 mb-2';
-      this.stopInspectButton.textContent = 'Stop Inspecting';
-      this.stopInspectButton.style.display = 'none';
-      this.stopInspectButton.onclick = () => {
-        this.parent.stopInspectOnClick();
-      };
-      plotButtonsRow.appendChild(this.stopInspectButton);
       // Do ticktext
       this.tickText = [];
       for (let i = 0; i < 21; i++) {
@@ -2851,6 +2867,7 @@
       }
       this.hideZoneLabels();
       this.unCrossAllImages();
+      this.inspectButton.style.display = 'none';
       this.stopInspectButton.style.display = '';
       this.toggleDungeonButton.style.display = 'none';
       this.toggleMonsterButton.style.display = 'none';
@@ -2932,6 +2949,7 @@
    * @property {number} attacksMade
    * @property {number} avgHitDmg
    * @property {number} killTimeS
+   * @property {number} killsPerSecond
    * @property {number} gpPerKill
    * @property {number} gpPerSecond
    * @property {number} prayerXpPerEnemy
@@ -3168,10 +3186,10 @@
         534: 160, // Barrentoe
       };
       // Simulation settings
-      /** Max number of player hits to attempt before timeout */
-      this.Nhitmax = 1000;
+      /** Max number of player actions to attempt before timeout */
+      this.maxActions = 1000;
       /** Number of enemy kills to simulate */
-      this.Ntrials = 10000;
+      this.trials = 10000;
       /** Number of hours to farm for signet ring */
       this.signetFarmTime = 1;
       /** @type {Array<boolean>} */
@@ -3197,6 +3215,7 @@
           attacksMade: 0,
           avgHitDmg: 0,
           killTimeS: 0,
+          killsPerSecond: 0,
           gpPerKill: 0,
           gpPerSecond: 0,
           prayerXpPerEnemy: 0,
@@ -3895,8 +3914,8 @@
       playerStats.prayerPointsPerEnemy *= (1 - this.herbloreBonus.divine / 100);
       playerStats.prayerPointsPerHeal *= (1 - this.herbloreBonus.divine / 100);
       this.currentSim.options = {
-        Ntrials: this.Ntrials,
-        Nhitmax: this.Nhitmax,
+        trials: this.trials,
+        maxActions: this.maxActions,
       };
       this.currentSim.playerStats = playerStats;
       this.currentSim.isSlayerTask = this.isSlayerTask;
@@ -4077,6 +4096,7 @@
             this.dungeonSimData[i].attacksMade = totHits;
             this.dungeonSimData[i].avgHitDmg = totEnemyHP / totHits;
             this.dungeonSimData[i].killTimeS = totTime / 1000;
+            this.dungeonSimData[i].killsPerSecond = 1 / this.dungeonSimData[i].killTimeS;
             this.dungeonSimData[i].ppConsumedPerSecond = totPrayerPoints / this.dungeonSimData[i].killTimeS;
             this.dungeonSimData[i].gpFromDamage = totalGPFromDamage;
             this.dungeonSimData[i].attacksTaken = totalAttacksTaken;
@@ -4188,7 +4208,8 @@
           rangedStrengthBonus += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
           rangedAttackBonus += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
         }
-        if (this.currentSim.playerStats.activeItems.Slayer_Crossbow && (MONSTERS[monsterID].slayerXP !== undefined || this.currentSim.isSlayerTask)) {
+        const slayerTaskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
+        if (this.currentSim.playerStats.activeItems.Slayer_Crossbow && (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID)))) {
           rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
         }
         const effectiveAttackLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + 8 + attackStyleBonus);
@@ -5204,20 +5225,18 @@
     * Creates a new button and appends it to the container. Autoadds callbacks to change colour
     * @param {string} buttonText Text to display on button
     * @param {Function} onclickCallback Callback to excute when pressed
-    * @param {number} width Width of button in px
-    * @param {number} height Height of button in px
     * @param {string} idTag Optional ID Tag
     */
-    addButton(buttonText, onclickCallback, width, height, idTag = '') {
+    addButton(buttonText, onclickCallback, idTag = '') {
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${buttonText} ${(idTag === '') ? '' : `${idTag} `}Button`;
-      newButton.className = 'btn btn-primary mb-1';
+      newButton.className = 'btn btn-primary m-1';
       newButton.style.width = `100%`;
       newButton.textContent = buttonText;
       newButton.onclick = onclickCallback;
       const buttonContainer = document.createElement('div');
-      buttonContainer.className = 'col-12';
+      buttonContainer.className = 'd-flex';
       buttonContainer.appendChild(newButton);
       this.container.appendChild(buttonContainer);
     }
@@ -5383,7 +5402,7 @@
     */
     addDropdown(labelText, optionText, optionValues, height, onChangeCallback) {
       const dropDownID = `MCS ${labelText} Dropdown`;
-      const newCCContainer = this.createCCContainer(height);
+      const newCCContainer = this.createCCContainer();
       newCCContainer.id = `${dropDownID} Container`;
       newCCContainer.appendChild(this.createLabel(labelText, dropDownID));
       const newDropdown = this.createDropdown(optionText, optionValues, dropDownID, onChangeCallback);
@@ -5400,14 +5419,12 @@
      */
     createDropdown(optionText, optionValues, dropDownID, onChangeCallback) {
       const newDropdown = document.createElement('select');
-      newDropdown.className = 'mcsDropdown';
-      newDropdown.style.width = this.inputWidth;
+      newDropdown.className = 'form-control';
       newDropdown.id = dropDownID;
       for (let i = 0; i < optionText.length; i++) {
         const newOption = document.createElement('option');
         newOption.text = optionText[i];
         newOption.value = optionValues[i];
-        newOption.className = 'mcsOption';
         newDropdown.add(newOption);
       }
       newDropdown.addEventListener('change', onChangeCallback);
@@ -5425,7 +5442,7 @@
      */
     addNumberInput(labelText, startValue, height, min, max, onChangeCallback) {
       const inputID = `MCS ${labelText} Input`;
-      const newCCContainer = this.createCCContainer(height);
+      const newCCContainer = this.createCCContainer();
       newCCContainer.appendChild(this.createLabel(labelText, inputID));
       const newInput = document.createElement('input');
       newInput.id = inputID;
@@ -5433,8 +5450,7 @@
       newInput.min = min;
       newInput.max = max;
       newInput.value = startValue;
-      newInput.className = 'mcsNumberInput';
-      newInput.style.width = this.inputWidth;
+      newInput.className = 'form-control';
       newInput.addEventListener('change', onChangeCallback);
       newCCContainer.appendChild(newInput);
       this.container.appendChild(newCCContainer);
@@ -5443,18 +5459,17 @@
      * Adds an input to the card for text
      * @param {string} labelText The text for the input's label
      * @param {string} startValue The iniial text in the input
-     * @param {number} height The height of the input in pixels
      * @param {Function} onInputCallback The callback for when the input changes
      */
-    addTextInput(labelText, startValue, height, onInputCallback) {
+    addTextInput(labelText, startValue, onInputCallback) {
       const inputID = `MCS ${labelText} TextInput`;
-      const newCCContainer = this.createCCContainer(height);
+      const newCCContainer = this.createCCContainer();
       newCCContainer.appendChild(this.createLabel(labelText, inputID));
       const newInput = document.createElement('input');
       newInput.id = inputID;
       newInput.type = 'text';
       newInput.value = startValue;
-      newInput.className = 'mcsTextInput';
+      newInput.className = 'form-control';
       newInput.style.width = this.inputWidth;
       newInput.addEventListener('input', onInputCallback);
       newCCContainer.appendChild(newInput);
@@ -5486,7 +5501,7 @@
       if (!outputID) {
         outputID = `MCS ${labelText} Output`;
       }
-      const newCCContainer = this.createCCContainer(height);
+      const newCCContainer = this.createCCContainer();
       if (imageSrc && imageSrc !== '') {
         newCCContainer.appendChild(this.createImage(imageSrc, height));
       }
@@ -5517,7 +5532,10 @@
       }
       newSectionTitle.textContent = titleText;
       newSectionTitle.className = 'mcsSectionTitle';
-      this.container.appendChild(newSectionTitle);
+      const titleContainer = document.createElement('div');
+      titleContainer.className = 'd-flex justify-content-center';
+      titleContainer.appendChild(newSectionTitle);
+      this.container.appendChild(titleContainer);
     }
     /**
      * Adds an array of buttons to the card
@@ -5553,7 +5571,7 @@
      * @param {string} imageSrc An optional string to specify the source of a label image, if '' an image is not added
      */
     addRadio(labelText, height, radioName, radioLabels, radioCallbacks, initialRadio, imageSrc) {
-      const newCCContainer = this.createCCContainer(height);
+      const newCCContainer = this.createCCContainer();
       if (imageSrc && imageSrc !== '') {
         newCCContainer.appendChild(this.createImage(imageSrc, height));
       }
@@ -5599,16 +5617,11 @@
 
     /**
      * Creates a Card Container Container div
-     * @param {number} height The height of the container in pixels
      * @return {HTMLDivElement}
      */
-    createCCContainer(height) {
+    createCCContainer() {
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsCCContainer';
-      newCCContainer.style.height = `${height}px`;
-      // const fillerDiv = document.createElement('div');
-      // fillerDiv.className = 'mcsFlexFiller';
-      // newCCContainer.appendChild(fillerDiv);
       return newCCContainer;
     }
     /**
