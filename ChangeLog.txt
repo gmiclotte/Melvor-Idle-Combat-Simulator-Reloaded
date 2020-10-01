@@ -1,3 +1,9 @@
+v0.11.1:
+    Changes:
+    - Moved monster stats back to the bottom row
+    - Made the interface less tall
+    - Made the modal fit to the width of its contents
+
 v0.11.0:
     Updated for Melvor Idle v0.16.3
 
