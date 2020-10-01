@@ -1,3 +1,13 @@
+v0.11.0
+Updated for game version Alpha v0.16.3
+New: Kills/s stat
+Change: Moved the tools menu below the skills menu
+Change: Placed the combat simulator in a modal
+Change: Restyled elements to be more in line with the game
+Fixed: Auroras now work in combination with Ancient Magicks
+Fixed: Monsters in dungeons no longer count as slayer tasks for the Slayer's Crossbow
+Fixed: Hiding skills no longer breaks the menu
+
 v0.10.1:
 Melvor Combat Sim has been updated for game version Alpha v0.16.1
 Change: Made ancient magick that guarantee hits only work when the player has > 20000 accuracy rating to match game change.
