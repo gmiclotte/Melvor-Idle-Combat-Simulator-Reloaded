@@ -1,3 +1,7 @@
+v0.11.2:
+    Fixes:
+    - Moved Kills/s to the end to restore the export order
+
 v0.11.1:
     Changes:
     - Moved monster stats back to the bottom row
