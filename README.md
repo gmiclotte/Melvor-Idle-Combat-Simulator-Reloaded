@@ -27,26 +27,26 @@ Currently not available on the chrome webstore, but you can download the sources
     - Equipment Tab: Allows you to change your equipment, combat style, and import gear sets from the game
         - To change equipment simply click on the slot you want to change and select equipment from the popup menu
         - To Import Gear Sets from the game click on the numbered buttons to import the corresponding gear set
-            - Player Levels, Spells, Prayers, Potions and Pets will also be imported)
+            - Player Levels, Spells, Prayers, Potions and Pets will also be imported
         - Use the Combat Style dropdown menu to change the style for that weapon type
     - Levels Tab: Allows you to adjust the levels used in the simulation
-        - Levels may be set to 'virtual' values above 99, these will not provide benefits to your stats, but factor into the calculation of pet chances
+        - Levels may be set to 'virtual' values above 99, these will not provide benefits to your stats but will factor into the calculation of pet chances
     - Spells Tab: Allows you to select Standard Spells, Curses, Auroras, and Ancient Magicks from their respective sub tabs
         - The level and item requirements of spells are respected
     - Prayers Tab: Allows you to select up to 2 Prayers that you meet the level requirements for
     - Potions Tab: Allows you to select a single combat potion
         - Use the Potion Tier dropdown to change the tier
         - Click on the potion icons to select the type
-    - Pets Tab: Allows you to select which pets you own. Only the relevant pets are listed
+    - Pets Tab: Allows you to select which pets you own
     - Sim. Options Tab: Allows you to select advanced and assorted simulation options
         - Max Actions: Controls the maximum number of player actions before the simulation times out
-        - #Trials: Controls the number of times each enemy is simulated. Higher values lead to more accuracy at the expense of longer computation time.
+        - \# Trials: Controls the number of times each enemy is simulated. Higher values lead to more accuracy at the expense of longer computation time.
         - Signet Time (h): The time period (in hours) used for the 'Chance for Signet Part B' calculation
         - Slayer Task: Whether to consider monsters killed to be part of a slayer task
             - Impacts Slayer pet chance, Slayer's Crossbow, and Slayer XP calculations
         - Hardcore Mode: Whether to use the hardcore combat triangle and disable passive regeneration
     - GP Options Tab: Various setting that adjust the way the GP per X calculations are performed
-        - Sell Bones: Whether or not to sell bones in GP calculations
+        - Sell Bones: Whether or not to sell bones
         - Convert Shards: Whether or not to convert elemental shards from god dungeons into elemental chests
      - Sell Loot: Whether or not to sell all loot, a subset of loot or none of it
         - When subset is selected you may edit which items to sell, by clicking Edit Subset
@@ -64,7 +64,7 @@ Currently not available on the chrome webstore, but you can download the sources
     - Prayer XP per X: Experience points per X for the Prayer skill
     - Slayer XP per X: Experience points per X for the Slayer skill
     - XP per Attack: Average amount of experience points per attack
-    - HP loss per X: Average amount of HP lost per X while fighting an enemy/dungeon, including regeneration effects
+    - HP loss per X: Average amount of HP lost per X, including regeneration effects
     - Prayer Points per X: Average amount of prayer points per X consumed
     - Damage per X: Average damage dealt per X
     - Average Kill Time (s): The average time in seconds to kill an enemy or to clear a dungeon
@@ -80,7 +80,8 @@ Currently not available on the chrome webstore, but you can download the sources
     - Y Pet Chance per X: The probability to receive Y pet in the given time period
         - Pets are rolled for when you earn experience of the given type, except for the slayer pet which is only rolled for upon killing an active slayer task monster
 6. Click on a bar to view detailed information about that monster/dungeon
-    - You can click Inspect Dungeon to view the simulation results for individual monsters inside a dungeon. Note that the average time in this view is the time required to defeat the quantity of that monster in the dungeon.
+    - You can click Inspect Dungeon to view the simulation results for individual monsters inside a dungeon
+        - Note that the average time in this view is the time required to defeat the quantity of that monster in the dungeon
 7. Export Data to your Clip Board by clicking the Export Data button
     - You can change the options for this export by clicking Show Export Options
         - Dungeon Monsters toggles whether the individual monsters from dungeons should be exported
