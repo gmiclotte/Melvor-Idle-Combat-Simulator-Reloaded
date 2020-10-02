@@ -4323,18 +4323,13 @@
         }
       } else {
         const dungeonID = this.parent.viewedDungeonID;
-        // Special keys that multiply by quantity
-        const qtyMultiplier = keyValue === 'killTimeS';
         const isSignet = keyValue === 'signetChance';
-        // 'xpPerSecond', 'hpxpPerSecond', 'prayerXpPerSecond', 'slayerXpPerSecond', 'xpPerHit', 'hpPerSecond', 'ppConsumedPerSecond', 'dmgPerSecond', 'killTimeS', 'avgHitDmg', 'gpPerKill', 'gpPerSecond', 'herbloreXPPerSecond', 'signetChance'
         this.condensedDungeonMonsters[dungeonID].forEach((monster) => {
           if (!isSignet) {
+            // Special keys that multiply by quantity
+            const qtyMultiplier = keyValue === 'killTimeS' ? monster.quantity : 1;
             if (isKillTime) dataMultiplier = this.monsterSimData[monster.id].killTimeS;
-            if (qtyMultiplier) {
-              dataSet.push((this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][keyValue] * dataMultiplier * monster.quantity : 0);
-            } else {
-              dataSet.push((this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][keyValue] * dataMultiplier : 0);
-            }
+            dataSet.push((this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][keyValue] * dataMultiplier * qtyMultiplier : 0);
           } else {
             dataSet.push(0);
           }
@@ -4372,11 +4367,13 @@
       exportString += rowDel;
       combatAreas.forEach((area) => {
         area.monsters.forEach((monsterID) => {
-          if (this.exportNonSimmed || (!this.exportNonSimmed && this.monsterSimFilter[monsterID])) {
+          if (this.exportNonSimmed || this.monsterSimFilter[monsterID]) {
             if (this.exportName) exportString += this.parent.getMonsterName(monsterID) + colDel;
             for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
               if (this.exportDataType[i]) {
-                exportString += (this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][this.parent.plotTypeDropdownValues[i]] * ((this.parent.plotTypeIsTime[i]) ? this.timeMultiplier : 1) : 0;
+                let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
+                if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
+                exportString += (this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
                 exportString += colDel;
               }
             }
@@ -4387,11 +4384,13 @@
       });
       slayerAreas.forEach((area) => {
         area.monsters.forEach((monsterID) => {
-          if (this.exportNonSimmed || (!this.exportNonSimmed && this.monsterSimFilter[monsterID])) {
+          if (this.exportNonSimmed || this.monsterSimFilter[monsterID]) {
             if (this.exportName) exportString += this.parent.getMonsterName(monsterID) + colDel;
             for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
               if (this.exportDataType[i]) {
-                exportString += (this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][this.parent.plotTypeDropdownValues[i]] * ((this.parent.plotTypeIsTime[i]) ? this.timeMultiplier : 1) : 0;
+                let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
+                if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
+                exportString += (this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
                 exportString += colDel;
               }
             }
@@ -4400,27 +4399,31 @@
           }
         });
       });
-      for (let i = 0; i < DUNGEONS.length; i++) {
-        if (this.exportNonSimmed || (!this.exportNonSimmed && this.dungeonSimFilter[i])) {
-          if (this.exportName) exportString += this.parent.getDungeonName(i) + colDel;
-          for (let j = 0; j < this.parent.plotTypeDropdownValues.length; j++) {
-            if (this.exportDataType[j]) {
-              exportString += (this.dungeonSimFilter[i] && this.dungeonSimData[i].simSuccess) ? this.dungeonSimData[i][this.parent.plotTypeDropdownValues[j]] * ((this.parent.plotTypeIsTime[j]) ? this.timeMultiplier : 1) : 0;
+      for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
+        if (this.exportNonSimmed || this.dungeonSimFilter[dungeonId]) {
+          if (this.exportName) exportString += this.parent.getDungeonName(dungeonId) + colDel;
+          for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
+            if (this.exportDataType[i]) {
+              let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
+              if (dataMultiplier === -1) dataMultiplier = this.dungeonSimData[dungeonId].killTimeS;
+              exportString += (this.dungeonSimFilter[dungeonId] && this.dungeonSimData[dungeonId].simSuccess) ? this.dungeonSimData[dungeonId][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
               exportString += colDel;
             }
           }
           exportString = exportString.slice(0, -colLen);
           exportString += rowDel;
           if (this.exportDungeonMonsters) {
-            this.condensedDungeonMonsters[i].forEach((monster) => {
+            this.condensedDungeonMonsters[dungeonId].forEach((monster) => {
               if (this.exportName) exportString += this.parent.getMonsterName(monster.id) + colDel;
-              for (let j = 0; j < this.parent.plotTypeDropdownValues.length; j++) {
-                if (this.exportDataType[j]) {
-                  const dataMultiplier = (this.parent.plotTypeDropdownValues[j] === 'killTimeS') ? monster.quantity : 1;
-                  if (this.parent.plotTypeDropdownValues[j] === 'signetChance') {
+              for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
+                if (this.exportDataType[i]) {
+                  const qtyMultiplier = this.parent.plotTypeDropdownValues[i] === 'killTimeS' ? monster.quantity : 1;
+                  if (this.parent.plotTypeDropdownValues[i] === 'signetChance') {
                     exportString += '0';
                   } else {
-                    exportString += (this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][this.parent.plotTypeDropdownValues[j]] * ((this.parent.plotTypeIsTime[j]) ? this.timeMultiplier : 1) * dataMultiplier : 0;
+                    let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
+                    if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monster.id].killTimeS;
+                    exportString += (this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][this.parent.plotTypeDropdownValues[i]] * dataMultiplier * qtyMultiplier : 0;
                   }
                   exportString += colDel;
                 }
