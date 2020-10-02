@@ -41,7 +41,6 @@
         'Prayer Points per ',
         'Damage per ',
         'Average Kill Time (s)',
-        'Kills per ',
         'Damage per Attack',
         'GP per ',
         'Potential Herblore XP per ',
@@ -49,6 +48,7 @@
         'Attacks Made per ',
         'Attacks Taken per ',
         'Pet Chance per ',
+        'Kills per ',
         // 'Simulation Time',
       ];
       this.plotTypeIsTime = [
@@ -61,11 +61,11 @@
         true,
         true,
         false,
-        true,
         false,
         true,
         true,
         false,
+        true,
         true,
         true,
         true,
@@ -81,7 +81,6 @@
         'ppConsumedPerSecond',
         'dmgPerSecond',
         'killTimeS',
-        'killsPerSecond',
         'avgHitDmg',
         'gpPerSecond',
         'herbloreXPPerSecond',
@@ -89,6 +88,7 @@
         'attacksMadePerSecond',
         'attacksTakenPerSecond',
         'petChance',
+        'killsPerSecond',
         // 'simulationTime',
       ];
       this.zoneInfoNames = [
@@ -101,7 +101,6 @@
         'Prayer Points/',
         'Damage/',
         'Kill Time(s)',
-        'Kills/',
         'Damage/attack',
         'GP/',
         'Herb XP/',
@@ -109,6 +108,7 @@
         'Attacks Made/',
         'Attacks Taken/',
         ' Pet Chance/',
+        'Kills/',
         // 'Sim Time',
       ];
       // Time unit options
