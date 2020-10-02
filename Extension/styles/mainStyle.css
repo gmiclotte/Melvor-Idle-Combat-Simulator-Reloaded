@@ -81,6 +81,7 @@
   position: relative;
   font-size: 16px;
   overflow-x: auto;
+  min-height: 428px;
 }
 
 .mcsTabContainer {
@@ -140,10 +141,10 @@
 
 .mcsPlotHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
   margin-left: 80px;
+  white-space: nowrap;
 }
 
 .mcsPlotHeader .form-control {

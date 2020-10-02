@@ -2499,7 +2499,7 @@
       this.plotContainer.appendChild(this.plotHeader);
 
       const plotHeaderSelects = document.createElement('div');
-      plotHeaderSelects.className = 'd-flex';
+      plotHeaderSelects.className = 'd-flex mr-auto';
       this.plotHeader.appendChild(plotHeaderSelects);
 
       // Use a dropdown menu for the plot title
@@ -2538,9 +2538,6 @@
       this.timeDropdown.onchange = (event) => this.parent.timeUnitDropdownOnChange(event);
       plotHeaderSelects.appendChild(this.timeDropdown);
 
-      const plotHeaderButtons = document.createElement('div');
-      this.plotHeader.appendChild(plotHeaderButtons);
-
       // Add inspection buttons
       this.inspectButton = document.createElement('button');
       this.inspectButton.className = 'btn btn-primary m-1';
@@ -2549,7 +2546,7 @@
       this.inspectButton.onclick = () => {
         this.parent.inspectDungeonOnClick();
       };
-      plotHeaderButtons.appendChild(this.inspectButton);
+      this.plotHeader.appendChild(this.inspectButton);
       this.stopInspectButton = document.createElement('button');
       this.stopInspectButton.className = 'btn btn-primary m-1';
       this.stopInspectButton.textContent = 'Stop Inspecting';
@@ -2557,7 +2554,7 @@
       this.stopInspectButton.onclick = () => {
         this.parent.stopInspectOnClick();
       };
-      plotHeaderButtons.appendChild(this.stopInspectButton);
+      this.plotHeader.appendChild(this.stopInspectButton);
 
       // Add toggle buttons
       this.toggleMonsterButton = document.createElement('button');
@@ -2566,14 +2563,14 @@
       this.toggleMonsterButton.onclick = () => {
         this.parent.toggleMonsterSims(false);
       };
-      plotHeaderButtons.appendChild(this.toggleMonsterButton);
+      this.plotHeader.appendChild(this.toggleMonsterButton);
       this.toggleDungeonButton = document.createElement('button');
       this.toggleDungeonButton.className = 'btn btn-primary m-1';
       this.toggleDungeonButton.textContent = 'Toggle Dungeons';
       this.toggleDungeonButton.onclick = () => {
         this.parent.toggleDungeonSims(false);
       };
-      plotHeaderButtons.appendChild(this.toggleDungeonButton);
+      this.plotHeader.appendChild(this.toggleDungeonButton);
 
       this.plotTopContainer = document.createElement('div');
       this.plotTopContainer.className = 'mcsPlotTopContainer';
