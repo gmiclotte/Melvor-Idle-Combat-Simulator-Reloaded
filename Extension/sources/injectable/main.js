@@ -1907,6 +1907,11 @@
         this.selectedBar = barID;
         this.setBarHighlight(barID);
       }
+      if (this.barSelected && !this.isViewingDungeon && this.barIsDungeon[barID]) {
+        this.plotter.inspectButton.style.display = '';
+      } else {
+        this.plotter.inspectButton.style.display = 'none';
+      }
       this.updateZoneInfoCard();
     }
     /**
@@ -2001,13 +2006,28 @@
       if (this.barSelected) {
         this.subInfoCard.container.style.display = '';
         this.infoPlaceholder.style.display = 'none';
-        if (this.isViewingDungeon) {
-          const monsterList = this.simulator.condensedDungeonMonsters[this.viewedDungeonID];
-          const dataIndex = this.selectedBar + monsterList.length - this.plotter.bars.length;
-          const monsterID = monsterList[dataIndex].id;
-          document.getElementById('MCS Zone Info Title').textContent = `${this.getMonsterName(monsterID)}${(monsterList[dataIndex].quantity > 1) ? ` x${monsterList[dataIndex].quantity}` : ''}`;
+        if (!this.isViewingDungeon && this.barIsDungeon[this.selectedBar]) {
+          const dungeonID = this.barMonsterIDs[this.selectedBar];
+          document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
+          document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
+          const updateInfo = this.simulator.dungeonSimData[dungeonID].simSuccess;
+          for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
+            const dataKey = this.plotTypeDropdownValues[i];
+            const outElem = document.getElementById(`MCS ${dataKey} Output`);
+            let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
+            if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
+            if (dataKey === 'petChance') dataMultiplier = 1;
+            outElem.textContent = ((updateInfo) ? mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4) : 'N/A');
+          }
+        } else {
+          let monsterID;
+          if (this.isViewingDungeon) {
+            monsterID = DUNGEONS[this.viewedDungeonID].monsters[this.selectedBar + DUNGEONS[this.viewedDungeonID].monsters.length - this.plotter.bars.length];
+          } else {
+            monsterID = this.barMonsterIDs[this.selectedBar];
+          }
+          document.getElementById('MCS Zone Info Title').textContent = this.getMonsterName(monsterID);
           document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
-          this.plotter.inspectButton.style.display = 'none';
           const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
           for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
             const dataKey = this.plotTypeDropdownValues[i];
@@ -2015,38 +2035,7 @@
             let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
             if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
             if (dataKey === 'petChance') dataMultiplier = 1;
-            else if (dataKey === 'killTimeS') dataMultiplier *= monsterList[dataIndex].quantity;
             outElem.textContent = ((updateInfo) ? mcsFormatNum(this.simulator.monsterSimData[monsterID][dataKey] * dataMultiplier, 4) : 'N/A');
-          }
-        } else {
-          if (this.barIsDungeon[this.selectedBar]) {
-            const dungeonID = this.barMonsterIDs[this.selectedBar];
-            document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
-            this.plotter.inspectButton.style.display = '';
-            document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
-            const updateInfo = this.simulator.dungeonSimData[dungeonID].simSuccess;
-            for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
-              const dataKey = this.plotTypeDropdownValues[i];
-              const outElem = document.getElementById(`MCS ${dataKey} Output`);
-              let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
-              if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
-              if (dataKey === 'petChance') dataMultiplier = 1;
-              outElem.textContent = ((updateInfo) ? mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4) : 'N/A');
-            }
-          } else {
-            const monsterID = this.barMonsterIDs[this.selectedBar];
-            document.getElementById('MCS Zone Info Title').textContent = this.getMonsterName(monsterID);
-            document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
-            this.plotter.inspectButton.style.display = 'none';
-            const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
-            for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
-              const dataKey = this.plotTypeDropdownValues[i];
-              const outElem = document.getElementById(`MCS ${dataKey} Output`);
-              let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
-              if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
-              if (dataKey === 'petChance') dataMultiplier = 1;
-              outElem.textContent = ((updateInfo) ? mcsFormatNum(this.simulator.monsterSimData[monsterID][dataKey] * dataMultiplier, 4) : 'N/A');
-            }
           }
         }
       } else {
@@ -2283,6 +2272,7 @@
       const barID = this.dungeonBarIDs[this.viewedDungeonID];
       this.selectedBar = barID;
       this.setBarHighlight(barID);
+      this.plotter.inspectButton.style.display = '';
 
       this.updatePlotData();
       this.plotter.setBarColours(this.simulator.getEnterSet());
@@ -2679,25 +2669,17 @@
       }
 
       this.parent.botContent.appendChild(this.plotContainer);
+
       // Data for displaying dungeons
-      this.dungeonDisplayData = [];
-      // Condensed monster data for dungeon display
-      DUNGEONS.forEach((dungeon) => {
-        let lastMonster = -1;
-        const displayData = [];
-        dungeon.monsters.forEach((monster) => {
-          if (monster !== lastMonster) {
-            lastMonster = monster;
-            displayData.push({
-              monsterID: lastMonster,
-              imageSource: MONSTERS[lastMonster].media,
-              name: this.parent.getMonsterName(lastMonster),
-            });
-          }
-        });
-        this.dungeonDisplayData.push(displayData);
-      });
+      this.dungeonDisplayData = DUNGEONS.map((dungeon) =>
+        dungeon.monsters.map((monster) => ({
+          monsterID: monster,
+          imageSource: MONSTERS[monster].media,
+          name: MONSTERS[monster].name,
+        }))
+      );
     }
+
     /**
      * Toggles the display of a bar tooltip on
      * @param {MouseEvent} event The mouse event
@@ -2832,21 +2814,20 @@
      */
     displayDungeon(dungeonID) {
       // Loop through each bar and enable/disable as required
-      const uniqueMonsterCount = this.dungeonDisplayData[dungeonID].length;
       // Change Images at bottom
       // Toggle Zone Labels
       // Toggle display of bars
       // Remove the white border stuff
-      for (let i = 0, numBars = this.bars.length; i < numBars; i++) {
-        if (i < uniqueMonsterCount) {
+      for (let i = 0; i < this.bars.length; i++) {
+        if (i < DUNGEONS[dungeonID].monsters.length) {
           // Change image source
           this.xAxisContainers[i].style.display = '';
           this.xAxisImages[i].setAttribute('src', this.dungeonDisplayData[dungeonID][i].imageSource);
-          this.bars[numBars - i - 1].style.display = '';
+          this.bars[this.bars.length - i - 1].style.display = '';
         } else {
           // Disable Bar and images
           this.xAxisContainers[i].style.display = 'none';
-          this.bars[numBars - i - 1].style.display = 'none';
+          this.bars[this.bars.length - i - 1].style.display = 'none';
         }
       }
       this.hideZoneLabels();
@@ -3296,34 +3277,6 @@
       // Options for time multiplier
       this.timeMultiplier = 1;
       this.selectedPlotIsTime = true;
-      // Condensed monster data for dungeon display
-      /** @typedef {Object} dungeonMonster
-       * @property {number} id
-       * @property {number} quantity
-       * @property {boolean} isBoss
-       */
-      /** @type {Array<Array<dungeonMonster>>} */
-      this.condensedDungeonMonsters = [];
-      DUNGEONS.forEach((dungeon) => {
-        let lastMonster = -1;
-        let currentIndex = -1;
-        const condensedArray = [];
-        dungeon.monsters.forEach((monster) => {
-          if (monster === lastMonster) {
-            condensedArray[currentIndex].quantity++;
-          } else {
-            lastMonster = monster;
-            currentIndex++;
-            condensedArray.push({
-              id: lastMonster,
-              quantity: 1,
-              isBoss: false,
-            });
-          }
-        });
-        condensedArray[condensedArray.length - 1].isBoss = true;
-        this.condensedDungeonMonsters.push(condensedArray);
-      });
       // Data Export Settings
       this.exportDataType = [];
       this.exportName = true;
@@ -4033,9 +3986,9 @@
       let totalGPFromDamage = 0;
       let totalAttacksTaken = 0;
       let totalSimTime = 0;
-      for (let i = 0; i < DUNGEONS.length; i++) {
-        if (this.dungeonSimFilter[i]) {
-          this.dungeonSimData[i].simSuccess = true;
+      for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
+        if (this.dungeonSimFilter[dungeonId]) {
+          this.dungeonSimData[dungeonId].simSuccess = true;
           totXp = 0;
           totHpXp = 0;
           totPrayXP = 0;
@@ -4046,50 +3999,45 @@
           totTime = 0;
           totalGPFromDamage = 0;
           totalAttacksTaken = 0;
-          for (let j = 0; j < DUNGEONS[i].monsters.length; j++) {
-            const mInd = DUNGEONS[i].monsters[j];
-            totXp += this.monsterSimData[mInd].xpPerEnemy;
-            totHpXp += this.monsterSimData[mInd].hpxpPerEnemy;
-            totPrayXP += this.monsterSimData[mInd].prayerXpPerEnemy;
-            totHits += this.monsterSimData[mInd].attacksMade;
-            totHP += this.monsterSimData[mInd].hpPerEnemy;
-            totEnemyHP += MONSTERS[mInd].hitpoints * numberMultiplier;
-            totTime += this.monsterSimData[mInd].avgKillTime;
-            totPrayerPoints += this.monsterSimData[mInd].ppConsumedPerSecond * this.monsterSimData[mInd].killTimeS;
-            totalGPFromDamage += this.monsterSimData[mInd].gpFromDamage;
-            totalAttacksTaken += this.monsterSimData[mInd].attacksTaken;
+          totalSimTime = 0;
+          for (let i = 0; i < DUNGEONS[dungeonId].monsters.length; i++) {
+            const monsterId = DUNGEONS[dungeonId].monsters[i];
+            totXp += this.monsterSimData[monsterId].xpPerEnemy;
+            totHpXp += this.monsterSimData[monsterId].hpxpPerEnemy;
+            totPrayXP += this.monsterSimData[monsterId].prayerXpPerEnemy;
+            totHits += this.monsterSimData[monsterId].attacksMade;
+            totHP += this.monsterSimData[monsterId].hpPerEnemy;
+            totEnemyHP += MONSTERS[monsterId].hitpoints * numberMultiplier;
+            totTime += this.monsterSimData[monsterId].avgKillTime;
+            totPrayerPoints += this.monsterSimData[monsterId].ppConsumedPerSecond * this.monsterSimData[monsterId].killTimeS;
+            totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamage;
+            totalAttacksTaken += this.monsterSimData[monsterId].attacksTaken;
+            totalSimTime += this.monsterSimData[monsterId].simulationTime;
 
-            if (!this.monsterSimData[mInd].simSuccess) {
-              this.dungeonSimData[i].simSuccess = false;
+            if (!this.monsterSimData[monsterId].simSuccess) {
+              this.dungeonSimData[dungeonId].simSuccess = false;
               break;
             }
           }
-          totalSimTime = 0;
-          for (let j = 0; j < this.condensedDungeonMonsters[i].length; j++) {
-            const mInd = this.condensedDungeonMonsters[i][j].id;
-            totalSimTime += this.monsterSimData[mInd].simulationTime;
-          }
-          if (this.dungeonSimData[i].simSuccess) {
-            this.dungeonSimData[i].xpPerSecond = totXp / totTime * 1000;
-            this.dungeonSimData[i].xpPerHit = totXp / totHits;
-            this.dungeonSimData[i].hpxpPerSecond = totHpXp / totTime * 1000;
-            this.dungeonSimData[i].prayerXpPerSecond = totPrayXP / totTime * 1000;
-            this.dungeonSimData[i].hpPerSecond = totHP / totTime * 1000;
-            this.dungeonSimData[i].dmgPerSecond = totEnemyHP / totTime * 1000;
-            this.dungeonSimData[i].avgKillTime = totTime;
-            this.dungeonSimData[i].attacksMade = totHits;
-            this.dungeonSimData[i].avgHitDmg = totEnemyHP / totHits;
-            this.dungeonSimData[i].killTimeS = totTime / 1000;
-            this.dungeonSimData[i].killsPerSecond = 1 / this.dungeonSimData[i].killTimeS;
-            this.dungeonSimData[i].ppConsumedPerSecond = totPrayerPoints / this.dungeonSimData[i].killTimeS;
-            this.dungeonSimData[i].gpFromDamage = totalGPFromDamage;
-            this.dungeonSimData[i].attacksTaken = totalAttacksTaken;
-            this.dungeonSimData[i].attacksTakenPerSecond = totalAttacksTaken / totTime * 1000;
-            this.dungeonSimData[i].attacksMadePerSecond = totHits / totTime * 1000;
-            this.dungeonSimData[i].simulationTime = totalSimTime;
-          }
+          this.dungeonSimData[dungeonId].xpPerSecond = totXp / totTime * 1000;
+          this.dungeonSimData[dungeonId].xpPerHit = totXp / totHits;
+          this.dungeonSimData[dungeonId].hpxpPerSecond = totHpXp / totTime * 1000;
+          this.dungeonSimData[dungeonId].prayerXpPerSecond = totPrayXP / totTime * 1000;
+          this.dungeonSimData[dungeonId].hpPerSecond = totHP / totTime * 1000;
+          this.dungeonSimData[dungeonId].dmgPerSecond = totEnemyHP / totTime * 1000;
+          this.dungeonSimData[dungeonId].avgKillTime = totTime;
+          this.dungeonSimData[dungeonId].attacksMade = totHits;
+          this.dungeonSimData[dungeonId].avgHitDmg = totEnemyHP / totHits;
+          this.dungeonSimData[dungeonId].killTimeS = totTime / 1000;
+          this.dungeonSimData[dungeonId].killsPerSecond = 1 / this.dungeonSimData[dungeonId].killTimeS;
+          this.dungeonSimData[dungeonId].ppConsumedPerSecond = totPrayerPoints / this.dungeonSimData[dungeonId].killTimeS;
+          this.dungeonSimData[dungeonId].gpFromDamage = totalGPFromDamage;
+          this.dungeonSimData[dungeonId].attacksTaken = totalAttacksTaken;
+          this.dungeonSimData[dungeonId].attacksTakenPerSecond = totalAttacksTaken / totTime * 1000;
+          this.dungeonSimData[dungeonId].attacksMadePerSecond = totHits / totTime * 1000;
+          this.dungeonSimData[dungeonId].simulationTime = totalSimTime;
         } else {
-          this.dungeonSimData[i].simSuccess = false;
+          this.dungeonSimData[dungeonId].simSuccess = false;
         }
       }
       // Update other data
@@ -4321,19 +4269,17 @@
       } else {
         const dungeonID = this.parent.viewedDungeonID;
         const isSignet = keyValue === 'signetChance';
-        this.condensedDungeonMonsters[dungeonID].forEach((monster) => {
+        DUNGEONS[dungeonID].monsters.forEach((monsterId) => {
           if (!isSignet) {
-            // Special keys that multiply by quantity
-            const qtyMultiplier = keyValue === 'killTimeS' ? monster.quantity : 1;
-            if (isKillTime) dataMultiplier = this.monsterSimData[monster.id].killTimeS;
-            dataSet.push((this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][keyValue] * dataMultiplier * qtyMultiplier : 0);
+            if (isKillTime) dataMultiplier = this.monsterSimData[monsterId].killTimeS;
+            dataSet.push((this.monsterSimData[monsterId].simSuccess) ? this.monsterSimData[monsterId][keyValue] * dataMultiplier : 0);
           } else {
             dataSet.push(0);
           }
         });
         if (isSignet) {
-          const bossMonster = this.condensedDungeonMonsters[dungeonID][this.condensedDungeonMonsters[dungeonID].length - 1];
-          dataSet[dataSet.length - 1] = (this.monsterSimData[bossMonster.id].simSuccess) ? this.monsterSimData[bossMonster.id][keyValue] * dataMultiplier : 0;
+          const bossId = DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1];
+          dataSet[dataSet.length - 1] = (this.monsterSimData[bossId].simSuccess) ? this.monsterSimData[bossId][keyValue] * dataMultiplier : 0;
         }
       }
       return dataSet;
@@ -4410,17 +4356,16 @@
           exportString = exportString.slice(0, -colLen);
           exportString += rowDel;
           if (this.exportDungeonMonsters) {
-            this.condensedDungeonMonsters[dungeonId].forEach((monster) => {
-              if (this.exportName) exportString += this.parent.getMonsterName(monster.id) + colDel;
+            DUNGEONS[dungeonId].monsters.forEach((monsterId) => {
+              if (this.exportName) exportString += this.parent.getMonsterName(monsterId) + colDel;
               for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
                 if (this.exportDataType[i]) {
-                  const qtyMultiplier = this.parent.plotTypeDropdownValues[i] === 'killTimeS' ? monster.quantity : 1;
                   if (this.parent.plotTypeDropdownValues[i] === 'signetChance') {
                     exportString += '0';
                   } else {
                     let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
-                    if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monster.id].killTimeS;
-                    exportString += (this.monsterSimData[monster.id].simSuccess) ? this.monsterSimData[monster.id][this.parent.plotTypeDropdownValues[i]] * dataMultiplier * qtyMultiplier : 0;
+                    if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monsterId.id].killTimeS;
+                    exportString += (this.monsterSimData[monsterId.id].simSuccess) ? this.monsterSimData[monsterId.id][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
                   }
                   exportString += colDel;
                 }
@@ -4871,17 +4816,16 @@
         // Shards
         if (godDungeonID.includes(dungeonID)) {
           let shardCount = 0;
-          const shardID = MONSTERS[this.condensedDungeonMonsters[dungeonID][0].id].bones;
-          this.condensedDungeonMonsters[dungeonID].forEach((monster) => {
-            const shardQty = (MONSTERS[monster.id].boneQty) ? MONSTERS[monster.id].boneQty : 1;
-            shardCount += shardQty;
+          const shardID = MONSTERS[DUNGEONS[dungeonID].monsters[0]].bones;
+          DUNGEONS[dungeonID].monsters.forEach((monsterId) => {
+            shardCount += MONSTERS[monsterId].boneQty || 1;
           });
           shardCount *= this.currentSim.lootBonus;
           if (this.convertShards) {
             const chestID = items[shardID].trimmedItemID;
             dungeonValue += shardCount / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
           } else {
-            dungeonValue += (this.shouldSell(shardID)) ? shardCount * items[shardID].sellsFor : 0;
+            dungeonValue += this.shouldSell(shardID) ? shardCount * items[shardID].sellsFor : 0;
           }
         }
       }
@@ -4897,23 +4841,23 @@
     updateGPData() {
       // Set data for monsters in combat zones
       if (this.parent.isViewingDungeon) {
-        this.condensedDungeonMonsters[this.parent.viewedDungeonID].forEach((monster) => {
-          if (this.monsterSimData[monster.id].simSuccess) {
-            this.monsterSimData[monster.id].gpPerKill = this.monsterSimData[monster.id].gpFromDamage;
+        DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
+          if (this.monsterSimData[monsterId].simSuccess) {
+            this.monsterSimData[monsterId].gpPerKill = this.monsterSimData[monsterId].gpFromDamage;
             if (godDungeonID.includes(this.parent.viewedDungeonID)) {
-              const boneQty = (MONSTERS[monster.id].boneQty !== undefined) ? MONSTERS[monster.id].boneQty : 1;
-              const shardID = MONSTERS[monster.id].bones;
+              const boneQty = MONSTERS[monsterId].boneQty || 1;
+              const shardID = MONSTERS[monsterId].bones;
               if (this.convertShards) {
                 const chestID = items[shardID].trimmedItemID;
-                this.monsterSimData[monster.id].gpPerKill += boneQty * this.currentSim.lootBonus / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
+                this.monsterSimData[monsterId].gpPerKill += boneQty * this.currentSim.lootBonus / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
               } else if (this.shouldSell(shardID)) {
-                this.monsterSimData[monster.id].gpPerKill += items[shardID].sellsFor * this.currentSim.lootBonus * boneQty;
+                this.monsterSimData[monsterId].gpPerKill += items[shardID].sellsFor * this.currentSim.lootBonus * boneQty;
               }
             }
-            this.monsterSimData[monster.id].gpPerSecond = this.monsterSimData[monster.id].gpPerKill / this.monsterSimData[monster.id].killTimeS;
+            this.monsterSimData[monsterId].gpPerSecond = this.monsterSimData[monsterId].gpPerKill / this.monsterSimData[monsterId].killTimeS;
           } else {
-            this.monsterSimData[monster.id].gpPerKill = 0;
-            this.monsterSimData[monster.id].gpPerSecond = 0;
+            this.monsterSimData[monsterId].gpPerKill = 0;
+            this.monsterSimData[monsterId].gpPerSecond = 0;
           }
         });
       } else {
@@ -4956,8 +4900,8 @@
      */
     updateHerbloreXP() {
       if (this.parent.isViewingDungeon) {
-        this.condensedDungeonMonsters[this.parent.viewedDungeonID].forEach((monster) => {
-          this.monsterSimData[monster.id].herbloreXPPerSecond = 0;
+        DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
+          this.monsterSimData[monsterId].herbloreXPPerSecond = 0;
         });
       } else {
         // Set data for monsters in combat zones
@@ -4986,8 +4930,8 @@
      */
     updateSlayerXP() {
       if (this.parent.isViewingDungeon) {
-        this.condensedDungeonMonsters[this.parent.viewedDungeonID].forEach((monster) => {
-          this.monsterSimData[monster.id].slayerXpPerSecond = 0;
+        DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
+          this.monsterSimData[monsterId].slayerXpPerSecond = 0;
         });
       } else {
         // Set data for monsters in combat zones
@@ -5026,8 +4970,8 @@
      */
     updateSignetChance() {
       if (this.parent.isViewingDungeon) {
-        this.condensedDungeonMonsters[this.parent.viewedDungeonID].forEach((monster) => {
-          this.monsterSimData[monster.id].signetChance = 0;
+        DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
+          this.monsterSimData[monsterId].signetChance = 0;
         });
       } else {
         // Set data for monsters in combat zones
@@ -5121,16 +5065,16 @@
           }, 1);
           simResult.petChance *= 100;
         });
-        this.condensedDungeonMonsters.forEach((condensedArray, index) => {
-          const dungeonResult = this.dungeonSimData[index];
+        DUNGEONS.forEach((_, dungeonId) => {
+          const dungeonResult = this.dungeonSimData[dungeonId];
           if (!dungeonResult.simSuccess) {
             dungeonResult.petChance = 0;
             return;
           }
           const timePeriod = (this.timeMultiplier === -1) ? dungeonResult.killTimeS : this.timeMultiplier;
-          dungeonResult.petChance = 1 - condensedArray.reduce((cumChanceToNotGet, monster) => {
-            const monsterResult = this.monsterSimData[monster.id];
-            const timeRatio = monster.quantity * monsterResult.killTimeS / this.dungeonSimData[index].killTimeS;
+          dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterId) => {
+            const monsterResult = this.monsterSimData[monsterId];
+            const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;
             const chanceToNotGet = monsterResult.petRolls.reduce((product, petRoll) => {
               return product * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * timeRatio * petRoll.rollsPerSecond);
             }, 1);
