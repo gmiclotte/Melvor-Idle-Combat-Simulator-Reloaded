@@ -709,8 +709,8 @@
         this.simOptionsCard = new McsCard(this.mainTabContainer, '', '', '150px');
         this.mainTabCards.push(this.simOptionsCard);
         this.simOptionsCard.addSectionTitle('Simulation Options');
-        this.simOptionsCard.addNumberInput('Max Hits', 1000, 25, 1, 10000, (event) => this.maxhitsInputOnChange(event));
-        this.simOptionsCard.addNumberInput('# Trials', 10000, 25, 1, 100000, (event) => this.numtrialsInputOnChange(event));
+        this.simOptionsCard.addNumberInput('Max Actions', 1000, 25, 1, 10000, (event) => this.maxActionsInputOnChange(event));
+        this.simOptionsCard.addNumberInput('# Trials', 10000, 25, 1, 100000, (event) => this.numTrialsInputOnChange(event));
         this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 25, 1, 1000, (event) => this.signetTimeInputOnChange(event));
         const dropDownOptionNames = [];
         for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
@@ -1606,20 +1606,20 @@
     }
     // Callback Functions for the Sim Options Card
     /**
-     * Callback for when the max hit input is changed
+     * Callback for when the max actions input is changed
      * @param {Event} event The change event for an input
      */
-    maxhitsInputOnChange(event) {
-      const newMaxHit = parseInt(event.currentTarget.value);
-      if (newMaxHit > 0 && newMaxHit <= 10000) {
-        this.simulator.maxActions = newMaxHit;
+    maxActionsInputOnChange(event) {
+      const newMaxActions = parseInt(event.currentTarget.value);
+      if (newMaxActions > 0 && newMaxActions <= 10000) {
+        this.simulator.maxActions = newMaxActions;
       }
     }
     /**
      * Callback for when the number of trials input is changed
      * @param {Event} event The change event for an input
      */
-    numtrialsInputOnChange(event) {
+    numTrialsInputOnChange(event) {
       const newNumTrials = parseInt(event.currentTarget.value);
       if (newNumTrials > 0 && newNumTrials <= 100000) {
         this.simulator.trials = newNumTrials;
