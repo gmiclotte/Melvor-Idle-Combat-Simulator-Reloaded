@@ -403,7 +403,7 @@
           if (skillName === 'Hitpoints') {
             minLevel = 10;
           }
-          this.levelSelectCard.addNumberInput(skillName, `${minLevel}`, 24, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
+          this.levelSelectCard.addNumberInput(skillName, minLevel, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
         });
       }
       // Spell selection cards
@@ -709,9 +709,9 @@
         this.simOptionsCard = new McsCard(this.mainTabContainer, '', '', '150px');
         this.mainTabCards.push(this.simOptionsCard);
         this.simOptionsCard.addSectionTitle('Simulation Options');
-        this.simOptionsCard.addNumberInput('Max Actions', 1000, 25, 1, 10000, (event) => this.maxActionsInputOnChange(event));
-        this.simOptionsCard.addNumberInput('# Trials', 10000, 25, 1, 100000, (event) => this.numTrialsInputOnChange(event));
-        this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 25, 1, 1000, (event) => this.signetTimeInputOnChange(event));
+        this.simOptionsCard.addNumberInput('Max Actions', 1000, 1, 10000, (event) => this.maxActionsInputOnChange(event));
+        this.simOptionsCard.addNumberInput('# Trials', 10000, 1, 100000, (event) => this.numTrialsInputOnChange(event));
+        this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
         const dropDownOptionNames = [];
         for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
           if (this.plotTypeIsTime[i]) {
@@ -742,7 +742,7 @@
         this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
         // Top labels
         const labelCont = document.createElement('div');
-        labelCont.className = 'mcsMultiButtonContainer mt-1';
+        labelCont.className = 'mcsMultiButtonContainer';
         labelCont.style.borderBottom = 'solid thin';
         const lab1 = document.createElement('div');
         lab1.className = 'mcsMultiHeader';
@@ -5335,7 +5335,9 @@
       const dropDownID = `MCS ${labelText} Dropdown`;
       const newCCContainer = this.createCCContainer();
       newCCContainer.id = `${dropDownID} Container`;
-      newCCContainer.appendChild(this.createLabel(labelText, dropDownID));
+      const label = this.createLabel(labelText, dropDownID);
+      label.classList.add('mb-1');
+      newCCContainer.appendChild(label);
       const newDropdown = this.createDropdown(optionText, optionValues, dropDownID, onChangeCallback);
       newCCContainer.appendChild(newDropdown);
       this.container.appendChild(newCCContainer);
@@ -5350,7 +5352,7 @@
      */
     createDropdown(optionText, optionValues, dropDownID, onChangeCallback) {
       const newDropdown = document.createElement('select');
-      newDropdown.className = 'form-control';
+      newDropdown.className = 'form-control mb-1';
       newDropdown.id = dropDownID;
       for (let i = 0; i < optionText.length; i++) {
         const newOption = document.createElement('option');
@@ -5366,22 +5368,23 @@
      * Adds an input to the card for a number
      * @param {string} labelText The text for the input's label
      * @param {number} startValue The initial value
-     * @param {number} height The height of the input in pixels
      * @param {number} min The minimum value of the input
      * @param {number} max The maximum value of the input
      * @param {Function} onChangeCallback The callback for when the input changes
      */
-    addNumberInput(labelText, startValue, height, min, max, onChangeCallback) {
+    addNumberInput(labelText, startValue, min, max, onChangeCallback) {
       const inputID = `MCS ${labelText} Input`;
       const newCCContainer = this.createCCContainer();
-      newCCContainer.appendChild(this.createLabel(labelText, inputID));
+      const label = this.createLabel(labelText, inputID);
+      label.classList.add('mb-1');
+      newCCContainer.appendChild(label);
       const newInput = document.createElement('input');
       newInput.id = inputID;
       newInput.type = 'number';
       newInput.min = min;
       newInput.max = max;
       newInput.value = startValue;
-      newInput.className = 'form-control';
+      newInput.className = 'form-control mb-1';
       newInput.addEventListener('change', onChangeCallback);
       newCCContainer.appendChild(newInput);
       this.container.appendChild(newCCContainer);
@@ -5395,12 +5398,14 @@
     addTextInput(labelText, startValue, onInputCallback) {
       const inputID = `MCS ${labelText} TextInput`;
       const newCCContainer = this.createCCContainer();
-      newCCContainer.appendChild(this.createLabel(labelText, inputID));
+      const label = this.createLabel(labelText, inputID);
+      label.classList.add('mb-1');
+      newCCContainer.appendChild(label);
       const newInput = document.createElement('input');
       newInput.id = inputID;
       newInput.type = 'text';
       newInput.value = startValue;
-      newInput.className = 'form-control';
+      newInput.className = 'form-control mb-1';
       newInput.style.width = this.inputWidth;
       newInput.addEventListener('input', onInputCallback);
       newCCContainer.appendChild(newInput);
@@ -5680,22 +5685,20 @@
    * @return {string}
    */
   function mcsFormatNum(number, digits) {
-    let output;
-    output = number.toPrecision(digits);
+    let output = number.toPrecision(digits);
+    let end = '';
     if (output.includes('e+')) {
       const power = parseInt(output.match(/\d*?$/));
       const powerCount = Math.floor(power / 3);
       output = `${output.match(/^[\d,\.]*/)}e+${power % 3}`;
       const formatEnd = ['', 'k', 'M', 'B', 'T'];
-      let end;
       if (powerCount < formatEnd.length) {
         end = formatEnd[powerCount];
       } else {
         end = `e${powerCount * 3}`;
       }
-      return `${parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits })}${end}`;
     }
-    return parseFloat(output).toLocaleString(undefined, { minimumSignificantDigits: digits });
+    return `${+parseFloat(output).toFixed(6).toLocaleString(undefined, { minimumSignificantDigits: digits })}${end}`;
   }
 
   /** @type {McsApp} */

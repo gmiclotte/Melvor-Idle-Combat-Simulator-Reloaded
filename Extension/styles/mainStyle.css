@@ -60,9 +60,8 @@
 }
 
 .mcsOuter {
-  border-radius: 10px;
-  padding: 5px;
-  margin: 5px !important;
+  padding: 0.25rem;
+  margin: 0.25rem;
   min-width: 250px;
 }
 
@@ -87,7 +86,6 @@
 .mcsTabContainer {
   border-style: none solid solid solid;
   border-color: #bbbbbb;
-  flex-grow: 1;
   width: 100%;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
@@ -110,7 +108,7 @@
   display: flex;
   min-height: 80px;
   flex-grow: 0;
-  left: 86px;
+  left: 85px;
 }
 
 .mcsYAxis {
@@ -216,16 +214,12 @@
   background-color: lightgray;
   border-color: #46c37b;
 }
+
 .mcsMultiImageButtonContainer {
-  position: relative;
   width: 192px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  background-color: inherit;
-  border-color: inherit;
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 
 .mcsTabButtonContainer {
@@ -243,7 +237,6 @@
   border-style: solid solid none solid;
   border-color: #bbbbbb;
   border-radius: 0.5rem 0.5rem 0 0;
-  margin-top: 5px;
 }
 
 .mcsTabButton:hover {
@@ -311,16 +304,14 @@
   background-color: #3359A0;
   color: #bbbbbb;
 }
+
 /*Card Container Container */
 .mcsCCContainer {
-  position: relative;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  background-color: inherit;
-  border-color: inherit;
   justify-content: flex-end;
   line-height: 20px;
+  padding: 0 0.25rem;
 }
 
 .mcsCCContainer img {
@@ -359,13 +350,11 @@
 
 .mcsNumberOutput {
   text-align: right;
-  height: 100%;
   border-width: thin;
   border-style: solid;
   border-color: inherit;
-  white-space: nowrap;
-  right: 0px;
   line-height: 1.15;
+  padding: 0 2px;
 }
 
 .mcsSectionTitle {
