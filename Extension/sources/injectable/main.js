@@ -4769,7 +4769,7 @@
         monsterValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * this.getMonsterCombatLevel(monsterID) / 500000;
       }
       monsterValue *= this.computeLootChance(monsterID);
-      if (this.sellBones && !this.currentSim.doBonesAutoBury) {
+      if (this.sellBones && !this.currentSim.doBonesAutoBury && MONSTERS[monsterID].bones) {
         monsterValue += items[MONSTERS[monsterID].bones].sellsFor * this.currentSim.lootBonus * ((MONSTERS[monsterID].boneQty) ? MONSTERS[monsterID].boneQty : 1);
       }
       return monsterValue;
