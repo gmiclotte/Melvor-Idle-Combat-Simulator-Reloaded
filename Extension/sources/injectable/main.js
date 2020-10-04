@@ -1382,10 +1382,10 @@
         this.simulator.spells.aurora.selectedID = -1;
       }
       // Update spell UI
-      Object.keys(this.simulator.spells).forEach((spellType) => {
-        const spellOpts = this.simulator.spells[spellType];
+      Object.values(this.simulator.spells).forEach((spellOpts, i) => {
         if (spellOpts.isSelected) {
           this.selectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
+          this.spellTabOnClick(i);
         }
       });
       this.updateSpellOptions(skillLevel[CONSTANTS.skill.Magic]);
