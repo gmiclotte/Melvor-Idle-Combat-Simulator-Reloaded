@@ -4380,8 +4380,8 @@
                     exportString += '0';
                   } else {
                     let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
-                    if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monsterId.id].killTimeS;
-                    exportString += (this.monsterSimData[monsterId.id].simSuccess) ? this.monsterSimData[monsterId.id][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
+                    if (dataMultiplier === -1) dataMultiplier = this.monsterSimData[monsterId].killTimeS;
+                    exportString += (this.monsterSimData[monsterId].simSuccess) ? this.monsterSimData[monsterId][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
                   }
                   exportString += colDel;
                 }
