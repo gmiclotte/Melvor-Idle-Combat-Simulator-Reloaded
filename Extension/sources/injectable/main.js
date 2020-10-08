@@ -197,9 +197,11 @@
           media: 'assets/media/bank/armour_cape.svg',
         },
       };
+
       // Useful assets
-      const media = {
+      this.media = {
         combat: 'assets/media/skills/combat/combat.svg',
+        slayer: 'assets/media/skills/slayer/slayer.svg',
         prayer: 'assets/media/skills/prayer/prayer.svg',
         spellbook: 'assets/media/skills/combat/spellbook.svg',
         curse: 'assets/media/skills/combat/curses.svg',
@@ -209,51 +211,47 @@
         pet: 'assets/media/pets/hitpoints.png',
         settings: 'assets/media/main/settings_header.svg',
         gp: 'assets/media/main/coins.svg',
+        attack: 'assets/media/skills/combat/attack.svg',
+        strength: 'assets/media/skills/combat/strength.svg',
+        ranged: 'assets/media/skills/ranged/ranged.svg',
+        magic: 'assets/media/skills/magic/magic.svg',
+        defence: 'assets/media/skills/defence/defence.svg',
       };
-      // Forced gear sorting
+
+      // Forced equipment sorting
       this.forceMeleeArmour = [CONSTANTS.item.Slayer_Helmet_Basic, CONSTANTS.item.Slayer_Platebody_Basic];
       this.forceRangedArmour = [CONSTANTS.item.Slayer_Cowl_Basic, CONSTANTS.item.Slayer_Leather_Body_Basic];
       this.forceMagicArmour = [CONSTANTS.item.Slayer_Wizard_Hat_Basic, CONSTANTS.item.Slayer_Wizard_Robes_Basic, CONSTANTS.item.Enchanted_Shield];
-      // Generate gear subsets
-      this.slotKeys = Object.keys(CONSTANTS.equipmentSlot);
-      this.gearSubsets = [];
+      // Generate equipment subsets
+      this.equipmentSlotKeys = Object.keys(CONSTANTS.equipmentSlot);
+      this.equipmentSubsets = [];
       /** @type {Array<number>} */
-      this.gearSelected = [];
-      for (let j = 0; j < this.slotKeys.length; j++) {
-        this.gearSubsets.push([this.emptyItems[this.slotKeys[j]]]);
-        this.gearSelected.push(0);
+      this.equipmentSelected = [];
+      for (let equipmentSlot = 0; equipmentSlot < this.equipmentSlotKeys.length; equipmentSlot++) {
+        this.equipmentSubsets.push([this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]]);
+        this.equipmentSelected.push(0);
         for (let i = 0; i < items.length; i++) {
-          if (items[i].equipmentSlot === CONSTANTS.equipmentSlot[this.slotKeys[j]]) {
-            this.gearSubsets[j].push(items[i]);
-            this.gearSubsets[j][this.gearSubsets[j].length - 1].itemID = i;
+          if (items[i].equipmentSlot === CONSTANTS.equipmentSlot[this.equipmentSlotKeys[equipmentSlot]]) {
+            this.equipmentSubsets[equipmentSlot].push(items[i]);
+            this.equipmentSubsets[equipmentSlot][this.equipmentSubsets[equipmentSlot].length - 1].itemID = i;
           }
         }
       }
       // Add ammoType 2 and 3 to weapon subsets
       for (let i = 0; i < items.length; i++) {
         if (items[i].equipmentSlot === CONSTANTS.equipmentSlot.Quiver && (items[i].ammoType === 2 || items[i].ammoType === 3)) {
-          this.gearSubsets[CONSTANTS.equipmentSlot.Weapon].push(items[i]);
-          this.gearSubsets[CONSTANTS.equipmentSlot.Weapon][this.gearSubsets[CONSTANTS.equipmentSlot.Weapon].length - 1].itemID = i;
+          this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon].push(items[i]);
+          this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon][this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon].length - 1].itemID = i;
         }
       }
-      // Sort Gear Subsets
-      for (let j = 0; j < this.slotKeys.length; j++) {
-        this.gearSubsets[j].sort((a, b) => {
-          return ((a.attackLevelRequired) ? a.attackLevelRequired : 0) - ((b.attackLevelRequired) ? b.attackLevelRequired : 0);
-        });
-        this.gearSubsets[j].sort((a, b) => {
-          return ((a.defenceLevelRequired) ? a.defenceLevelRequired : 0) - ((b.defenceLevelRequired) ? b.defenceLevelRequired : 0);
-        });
-        this.gearSubsets[j].sort((a, b) => {
-          return ((a.rangedLevelRequired) ? a.rangedLevelRequired : 0) - ((b.rangedLevelRequired) ? b.rangedLevelRequired : 0);
-        });
-        this.gearSubsets[j].sort((a, b) => {
-          return ((a.magicLevelRequired) ? a.magicLevelRequired : 0) - ((b.magicLevelRequired) ? b.magicLevelRequired : 0);
-        });
-        if (j === CONSTANTS.equipmentSlot.Quiver) {
-          this.gearSubsets[j].sort((a, b) => {
-            return ((a.ammoType) ? a.ammoType : -1) - ((b.ammoType) ? b.ammoType : -1);
-          });
+      // Sort equipment subsets
+      for (let equipmentSlot = 0; equipmentSlot < this.equipmentSlotKeys.length; equipmentSlot++) {
+        this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.attackLevelRequired || 0) - (b.attackLevelRequired || 0));
+        this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.defenceLevelRequired || 0) - (b.defenceLevelRequired || 0));
+        this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.rangedLevelRequired || 0) - (b.rangedLevelRequired || 0));
+        this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.magicLevelRequired || 0) - (b.magicLevelRequired || 0));
+        if (equipmentSlot === CONSTANTS.equipmentSlot.Quiver) {
+          this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.ammoType || 0) - (b.ammoType || 0));
         };
       }
       this.skillKeys = ['Attack', 'Strength', 'Defence', 'Hitpoints', 'Ranged', 'Magic', 'Prayer', 'Slayer'];
@@ -325,7 +323,7 @@
       this.tabDiv.appendChild(elem2);
       const elem3 = document.createElement('img');
       elem3.className = 'nav-img';
-      elem3.src = media.combat;
+      elem3.src = this.media.combat;
       elem2.appendChild(elem3);
       const elem4 = document.createElement('span');
       elem4.className = 'nav-main-link-name';
@@ -343,252 +341,26 @@
         this.selectedMainTab = 0;
         this.mainTabCard = new McsCard(this.topContent, '350px', '', '150px', true);
         const mainTabNames = ['Equipment', 'Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'Sim. Options', 'GP Options'];
-        const mainTabImages = [this.emptyItems.Helmet.media, media.combat, media.spellbook, media.prayer, media.emptyPotion, media.pet, media.settings, media.gp];
+        const mainTabImages = [this.emptyItems.Helmet.media, this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.settings, this.media.gp];
         const mainTabCallbacks = mainTabNames.map((_name, index) => {
           return () => this.mainTabOnClick(index);
         });
         this.mainTabIDs = mainTabNames.map((name) => {
           return `MCS ${name} Tab`;
         });
-        this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks, 25);
+        this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
         /** @type {McsCard[]} */
         this.mainTabCards = [];
       }
+
       // Add Cards to the container
-      // Gear/Level/Style/Spell Selection Card:
-      {
-        this.gearSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
-        this.mainTabCards.push(this.gearSelectCard);
-        const gearRows = [
-          [CONSTANTS.equipmentSlot.Helmet],
-          [CONSTANTS.equipmentSlot.Cape, CONSTANTS.equipmentSlot.Amulet, CONSTANTS.equipmentSlot.Quiver],
-          [CONSTANTS.equipmentSlot.Weapon, CONSTANTS.equipmentSlot.Platebody, CONSTANTS.equipmentSlot.Shield],
-          [CONSTANTS.equipmentSlot.Platelegs],
-          [CONSTANTS.equipmentSlot.Gloves, CONSTANTS.equipmentSlot.Boots, CONSTANTS.equipmentSlot.Ring],
-        ];
-        gearRows.forEach((gearRow) => {
-          const rowSources = [];
-          const rowIDs = [];
-          const rowPopups = [];
-          gearRow.forEach((gearID) => {
-            rowSources.push(this.emptyItems[this.slotKeys[gearID]].media);
-            rowIDs.push(`MCS ${this.slotKeys[gearID]} Gear Image`);
-            rowPopups.push(this.createGearPopup(gearID));
-          });
-          this.gearSelectCard.addMultiPopupMenu(rowSources, rowIDs, 40, 40, rowPopups);
-        });
-        const gearSetCCContainer = this.gearSelectCard.createCCContainer();
-        gearSetCCContainer.appendChild(this.gearSelectCard.createLabel('Import Gear Set', ''));
-        this.gearSelectCard.addMultiButton(['1', '2', '3'], [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], gearSetCCContainer);
-        this.gearSelectCard.container.appendChild(gearSetCCContainer);
-        // Style dropdown (Specially Coded)
-        const combatStyleCCContainer = this.gearSelectCard.createCCContainer();
-        const combatStyleLabel = this.gearSelectCard.createLabel('Combat Style', '');
-        const meleeStyleDropdown = this.gearSelectCard.createDropdown(['Stab', 'Slash', 'Block'], [0, 1, 2], 'MCS Melee Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Melee'));
-        const rangedStyleDropdown = this.gearSelectCard.createDropdown(['Accurate', 'Rapid', 'Longrange'], [0, 1, 2], 'MCS Ranged Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Ranged'));
-        const magicStyleDropdown = this.gearSelectCard.createDropdown(['Magic', 'Defensive'], [0, 1], 'MCS Magic Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Magic'));
-        rangedStyleDropdown.style.display = 'none';
-        magicStyleDropdown.style.display = 'none';
-        combatStyleCCContainer.appendChild(combatStyleLabel);
-        combatStyleCCContainer.appendChild(meleeStyleDropdown);
-        combatStyleCCContainer.appendChild(rangedStyleDropdown);
-        combatStyleCCContainer.appendChild(magicStyleDropdown);
-        this.gearSelectCard.container.appendChild(combatStyleCCContainer);
-      }
-      // Level Selection Card:
-      {
-        this.levelSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
-        this.mainTabCards.push(this.levelSelectCard);
-        this.levelSelectCard.addSectionTitle('Player Levels');
-        this.skillKeys.forEach((skillName) => {
-          let minLevel = 1;
-          if (skillName === 'Hitpoints') {
-            minLevel = 10;
-          }
-          this.levelSelectCard.addNumberInput(skillName, minLevel, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
-        });
-      }
-      // Spell selection cards
-      {
-        this.spellSelectCard = new McsCard(this.mainTabContainer, '', '100%', '150px');
-        this.mainTabCards.push(this.spellSelectCard);
-        this.spellSelectCard.addSectionTitle('Spells');
-        this.selectedSpellTab = 0;
-        const spellTypeNames = ['Standard', 'Curses', 'Auroras', 'Ancient Magicks'];
-        const spellTypeImages = [media.spellbook, media.curse, media.aurora, media.ancient];
-        const spellTabCallbacks = spellTypeNames.map((_name, index) => {
-          return () => this.spellTabOnClick(index);
-        });
-        this.spellTabIDs = spellTypeNames.map((name) => {
-          return `MCS ${name} Tab`;
-        });
-        this.spellTabContainer = this.spellSelectCard.addTabMenu(spellTypeNames, spellTypeImages, spellTabCallbacks, 25);
-        /** @type {McsCard[]} */
-        this.spellTabCards = [];
-        this.spellTabCards.push(this.createSpellSelectCard('Standard Magic', 'standard'));
-        this.spellTabCards.push(this.createSpellSelectCard('Curses', 'curse'));
-        this.spellTabCards.push(this.createSpellSelectCard('Auroras', 'aurora'));
-        this.spellTabCards.push(this.createSpellSelectCard('Ancient Magicks', 'ancient'));
-        this.spellTabCards.forEach((card, cardID) => {
-          if (cardID !== 0) {
-            card.container.style.display = 'none';
-          }
-        });
-      }
-      // Prayer Selection Card:
-      {
-        this.prayerSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
-        this.mainTabCards.push(this.prayerSelectCard);
-        this.prayerSelectCard.addSectionTitle('Prayers');
-        const prayerSources = [];
-        const prayerNames = [];
-        const prayerCallbacks = [];
-        for (let i = 0; i < PRAYER.length; i++) {
-          prayerSources.push(PRAYER[i].media);
-          prayerNames.push(this.getPrayerName(i));
-          prayerCallbacks.push((e) => this.prayerButtonOnClick(e, i));
-        }
-        const prayerTooltips = this.prayerSelectCard.addMultiImageButton(prayerSources, prayerNames, 'Medium', prayerCallbacks);
-        // Generate the tooltip contents
-        const prayerBonusDictionary = {
-          prayerBonusAttack: 'Melee Accuracy',
-          prayerBonusStrength: 'Melee Strength',
-          prayerBonusDefence: 'Melee Evasion',
-          prayerBonusAttackRanged: 'Ranged Accuracy',
-          prayerBonusStrengthRanged: 'Ranged Strength',
-          prayerBonusDefenceRanged: 'Ranged Evasion',
-          prayerBonusAttackMagic: 'Magic Accuracy',
-          prayerBonusDamageMagic: 'Magic Damage',
-          prayerBonusDefenceMagic: 'Magic Evasion',
-          prayerBonusProtectItem: 'Keep item on death',
-          prayerBonusHitpoints: '2x Restore Rate for Hitpoints',
-          prayerBonusProtectFromMelee: `${protectFromValue}% chance to dodge Melee Attacks`,
-          prayerBonusProtectFromRanged: `${protectFromValue}% chance to dodge Ranged Attacks`,
-          prayerBonusProtectFromMagic: `${protectFromValue}% chance to dodge Magic Attacks`,
-          prayerBonusHitpointHeal: 'Heal +20% HP when HP falls below 10%',
-          prayerBonusDamageReduction: 'Damage Reduction',
-        };
-        const prayerBonusNumeric = {
-          prayerBonusAttack: true,
-          prayerBonusStrength: true,
-          prayerBonusDefence: true,
-          prayerBonusAttackRanged: true,
-          prayerBonusStrengthRanged: true,
-          prayerBonusDefenceRanged: true,
-          prayerBonusAttackMagic: true,
-          prayerBonusDamageMagic: true,
-          prayerBonusDefenceMagic: true,
-          prayerBonusProtectItem: false,
-          prayerBonusHitpoints: false,
-          prayerBonusProtectFromMelee: false,
-          prayerBonusProtectFromRanged: false,
-          prayerBonusProtectFromMagic: false,
-          prayerBonusHitpointHeal: false,
-          prayerBonusDamageReduction: true,
-        };
-        PRAYER.forEach((prayer, prayerID) => {
-          const prayerTooltip = new McsTooltipBuilder(prayerTooltips[prayerID]);
-          prayerTooltip.addTitle(this.getPrayerName(prayerID));
-          prayerTooltip.addDivider();
-          prayer.vars.forEach((prayerBonus, j) => {
-            if (prayerBonusNumeric[prayerBonus]) {
-              prayerTooltip.addText(`+${prayer.values[j]}% ${prayerBonusDictionary[prayerBonus]}`);
-            } else {
-              prayerTooltip.addText(prayerBonusDictionary[prayerBonus]);
-            }
-            prayerTooltip.addLineBreak();
-          });
-          if (prayer.pointsPerPlayer > 0) {
-            prayerTooltip.addText(`+${(2 / numberMultiplier * prayer.pointsPerPlayer).toFixed(2)} prayer xp per damage done`);
-          }
-          prayerTooltip.addDivider();
-          if (prayer.pointsPerEnemy > 0) {
-            prayerTooltip.addText(`Costs: ${prayer.pointsPerEnemy} per enemy attack`);
-          }
-          if (prayer.pointsPerPlayer > 0) {
-            prayerTooltip.addText(`Costs: ${prayer.pointsPerPlayer} per player attack`);
-          }
-          if (prayer.pointsPerRegen > 0) {
-            prayerTooltip.addText(`Costs: ${prayer.pointsPerRegen} per HP regen`);
-          }
-        });
-      }
-      // Potion Selection Card:
-      {
-        this.potionSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
-        this.mainTabCards.push(this.potionSelectCard);
-        // Potion Selection
-        this.potionSelectCard.addSectionTitle('Potions');
-        this.potionSelectCard.addDropdown('Potion Tier', ['Tier 1', 'Tier 2', 'Tier 3', 'Tier 4'], [0, 1, 2, 3], 25, (e) => this.potionTierDropDownOnChange(e));
-        const potionSources = [];
-        const potionNames = [];
-        const potionCallbacks = [];
-        /** @type {Array<number>} */
-        this.combatPotionIDs = [];
-        for (let i = 0; i < herbloreItemData.length; i++) {
-          if (herbloreItemData[i].category === 0) {
-            potionSources.push(items[herbloreItemData[i].itemID[0]].media);
-            potionNames.push(this.getPotionName(i));
-            potionCallbacks.push((e) => this.potionImageButtonOnClick(e, i));
-            this.combatPotionIDs.push(i);
-          }
-        }
-        this.potionTooltips = {
-          /** @type {Array<HTMLDivElement>} */
-          divs: [],
-          /** @type {Array<HTMLSpanElement>} */
-          titles: [],
-          /** @type {Array<HTMLSpanElement>} */
-          descriptions: [],
-          /** @type {Array<HTMLSpanElement>} */
-          charges: [],
-        };
-        this.potionTooltips.divs = this.potionSelectCard.addMultiImageButton(potionSources, potionNames, 'Medium', potionCallbacks);
-        for (let i = 0; i < this.combatPotionIDs.length; i++) {
-          const potionID = this.combatPotionIDs[i];
-          const potionTooltip = new McsTooltipBuilder(this.potionTooltips.divs[i]);
-          this.potionTooltips.titles.push(potionTooltip.addTitle(this.getItemName(herbloreItemData[potionID].itemID[0])));
-          potionTooltip.addDivider();
-          this.potionTooltips.descriptions.push(potionTooltip.addText(items[herbloreItemData[potionID].itemID[0]].description));
-          potionTooltip.addDivider();
-          this.potionTooltips.charges.push(potionTooltip.addText(`Charges: ${items[herbloreItemData[potionID].itemID[0]].potionCharges}`));
-        }
-      }
-      // Pet selection card
-      {
-        this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-        const combatPets = PETS.filter((_pet, petID) => {
-          return this.combatPetsIds.includes(petID);
-        });
-        this.petSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
-        this.mainTabCards.push(this.petSelectCard);
-        this.petSelectCard.addSectionTitle('Pets');
-        const petImageSources = combatPets.map((pet) => {
-          return pet.media;
-        });
-        const petNames = combatPets.map((pet) => {
-          return pet.name;
-        });
-        const petButtonCallbacks = combatPets.map((_pet, subID) => {
-          return (e) => this.petButtonOnClick(e, this.combatPetsIds[subID]);
-        });
-        const petTooltips = this.petSelectCard.addMultiImageButton(petImageSources, petNames, 'Medium', petButtonCallbacks);
-        petTooltips.forEach((tooltipDiv, subID) => {
-          const petTTBuilder = new McsTooltipBuilder(tooltipDiv);
-          petTTBuilder.addTitle(petNames[subID]);
-          petTTBuilder.addDivider();
-          petTTBuilder.addText(PETS[this.combatPetsIds[subID]].description.replace(/^<small>.*?<\/small><br>/, ''));
-        });
-        this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
-      }
-      const iconSources = {
-        combat: 'assets/media/skills/combat/combat.svg',
-        attack: 'assets/media/skills/combat/attack.svg',
-        strength: 'assets/media/skills/combat/strength.svg',
-        ranged: 'assets/media/skills/ranged/ranged.svg',
-        magic: 'assets/media/skills/magic/magic.svg',
-        defence: 'assets/media/skills/defence/defence.svg',
-      };
+      this.createEquipmentSelectCard();
+      this.createLevelSelectCard();
+      this.createSpellSelectCards();
+      this.createPrayerSelectCard();
+      this.createPotionSelectCard();
+      this.createPetSelectCard();
+
       // Equipment Stat Display Card
       {
         this.equipStatCard = new McsCard(this.topContent, '250px', '', '50px', true);
@@ -610,7 +382,7 @@
           'attackLevelRequired',
           'defenceLevelRequired',
           'rangedLevelRequired',
-          'magicLevelRequired'
+          'magicLevelRequired',
         ];
         const equipStatNames = [
           'Attack Speed',
@@ -629,29 +401,29 @@
           'Level Required',
           'Level Required',
           'Level Required',
-          'Level Required'
+          'Level Required',
         ];
         const equipStatIcons = [
-          'combat',
-          'strength',
-          'attack',
-          'strength',
-          'defence',
-          'ranged',
-          'ranged',
-          'magic',
-          'magic',
-          'defence',
-          'defence',
-          'ranged',
-          'magic',
-          'attack',
-          'defence',
-          'ranged',
-          'magic'
+          this.media.combat,
+          this.media.strength,
+          this.media.attack,
+          this.media.strength,
+          this.media.defence,
+          this.media.ranged,
+          this.media.ranged,
+          this.media.magic,
+          this.media.magic,
+          this.media.defence,
+          this.media.defence,
+          this.media.ranged,
+          this.media.magic,
+          this.media.attack,
+          this.media.defence,
+          this.media.ranged,
+          this.media.magic,
         ];
         for (let i = 0; i < equipStatNames.length; i++) {
-          this.equipStatCard.addNumberOutput(equipStatNames[i], 0, 20, iconSources[equipStatIcons[i]], `MCS ${this.equipStatKeys[i]} ES Output`);
+          this.equipStatCard.addNumberOutput(equipStatNames[i], 0, 20, equipStatIcons[i], `MCS ${this.equipStatKeys[i]} ES Output`);
         }
       }
       // Combat Stat Display Card
@@ -667,9 +439,19 @@
           'Evasion Rating',
           'Evasion Rating',
           'Max Hitpoints',
-          'Damage Reduction'
+          'Damage Reduction',
         ];
-        const combatStatIcons = ['', '', '', '', 'combat', 'ranged', 'magic', '', ''];
+        const combatStatIcons = [
+          '',
+          '',
+          '',
+          '',
+          this.media.combat,
+          this.media.ranged,
+          this.media.magic,
+          '',
+          '',
+        ];
         this.combatStatKeys = [
           'attackSpeed',
           'minHit',
@@ -679,10 +461,10 @@
           'maxRngDefRoll',
           'maxMagDefRoll',
           'maxHitpoints',
-          'damageReduction'
+          'damageReduction',
         ];
         for (let i = 0; i < combatStatNames.length; i++) {
-          this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? iconSources[combatStatIcons[i]] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
+          this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? combatStatIcons[i] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
         }
         this.combatStatCard.addSectionTitle('Simulate/Export');
         this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
@@ -732,7 +514,7 @@
         this.gpSelectCard.addSectionTitle('GP/s Options');
         this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
         this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
-        this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], 25, (e) => this.sellLootDropdownOnChange(e));
+        this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
         this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
       }
       // GP/s options card
@@ -774,7 +556,7 @@
         this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
         this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
         this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '80px');
-        this.subInfoCard.addImage(media.combat, 48, 'MCS Info Image');
+        this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
         const zoneInfoLabelNames = [];
         for (let i = 0; i < this.zoneInfoNames.length; i++) {
           if (this.plotTypeIsTime[i]) {
@@ -795,7 +577,7 @@
       this.selectedBar = 0;
       this.barSelected = false;
       for (let i = 0; i < this.plotter.bars.length; i++) {
-        this.plotter.bars[i].onclick = ((e) => this.barOnClick(e, i));
+        this.plotter.bars[i].parentElement.onclick = (() => this.barOnClick(i));
       }
       /** @type {Array<number>} */
       this.barMonsterIDs = [];
@@ -827,21 +609,25 @@
 
       // Now that everything is done we add it to the document
       document.getElementById('page-container').appendChild(this.mcsModal);
-      // Adjust the widths of the containers
-      this.equipStatCard.setContainerWidths();
-      this.combatStatCard.setContainerWidths();
-      this.gpOptionsCard.setContainerWidths();
+
+      // Finalize tooltips
+      const tippyOptions = { allowHTML: true, animation: false, maxWidth: 400, hideOnClick: false };
+      this.tippyInstances = tippy('#mcsModal [data-tippy-content]', tippyOptions);
+      this.plotter.bars.forEach((bar) => {
+        this.tippyInstances.concat(tippy(bar, { triggerTarget: bar.parentElement, ...tippyOptions }));
+      });
+      this.tippySingletons = [];
+      $('#mcsModal .mcsMultiImageButtonContainer').parent().each((_, e) => {
+        this.tippySingletons.push(tippy.createSingleton($(e).find('[data-tippy-content]').toArray().map(e => e._tippy), { delay: [0, 200], ...tippyOptions }));
+      });
+
+      // Setup the default state of the UI
       this.gpOptionsCard.container.style.display = 'none';
-      this.exportOptionsCard.setContainerWidths();
-      this.zoneInfoCard.setContainerWidths();
-      this.subInfoCard.setContainerWidths();
       this.mainTabCards.forEach((card, cardID) => {
-        card.setContainerWidths();
         if (cardID !== 0) {
           card.container.style.display = 'none';
         }
       });
-      // Push an update to the displays
       this.exportOptionsCard.outerContainer.style.display = 'none';
       this.plotter.timeDropdown.selectedIndex = 1;
       document.getElementById('MCS Edit Subset Button').style.display = 'none';
@@ -866,83 +652,236 @@
       this.gearSets = [];
     }
 
-    /** Adds a multi-button with gear to the gear select popup
-     * @param {McsCard} card The parent card
-     * @param {number} gearID The array of gear
-     * @param {Function} filterFunction Filter gear with this function
-     * @param {string} [sortKey=itemID] Sort gear by this key
-     */
-    addGearMultiButton(card, gearID, filterFunction, sortKey = 'itemID') {
-      const menuItems = this.gearSubsets[gearID].filter(filterFunction);
-      menuItems.sort((a, b) => {
-        return ((a[sortKey]) ? a[sortKey] : 0) - ((b[sortKey]) ? b[sortKey] : 0);
+    createEquipmentSelectCard() {
+      this.equipmentSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
+      this.mainTabCards.push(this.equipmentSelectCard);
+      const equipmentRows = [
+        [CONSTANTS.equipmentSlot.Helmet],
+        [CONSTANTS.equipmentSlot.Cape, CONSTANTS.equipmentSlot.Amulet, CONSTANTS.equipmentSlot.Quiver],
+        [CONSTANTS.equipmentSlot.Weapon, CONSTANTS.equipmentSlot.Platebody, CONSTANTS.equipmentSlot.Shield],
+        [CONSTANTS.equipmentSlot.Platelegs],
+        [CONSTANTS.equipmentSlot.Gloves, CONSTANTS.equipmentSlot.Boots, CONSTANTS.equipmentSlot.Ring],
+      ];
+      equipmentRows.forEach((row) => {
+        const rowSources = [];
+        const rowIDs = [];
+        const rowPopups = [];
+        const tooltips = [];
+        row.forEach((equipmentSlot) => {
+          rowSources.push(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]].media);
+          rowIDs.push(`MCS ${this.equipmentSlotKeys[equipmentSlot]} Image`);
+          rowPopups.push(this.createEquipmentPopup(equipmentSlot));
+          tooltips.push(this.equipmentSlotKeys[equipmentSlot]);
+        });
+        this.equipmentSelectCard.addMultiPopupMenu(rowSources, rowIDs, rowPopups, tooltips);
       });
-      const buttonMedia = menuItems.map((item) => {
-        return item.media;
+      const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
+      importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
+      this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], importSetCCContainer);
+      this.equipmentSelectCard.container.appendChild(importSetCCContainer);
+      // Style dropdown (Specially Coded)
+      const combatStyleCCContainer = this.equipmentSelectCard.createCCContainer();
+      const combatStyleLabel = this.equipmentSelectCard.createLabel('Combat Style', '');
+      const meleeStyleDropdown = this.equipmentSelectCard.createDropdown(['Stab', 'Slash', 'Block'], [0, 1, 2], 'MCS Melee Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Melee'));
+      const rangedStyleDropdown = this.equipmentSelectCard.createDropdown(['Accurate', 'Rapid', 'Longrange'], [0, 1, 2], 'MCS Ranged Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Ranged'));
+      const magicStyleDropdown = this.equipmentSelectCard.createDropdown(['Magic', 'Defensive'], [0, 1], 'MCS Magic Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Magic'));
+      rangedStyleDropdown.style.display = 'none';
+      magicStyleDropdown.style.display = 'none';
+      combatStyleCCContainer.appendChild(combatStyleLabel);
+      combatStyleCCContainer.appendChild(meleeStyleDropdown);
+      combatStyleCCContainer.appendChild(rangedStyleDropdown);
+      combatStyleCCContainer.appendChild(magicStyleDropdown);
+      this.equipmentSelectCard.container.appendChild(combatStyleCCContainer);
+    }
+
+    createLevelSelectCard() {
+      this.levelSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
+      this.mainTabCards.push(this.levelSelectCard);
+      this.levelSelectCard.addSectionTitle('Player Levels');
+      this.skillKeys.forEach((skillName) => {
+        let minLevel = 1;
+        if (skillName === 'Hitpoints') {
+          minLevel = 10;
+        }
+        this.levelSelectCard.addNumberInput(skillName, minLevel, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
       });
-      const buttonIds = menuItems.map((item) => {
-        return `${this.getItemName(item.itemID)}`;
+    }
+
+    createSpellSelectCards() {
+      this.spellSelectCard = new McsCard(this.mainTabContainer, '', '100%', '150px');
+      this.mainTabCards.push(this.spellSelectCard);
+      this.spellSelectCard.addSectionTitle('Spells');
+      this.selectedSpellTab = 0;
+      const spellTypeNames = ['Standard', 'Curses', 'Auroras', 'Ancient Magicks'];
+      const spellTypeImages = [this.media.spellbook, this.media.curse, this.media.aurora, this.media.ancient];
+      const spellTabCallbacks = spellTypeNames.map((_name, index) => {
+        return () => this.spellTabOnClick(index);
       });
-      const buttonCallbacks = menuItems.map((item) => {
-        return () => this.equipItemButton(gearID, item.itemID);
+      this.spellTabIDs = spellTypeNames.map((name) => {
+        return `MCS ${name} Tab`;
       });
-      const multiTooltips = card.addMultiImageButton(buttonMedia, buttonIds, 'Small', buttonCallbacks, 420);
-      multiTooltips.forEach((tooltip, i) => {
-        const itemTTBuilder = new McsTooltipBuilder(tooltip);
-        itemTTBuilder.addTitle(this.getItemName(menuItems[i].itemID));
+      this.spellTabContainer = this.spellSelectCard.addTabMenu(spellTypeNames, spellTypeImages, spellTabCallbacks);
+      /** @type {McsCard[]} */
+      this.spellTabCards = [];
+      this.spellTabCards.push(this.createSpellSelectCard('Standard Magic', 'standard'));
+      this.spellTabCards.push(this.createSpellSelectCard('Curses', 'curse'));
+      this.spellTabCards.push(this.createSpellSelectCard('Auroras', 'aurora'));
+      this.spellTabCards.push(this.createSpellSelectCard('Ancient Magicks', 'ancient'));
+      this.spellTabCards.forEach((card, cardID) => {
+        if (cardID !== 0) {
+          card.container.style.display = 'none';
+        }
       });
     }
 
     /**
      * Creates a card for selecting spells
-     * @param {string} title Title of the card
-     * @param {string} spellType spell array to generate select menu for
-     * @return {McsCard}
-     * @memberof McsApp
+     * @param {string} title The title of the card
+     * @param {string} spellType The type of spells to generate the select menu for
+     * @return {McsCard} The created spell select card
      */
     createSpellSelectCard(title, spellType) {
       const newCard = new McsCard(this.spellTabContainer, '', '', '100px');
       newCard.addSectionTitle(title);
-      const spellArray = this.simulator.spells[spellType].array;
-      const spellImages = spellArray.map((spell) => {
-        return spell.media;
-      });
-      const spellNames = spellArray.map((spell) => {
-        return spell.name;
-      });
-      const spellCallbacks = spellArray.map((_spell, spellID) => {
-        return (event) => this.spellButtonOnClick(event, spellID, spellType);
-      });
-      const spellTooltips = newCard.addMultiImageButton(spellImages, spellNames, 'Medium', spellCallbacks);
-      spellTooltips.forEach((tooltip, spellID) => {
-        const spellTTBuilder = new McsTooltipBuilder(tooltip);
-        spellTTBuilder.addTitle(spellNames[spellID]);
-        spellTTBuilder.addDivider();
+      const spells = this.simulator.spells[spellType].array;
+      const spellImages = spells.map((spell) => spell.media);
+      const spellNames = spells.map((spell) => spell.name);
+      const spellCallbacks = spells.map((_, spellID) => (event) => this.spellButtonOnClick(event, spellID, spellType));
+      const tooltips = spells.map((spell) => {
+        let tooltip = `<div class="text-center">${spell.name}<br><small><span class="text-info">`;
         switch (spellType) {
-          case 'aurora':
-            {
-              spellTTBuilder.addText(spellArray[spellID].description.replace(/^.*?<br>/, ''));
-              break;
-            }
-          case 'curse':
-          case 'ancient':
-            {
-              spellArray[spellID].description.split('<br>').forEach((lineText, lineNum, lines) => {
-                spellTTBuilder.addText(lineText);
-                if ((lineNum + 1) !== lines.length) {
-                  spellTTBuilder.addLineBreak();
-                }
-              });
-              break;
-            }
           case 'standard':
-            {
-              spellTTBuilder.addText(`Max Hit: ${spellArray[spellID].maxHit * numberMultiplier}`);
-              break;
-            }
+            tooltip += `Spell Damage: ${spell.maxHit * numberMultiplier}`;
+            break;
+          case 'aurora':
+            tooltip += spell.description.replace(/^.*?<br>/, '');
+            break;
+          default:
+            tooltip += spell.description;
         }
+        const runes = spell.runesRequired.map((rune) => `${rune.qty}${this.getTooltipIcon(items[rune.id].media)}`).join(' ');
+        tooltip += `</span><br><span class="text-warning">Requires:</span><br>${runes}</small></div>`;
+        return tooltip;
       });
+      newCard.addImageButtons(spellImages, spellNames, 'Medium', spellCallbacks, tooltips);
       return newCard;
+    }
+
+    createPrayerSelectCard() {
+      this.prayerSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.mainTabCards.push(this.prayerSelectCard);
+      this.prayerSelectCard.addSectionTitle('Prayers');
+      const prayerSources = [];
+      const prayerNames = [];
+      const prayerCallbacks = [];
+      for (let i = 0; i < PRAYER.length; i++) {
+        prayerSources.push(PRAYER[i].media);
+        prayerNames.push(this.getPrayerName(i));
+        prayerCallbacks.push((e) => this.prayerButtonOnClick(e, i));
+      }
+
+      // Generate the tooltip contents
+      const prayerBonuses = {
+        prayerBonusAttack: { description: 'Melee Accuracy', isNumeric: true },
+        prayerBonusStrength: { description: 'Melee Strength', isNumeric: true },
+        prayerBonusDefence: { description: 'Melee Evasion', isNumeric: true },
+        prayerBonusAttackRanged: { description: 'Ranged Accuracy', isNumeric: true },
+        prayerBonusStrengthRanged: { description: 'Ranged Strength', isNumeric: true },
+        prayerBonusDefenceRanged: { description: 'Ranged Evasion', isNumeric: true },
+        prayerBonusAttackMagic: { description: 'Magic Accuracy', isNumeric: true },
+        prayerBonusDamageMagic: { description: 'Magic Damage', isNumeric: true },
+        prayerBonusDefenceMagic: { description: 'Magic Evasion', isNumeric: true },
+        prayerBonusProtectItem: { description: 'Keep item on death', isNumeric: false },
+        prayerBonusHitpoints: { description: '2x Restore Rate for Hitpoints', isNumeric: false },
+        prayerBonusProtectFromMelee: { description: `${protectFromValue}% chance to dodge Melee Attacks`, isNumeric: false },
+        prayerBonusProtectFromRanged: { description: `${protectFromValue}% chance to dodge Ranged Attacks`, isNumeric: false },
+        prayerBonusProtectFromMagic: { description: `${protectFromValue}% chance to dodge Magic Attacks`, isNumeric: false },
+        prayerBonusHitpointHeal: { description: 'Heal +20% HP when HP falls below 10%', isNumeric: false },
+        prayerBonusDamageReduction: { description: 'Damage Reduction', isNumeric: true },
+      };
+      const tooltips = [];
+      PRAYER.forEach((prayer) => {
+        let tooltip = `<div class="text-center">${prayer.name}<br><small><span class='text-info'>`;
+        prayer.vars.forEach((prayerBonus, i) => {
+          if (prayerBonuses[prayerBonus].isNumeric) {
+            tooltip += `+${prayer.values[i]}% `;
+          }
+          tooltip += `${prayerBonuses[prayerBonus].description}<br>`;
+        });
+        tooltip += '</span>';
+        if (prayer.pointsPerPlayer > 0) {
+          tooltip += `<span class='text-success'>+${(2 / numberMultiplier * prayer.pointsPerPlayer).toFixed(2)} Prayer XP per damage dealt to enemy</span><br>`;
+        }
+        tooltip += '<span class="text-warning">Prayer Point Cost:</span><br><span class="text-info">';
+        if (prayer.pointsPerEnemy > 0) {
+          tooltip += `${prayer.pointsPerEnemy}</span> per <span class='text-success'>PLAYER</span> attack`;
+        }
+        if (prayer.pointsPerPlayer > 0) {
+          tooltip += `${prayer.pointsPerPlayer}</span> per <span class='text-danger'>ENEMY</span> attack`;
+        }
+        if (prayer.pointsPerRegen > 0) {
+          tooltip += `${prayer.pointsPerRegen}</span> per <span class='text-info'>HP REGEN</span>`;
+        }
+        tooltip += '</small></div>';
+        tooltips.push(tooltip);
+      });
+      this.prayerSelectCard.addImageButtons(prayerSources, prayerNames, 'Medium', prayerCallbacks, tooltips);
+    }
+
+    createPotionSelectCard() {
+      this.potionSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.mainTabCards.push(this.potionSelectCard);
+      this.potionSelectCard.addSectionTitle('Potions');
+      this.potionSelectCard.addDropdown('Potion Tier', ['Tier 1', 'Tier 2', 'Tier 3', 'Tier 4'], [0, 1, 2, 3], (e) => this.potionTierDropDownOnChange(e));
+      const potionSources = [];
+      const potionNames = [];
+      const potionCallbacks = [];
+      const tooltips = [];
+      /** @type {Array<number>} */
+      this.combatPotionIDs = [];
+      for (let i = 0; i < herbloreItemData.length; i++) {
+        if (herbloreItemData[i].category === 0) {
+          const potion = items[herbloreItemData[i].itemID[0]];
+          potionSources.push(potion.media);
+          potionNames.push(this.getPotionName(i));
+          potionCallbacks.push((e) => this.potionImageButtonOnClick(e, i));
+          tooltips.push(this.getPotionTooltip(potion));
+          this.combatPotionIDs.push(i);
+        }
+      }
+      this.potionSelectCard.addImageButtons(potionSources, potionNames, 'Medium', potionCallbacks, tooltips);
+    }
+
+    createPetSelectCard() {
+      this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+      const combatPets = PETS.filter((_pet, petID) => {
+        return this.combatPetsIds.includes(petID);
+      });
+      this.petSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.mainTabCards.push(this.petSelectCard);
+      this.petSelectCard.addSectionTitle('Pets');
+      const petImageSources = combatPets.map((pet) => pet.media);
+      const petNames = combatPets.map((pet) => pet.name);
+      const petButtonCallbacks = this.combatPetsIds.map((petId) => (e) => this.petButtonOnClick(e, petId));
+      const tooltips = combatPets.map((pet) => `<div class="text-center">${pet.name}<br><small class='text-info'>${pet.description.replace(/\.$/, '')}</small></div>`);
+      this.petSelectCard.addImageButtons(petImageSources, petNames, 'Medium', petButtonCallbacks, tooltips);
+      this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
+    }
+
+    /** Adds a multi-button with equipment to the equipment select popup
+     * @param {McsCard} card The parent card
+     * @param {number} equipmentSlot The equipment slot
+     * @param {Function} filterFunction Filter equipment with this function
+     * @param {string} [sortKey=itemID] Sort equipment by this key
+     */
+    addEquipmentMultiButton(card, equipmentSlot, filterFunction, sortKey = 'itemID') {
+      const menuItems = this.equipmentSubsets[equipmentSlot].filter(filterFunction);
+      menuItems.sort((a, b) => ((a[sortKey]) ? a[sortKey] : 0) - ((b[sortKey]) ? b[sortKey] : 0));
+      const buttonMedia = menuItems.map((item) => item.media);
+      const buttonIds = menuItems.map((item) => this.getItemName(item.itemID));
+      const buttonCallbacks = menuItems.map((item) => () => this.equipItem(equipmentSlot, item.itemID));
+      const tooltips = menuItems.map((item) => this.getEquipmentTooltip(equipmentSlot, item));
+      card.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, 420);
     }
 
     /**
@@ -1060,76 +999,76 @@
     }
 
     /**
-     * Creates a gear popup
-     * @param {number} gearID
+     * Creates an equipment popup
+     * @param {number} equipmentSlot
      * @return {HTMLDivElement}
      */
-    createGearPopup(gearID) {
-      const gearSelectPopup = document.createElement('div');
-      gearSelectPopup.className = 'mcsPopup';
-      const gearSelectCard = new McsCard(gearSelectPopup, '', '', '400px');
+    createEquipmentPopup(equipmentSlot) {
+      const equipmentSelectPopup = document.createElement('div');
+      equipmentSelectPopup.className = 'mcsPopup';
+      const equipmentSelectCard = new McsCard(equipmentSelectPopup, '', '', '400px');
       const triSplit = [0, 1, 2, 3, 5, 8];
       const noSplit = [6, 7, 10];
-      if (triSplit.includes(gearID)) {
-        gearSelectCard.addSectionTitle('Melee');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('defenceLevelRequired', item), 'defenceLevelRequired');
-        gearSelectCard.addSectionTitle('Ranged');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('rangedLevelRequired', item), 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Magic');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasKey('magicLevelRequired', item), 'magicLevelRequired');
-        if (this.gearSubsets[gearID].filter((item) => this.filterIfHasNoLevelReq(item)).length > 1) {
-          gearSelectCard.addSectionTitle('Other');
-          this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterIfHasNoLevelReq(item), 'name');
+      if (triSplit.includes(equipmentSlot)) {
+        equipmentSelectCard.addSectionTitle('Melee');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterIfHasKey('defenceLevelRequired', item), 'defenceLevelRequired');
+        equipmentSelectCard.addSectionTitle('Ranged');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterIfHasKey('rangedLevelRequired', item), 'rangedLevelRequired');
+        equipmentSelectCard.addSectionTitle('Magic');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterIfHasKey('magicLevelRequired', item), 'magicLevelRequired');
+        if (this.equipmentSubsets[equipmentSlot].filter((item) => this.filterIfHasNoLevelReq(item)).length > 1) {
+          equipmentSelectCard.addSectionTitle('Other');
+          this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterIfHasNoLevelReq(item), 'name');
         }
-      } else if (noSplit.includes(gearID)) {
-        gearSelectCard.addSectionTitle(this.slotKeys[gearID]);
-        this.addGearMultiButton(gearSelectCard, gearID, () => this.returnTrue());
-      } else if (gearID === 4) {
-        gearSelectCard.addSectionTitle('1H Melee');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+      } else if (noSplit.includes(equipmentSlot)) {
+        equipmentSelectCard.addSectionTitle(this.equipmentSlotKeys[equipmentSlot]);
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, () => this.returnTrue());
+      } else if (equipmentSlot === 4) {
+        equipmentSelectCard.addSectionTitle('1H Melee');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByTwoHanded(false, item) && this.filterByWeaponType('Melee', item);
         }, 'attackLevelRequired');
-        gearSelectCard.addSectionTitle('2H Melee');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('2H Melee');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByTwoHanded(true, item) && this.filterByWeaponType('Melee', item);
         }, 'attackLevelRequired');
-        gearSelectCard.addSectionTitle('Bows');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('Bows');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByAmmoReq(0, item) && this.filterByWeaponType('Ranged', item);
         }, 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Crossbows');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('Crossbows');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByAmmoReq(1, item) && this.filterByWeaponType('Ranged', item);
         }, 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Javelins');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('Javelins');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByAmmoReq(2, item) && this.filterByWeaponType('Ranged', item);
         }, 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Throwing Knives');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('Throwing Knives');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByAmmoReq(3, item) && this.filterByWeaponType('Ranged', item);
         }, 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('1H Magic');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('1H Magic');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByTwoHanded(false, item) && this.filterByWeaponType('Magic', item);
         }, 'magicLevelRequired');
-        gearSelectCard.addSectionTitle('2H Magic');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => {
+        equipmentSelectCard.addSectionTitle('2H Magic');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => {
           return this.filterByTwoHanded(true, item) && this.filterByWeaponType('Magic', item);
         }, 'magicLevelRequired');
-      } else if (gearID === 9) {
-        gearSelectCard.addSectionTitle('Arrows');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(0, item), 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Bolts');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(1, item), 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Javelins');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(2, item), 'rangedLevelRequired');
-        gearSelectCard.addSectionTitle('Throwing Knives');
-        this.addGearMultiButton(gearSelectCard, gearID, (item) => this.filterByAmmoType(3, item), 'rangedLevelRequired');
+      } else if (equipmentSlot === 9) {
+        equipmentSelectCard.addSectionTitle('Arrows');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(0, item), 'rangedLevelRequired');
+        equipmentSelectCard.addSectionTitle('Bolts');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(1, item), 'rangedLevelRequired');
+        equipmentSelectCard.addSectionTitle('Javelins');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(2, item), 'rangedLevelRequired');
+        equipmentSelectCard.addSectionTitle('Throwing Knives');
+        this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(3, item), 'rangedLevelRequired');
       } else {
-        throw Error('Invalid gearID');
+        throw Error(`Invalid equipmentSlot: ${equipmentSlot}`);
       }
-      return gearSelectPopup;
+      return equipmentSelectPopup;
     }
     // Tab Callbacks
     /**
@@ -1187,54 +1126,53 @@
         this.eyeHidden = true;
       }
     }
-    // Callback Functions for Gear select Card
+    // Callback Functions for equipment select card
     /**
-     * Equips/unequips an item to a gearslot
-     * @param {number} gearID
-     * @param {number} itemID
+     * Equips an item to an equipment slot
+     * @param {number} equipmentSlot
+     * @param {number} itemId
      * @memberof McsApp
      */
-    equipItemButton(gearID, itemID) {
-      const prevWeapon = this.gearSelected[CONSTANTS.equipmentSlot.Weapon];
-      this.gearSelected[gearID] = itemID;
-      this.setGearImage(gearID, itemID);
-      const item = items[itemID];
+    equipItem(equipmentSlot, itemId) {
+      if (this.equipmentSelected[equipmentSlot] === itemId) {
+        return;
+      }
+
+      const prevWeapon = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
+      this.equipmentSelected[equipmentSlot] = itemId;
+      this.setEquipmentImage(equipmentSlot, itemId);
+
+      if (!itemId) {
+        return;
+      }
+
+      const item = items[itemId];
       const weaponAmmo = [2, 3];
-      switch (gearID) {
+      switch (equipmentSlot) {
         case CONSTANTS.equipmentSlot.Weapon:
           if (item.equipmentSlot === CONSTANTS.equipmentSlot.Quiver) {
-            this.gearSelected[CONSTANTS.equipmentSlot.Quiver] = itemID;
-            this.setGearImage(CONSTANTS.equipmentSlot.Quiver, itemID);
-          } else if (weaponAmmo.includes(items[this.gearSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
-            this.gearSelected[CONSTANTS.equipmentSlot.Quiver] = 0;
-            this.setGearImage(CONSTANTS.equipmentSlot.Quiver, 0);
+            this.equipItem(CONSTANTS.equipmentSlot.Quiver, itemId);
+          } else if (weaponAmmo.includes(items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
+            this.equipItem(CONSTANTS.equipmentSlot.Quiver, 0);
           }
           if (item.isTwoHanded) {
-            this.gearSelected[CONSTANTS.equipmentSlot.Shield] = 0;
-            this.setGearImage(CONSTANTS.equipmentSlot.Shield, 0);
+            this.equipItem(CONSTANTS.equipmentSlot.Shield, 0);
           }
           break;
         case CONSTANTS.equipmentSlot.Shield:
-          if (items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].isTwoHanded) {
-            this.gearSelected[CONSTANTS.equipmentSlot.Weapon] = 0;
-            this.setGearImage(CONSTANTS.equipmentSlot.Weapon, 0);
+          if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isTwoHanded) {
+            this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
           }
           break;
         case CONSTANTS.equipmentSlot.Quiver:
           if (weaponAmmo.includes(item.ammoType)) { // Swapping to knife/jav
-            this.gearSelected[CONSTANTS.equipmentSlot.Weapon] = itemID;
-            this.setGearImage(CONSTANTS.equipmentSlot.Weapon, itemID);
-            if (item.isTwoHanded) {
-              this.gearSelected[CONSTANTS.equipmentSlot.Shield] = 0;
-              this.setGearImage(CONSTANTS.equipmentSlot.Shield, 0);
-            }
-          } else if (items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping from knife/jav
-            this.gearSelected[CONSTANTS.equipmentSlot.Weapon] = 0;
-            this.setGearImage(CONSTANTS.equipmentSlot.Weapon, 0);
+            this.equipItem(CONSTANTS.equipmentSlot.Weapon, itemId);
+          } else if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping from knife/jav
+            this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
           }
           break;
       }
-      if (prevWeapon !== this.gearSelected[CONSTANTS.equipmentSlot.Weapon]) {
+      if (prevWeapon !== this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]) {
         this.updateStyleDropdowns();
       }
       this.checkForElisAss();
@@ -1245,11 +1183,138 @@
     }
 
     /**
+     * Change the equipment image
+     * @param {number} equipmentSlot
+     * @param {number} itemId
+     */
+    setEquipmentImage(equipmentSlot, itemId) {
+      const slotKey = this.equipmentSlotKeys[equipmentSlot];
+      const img = document.getElementById(`MCS ${slotKey} Image`);
+      let item;
+      if (itemId === 0) {
+        img.src = this.emptyItems[slotKey].media;
+      } else {
+        item = items[itemId];
+        img.src = item.media;
+      }
+      img._tippy.setContent(this.getEquipmentTooltip(equipmentSlot, item));
+    }
+
+    /**
+     * Gets the content for the tooltip of a piece of equipment
+     *
+     * @param equipmentSlot The equipment slot of the item
+     * @param item The item to get the tooltip for
+     * @returns {string} The tooltip content
+     */
+    getEquipmentTooltip(equipmentSlot, item) {
+      if (!item) {
+        return this.equipmentSlotKeys[equipmentSlot];
+      }
+      let tooltip = `<div class="text-center">${item.name}<br><small>`;
+      if (item.description) {
+        tooltip += `<span class='text-info'>${item.description.replace(/<br>\(/, ' (')}</span><br>`;
+      }
+      if (item.hasSpecialAttack) {
+        const special = playerSpecialAttacks[item.specialAttackID];
+        tooltip += `<span class='text-danger'>${special.name} (${special.chance}%): </span><span class='text-warning'>${special.description}</span><br>`;
+      }
+      if (item.attackSpeed) {
+        tooltip += `<span class='text-info'>Attack Speed: ${item.attackSpeed / 1000}s</span><br>`;
+      }
+
+      if (item.strengthBonus || (item.attackBonus && item.attackBonus.some(b => b))) {
+        tooltip += this.getTooltipIcon(this.media.combat);
+        const statBonuses = [];
+        if (item.strengthBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Strength', item.strengthBonus));
+        }
+        if (item.attackBonus) {
+          if (item.attackBonus[0]) {
+            statBonuses.push(this.getTooltipStatBonus('Stab', item.attackBonus[0]));
+          }
+          if (item.attackBonus[1]) {
+            statBonuses.push(this.getTooltipStatBonus('Slash', item.attackBonus[1]));
+          }
+          if (item.attackBonus[2]) {
+            statBonuses.push(this.getTooltipStatBonus('Block', item.attackBonus[2]));
+          }
+        }
+        tooltip += `${statBonuses.join(', ')}<br>`;
+      }
+      if (item.rangedStrengthBonus || item.rangedAttackBonus) {
+        tooltip += this.getTooltipIcon(this.media.ranged);
+        const statBonuses = [];
+        if (item.rangedStrengthBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Strength', item.rangedStrengthBonus));
+        }
+        if (item.rangedAttackBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Attack', item.rangedAttackBonus));
+        }
+        tooltip += `${statBonuses.join(', ')}<br>`;
+      }
+      if (item.magicDamageBonus || item.magicAttackBonus) {
+        tooltip += this.getTooltipIcon(this.media.magic);
+        const statBonuses = [];
+        if (item.magicDamageBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Damage', item.magicDamageBonus, '%'));
+        }
+        if (item.magicAttackBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Attack', item.magicAttackBonus));
+        }
+        tooltip += `${statBonuses.join(', ')}<br>`;
+      }
+      if (item.damageReduction || item.defenceBonus || item.rangedDefenceBonus || item.magicDefenceBonus) {
+        tooltip += `<div class="d-flex justify-content-center" style="align-items: center;">${this.getTooltipIcon(this.media.defence)}`;
+        const statBonuses = [];
+        if (item.damageReduction) {
+          statBonuses.push(this.getTooltipStatBonus('Damage Reduction', item.damageReduction, '%'));
+        }
+        if (item.defenceBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Melee Defence', item.defenceBonus));
+        }
+        if (item.rangedDefenceBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Ranged Defence', item.rangedDefenceBonus));
+        }
+        if (item.magicDefenceBonus) {
+          statBonuses.push(this.getTooltipStatBonus('Magic Defence', item.magicDefenceBonus));
+        }
+        tooltip += `<div>${statBonuses.join(', ')}</div></div><br>`;
+      }
+      if (item.slayerBonusXP) {
+        tooltip += `${this.getTooltipIcon(this.media.slayer)}${this.getTooltipStatBonus('Slayer XP', item.slayerBonusXP, '%')}<br>`;
+      }
+
+      tooltip += '</small></div>';
+      return tooltip;
+    }
+
+    /**
+     * Returns a span containing a description of the given stat bonus
+     * @param {string} stat The name of the stat
+     * @param {number} bonus The value of the bonus
+     * @param {string} suffix A suffix to add after the bonus
+     * @returns {HTMLSpanElement}
+     */
+    getTooltipStatBonus(stat, bonus, suffix = '') {
+      return `<span style="white-space: nowrap;" class="text-${bonus > 0 ? 'success">+' : 'danger">'}${bonus}${suffix} ${stat}</span>`;
+    }
+
+    /**
+     * Returns an image element containing the given icon for use in a tooltip
+     * @param {string} icon The source of the icon
+     * @returns {HTMLImageElement} The image element
+     */
+    getTooltipIcon(icon) {
+      return `<img class="tooltip-icon" src="${icon}">`;
+    }
+
+    /**
      * Updates the style selection dropdowns
      * @memberof McsApp
      */
     updateStyleDropdowns() {
-      const item = items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]];
+      const item = items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]];
       switch (this.getWeaponType(item)) {
         case 'Ranged':
           this.disableStyleDropdown('Magic');
@@ -1268,21 +1333,7 @@
           break;
       }
     }
-    /**
-     * Changed the gear image
-     * @param {number} gearID
-     * @param {number} itemID
-     */
-    setGearImage(gearID, itemID) {
-      let newSource;
-      const slotKey = this.slotKeys[gearID];
-      if (itemID === 0) {
-        newSource = this.emptyItems[slotKey].media;
-      } else {
-        newSource = items[itemID].media;
-      }
-      document.getElementById(`MCS ${slotKey} Gear Image`).src = newSource;
-    }
+
     /**
      * Callback for when a level input is changed
      * @param {Event} event The change event for an input
@@ -1323,10 +1374,10 @@
     importButtonOnClick(setID) {
       let itemID;
       const setToImport = equipmentSets[setID].equipment;
-      for (let i = 0; i < this.slotKeys.length; i++) {
-        itemID = setToImport[CONSTANTS.equipmentSlot[this.slotKeys[i]]];
-        this.gearSelected[i] = itemID;
-        this.setGearImage(i, itemID);
+      for (let i = 0; i < this.equipmentSlotKeys.length; i++) {
+        itemID = setToImport[CONSTANTS.equipmentSlot[this.equipmentSlotKeys[i]]];
+        this.equipmentSelected[i] = itemID;
+        this.setEquipmentImage(i, itemID);
       }
       this.updateStyleDropdowns();
       // Update levels from in game levels
@@ -1550,7 +1601,7 @@
         notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} requires level ${spell.magicLevelRequired} Magic.`, 'danger');
         return;
       }
-      if (spell.requiredItem !== undefined && spell.requiredItem !== -1 && !this.gearSelected.includes(spell.requiredItem)) {
+      if (spell.requiredItem !== undefined && spell.requiredItem !== -1 && !this.equipmentSelected.includes(spell.requiredItem)) {
         notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} requires ${this.getItemName(spell.requiredItem)}.`, 'danger');
         return;
       }
@@ -1679,7 +1730,7 @@
      * @param {MouseEvent} event The onclick event for a button
      */
     simulateButtonOnClick() {
-      if (((items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].isRanged) && (items[this.gearSelected[CONSTANTS.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.gearSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
+      if (((items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isRanged) && (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
         notifyPlayer(CONSTANTS.skill.Ranged, 'Incorrect Ammo type equipped for weapon.', 'danger');
       } else {
         if (this.simulator.simInProgress) {
@@ -1904,11 +1955,9 @@
     }
     /**
      * The callback for when a plotter bar is clicked
-     * @param {MouseEvent} event The onclick event
      * @param {number} barID The id of the bar
      */
-    barOnClick(event, barID) {
-      // let barID = parseInt(event.currentTarget.getAttribute('data-barid'),10);
+    barOnClick(barID) {
       if (this.barSelected) {
         if (this.selectedBar === barID) {
           this.barSelected = false;
@@ -2113,7 +2162,7 @@
       const spellOption = this.simulator.spells.aurora;
       AURORAS.forEach((spell, index) => {
         if (spell.requiredItem !== -1) {
-          if (this.gearSelected.includes(spell.requiredItem) && this.simulator.playerLevels.Magic >= spell.magicLevelRequired) {
+          if (this.equipmentSelected.includes(spell.requiredItem) && this.simulator.playerLevels.Magic >= spell.magicLevelRequired) {
             document.getElementById(`MCS ${spell.name} Button Image`).src = spell.media;
           } else {
             document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
@@ -2201,24 +2250,32 @@
       }
       this.updateZoneInfoCard();
     }
+
     /**
      * Updates the images and tooltips for potions when the potion tier is changed
      * @param {number} potionTier The new potion tier
      */
     updatePotionTier(potionTier) {
-      for (let i = 0; i < this.combatPotionIDs.length; i++) {
-        const potionID = this.combatPotionIDs[i];
-        // Update potion images
-        document.getElementById(`MCS ${this.getPotionName(potionID)} Button Image`).src = items[herbloreItemData[potionID].itemID[potionTier]].media;
-        // Update potion tooltips
-        // Potion  Title
-        this.potionTooltips.titles[i].textContent = this.getItemName(herbloreItemData[potionID].itemID[potionTier]);
-        // Potion Description
-        this.potionTooltips.descriptions[i].textContent = items[herbloreItemData[potionID].itemID[potionTier]].description;
-        // Potion Charges
-        this.potionTooltips.charges[i].textContent = `Charges: ${items[herbloreItemData[potionID].itemID[potionTier]].potionCharges}`;
-      }
+      this.combatPotionIDs.forEach((potionId) => {
+        const potion = items[herbloreItemData[potionId].itemID[potionTier]];
+        const img = document.getElementById(`MCS ${this.getPotionName(potionId)} Button Image`);
+        img.src = potion.media;
+        img.parentElement._tippy.setContent(this.getPotionTooltip(potion));
+      });
     }
+
+    /**
+     * Gets the content for the tooltip of a potion
+     * @param potion The potion object to get the tooltip for
+     * @returns {string} The tooltip content
+     */
+    getPotionTooltip(potion) {
+      return `<div class="text-center">${potion.name}<small>
+      <br><span class='text-info'>${potion.description.replace(/\.$/, '')}</span>
+      <br><span class='text-warning'>${potion.potionCharges} Potion Charges</span>
+      </small></div>`;
+    }
+
     /**
     * Updates the display of the sale list radio options depending on what the user has searched
     * @param {string} searchString The search query
@@ -2303,7 +2360,7 @@
     appendGearSet(setName) {
       this.gearSets.push({
         setName: setName,
-        setData: this.gearSelected,
+        setData: this.equipmentSelected,
       });
       // Update gear set dropdown
 
@@ -2324,23 +2381,23 @@
      */
     setGearToSet(setID) {
       // Set Gearselected to data
-      this.gearSelected = this.gearSets[setID].setData;
+      this.equipmentSelected = this.gearSets[setID].setData;
       // Update dropdowns to proper value
-      for (let i = 0; i < this.gearSelected.length; i++) {
-        for (let j = 0; j < this.gearSubsets[i].length; j++) {
-          if (this.gearSubsets[i][j].itemID === this.gearSelected[i]) {
-            this.gearSelectCard.dropDowns[i].selectedIndex = j;
+      for (let i = 0; i < this.equipmentSelected.length; i++) {
+        for (let j = 0; j < this.equipmentSubsets[i].length; j++) {
+          if (this.equipmentSubsets[i][j].itemID === this.equipmentSelected[i]) {
+            this.equipmentSelectCard.dropDowns[i].selectedIndex = j;
             break;
           }
         }
         // Do check for weapon type
         if (i === CONSTANTS.equipmentSlot.Weapon) {
           if (items[gearID].isTwoHanded) {
-            this.gearSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].selectedIndex = 0;
-            this.gearSelected[CONSTANTS.equipmentSlot.Shield] = 0;
-            this.gearSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = true;
+            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].selectedIndex = 0;
+            this.equipmentSelected[CONSTANTS.equipmentSlot.Shield] = 0;
+            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = true;
           } else {
-            this.gearSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = false;
+            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = false;
           }
           // Change to the correct combat style selector
           if ((items[gearID].type === 'Ranged Weapon') || items[gearID].isRanged) {
@@ -2360,7 +2417,7 @@
           }
         }
       }
-      // Update gear stats and combat stats
+      // Update equipment stats and combat stats
       this.simulator.computeEquipStats();
       this.updateEquipStats();
       this.simulator.computeCombatStats();
@@ -2440,6 +2497,8 @@
       this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
       this.newHeading.remove();
       this.tabDiv.remove();
+      this.tippySingletons.forEach(singleton => singleton.destroy());
+      this.tippyInstances.forEach(instance => instance.destroy());
       $(this.mcsModal).modal('hide');
       $(this.mcsModal).modal('dispose');
       this.mcsModal.remove();
@@ -2458,8 +2517,8 @@
       this.parent = parent;
       this.barWidth = 20;
       this.barGap = 1;
-      this.barNames = [];
       this.barImageSrc = [];
+      this.barNames = [];
       this.barBottomNames = [];
       this.barBottomLength = [];
       this.barBottomBrackets = [];
@@ -2602,7 +2661,7 @@
       for (let i = 0; i < 20; i++) {
         this.gridLine.push(document.createElement('div'));
         this.gridLine[i].className = 'mcsGridline';
-        this.gridLine[i].setAttribute('style', `bottom: ${(i + 1) * 5}%;height: 5%;`);
+        this.gridLine[i].setAttribute('style', `bottom: ${(i + 1) * 5}%;`);
         this.plotBox.appendChild(this.gridLine[i]);
       }
 
@@ -2612,11 +2671,14 @@
       this.xAxisContainers = [];
       this.bars = [];
       for (let i = 0; i < totBars; i++) {
-        this.bars.push(document.createElement('div'));
-        this.bars[i].className = 'mcsBar';
-        this.bars[i].style.height = 0;
-        this.bars[i].setAttribute('data-barid', i);
-        this.plotBox.appendChild(this.bars[i]);
+        const bar = document.createElement('div');
+        bar.className = 'mcsBar';
+        bar.style.height = 0;
+        const barContainer = document.createElement('div');
+        barContainer.className = 'mcs-bar-container';
+        barContainer.appendChild(bar);
+        this.bars.push(bar);
+        this.plotBox.appendChild(barContainer);
 
         const imageContainer = document.createElement('div');
         imageContainer.className = 'mcsXAxisImageContainer';
@@ -2637,6 +2699,7 @@
         imageContainer.appendChild(newCross);
         this.xAxis.appendChild(imageContainer);
       }
+
       // Do Second descriptions
       let botLength = 0;
       this.barBottomDivs = [];
@@ -2659,6 +2722,7 @@
         botLength += this.barBottomLength[i];
         divi++;
       }
+
       // Do ticktext
       this.tickText = [];
       for (let i = 0; i < 21; i++) {
@@ -2667,21 +2731,6 @@
         this.tickText[i].setAttribute('style', `height: 5%; bottom: ${i * 5 - 2.5}%;`);
         this.tickText[i].appendChild(document.createTextNode(mcsFormatNum(i * 0.05, 4)));
         this.yAxis.appendChild(this.tickText[i]);
-      }
-      // Do Tooltips
-      this.barTooltips = [];
-      for (let i = 0; i < this.bars.length; i++) {
-        this.barTooltips.push(document.createElement('div'));
-        this.barTooltips[i].className = 'mcsBarTooltip';
-        this.barTooltips[i].style.display = 'none';
-        if (i < (this.bars.length - 3)) {
-          this.barTooltips[i].style.left = `0%`;
-        } else {
-          this.barTooltips[i].style.right = `0%`;
-        }
-        this.bars[i].appendChild(this.barTooltips[i]);
-        this.bars[i].onmouseover = (event) => this.barOnMouseOver(event, i);
-        this.bars[i].onmouseout = (event) => this.barOnMouseOut(event, i);
       }
 
       this.parent.botContent.appendChild(this.plotContainer);
@@ -2698,20 +2747,20 @@
 
     /**
      * Toggles the display of a bar tooltip on
-     * @param {MouseEvent} event The mouse event
      * @param {number} id The ID of the bar
      */
-    barOnMouseOver(event, id) {
+    barOnMouseOver(id) {
       this.barTooltips[id].style.display = 'block';
     }
+
     /**
      * Toggles the display of a bar tooltip off
-     * @param {MouseEvent} event The mouse event
      * @param {number} id The ID of the bar
      */
-    barOnMouseOut(event, id) {
+    barOnMouseOut(id) {
       this.barTooltips[id].style.display = 'none';
     }
+
     /**
      * Changes the displayed data
      * @param {Array<number>} barData The new data to diplay
@@ -2759,7 +2808,19 @@
         const dataIndex = numData - i - 1;
         const barIndex = numBars - i - 1;
         this.bars[barIndex].style.height = `${barData[dataIndex] / divMax * 100}%`;
-        this.barTooltips[barIndex].textContent = mcsFormatNum(barData[dataIndex], 4);
+
+        let barName = '';
+        if (!this.parent.isViewingDungeon && this.parent.barIsDungeon[barIndex]) {
+          barName = DUNGEONS[this.parent.barMonsterIDs[barIndex]].name;
+        } else {
+          if (this.parent.isViewingDungeon) {
+            barName = MONSTERS[DUNGEONS[this.parent.viewedDungeonID].monsters[barIndex + DUNGEONS[this.parent.viewedDungeonID].monsters.length - this.bars.length]].name;
+          } else {
+            barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
+          }
+        }
+
+        this.bars[barIndex]._tippy.setContent(`<div class="text-center">${barName}<br><span class="text-info">${mcsFormatNum(barData[dataIndex], 4)}</span></div>`);
       }
       for (let i = 0; i < 20; i++) {
         if (i < (Ndivs - 1)) {
@@ -3413,9 +3474,9 @@
     * @description Computes the stats of the players equipped items and stores them on this properties
     */
     computeEquipStats() {
-      this.resetGearStats();
-      for (let i = 0; i < this.parent.slotKeys.length; i++) {
-        const itemID = this.parent.gearSelected[i];
+      this.resetEquipStats();
+      for (let i = 0; i < this.parent.equipmentSlotKeys.length; i++) {
+        const itemID = this.parent.equipmentSelected[i];
         let curItem;
         if (itemID === 0) {
           continue;
@@ -3472,7 +3533,7 @@
       this.combatStats.minHit = 0;
       let attackStyleBonus = 1;
       let meleeDefenceBonus = 1;
-      const weaponID = this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon];
+      const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
       if ((items[weaponID].type === 'Ranged Weapon') || items[weaponID].isRanged) {
         // Ranged
         this.combatStats.attackType = CONSTANTS.attackType.Ranged;
@@ -3499,7 +3560,7 @@
           this.combatStats.maxHit = Math.floor(numberMultiplier * ((SPELLS[this.spells.standard.selectedID].maxHit + SPELLS[this.spells.standard.selectedID].maxHit * (this.equipStats.magicDamageBonus / 100)) * (1 + (this.playerLevels.Magic + 1) / 200) * (1 + this.prayerBonus.magicDamage / 100) * (1 + this.herbloreBonus.magicDamage / 100)));
           this.combatStats.minHit = this.equipStats.increasedMinSpellDmg[SPELLS[this.spells.standard.selectedID].spellType];
           // Cloudburst Water Spell Bonus
-          if (this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Cloudburst_Staff && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
+          if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Cloudburst_Staff && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
             this.combatStats.maxHit += items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage * numberMultiplier;
           }
         } else {
@@ -3687,9 +3748,9 @@
       this.herbloreBonus.luckyHerb = 0; // 11
     }
     /**
-    * Resets the properties of this that refer to equipment stats to their default values
+    * Resets the equipment stats to their default values
     */
-    resetGearStats() {
+    resetEquipStats() {
       this.equipStats.attackSpeed = 4000;
       this.equipStats.strengthBonus = 0;
       this.equipStats.attackBonus = [0, 0, 0];
@@ -3741,27 +3802,27 @@
         startingGP: 50000000,
         levels: Object.assign({}, this.playerLevels), // Shallow copy of player levels
         activeItems: {
-          Hitpoints_Skillcape: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Ranged_Skillcape: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Magic_Skillcape: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Prayer_Skillcape: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Firemaking_Skillcape: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Cape_of_Arrow_Preservation: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation),
+          Hitpoints_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          Ranged_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          Magic_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          Prayer_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          Firemaking_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          Cape_of_Arrow_Preservation: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation),
 
-          Gold_Ruby_Ring: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring), // Regen Boost
-          Gold_Diamond_Ring: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring), // Flee Combat
-          Gold_Emerald_Ring: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring), // XP Boost
-          Gold_Sapphire_Ring: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring), // Reflect
+          Gold_Ruby_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring), // Regen Boost
+          Gold_Diamond_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring), // Flee Combat
+          Gold_Emerald_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring), // XP Boost
+          Gold_Sapphire_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring), // Reflect
 
-          Fighter_Amulet: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee), // Attack stun
-          Warlock_Amulet: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === 2), // Magic Healing
-          Guardian_Amulet: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet), // Damage reduction on getting hit
-          Deadeye_Amulet: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === 1), // Ranged criticals
+          Fighter_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee), // Attack stun
+          Warlock_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === 2), // Magic Healing
+          Guardian_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet), // Damage reduction on getting hit
+          Deadeye_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === 1), // Ranged criticals
 
-          Confetti_Crossbow: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow),
-          Stormsnap: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap),
-          Slayer_Crossbow: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow),
-          Big_Ron: (this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron),
+          Confetti_Crossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow),
+          Stormsnap: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap),
+          Slayer_Crossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow),
+          Big_Ron: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron),
         },
         prayerPointsPerAttack: 0,
         prayerPointsPerEnemy: 0,
@@ -3779,9 +3840,9 @@
       if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.ancient.isSelected) {
         playerStats.usingAncient = true;
         playerStats.specialData = playerSpecialAttacks[ANCIENT[this.spells.ancient.selectedID].specID];
-      } else if (items[this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon]].hasSpecialAttack) {
+      } else if (items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].hasSpecialAttack) {
         playerStats.hasSpecialAttack = true;
-        playerStats.specialData = playerSpecialAttacks[items[this.parent.gearSelected[CONSTANTS.equipmentSlot.Weapon]].specialAttackID];
+        playerStats.specialData = playerSpecialAttacks[items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].specialAttackID];
       }
       // Curses
       if (this.combatStats.attackType === CONSTANTS.attackType.Magic && !this.spells.ancient.isSelected && this.spells.curse.isSelected) {
@@ -3814,10 +3875,10 @@
         playerStats.xpBonus = 0.07;
       }
       this.currentSim.canTopazDrop = false;
-      if (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Topaz_Ring) {
+      if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Topaz_Ring) {
         this.currentSim.gpBonus = 1.15;
         this.currentSim.canTopazDrop = true;
-      } else if (this.parent.gearSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Aorpheats_Signet_Ring) {
+      } else if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Aorpheats_Signet_Ring) {
         this.currentSim.gpBonus = 2;
       } else {
         this.currentSim.gpBonus = 1;
@@ -3827,7 +3888,7 @@
       if (this.petOwned[20]) this.currentSim.lootBonus += 0.01;
       this.currentSim.slayerXPBonus = this.equipStats.slayerXPBonus;
       this.currentSim.herbConvertChance = this.herbloreBonus.luckyHerb / 100;
-      this.currentSim.doBonesAutoBury = (this.parent.gearSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
+      this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
       // Compute prayer point usage and xp gain
       const hasPrayerCape = playerStats.activeItems.Prayer_Skillcape;
       for (let i = 0; i < PRAYER.length; i++) {
@@ -4413,16 +4474,16 @@
           canEnter = false;
         }
         if (slayerAreas[i].slayerItem !== 0) {
-          let gearFound = false;
-          for (let j = 0; j < this.parent.gearSelected.length; j++) {
-            if (this.parent.gearSelected[j] === slayerAreas[i].slayerItem) {
-              gearFound = true;
+          let slayerItemFound = false;
+          for (let j = 0; j < this.parent.equipmentSelected.length; j++) {
+            if (this.parent.equipmentSelected[j] === slayerAreas[i].slayerItem) {
+              slayerItemFound = true;
             }
           }
-          if (!gearFound) {
+          if (!slayerItemFound) {
             canEnter = false;
           }
-          if (this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || this.parent.gearSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape) {
+          if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape) {
             canEnter = true;
           }
         }
@@ -5209,19 +5270,21 @@
       return newImage;
     }
     /**
-    * Creates a new button with the image
+    * Creates a button displaying an image with a tooltip
     * @param {string} imageSource Source of the image on the button
     * @param {string} idText Text to put in the id of the button
     * @param {Function} onclickCallback Callback when clicking the button
-    * @param {string} size Image Size
+    * @param {string} size Image size
+    * @param {string} tooltip The tooltip content
     * @return {HTMLButtonElement} The created button element
     */
-    createImageButton(imageSource, idText, onclickCallback, size) {
+    createImageButton(imageSource, idText, onclickCallback, size, tooltip) {
       const newButton = document.createElement('button');
       newButton.type = 'button';
       newButton.id = `MCS ${idText} Button`;
       newButton.className = 'btn btn-outline-dark';
       newButton.onclick = onclickCallback;
+      if (tooltip) newButton.dataset.tippyContent = tooltip;
       const newImage = document.createElement('img');
       newImage.className = `mcsButtonImage mcsImage${size}`;
       newImage.id = `MCS ${idText} Button Image`;
@@ -5235,10 +5298,9 @@
      * @param {string[]} tabNames
      * @param {string[]} tabImages
      * @param {Function[]} tabCallbacks
-     * @param {number} imageSize Size of images in px
      * @return {HTMLDivElement}
      */
-    addTabMenu(tabNames, tabImages, tabCallbacks, imageSize) {
+    addTabMenu(tabNames, tabImages, tabCallbacks) {
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsTabButtonContainer';
       tabNames.forEach((name, index) => {
@@ -5246,17 +5308,14 @@
         newTab.type = 'button';
         newTab.id = `MCS ${name} Tab`;
         newTab.className = 'mcsTabButton';
+        newTab.dataset.tippyContent = name;
         newTab.onclick = tabCallbacks[index];
         const newImage = document.createElement('img');
         newImage.className = 'mcsButtonImage';
         newImage.id = `MCS ${name} Tab Image`;
         newImage.src = tabImages[index];
-        newImage.style.width = `${imageSize}px`;
-        newImage.style.height = `${imageSize}px`;
         newTab.appendChild(newImage);
         newCCContainer.appendChild(newTab);
-        const ttBuilder = new McsTooltipBuilder(this.addTooltip(newTab));
-        ttBuilder.addTitle(name);
       });
       this.container.appendChild(newCCContainer);
       const tabContainer = document.createElement('div');
@@ -5265,28 +5324,29 @@
       return tabContainer;
     }
     /**
-     * Creates multiple image button in an array
+     * Creates multiple image buttons in a single container
      * @param {Array<string>} sources The image source paths
      * @param {Array<string>} idtexts The ids for the buttons
      * @param {string} size The size of the buttons: Small, Medium
      * @param {Array<Function>} onclickCallbacks The callbacks for the buttons
      * @param {number} containerWidth container width in px
-     * @return {Array<HTMLDivElement>} The tooltips of the buttons
+     * @param {Array<string>} tooltips The tooltip contents
+     * @return {Array<HTMLDivElement>} The image buttons
      */
-    addMultiImageButton(sources, idtexts, size, onclickCallbacks, containerWidth) {
-      const toolTips = [];
+    addImageButtons(sources, idtexts, size, onclickCallbacks, tooltips = [], containerWidth) {
+      const deleteMe = [];
       const newCCContainer = document.createElement('div');
       newCCContainer.className = 'mcsMultiImageButtonContainer';
       for (let i = 0; i < sources.length; i++) {
-        const newButton = this.createImageButton(sources[i], idtexts[i], onclickCallbacks[i], size);
-        toolTips.push(this.addTooltip(newButton));
+        const newButton = this.createImageButton(sources[i], idtexts[i], onclickCallbacks[i], size, tooltips[i]);
+        deleteMe.push(this.addTooltip(newButton));
         newCCContainer.appendChild(newButton);
       }
       if (containerWidth) {
         newCCContainer.style.width = `${containerWidth}px`;
       }
       this.container.appendChild(newCCContainer);
-      return toolTips;
+      return deleteMe;
     }
     /**
      * Assigns the onclick event to a popupmenu
@@ -5302,7 +5362,7 @@
               firstClick = false;
               return;
             }
-            if (!popupMenuElement.contains(event.target) && popupMenuElement.style.display === '') {
+            if (popupMenuElement.style.display === '') {
               popupMenuElement.style.display = 'none';
               document.body.removeEventListener('click', outsideClickListener);
             }
@@ -5316,21 +5376,22 @@
      * Creates a multiple button popup menu (Equip grid)
      * @param {string[]} sources
      * @param {string[]} elIds
-     * @param {number} height
-     * @param {number} width
      * @param {HTMLElement} popups
+     * @param {Array<string>} tooltips The tooltip contents
      */
-    addMultiPopupMenu(sources, elIds, height, width, popups) {
+    addMultiPopupMenu(sources, elIds, popups, tooltips) {
       const newCCContainer = document.createElement('div');
-      newCCContainer.className = 'mcsGearImageContainer';
+      newCCContainer.className = 'mcsEquipmentImageContainer';
       for (let i = 0; i < sources.length; i++) {
         const containerDiv = document.createElement('div');
         containerDiv.style.position = 'relative';
         containerDiv.style.cursor = 'pointer';
         const newImage = document.createElement('img');
-        newImage.id = `${elIds[i]}`;
+        newImage.id = elIds[i];
         newImage.src = sources[i];
         newImage.className = 'combat-equip-img border border-2x border-rounded-equip border-combat-outline p-1';
+        newImage.dataset.tippyContent = tooltips[i];
+        newImage.dataset.tippyHideonclick = 'true';
         containerDiv.appendChild(newImage);
         containerDiv.appendChild(popups[i]);
         newCCContainer.appendChild(containerDiv);
@@ -5344,10 +5405,9 @@
     * @param {string} labelText The text to label the dropdown with
     * @param {Array<string>} optionText The text of the dropdown's options
     * @param {Array} optionValues The values of the dropdown's options
-    * @param {number} height The height of the dropdown
     * @param {Function} onChangeCallback The callback for when the option is changed
     */
-    addDropdown(labelText, optionText, optionValues, height, onChangeCallback) {
+    addDropdown(labelText, optionText, optionValues, onChangeCallback) {
       const dropDownID = `MCS ${labelText} Dropdown`;
       const newCCContainer = this.createCCContainer();
       newCCContainer.id = `${dropDownID} Container`;
@@ -5634,66 +5694,6 @@
     }
   }
 
-  /**
-   * Class to build tooltips
-   */
-  class McsTooltipBuilder {
-    /**
-     * Constructs an instance of McsTooltipBuilder.
-     * @param {HTMLDivElement} tooltipDiv Parent div element where all tooltip sub elements will be appended
-     */
-    constructor(tooltipDiv) {
-      this.container = tooltipDiv;
-    }
-    /**
-     * Adds a title <span> element to the tooltip
-     * @param {string} textContent The text to put in the title
-     * @return {HTMLSpanElement}
-     */
-    addTitle(textContent) {
-      return this.addSpan('mcsTTTitle', textContent);
-    }
-    /**
-    * Adds a text <span> element to the tooltip
-    * @param {string} textContent The text to put in the title
-    * @return {HTMLSpanElement}
-    */
-    addText(textContent) {
-      return this.addSpan('mcsTTText', textContent);
-    }
-    /**
-    * Adds a <div> element to the tooltip with seperation lines
-    * @return {HTMLDivElement}
-    */
-    addDivider() {
-      const newDivider = document.createElement('div');
-      newDivider.className = 'mcsTTDivider';
-      this.container.appendChild(newDivider);
-      return newDivider;
-    }
-    /**
-    * Adds a <br> element to the tooltip
-    * @return {HTMLBRElement}
-    */
-    addLineBreak() {
-      const newBreak = document.createElement('br');
-      this.container.appendChild(newBreak);
-      return newBreak;
-    }
-    /**
-     * Adds a span element with the given classname and text to the tooltip
-     * @param {string} className
-     * @param {string} textContent
-     * @return {HTMLSpanElement}
-     */
-    addSpan(className, textContent) {
-      const newSpan = document.createElement('span');
-      newSpan.className = className;
-      newSpan.textContent = textContent;
-      this.container.appendChild(newSpan);
-      return newSpan;
-    }
-  }
   /**
    * @description Formats a number with the specified number of sigfigs, Addings suffixes as required
    * @param {number} number Number

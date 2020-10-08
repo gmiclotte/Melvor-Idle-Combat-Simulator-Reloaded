@@ -193,6 +193,8 @@
 
 .mcsButtonImage {
   margin: 4px;
+  width: 25px;
+  height: 25px;
 }
 
 .mcsImageSmall {
@@ -256,7 +258,7 @@
   background-color: #4a5568 !important;
 }
 
-.mcsGearImageContainer {
+.mcsEquipmentImageContainer {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -403,6 +405,11 @@
   z-index: 1;
 }
 
+.mcs-bar-container {
+  display: flex;
+  z-index: 1;
+}
+
 .mcsBar {
   position: relative;
   background-color: #0072BD;
@@ -448,8 +455,14 @@
   border-width: thick;
   border-radius: 0.5rem;
   width: 500px;
-  z-index: 1;
+  z-index: 999;
   cursor: default;
+}
+
+.tooltip-icon {
+  width: 24px;
+  height: 24px;
+  margin: 2px 6px;
 }
 
 .darkMode .mcsTabContent {
