@@ -806,11 +806,11 @@
           tooltip += `<span class='text-success'>+${(2 / numberMultiplier * prayer.pointsPerPlayer).toFixed(2)} Prayer XP per damage dealt to enemy</span><br>`;
         }
         tooltip += '<span class="text-warning">Prayer Point Cost:</span><br><span class="text-info">';
-        if (prayer.pointsPerEnemy > 0) {
-          tooltip += `${prayer.pointsPerEnemy}</span> per <span class='text-success'>PLAYER</span> attack`;
-        }
         if (prayer.pointsPerPlayer > 0) {
-          tooltip += `${prayer.pointsPerPlayer}</span> per <span class='text-danger'>ENEMY</span> attack`;
+          tooltip += `${prayer.pointsPerPlayer}</span> per <span class='text-success'>PLAYER</span> attack`;
+        }
+        if (prayer.pointsPerEnemy > 0) {
+          tooltip += `${prayer.pointsPerEnemy}</span> per <span class='text-danger'>ENEMY</span> attack`;
         }
         if (prayer.pointsPerRegen > 0) {
           tooltip += `${prayer.pointsPerRegen}</span> per <span class='text-info'>HP REGEN</span>`;
