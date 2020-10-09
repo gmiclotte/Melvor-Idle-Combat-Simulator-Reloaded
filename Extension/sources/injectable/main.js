@@ -607,7 +607,7 @@
       document.getElementById('page-container').appendChild(this.mcsModal);
 
       // Finalize tooltips
-      const tippyOptions = { allowHTML: true, animation: false, maxWidth: 400, hideOnClick: false };
+      const tippyOptions = { allowHTML: true, animation: false, hideOnClick: false };
       this.tippyInstances = tippy('#mcsModal [data-tippy-content]', tippyOptions);
       this.plotter.bars.forEach((bar) => {
         this.tippyInstances.concat(tippy(bar, { triggerTarget: bar.parentElement, ...tippyOptions }));
@@ -1204,14 +1204,18 @@
       if (!item) {
         return this.equipmentSlotKeys[equipmentSlot];
       }
+
       let tooltip = `<div class="text-center">${item.name}<br><small>`;
+
       if (item.description) {
         tooltip += `<span class='text-info'>${item.description.replace(/<br>\(/, ' (')}</span><br>`;
       }
+
       if (item.hasSpecialAttack) {
         const special = playerSpecialAttacks[item.specialAttackID];
         tooltip += `<span class='text-danger'>${special.name} (${special.chance}%): </span><span class='text-warning'>${special.description}</span><br>`;
       }
+
       if (item.attackSpeed) {
         tooltip += `<span class='text-info'>Attack Speed: ${item.attackSpeed / 1000}s</span><br>`;
       }
@@ -1272,10 +1276,21 @@
         if (item.magicDefenceBonus) {
           statBonuses.push(this.getTooltipStatBonus('Magic Defence', item.magicDefenceBonus));
         }
-        tooltip += `<div>${statBonuses.join(', ')}</div></div><br>`;
+        tooltip += `<span style="max-width: 240px;">${statBonuses.join(', ')}</span></div>`;
       }
       if (item.slayerBonusXP) {
         tooltip += `${this.getTooltipIcon(this.media.slayer)}${this.getTooltipStatBonus('Slayer XP', item.slayerBonusXP, '%')}<br>`;
+      }
+
+      const requirements = [
+        { description: 'Attack Level', property: 'attackLevelRequired' },
+        { description: 'Defence Level', property: 'defenceLevelRequired' },
+        { description: 'Ranged Level', property: 'rangedLevelRequired' },
+        { description: 'Magic Level', property: 'magicLevelRequired' },
+        { description: 'Slayer Level', property: 'slayerLevelRequired' },
+      ];
+      if (requirements.some((req) => item[req.property])) {
+        tooltip += `<span class="text-warning">Requires:</span> ${requirements.flatMap((req) => item[req.property] ? `${req.description} ${item[req.property]}` : []).join(', ')}`;
       }
 
       tooltip += '</small></div>';
@@ -5209,18 +5224,7 @@
       this.dropDowns = [];
       this.numOutputs = [];
     }
-    /**
-     * Sets the container width to the max, only works while none have display=none
-     * @memberof McsCard
-     */
-    setContainerWidths() {
-      const maxWidth = Math.max(...[...this.container.getElementsByClassName('mcsCCContainer')].map((container) => {
-        return container.offsetWidth;
-      }));
-      [...this.container.getElementsByClassName('mcsCCContainer')].forEach((container) => {
-        // container.style.width = `${maxWidth}px`;
-      });
-    }
+
     /**
     * Creates a new button and appends it to the container. Autoadds callbacks to change colour
     * @param {string} buttonText Text to display on button
