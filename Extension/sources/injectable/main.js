@@ -335,24 +335,22 @@
         }
       });
 
+      this.createEquipmentSelectCard();
+
+      // Add tab card
       {
         this.selectedMainTab = 0;
-        this.mainTabCard = new McsCard(this.topContent, '350px', '', '150px', true);
-        const mainTabNames = ['Equipment', 'Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'Sim. Options', 'GP Options'];
-        const mainTabImages = [this.emptyItems.Helmet.media, this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.settings, this.media.gp];
-        const mainTabCallbacks = mainTabNames.map((_name, index) => {
-          return () => this.mainTabOnClick(index);
-        });
-        this.mainTabIDs = mainTabNames.map((name) => {
-          return `MCS ${name} Tab`;
-        });
+        this.mainTabCard = new McsCard(this.topContent, '', '150px', true);
+        const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'Sim. Options', 'GP Options'];
+        const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.settings, this.media.gp];
+        const mainTabCallbacks = mainTabNames.map((_, i) => () => this.mainTabOnClick(i));
+        this.mainTabIDs = mainTabNames.map((name) => toId(`${name}-tab`));
         this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
         /** @type {McsCard[]} */
         this.mainTabCards = [];
       }
 
-      // Add Cards to the container
-      this.createEquipmentSelectCard();
+      // Add Cards to the tab card
       this.createLevelSelectCard();
       this.createSpellSelectCards();
       this.createPrayerSelectCard();
@@ -361,7 +359,7 @@
 
       // Equipment Stat Display Card
       {
-        this.equipStatCard = new McsCard(this.topContent, '250px', '', '50px', true);
+        this.equipStatCard = new McsCard(this.topContent, '', '50px', true);
         this.equipStatCard.addSectionTitle('Equipment Stats');
         this.equipStatKeys = [
           'attackSpeed',
@@ -426,7 +424,7 @@
       }
       // Combat Stat Display Card
       {
-        this.combatStatCard = new McsCard(this.topContent, '250px', '', '60px', true);
+        this.combatStatCard = new McsCard(this.topContent, '', '60px', true);
         this.combatStatCard.addSectionTitle('Combat Stats');
         const combatStatNames = [
           'Attack Speed',
@@ -472,7 +470,7 @@
       // Export Options Card
       {
         this.isExportDisplayed = false;
-        this.exportOptionsCard = new McsCard(this.topContent, '300px', '', '100px', true);
+        this.exportOptionsCard = new McsCard(this.topContent, '', '100px', true);
         this.exportOptionsCard.addSectionTitle('Export Options');
         this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
         this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
@@ -488,7 +486,7 @@
       }
       // Simulation/Plot Options Card
       {
-        this.simOptionsCard = new McsCard(this.mainTabContainer, '', '', '150px');
+        this.simOptionsCard = new McsCard(this.mainTabContainer, '', '150px');
         this.mainTabCards.push(this.simOptionsCard);
         this.simOptionsCard.addSectionTitle('Simulation Options');
         this.simOptionsCard.addNumberInput('Max Actions', 1000, 1, 10000, (event) => this.maxActionsInputOnChange(event));
@@ -507,7 +505,7 @@
       }
       // Gp Options card
       {
-        this.gpSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
+        this.gpSelectCard = new McsCard(this.mainTabContainer, '', '150px');
         this.mainTabCards.push(this.gpSelectCard);
         this.gpSelectCard.addSectionTitle('GP/s Options');
         this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
@@ -517,7 +515,7 @@
       }
       // GP/s options card
       {
-        this.gpOptionsCard = new McsCard(this.gpSelectCard.container, '', '', '200px');
+        this.gpOptionsCard = new McsCard(this.gpSelectCard.container, '', '200px');
         this.gpOptionsCard.addSectionTitle('Item Subset Selection');
         this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
         this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
@@ -538,7 +536,7 @@
         lab2.style.width = '124px';
         labelCont.appendChild(lab2);
         this.gpOptionsCard.container.appendChild(labelCont);
-        this.gpSearchResults = new McsCard(this.gpOptionsCard.container, '', '130px', '100px');
+        this.gpSearchResults = new McsCard(this.gpOptionsCard.container, '130px', '100px');
         for (let i = 0; i < this.simulator.lootList.length; i++) {
           this.gpSearchResults.addRadio(this.simulator.lootList[i].name, 20, `${this.simulator.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
         }
@@ -550,10 +548,10 @@
       }
       // Individual info card
       {
-        this.zoneInfoCard = new McsCard(this.botContent, '275px', '', '100px', true);
+        this.zoneInfoCard = new McsCard(this.botContent, '', '100px', true);
         this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
         this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
-        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '', '80px');
+        this.subInfoCard = new McsCard(this.zoneInfoCard.container, '', '80px');
         this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
         const zoneInfoLabelNames = [];
         for (let i = 0; i < this.zoneInfoNames.length; i++) {
@@ -651,8 +649,7 @@
     }
 
     createEquipmentSelectCard() {
-      this.equipmentSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
-      this.mainTabCards.push(this.equipmentSelectCard);
+      this.equipmentSelectCard = new McsCard(this.topContent, '', '150px', true);
       const equipmentRows = [
         [CONSTANTS.equipmentSlot.Helmet],
         [CONSTANTS.equipmentSlot.Cape, CONSTANTS.equipmentSlot.Amulet, CONSTANTS.equipmentSlot.Quiver],
@@ -693,7 +690,7 @@
     }
 
     createLevelSelectCard() {
-      this.levelSelectCard = new McsCard(this.mainTabContainer, '', '', '150px');
+      this.levelSelectCard = new McsCard(this.mainTabContainer, '', '150px');
       this.mainTabCards.push(this.levelSelectCard);
       this.levelSelectCard.addSectionTitle('Player Levels');
       this.skillKeys.forEach((skillName) => {
@@ -706,7 +703,7 @@
     }
 
     createSpellSelectCards() {
-      this.spellSelectCard = new McsCard(this.mainTabContainer, '', '100%', '150px');
+      this.spellSelectCard = new McsCard(this.mainTabContainer, '100%', '150px');
       this.mainTabCards.push(this.spellSelectCard);
       this.spellSelectCard.addSectionTitle('Spells');
       this.selectedSpellTab = 0;
@@ -715,9 +712,7 @@
       const spellTabCallbacks = spellTypeNames.map((_name, index) => {
         return () => this.spellTabOnClick(index);
       });
-      this.spellTabIDs = spellTypeNames.map((name) => {
-        return `MCS ${name} Tab`;
-      });
+      this.spellTabIDs = spellTypeNames.map((name) => toId(`${name}-tab`));
       this.spellTabContainer = this.spellSelectCard.addTabMenu(spellTypeNames, spellTypeImages, spellTabCallbacks);
       /** @type {McsCard[]} */
       this.spellTabCards = [];
@@ -739,7 +734,7 @@
      * @return {McsCard} The created spell select card
      */
     createSpellSelectCard(title, spellType) {
-      const newCard = new McsCard(this.spellTabContainer, '', '', '100px');
+      const newCard = new McsCard(this.spellTabContainer, '', '100px');
       newCard.addSectionTitle(title);
       const spells = this.simulator.spells[spellType].array;
       const spellImages = spells.map((spell) => spell.media);
@@ -766,7 +761,7 @@
     }
 
     createPrayerSelectCard() {
-      this.prayerSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.prayerSelectCard = new McsCard(this.mainTabContainer, '', '100px');
       this.mainTabCards.push(this.prayerSelectCard);
       this.prayerSelectCard.addSectionTitle('Prayers');
       const prayerSources = [];
@@ -827,7 +822,7 @@
     }
 
     createPotionSelectCard() {
-      this.potionSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.potionSelectCard = new McsCard(this.mainTabContainer, '', '100px');
       this.mainTabCards.push(this.potionSelectCard);
       this.potionSelectCard.addSectionTitle('Potions');
       this.potionSelectCard.addDropdown('Potion Tier', ['Tier 1', 'Tier 2', 'Tier 3', 'Tier 4'], [0, 1, 2, 3], (e) => this.potionTierDropDownOnChange(e));
@@ -855,7 +850,7 @@
       const combatPets = PETS.filter((_pet, petID) => {
         return this.combatPetsIds.includes(petID);
       });
-      this.petSelectCard = new McsCard(this.mainTabContainer, '', '', '100px');
+      this.petSelectCard = new McsCard(this.mainTabContainer, '', '100px');
       this.mainTabCards.push(this.petSelectCard);
       this.petSelectCard.addSectionTitle('Pets');
       const petImageSources = combatPets.map((pet) => pet.media);
@@ -879,7 +874,7 @@
       const buttonIds = menuItems.map((item) => this.getItemName(item.itemID));
       const buttonCallbacks = menuItems.map((item) => () => this.equipItem(equipmentSlot, item.itemID));
       const tooltips = menuItems.map((item) => this.getEquipmentTooltip(equipmentSlot, item));
-      card.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, 420);
+      card.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, '100%');
     }
 
     /**
@@ -1004,7 +999,7 @@
     createEquipmentPopup(equipmentSlot) {
       const equipmentSelectPopup = document.createElement('div');
       equipmentSelectPopup.className = 'mcsPopup';
-      const equipmentSelectCard = new McsCard(equipmentSelectPopup, '', '', '400px');
+      const equipmentSelectCard = new McsCard(equipmentSelectPopup, '', '600px');
       const triSplit = [0, 1, 2, 3, 5, 8];
       const noSplit = [6, 7, 10];
       if (triSplit.includes(equipmentSlot)) {
@@ -3469,7 +3464,7 @@
       });
     }
     /**
-    * @description Computes the stats of the players equipped items and stores them on this properties
+    * Computes the stats of the players equipped items and stores them on this properties
     */
     computeEquipStats() {
       this.resetEquipStats();
@@ -3523,7 +3518,7 @@
       }
     }
     /**
-    * @description Computes the combat stats from Equipment stats, combat style, spell selection and player levels and stores them on this properties
+    * Computes the combat stats from Equipment stats, combat style, spell selection and player levels and stores them on this properties
     */
     computeCombatStats() {
       // ['Attack','Strength','Defence','Ranged','Magic']
@@ -3599,7 +3594,7 @@
       this.combatStats.maxHitpoints *= numberMultiplier;
     }
     /**
-    * @description Computes the prayer bonuses for the selected prayers
+    * Computes the prayer bonuses for the selected prayers
     */
     computePrayerBonus() {
       this.resetPrayerBonus();
@@ -5196,12 +5191,11 @@
     /**
      * Constructs an instance of McsCard
      * @param {HTMLElement} parentElement The parent element the card should be appended to
-     * @param {string} width The width of the card
      * @param {string} height The height of the card
      * @param {string} inputWidth The width of inputs for the card's ui elements
      * @param {boolean} outer This card is an outside card
      */
-    constructor(parentElement, width, height, inputWidth, outer = false) {
+    constructor(parentElement, height, inputWidth, outer = false) {
       this.outerContainer = document.createElement('div');
       this.outerContainer.className = `mcsCardContainer${outer ? ' mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark' : ''}`;
       if (height !== '') {
@@ -5304,13 +5298,13 @@
       tabNames.forEach((name, index) => {
         const newTab = document.createElement('button');
         newTab.type = 'button';
-        newTab.id = `MCS ${name} Tab`;
+        newTab.id = toId(`${name}-tab`);
         newTab.className = 'mcsTabButton';
         newTab.dataset.tippyContent = name;
         newTab.onclick = tabCallbacks[index];
         const newImage = document.createElement('img');
         newImage.className = 'mcsButtonImage';
-        newImage.id = `MCS ${name} Tab Image`;
+        newImage.id = toId(`${name}-tab-image`);
         newImage.src = tabImages[index];
         newTab.appendChild(newImage);
         newCCContainer.appendChild(newTab);
@@ -5327,8 +5321,8 @@
      * @param {Array<string>} idtexts The ids for the buttons
      * @param {string} size The size of the buttons: Small, Medium
      * @param {Array<Function>} onclickCallbacks The callbacks for the buttons
-     * @param {number} containerWidth container width in px
      * @param {Array<string>} tooltips The tooltip contents
+     * @param {string} containerWidth container width
      * @return {Array<HTMLDivElement>} The image buttons
      */
     addImageButtons(sources, idtexts, size, onclickCallbacks, tooltips = [], containerWidth) {
@@ -5341,7 +5335,7 @@
         newCCContainer.appendChild(newButton);
       }
       if (containerWidth) {
-        newCCContainer.style.width = `${containerWidth}px`;
+        newCCContainer.style.width = containerWidth;
       }
       this.container.appendChild(newCCContainer);
       return deleteMe;
@@ -5693,7 +5687,7 @@
   }
 
   /**
-   * @description Formats a number with the specified number of sigfigs, Addings suffixes as required
+   * Formats a number with the specified number of sigfigs, Addings suffixes as required
    * @param {number} number Number
    * @param {number} digits Number of significant digits
    * @return {string}
@@ -5713,6 +5707,15 @@
       }
     }
     return `${+parseFloat(output).toFixed(6).toLocaleString(undefined, { minimumSignificantDigits: digits })}${end}`;
+  }
+
+  /**
+   * Creates an id for an element from a name
+   * @param {string} name The name describing the element
+   * @returns An id starting with "mcs-" and ending with the name in lowercase with spaces replaced by "-"
+   */
+  function toId(name) {
+    return `mcs-${name.toLowerCase().replace(/ /g, '-')}`;
   }
 
   /** @type {McsApp} */

@@ -214,9 +214,6 @@
 
 .mcsMultiImageButtonContainer {
   width: 192px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
 }
 
 .mcsMultiImageButtonContainer button {
@@ -454,7 +451,8 @@
   border-style: solid;
   border-width: thick;
   border-radius: 0.5rem;
-  width: 500px;
+  width: 614px;
+  padding: 0 0.5rem 0.5rem 0.5rem;
   z-index: 999;
   cursor: default;
 }

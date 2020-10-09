@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 // Set up listener from page
 window.addEventListener('message', (event) => {
   // We only accept messages from ourselves
@@ -34,17 +35,19 @@ window.addEventListener('message', (event) => {
     }
   }
 }, false);
+
 // Perform script injection
 const injectableNames = ['main'];
 for (let i = 0; i < injectableNames.length; i++) {
   injectScript(injectableNames[i]);
 }
+
 /**
- * @description Injects a script onto the page of the
+ * Injects a script onto the page of the
  * @param {string} scriptName
  */
 function injectScript(scriptName) {
-  const scriptID = `MCS ${scriptName}`;
+  const scriptID = `mcs-${scriptName}`;
   // Check if script already exists, if so delete it
   if (document.getElementById(scriptID)) {
     window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'UNLOAD' });
