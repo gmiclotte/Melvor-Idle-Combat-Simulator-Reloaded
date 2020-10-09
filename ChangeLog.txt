@@ -1,6 +1,15 @@
+v1.1.0:
+    Changes:
+    - Moved equipment tab to its own card
+    - Added level requirements to equipment tooltips
+
+    Fixes:
+    - Style issues
+
 v1.0.0:
     Changes:
     - Renamed fork to Combat Simulator Reloaded
+    - Bars can now be selected by clicking above them instead of only on the bars themselves, and their tooltips will also appear even when you hover above them
     - Inspecting a dungeon now shows all encountered monsters without combining the ones that appear multiple times in a row
     - The spells tab automatically shows the tab of the currently selected spell after importing a gear set
     - Remade tooltips in the same style as the game

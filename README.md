@@ -1,5 +1,8 @@
 # Melvor Idle Combat Simulator Reloaded
+[![Google Chrome](https://img.shields.io/chrome-web-store/v/cgggfndkphggbgeimpplooflemnfndok?label=Get%20MCS%20Reloaded%20for%20Chrome&logo=Google%20Chrome)](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
+
 A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
+
 A fork of the great but no longer maintained [Melvor Idle Combat Simulator](https://github.com/coolrox95/Melvor-Idle-Combat-Simulator) by Coolrox95.
 
 ## How to Install
@@ -7,10 +10,12 @@ While this extension has been tested, it is still recommended to create a backup
 After installing the extension, a refresh of the game may be required.
 
 ### Firefox:
-Currently not available as a signed add-on, but you can [add it as temporary add-on](https://www.youtube.com/watch?v=J7el77F1ckg)
+Currently not available as a signed add-on, but you can download [the latest version](/../../releases/latest) of the simulator and [add it as temporary add-on](https://www.youtube.com/watch?v=J7el77F1ckg)
 
 ### Chrome:
-Currently not available on the chrome webstore, but you can download the sources here and [add it as an unpacked extension](https://developer.chrome.com/extensions/getstarted)
+You can get the extension on the [Chrome Web Store](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
+
+Or you can download the sources here and [add it as an unpacked extension](https://developer.chrome.com/extensions/getstarted)
 1. Download [the latest version](/../../releases/latest) of the simulator
 2. Unzip the files
 3. Navigate to: chrome://extensions and toggle Developer mode on
@@ -24,9 +29,9 @@ Currently not available on the chrome webstore, but you can download the sources
 ## Instructions
 1. Open the simulator by clicking the Combat Simulator button in the Tools section in the game's sidebar (located between Skills and Minigame)
 2. Select the tabs of the simulator and adjust the settings for your simulation
-    - Equipment Tab: Allows you to change your equipment, combat style, and import gear sets from the game
-        - To change equipment simply click on the slot you want to change and select equipment from the popup menu
-        - To Import Gear Sets from the game click on the numbered buttons to import the corresponding gear set
+    - Equipment Tab: Allows you to change your equipment, combat style, and import equipment sets from the game
+        - To change equipment click on the slot you want to change and select the desired equipment from the popup menu
+        - Click on the numbered buttons to import the corresponding equipment set from the game
             - Player Levels, Spells, Prayers, Potions and Pets will also be imported
         - Use the Combat Style dropdown menu to change the style for that weapon type
     - Levels Tab: Allows you to adjust the levels used in the simulation
@@ -68,7 +73,6 @@ Currently not available on the chrome webstore, but you can download the sources
     - Prayer Points per X: Average amount of prayer points per X consumed
     - Damage per X: Average damage dealt per X
     - Average Kill Time (s): The average time in seconds to kill an enemy or to clear a dungeon
-    - Kills per X: The average number of kills or dungeon clears per X
     - Damage per Attack: The average amount of damage done per attack
     - GP per X: The average amount of GP earned per X
     - Potential Herblore XP per X: The potential herblore xp earned using lucky herb potions, asssuming you use the herbs to craft the most xp efficient potions
@@ -79,6 +83,7 @@ Currently not available on the chrome webstore, but you can download the sources
         - This can be used to determine potion charge usage for combat potions that consume charges on enemy attacks
     - Y Pet Chance per X: The probability to receive Y pet in the given time period
         - Pets are rolled for when you earn experience of the given type, except for the slayer pet which is only rolled for upon killing an active slayer task monster
+    - Kills per X: The average number of kills or dungeon clears per X
 6. Click on a bar to view detailed information about that monster or dungeon
     - You can click Inspect Dungeon to view the simulation results for individual monsters inside a dungeon
 7. Export Data to your Clip Board by clicking the Export Data button
