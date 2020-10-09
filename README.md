@@ -1,6 +1,6 @@
-# Melvor Idle Combat Simulator
+# Melvor Idle Combat Simulator Reloaded
 A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
-This extension was built for version: Alpha v0.16.1 of Melvor Idle.
+A fork of the great but no longer maintained [Melvor Idle Combat Simulator](https://github.com/coolrox95/Melvor-Idle-Combat-Simulator) by Coolrox95.
 
 ## How to Install
 While this extension has been tested, it is still recommended to create a backup of your save file first.
@@ -79,9 +79,8 @@ Currently not available on the chrome webstore, but you can download the sources
         - This can be used to determine potion charge usage for combat potions that consume charges on enemy attacks
     - Y Pet Chance per X: The probability to receive Y pet in the given time period
         - Pets are rolled for when you earn experience of the given type, except for the slayer pet which is only rolled for upon killing an active slayer task monster
-6. Click on a bar to view detailed information about that monster/dungeon
+6. Click on a bar to view detailed information about that monster or dungeon
     - You can click Inspect Dungeon to view the simulation results for individual monsters inside a dungeon
-        - Note that the average time in this view is the time required to defeat the quantity of that monster in the dungeon
 7. Export Data to your Clip Board by clicking the Export Data button
     - You can change the options for this export by clicking Show Export Options
         - Dungeon Monsters toggles whether the individual monsters from dungeons should be exported

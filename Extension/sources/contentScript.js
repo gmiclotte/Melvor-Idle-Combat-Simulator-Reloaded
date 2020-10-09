@@ -1,4 +1,4 @@
-/*  Melvor Combat Simulator: Adds a combat simulator to Melvor Idle
+/*  Melvor Idle Combat Simulator
 
     Copyright (C) <2020>  <Coolrox95>
 

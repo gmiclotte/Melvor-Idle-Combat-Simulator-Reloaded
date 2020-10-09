@@ -1,4 +1,4 @@
-/*  Melvor Combat Simulator: Adds a combat simulator to Melvor Idle
+/*  Melvor Idle Combat Simulator
 
     Copyright (C) <2020>  <Coolrox95>
 
@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 (() => {
-  const version = 'v0.11.2';
+  const version = 'v1.0.0';
 
   /**
    * Container Class for the Combat Simulator.
@@ -292,7 +292,7 @@
       modalDialog.appendChild(modalContent);
 
       const modalHeader = $(`<div class="block block-themed block-transparent mb-0"><div class="block-header bg-primary-dark">
-        <h3 class="block-title">Combat Simulator ${version}</h3>
+        <h3 class="block-title">Combat Simulator Reloaded ${version}</h3>
         <div class="block-options"><button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
         <i class="fa fa-fw fa-times"></i></button></div></div></div>`);
       $(modalContent).append(modalHeader);
@@ -316,19 +316,19 @@
       this.tabDiv.style.cursor = 'pointer';
       this.tabDiv.className = 'nav-main-item mcsNoSelect';
 
-      const elem2 = document.createElement('a');
-      elem2.className = 'nav-main-link nav-compact';
-      elem2.dataset.toggle = 'modal';
-      elem2.dataset.target = '#mcsModal';
-      this.tabDiv.appendChild(elem2);
-      const elem3 = document.createElement('img');
-      elem3.className = 'nav-img';
-      elem3.src = this.media.combat;
-      elem2.appendChild(elem3);
-      const elem4 = document.createElement('span');
-      elem4.className = 'nav-main-link-name';
-      elem4.textContent = 'Combat Simulator';
-      elem2.appendChild(elem4);
+      const menuButton = document.createElement('div');
+      menuButton.className = 'nav-main-link nav-compact';
+      menuButton.dataset.toggle = 'modal';
+      menuButton.dataset.target = '#mcsModal';
+      this.tabDiv.appendChild(menuButton);
+      const icon = document.createElement('img');
+      icon.className = 'nav-img';
+      icon.src = this.media.combat;
+      menuButton.appendChild(icon);
+      const menuText = document.createElement('span');
+      menuText.className = 'nav-main-link-name';
+      menuText.textContent = 'Combat Simulator';
+      menuButton.appendChild(menuText);
 
       document.getElementsByClassName('nav-main-heading').forEach((heading) => {
         if (heading.textContent === 'Minigame') {
@@ -5734,7 +5734,7 @@
           let wrongVersion = false;
           if (gameVersion !== 'Alpha v0.16.3') {
             wrongVersion = true;
-            tryLoad = window.confirm('Melvor Combat Simulator\nA different game version was detected. Loading the combat sim may cause unexpected behaviour or result in inaccurate simulation results.\n Try loading it anyways?');
+            tryLoad = window.confirm('Combat Simulator Reloaded\nA different game version was detected. Loading the combat sim may cause unexpected behaviour or result in inaccurate simulation results.\n Try loading it anyways?');
           }
           if (tryLoad) {
             try {

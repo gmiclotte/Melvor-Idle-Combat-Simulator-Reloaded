@@ -1,3 +1,15 @@
+v1.0.0:
+    Changes:
+    - Renamed fork to Combat Simulator Reloaded
+    - Inspecting a dungeon now shows all encountered monsters without combining the ones that appear multiple times in a row
+    - The spells tab automatically shows the tab of the currently selected spell after importing a gear set
+    - Remade tooltips in the same style as the game
+    - Style improvements
+
+    Fixes:
+    - The Sell Bones option no longer crashes because plants have no bones
+    - Exported data when set to "per kill" was very wrong
+
 v0.11.2:
     Fixes:
     - Moved Kills/s to the end to restore the export order
