@@ -23,8 +23,6 @@
    * A single instance of this is initiated on load.
    */
   class McsApp {
-    selectedButtonClass = 'btn-dark';
-
     /**
      * Constructs an instance of mcsApp
      * @param {Object} urls URLs from content script
@@ -987,7 +985,7 @@
      * @param {HTMLButtonElement}
      */
     selectButton(button) {
-      button.classList.add(this.selectedButtonClass);
+      button.classList.add('btn-dark');
     }
 
     /**
@@ -995,7 +993,7 @@
      * @param {HTMLButtonElement}
      */
     unselectButton(button) {
-      button.classList.remove(this.selectedButtonClass);
+      button.classList.remove('btn-dark');
     }
 
     /**
