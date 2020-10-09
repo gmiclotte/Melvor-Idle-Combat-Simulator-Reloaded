@@ -61,7 +61,7 @@
 
 .mcsOuter {
   padding: 0.25rem;
-  margin: 0.25rem;
+  margin: 0.25rem !important;
   min-width: 250px;
 }
 
