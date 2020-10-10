@@ -1,4 +1,5 @@
 # Melvor Idle Combat Simulator Reloaded
+[![Mozilla Firefox](https://img.shields.io/amo/v/combat-simulator-reloaded?label=Get%20MCS%20Reloaded%20for%20Firefox&logo=firefox)](https://addons.mozilla.org/en-US/firefox/addon/combat-simulator-reloaded/)
 [![Google Chrome](https://img.shields.io/chrome-web-store/v/cgggfndkphggbgeimpplooflemnfndok?label=Get%20MCS%20Reloaded%20for%20Chrome&logo=Google%20Chrome)](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
 
 A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
@@ -6,16 +7,22 @@ A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
 A fork of the great but no longer maintained [Melvor Idle Combat Simulator](https://github.com/coolrox95/Melvor-Idle-Combat-Simulator) by Coolrox95.
 
 ## How to Install
+Click the button button for Firefox or Chrome above.
+
 While this extension has been tested, it is still recommended to create a backup of your save file first.
 After installing the extension, a refresh of the game may be required.
 
+If you want to install from the source files follow the instructions below.
+
 ### Firefox:
-Currently not available as a signed add-on, but you can download [the latest version](/../../releases/latest) of the simulator and [add it as temporary add-on](https://www.youtube.com/watch?v=J7el77F1ckg)
+You can get the add-on [on AMO](https://addons.mozilla.org/en-US/firefox/addon/combat-simulator-reloaded/)
+
+Or you can download [the latest version here](/../../releases/latest) and [add it as temporary add-on](https://www.youtube.com/watch?v=J7el77F1ckg)
 
 ### Chrome:
-You can get the extension on the [Chrome Web Store](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
+You can get the extension [on the Chrome Web Store](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
 
-Or you can download the sources here and [add it as an unpacked extension](https://developer.chrome.com/extensions/getstarted)
+Or you can download [the latest version here](/../../releases/latest) and [add it as an unpacked extension](https://developer.chrome.com/extensions/getstarted)
 1. Download [the latest version](/../../releases/latest) of the simulator
 2. Unzip the files
 3. Navigate to: chrome://extensions and toggle Developer mode on
