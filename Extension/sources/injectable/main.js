@@ -1132,17 +1132,13 @@
       this.equipmentSelected[equipmentSlot] = itemId;
       this.setEquipmentImage(equipmentSlot, itemId);
 
-      if (!itemId) {
-        return;
-      }
-
       const item = items[itemId];
       const weaponAmmo = [2, 3];
       switch (equipmentSlot) {
         case CONSTANTS.equipmentSlot.Weapon:
-          if (item.equipmentSlot === CONSTANTS.equipmentSlot.Quiver) {
+          if (item.equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping to throwing knives / javelins
             this.equipItem(CONSTANTS.equipmentSlot.Quiver, itemId);
-          } else if (weaponAmmo.includes(items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
+          } else if (weaponAmmo.includes(items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) { // Swapping from throwing knives / javelins
             this.equipItem(CONSTANTS.equipmentSlot.Quiver, 0);
           }
           if (item.isTwoHanded) {
@@ -1150,14 +1146,14 @@
           }
           break;
         case CONSTANTS.equipmentSlot.Shield:
-          if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isTwoHanded) {
+          if (itemId && items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isTwoHanded) {
             this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
           }
           break;
         case CONSTANTS.equipmentSlot.Quiver:
-          if (weaponAmmo.includes(item.ammoType)) { // Swapping to knife/jav
+          if (weaponAmmo.includes(item.ammoType)) { // Swapping to throwing knives / javelins
             this.equipItem(CONSTANTS.equipmentSlot.Weapon, itemId);
-          } else if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping from knife/jav
+          } else if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping from throwing knives / javelins
             this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
           }
           break;
