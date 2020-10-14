@@ -489,7 +489,7 @@
         this.simOptionsCard = new McsCard(this.mainTabContainer, '', '150px');
         this.mainTabCards.push(this.simOptionsCard);
         this.simOptionsCard.addSectionTitle('Simulation Options');
-        this.simOptionsCard.addNumberInput('Max Actions', 1000, 1, 10000, (event) => this.maxActionsInputOnChange(event));
+        this.simOptionsCard.addNumberInput('Max Actions', 300, 1, 10000, (event) => this.maxActionsInputOnChange(event));
         this.simOptionsCard.addNumberInput('# Trials', 10000, 1, 100000, (event) => this.numTrialsInputOnChange(event));
         this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
         const dropDownOptionNames = [];

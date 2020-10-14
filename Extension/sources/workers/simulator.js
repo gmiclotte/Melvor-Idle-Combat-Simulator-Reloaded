@@ -424,7 +424,6 @@ class CombatSimulator {
         // Perform actions for timers that have run out if applicable
         if (player.isActing && player.actionTimer <= 0 && enemyAlive) {
           stats.playerActions++;
-          player.actionsTaken++;
           // Do player action
           if (player.isStunned) {
             damageToEnemy = 0;
@@ -434,6 +433,7 @@ class CombatSimulator {
             }
             player.actionTimer = player.currentSpeed;
           } else {
+            player.actionsTaken++;
             stats.playerAttackCalls++;
             let specialAttack = false;
             if (playerStats.usingAncient) {
