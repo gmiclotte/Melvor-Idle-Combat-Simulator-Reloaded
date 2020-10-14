@@ -452,31 +452,27 @@ class CombatSimulator {
               playerAccuracy = this.calculateAccuracy(playerStats, enemy);
             }
             // Apply curse
-            if (playerStats.canCurse) {
+            if (playerStats.canCurse && !enemy.isCursed) {
               const curseRoll = Math.random() * 100;
               if (playerStats.curseData.chance > curseRoll) {
-                if (enemy.isCursed) { // Already cursed reset the turns
-                  enemy.curseTurns = 3;
-                } else {
-                  enemy.isCursed = true;
-                  enemy.curseTurns = 3;
-                  // Update the curses that change stats
-                  switch (enemy.curse.type) {
-                    case 'Blinding':
-                      enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
-                      if (!playerStats.isProtected) {
-                        enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
-                      }
-                      break;
-                    case 'Soul Split':
-                    case 'Decay':
-                      this.setEvasionDebuffs(enemyStats, enemy);
-                      playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                      break;
-                    case 'Weakening':
-                      enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
-                      break;
-                  }
+                enemy.isCursed = true;
+                enemy.curseTurns = 3;
+                // Update the curses that change stats
+                switch (enemy.curse.type) {
+                  case 'Blinding':
+                    enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
+                    if (!playerStats.isProtected) {
+                      enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
+                    }
+                    break;
+                  case 'Soul Split':
+                  case 'Decay':
+                    this.setEvasionDebuffs(enemyStats, enemy);
+                    playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                    break;
+                  case 'Weakening':
+                    enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
+                    break;
                 }
               }
             }
@@ -662,31 +658,27 @@ class CombatSimulator {
             playerAccuracy = this.calculateAccuracy(playerStats, enemy);
           }
           // Apply curse
-          if (playerStats.canCurse) {
+          if (playerStats.canCurse && !enemy.isCursed) {
             const curseRoll = Math.random() * 100;
             if (playerStats.curseData.chance > curseRoll) {
-              if (enemy.isCursed) { // Already cursed reset the turns
-                enemy.curseTurns = 3;
-              } else {
-                enemy.isCursed = true;
-                enemy.curseTurns = 3;
-                // Update the curses that change stats
-                switch (enemy.curse.type) {
-                  case 'Blinding':
-                    enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
-                    if (!playerStats.isProtected) {
-                      enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
-                    }
-                    break;
-                  case 'Soul Split':
-                  case 'Decay':
-                    this.setEvasionDebuffs(enemyStats, enemy);
-                    playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                    break;
-                  case 'Weakening':
-                    enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
-                    break;
-                }
+              enemy.isCursed = true;
+              enemy.curseTurns = 3;
+              // Update the curses that change stats
+              switch (enemy.curse.type) {
+                case 'Blinding':
+                  enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
+                  if (!playerStats.isProtected) {
+                    enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
+                  }
+                  break;
+                case 'Soul Split':
+                case 'Decay':
+                  this.setEvasionDebuffs(enemyStats, enemy);
+                  playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                  break;
+                case 'Weakening':
+                  enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
+                  break;
               }
             }
           }
@@ -1315,7 +1307,7 @@ class CombatSimulator {
       enemy.maxMagDefRoll = Math.floor(enemy.maxMagDefRoll * enemy.magicEvasionBuff);
       enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.rangedEvasionBuff);
     }
-    if (enemy.isCursed && enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split') {
+    if (enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split')) {
       enemy.maxDefRoll = Math.floor(enemy.maxDefRoll * enemy.curse.meleeEvasionDebuff);
       enemy.maxMagDefRoll = Math.floor(enemy.maxMagDefRoll * enemy.curse.magicEvasionDebuff);
       enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.curse.rangedEvasionDebuff);
