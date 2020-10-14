@@ -973,19 +973,21 @@
     }
 
     /**
-     * Adds a class to a button to show that it is selected
+     * Change a button's classes to show that it is selected
      * @param {HTMLButtonElement}
      */
     selectButton(button) {
-      button.classList.add('btn-dark');
+      button.classList.add('btn-primary');
+      button.classList.remove('btn-outline-dark');
     }
 
     /**
-     * Removes a class from a button to show that it is not selected
+     * Change a button's classes to show that it is not selected
      * @param {HTMLButtonElement}
      */
     unselectButton(button) {
-      button.classList.remove('btn-dark');
+      button.classList.remove('btn-primary');
+      button.classList.add('btn-outline-dark');
     }
 
     /**
