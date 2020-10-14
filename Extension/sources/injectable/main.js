@@ -674,6 +674,7 @@
       // Style dropdown (Specially Coded)
       const combatStyleCCContainer = this.equipmentSelectCard.createCCContainer();
       const combatStyleLabel = this.equipmentSelectCard.createLabel('Combat Style', '');
+      combatStyleLabel.classList.add('mb-1');
       const meleeStyleDropdown = this.equipmentSelectCard.createDropdown(['Stab', 'Slash', 'Block'], [0, 1, 2], 'MCS Melee Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Melee'));
       const rangedStyleDropdown = this.equipmentSelectCard.createDropdown(['Accurate', 'Rapid', 'Longrange'], [0, 1, 2], 'MCS Ranged Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Ranged'));
       const magicStyleDropdown = this.equipmentSelectCard.createDropdown(['Magic', 'Defensive'], [0, 1], 'MCS Magic Style Dropdown', (event) => this.styleDropdownOnChange(event, 'Magic'));

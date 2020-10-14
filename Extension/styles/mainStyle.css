@@ -109,6 +109,7 @@
   min-height: 80px;
   flex-grow: 0;
   left: 85px;
+  border-color: inherit;
 }
 
 .mcsYAxis {
@@ -349,9 +350,7 @@
 
 .mcsNumberOutput {
   text-align: right;
-  border-width: thin;
-  border-style: solid;
-  border-color: inherit;
+  border-bottom: 1px solid;
   line-height: 1.15;
   padding: 0 2px;
 }
@@ -508,4 +507,8 @@
 
 .darkMode .mcsTabContainer {
   border-color: #3e4856;
+}
+
+.darkMode .form-control {
+  border-color: #343a40;
 }
