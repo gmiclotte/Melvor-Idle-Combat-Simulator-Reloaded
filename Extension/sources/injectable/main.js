@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+/// <reference path="../typedefs.js" />
+
 (() => {
   const version = 'v1.0.0';
 
@@ -634,9 +636,9 @@
       // Set up spells
       const standardOpts = this.simulator.spells.standard;
       this.selectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
-      this.simulator.computeEquipStats();
-      this.updateEquipStats();
-      this.simulator.computeCombatStats();
+      this.simulator.updateEquipmentStats();
+      this.updateEquipmentStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
       this.updatePlotData();
       // Export Options element
@@ -1165,9 +1167,9 @@
         this.updateStyleDropdowns();
       }
       this.checkForElisAss();
-      this.simulator.computeEquipStats();
-      this.updateEquipStats();
-      this.simulator.computeCombatStats();
+      this.simulator.updateEquipmentStats();
+      this.updateEquipmentStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
 
@@ -1357,7 +1359,7 @@
           this.updatePrayerOptions(newLevel);
         }
       }
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     /**
@@ -1368,7 +1370,7 @@
     styleDropdownOnChange(event, combatType) {
       const styleID = parseInt(event.currentTarget.selectedOptions[0].value);
       this.simulator.attackStyle[combatType] = styleID;
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     /**
@@ -1511,11 +1513,11 @@
         document.getElementById('MCS Hardcore Mode Radio No').checked = true;
       }
       this.updatePrayerOptions(skillLevel[CONSTANTS.skill.Prayer]);
-      this.simulator.computeEquipStats();
-      this.updateEquipStats();
+      this.simulator.updateEquipmentStats();
+      this.updateEquipmentStats();
       this.simulator.computePotionBonus();
       this.simulator.computePrayerBonus();
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     // Callback Functions for the Prayer Select Card
@@ -1549,7 +1551,7 @@
       }
       if (prayerChanged) {
         this.simulator.computePrayerBonus();
-        this.simulator.computeCombatStats();
+        this.simulator.updateCombatStats();
         this.updateCombatStats();
       }
     }
@@ -1561,7 +1563,7 @@
       const potionTier = parseInt(event.currentTarget.selectedOptions[0].value);
       this.simulator.potionTier = potionTier;
       this.simulator.computePotionBonus();
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
       this.updatePotionTier(potionTier);
     }
@@ -1587,7 +1589,7 @@
         this.selectButton(event.currentTarget);
       }
       this.simulator.computePotionBonus();
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     // Callback Functions for the spell select buttons
@@ -1655,7 +1657,7 @@
         }
       }
       // Update combat stats for new spell
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     // Callback Functions for the pet select card
@@ -1672,7 +1674,7 @@
         this.simulator.petOwned[petID] = true;
         this.selectButton(event.currentTarget);
       }
-      this.simulator.computeCombatStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     // Callback Functions for the Sim Options Card
@@ -2201,17 +2203,17 @@
     /**
      * Updates the text fields for the stats provided by equipment
      */
-    updateEquipStats() {
+    updateEquipmentStats() {
       let newStatValue;
       for (let i = 0; i < this.equipStatKeys.length; i++) {
         if (this.equipStatKeys[i] === 'attBon0') {
-          newStatValue = this.simulator.equipStats.attackBonus[0];
+          newStatValue = this.simulator.equipmentStats.attackBonus[0];
         } else if (this.equipStatKeys[i] === 'attBon1') {
-          newStatValue = this.simulator.equipStats.attackBonus[1];
+          newStatValue = this.simulator.equipmentStats.attackBonus[1];
         } else if (this.equipStatKeys[i] === 'attBon2') {
-          newStatValue = this.simulator.equipStats.attackBonus[2];
+          newStatValue = this.simulator.equipmentStats.attackBonus[2];
         } else {
-          newStatValue = this.simulator.equipStats[this.equipStatKeys[i]];
+          newStatValue = this.simulator.equipmentStats[this.equipStatKeys[i]];
         }
         document.getElementById(`MCS ${this.equipStatKeys[i]} ES Output`).textContent = newStatValue.toLocaleString();
       }
@@ -2422,9 +2424,9 @@
         }
       }
       // Update equipment stats and combat stats
-      this.simulator.computeEquipStats();
-      this.updateEquipStats();
-      this.simulator.computeCombatStats();
+      this.simulator.updateEquipmentStats();
+      this.updateEquipmentStats();
+      this.simulator.updateCombatStats();
       this.updateCombatStats();
     }
     // Data Sanatizing Functions
@@ -2978,71 +2980,8 @@
     }
   }
 
-  // Type definitions for McsSimulator properties that are dynamically generated based on game data
-  /**
-   * Simulation result for a single monster
-   * @typedef {Object} monsterSimResult
-   * @property {boolean} inQueue
-   * @property {boolean} simSuccess
-   * @property {number} xpPerEnemy
-   * @property {number} xpPerSecond
-   * @property {number} xpPerHit
-   * @property {number} hpxpPerEnemy
-   * @property {number} hpPerEnemy
-   * @property {number} hpPerSecond
-   * @property {number} dmgPerSecond
-   * @property {number} avgKillTime
-   * @property {number} attacksMade
-   * @property {number} avgHitDmg
-   * @property {number} killTimeS
-   * @property {number} killsPerSecond
-   * @property {number} gpPerKill
-   * @property {number} gpPerSecond
-   * @property {number} prayerXpPerEnemy
-   * @property {number} prayerXpPerSecond
-   * @property {number} slayerXpPerSecond
-   * @property {number} ppConsumedPerSecond
-   * @property {number} herbloreXPPerSecond
-   * @property {number} signetChance
-   * @property {number} gpFromDamage
-   * @property {number} attacksTaken
-   * @property {number} attacksTakenPerSecond
-   * @property {number} attacksMadePerSecond
-   * @property {number} simulationTime
-   * @property {Array} petRolls
-   */
-  /**
-   * Stats of the player
-   * @typedef {Object} playerStats
-   * @property {number} attackSpeed Attack speed in ms
-   * @property {number} attackType Attack Type Melee:0, Ranged:1, Magic:2
-   * @property {number} maxAttackRoll Accuracy Rating
-   * @property {number} maxHit Maximum Hit of Normal Attack
-   * @property {number} minHit Minimum Hit of Normal Attack
-   * @property {number} maxDefRoll Melee Evasion Rating
-   * @property {number} maxMagDefRoll Magic Evasion Rating
-   * @property {number} maxRngDefRoll Ranged Evasion Rating
-   * @property {number} xpBonus Fractional bonus to combat xp gain
-   * @property {number} maxHitpoints Maximum HP
-   * @property {number} avgHPRegen Average HP gained per regen interval
-   * @property {number} damageReduction Damage Reduction in %
-   * @property {boolean} diamondLuck If player has diamond luck potion active
-   * @property {boolean} usingAncient If player is using ancient magick
-   * @property {boolean} hasSpecialAttack If player can special attack
-   * @property {Object} specialData Data of player special attack
-   * @property {number} startingGP Initial GP of player
-   * @property {Object} levels Levels of player
-   * @property {boolean[]} prayerSelected Prayers of PRAYER that player has active
-   * @property {number} activeItems Special items the player has active
-   * @property {number} prayerPointsPerAttack Prayer points consumed per player attack
-   * @property {number} prayerPointsPerEnemy Prayer points consumed per enemy attack
-   * @property {number} prayerPointsPerHeal Prayer points consumed per regen interval
-   * @property {number} prayerXPperDamage Prayer xp gained per point of damage dealt
-   * @property {boolean} isProtected Player has active protection prayer
-   */
   /**
    * Simulator class, used for all simulation work, and storing simulation results and settings
-   * @property {Array} monsterSimData
    */
   class McsSimulator {
     /**
@@ -3073,28 +3012,8 @@
         Prayer: 1,
         Slayer: 1,
       };
-      // Equipment Stats
-      this.equipStats = {
-        attackSpeed: 4000,
-        strengthBonus: 0,
-        attackBonus: [0, 0, 0],
-        rangedAttackBonus: 0,
-        rangedStrengthBonus: 0,
-        magicAttackBonus: 0,
-        magicDamageBonus: 0,
-        defenceBonus: 0,
-        damageReduction: 0,
-        rangedDefenceBonus: 0,
-        magicDefenceBonus: 0,
-        attackLevelRequired: 1,
-        defenceLevelRequired: 1,
-        rangedLevelRequired: 1,
-        magicLevelRequired: 1,
-        slayerXPBonus: 0,
-        chanceToDoubleLoot: 0,
-        maxHitpointsBonus: 0,
-        increasedMinSpellDmg: [0, 0, 0, 0],
-      };
+      /** @type {EquipmentStats} */
+      this.equipmentStats;
       // Spell Selection
       this.spells = {
         standard: {
@@ -3243,7 +3162,7 @@
       /** @type {Array<boolean>} */
       this.dungeonSimFilter = [];
       // Simulation data;
-      /** @type {Array<monsterSimResult>} */
+      /** @type {Array<MonsterSimResult>} */
       this.monsterSimData = [];
       for (let i = 0; i < MONSTERS.length; i++) {
         this.monsterSimData.push({
@@ -3311,20 +3230,7 @@
         this.dungeonSimFilter.push(true);
       }
       // Pre Compute Monster Base Stats
-      /** @typedef {Object} enemyStats
-       * @property {number} hitpoints Max Enemy HP
-       * @property {number} attackSpeed Enemy attack speed (ms)
-       * @property {number} attackType Enemy attack type
-       * @property {number} maxHit Normal attack max hit
-       * @property {number} maxDefRoll Melee Evasion Rating
-       * @property {number} maxMagDefRoll Magic Evasion Rating
-       * @property {number} maxRngDefRoll Ranged Evasion Rating
-       * @property {boolean} hasSpecialAttack If enemy can do special attacks
-       * @property {Array<number>} specialAttackChances Chance of each special attack
-       * @property {Array<number>} specialIDs IDs of special attacks
-       * @property {number} specialLength Number of special attacks
-       */
-      /** @type {Array<enemyStats>} */
+      /** @type {Array<EnemyStats>} */
       this.enemyStats = [];
       for (let i = 0; i < MONSTERS.length; i++) {
         this.enemyStats.push(this.getEnemyStats(i));
@@ -3337,8 +3243,10 @@
         canTopazDrop: false,
         herbConvertChance: 0,
         doBonesAutoBury: false,
+        /** @type {PlayerStats} */
         playerStats: {},
-        equipStats: {},
+        /** @type {EquipmentStats} */
+        equipmentStats: {},
         options: {},
         prayerBonus: {},
         herbloreBonus: {},
@@ -3376,16 +3284,9 @@
       this.workerURL = workerURL;
       this.currentJob = 0;
       this.simInProgress = false;
-      /** @typedef {Object} simulationJob
-       * @property {number} monsterID
-       */
-      /** @type {Array<simulationJob>} */
+      /** @type {SimulationJob[]} */
       this.simulationQueue = [];
-      /** @typedef {Object} simulationWorker
-       * @property {Worker} worker
-       * @property {boolean} inUse
-      */
-      /** @type {Array<simulationWorker>} */
+      /** @type {SimulationWorker[]} */
       this.simulationWorkers = [];
       this.maxThreads = window.navigator.hardwareConcurrency;
       this.simStartTime = 0;
@@ -3468,71 +3369,96 @@
         enemySpecialAttacks: enemySpecialAttacks,
         enemySpawnTimer: enemySpawnTimer,
         hitpointRegenInterval: hitpointRegenInterval,
-        Deadeye_Amulet: items[CONSTANTS.item.Deadeye_Amulet],
-        Confetti_Crossbow: items[CONSTANTS.item.Confetti_Crossbow],
-        Warlock_Amulet: items[CONSTANTS.item.Warlock_Amulet],
+        deadeyeAmulet: items[CONSTANTS.item.Deadeye_Amulet],
+        confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
+        warlockAmulet: items[CONSTANTS.item.Warlock_Amulet],
         CURSEIDS: CONSTANTS.curse,
       });
     }
+
     /**
-    * Computes the stats of the players equipped items and stores them on this properties
+    * Calculates the equipment's combined stats and stores them in `this.equipmentStats`
     */
-    computeEquipStats() {
-      this.resetEquipStats();
-      for (let i = 0; i < this.parent.equipmentSlotKeys.length; i++) {
-        const itemID = this.parent.equipmentSelected[i];
-        let curItem;
+    updateEquipmentStats() {
+      /** @type {EquipmentStats} */
+      const equipmentStats = {
+        attackSpeed: 4000,
+        strengthBonus: 0,
+        attackBonus: [0, 0, 0],
+        rangedAttackBonus: 0,
+        rangedStrengthBonus: 0,
+        magicAttackBonus: 0,
+        magicDamageBonus: 0,
+        defenceBonus: 0,
+        damageReduction: 0,
+        rangedDefenceBonus: 0,
+        magicDefenceBonus: 0,
+        attackLevelRequired: 1,
+        defenceLevelRequired: 1,
+        rangedLevelRequired: 1,
+        magicLevelRequired: 1,
+        slayerXPBonus: 0,
+        chanceToDoubleLoot: 0,
+        maxHitpointsBonus: 0,
+        increasedMinSpellDmg: [0, 0, 0, 0],
+      };
+
+      for (let equipmentSlot = 0; equipmentSlot < this.parent.equipmentSlotKeys.length; equipmentSlot++) {
+        const itemID = this.parent.equipmentSelected[equipmentSlot];
         if (itemID === 0) {
           continue;
-        } else {
-          curItem = items[itemID];
         }
-        this.equipStats.strengthBonus += (curItem.strengthBonus) ? curItem.strengthBonus : 0;
-        if (curItem.attackBonus !== undefined) {
+        const item = items[itemID];
+
+        equipmentStats.strengthBonus += item.strengthBonus || 0;
+        equipmentStats.magicAttackBonus += item.magicAttackBonus || 0;
+        equipmentStats.magicDamageBonus += item.magicDamageBonus || 0;
+        equipmentStats.defenceBonus += item.defenceBonus || 0;
+        equipmentStats.damageReduction += item.damageReduction || 0;
+        equipmentStats.magicDefenceBonus += item.magicDefenceBonus || 0;
+        equipmentStats.slayerXPBonus += item.slayerBonusXP || 0;
+        equipmentStats.chanceToDoubleLoot += item.chanceToDoubleLoot || 0;
+        equipmentStats.maxHitpointsBonus += item.increasedMaxHitpoints || 0;
+        equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Air] += item.increasedMinAirSpellDmg || 0;
+        equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Water] += item.increasedMinWaterSpellDmg || 0;
+        equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Earth] += item.increasedMinEarthSpellDmg || 0;
+        equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Fire] += item.increasedMinFireSpellDmg || 0;
+
+        if (item.attackBonus) {
           for (let j = 0; j < 3; j++) {
-            this.equipStats.attackBonus[j] += curItem.attackBonus[j];
+            equipmentStats.attackBonus[j] += item.attackBonus[j];
           }
         }
-        if (!(i === CONSTANTS.equipmentSlot.Weapon && curItem.isAmmo)) {
-          this.equipStats.rangedAttackBonus += (curItem.rangedAttackBonus) ? curItem.rangedAttackBonus : 0;
-          this.equipStats.rangedStrengthBonus += (curItem.rangedStrengthBonus) ? curItem.rangedStrengthBonus : 0;
-          this.equipStats.rangedDefenceBonus += (curItem.rangedDefenceBonus) ? curItem.rangedDefenceBonus : 0;
+        if (!(equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo)) {
+          equipmentStats.rangedAttackBonus += item.rangedAttackBonus || 0;
+          equipmentStats.rangedStrengthBonus += item.rangedStrengthBonus || 0;
+          equipmentStats.rangedDefenceBonus += item.rangedDefenceBonus || 0;
         }
-        this.equipStats.magicAttackBonus += (curItem.magicAttackBonus) ? curItem.magicAttackBonus : 0;
-        this.equipStats.magicDamageBonus += (curItem.magicDamageBonus) ? curItem.magicDamageBonus : 0;
-        this.equipStats.defenceBonus += (curItem.defenceBonus) ? curItem.defenceBonus : 0;
-        this.equipStats.damageReduction += (curItem.damageReduction) ? curItem.damageReduction : 0;
-        this.equipStats.magicDefenceBonus += (curItem.magicDefenceBonus) ? curItem.magicDefenceBonus : 0;
-        this.equipStats.slayerXPBonus += (curItem.slayerBonusXP) ? curItem.slayerBonusXP : 0;
-        this.equipStats.chanceToDoubleLoot += (curItem.chanceToDoubleLoot) ? curItem.chanceToDoubleLoot : 0;
-        this.equipStats.maxHitpointsBonus += (curItem.increasedMaxHitpoints) ? curItem.increasedMaxHitpoints : 0;
+        if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
+          equipmentStats.attackSpeed = item.attackSpeed || 4000;
+        }
 
-        if (((curItem.attackLevelRequired) ? curItem.attackLevelRequired : 1) > this.equipStats.attackLevelRequired) {
-          this.equipStats.attackLevelRequired = curItem.attackLevelRequired;
+        if (item.attackLevelRequired > equipmentStats.attackLevelRequired) {
+          equipmentStats.attackLevelRequired = item.attackLevelRequired;
         }
-        if (((curItem.rangedLevelRequired) ? curItem.rangedLevelRequired : 1) > this.equipStats.rangedLevelRequired) {
-          this.equipStats.rangedLevelRequired = curItem.rangedLevelRequired;
+        if (item.rangedLevelRequired > equipmentStats.rangedLevelRequired) {
+          equipmentStats.rangedLevelRequired = item.rangedLevelRequired;
         }
-        if (((curItem.magicLevelRequired) ? curItem.magicLevelRequired : 1) > this.equipStats.magicLevelRequired) {
-          this.equipStats.magicLevelRequired = curItem.magicLevelRequired;
+        if (item.magicLevelRequired > equipmentStats.magicLevelRequired) {
+          equipmentStats.magicLevelRequired = item.magicLevelRequired;
         }
-        if (((curItem.defenceLevelRequired) ? curItem.defenceLevelRequired : 1) > this.equipStats.defenceLevelRequired) {
-          this.equipStats.defenceLevelRequired = curItem.defenceLevelRequired;
+        if (item.defenceLevelRequired > equipmentStats.defenceLevelRequired) {
+          equipmentStats.defenceLevelRequired = item.defenceLevelRequired;
         }
-        if (i === CONSTANTS.equipmentSlot.Weapon) {
-          this.equipStats.attackSpeed = (curItem.attackSpeed) ? curItem.attackSpeed : 4000;
-        }
-        if (curItem.increasedMinAirSpellDmg !== undefined) this.equipStats.increasedMinSpellDmg[CONSTANTS.spellType.Air] += curItem.increasedMinAirSpellDmg;
-        if (curItem.increasedMinWaterSpellDmg !== undefined) this.equipStats.increasedMinSpellDmg[CONSTANTS.spellType.Water] += curItem.increasedMinWaterSpellDmg;
-        if (curItem.increasedMinEarthSpellDmg !== undefined) this.equipStats.increasedMinSpellDmg[CONSTANTS.spellType.Earth] += curItem.increasedMinEarthSpellDmg;
-        if (curItem.increasedMinFireSpellDmg !== undefined) this.equipStats.increasedMinSpellDmg[CONSTANTS.spellType.Fire] += curItem.increasedMinFireSpellDmg;
       }
+
+      this.equipmentStats = equipmentStats;
     }
+
     /**
-    * Computes the combat stats from Equipment stats, combat style, spell selection and player levels and stores them on this properties
+    * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
     */
-    computeCombatStats() {
-      // ['Attack','Strength','Defence','Ranged','Magic']
+    updateCombatStats() {
       this.combatStats.attackSpeed = 4000;
       this.combatStats.minHit = 0;
       let attackStyleBonus = 1;
@@ -3543,26 +3469,26 @@
         this.combatStats.attackType = CONSTANTS.attackType.Ranged;
         if (this.attackStyle.Ranged === 0) {
           attackStyleBonus += 3;
-          this.combatStats.attackSpeed = this.equipStats.attackSpeed;
+          this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
         } else if (this.attackStyle.Ranged === 1) {
-          this.combatStats.attackSpeed = this.equipStats.attackSpeed - 400;
+          this.combatStats.attackSpeed = this.equipmentStats.attackSpeed - 400;
         } else {
           meleeDefenceBonus += 3;
-          this.combatStats.attackSpeed = this.equipStats.attackSpeed;
+          this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
         }
         const effectiveAttackLevel = Math.floor(this.playerLevels.Ranged + 8 + attackStyleBonus);
-        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipStats.rangedAttackBonus + 64) * (1 + (this.prayerBonus.rangedAccuracy / 100)) * (1 + this.herbloreBonus.rangedAccuracy / 100));
+        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.rangedAttackBonus + 64) * (1 + (this.prayerBonus.rangedAccuracy / 100)) * (1 + this.herbloreBonus.rangedAccuracy / 100));
 
         const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonus);
-        this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipStats.rangedStrengthBonus / 80 + effectiveStrengthLevel * this.equipStats.rangedStrengthBonus / 640) * (1 + (this.prayerBonus.rangedDamage / 100)) * (1 + this.herbloreBonus.rangedStrength / 100)));
+        this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.rangedStrengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.rangedStrengthBonus / 640) * (1 + (this.prayerBonus.rangedDamage / 100)) * (1 + this.herbloreBonus.rangedStrength / 100)));
       } else if (items[weaponID].isMagic) {
         // Magic
         this.combatStats.attackType = CONSTANTS.attackType.Magic;
         effectiveAttackLevel = Math.floor(this.playerLevels.Magic + 8 + attackStyleBonus);
-        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipStats.magicAttackBonus + 64) * (1 + (this.prayerBonus.magicAccuracy / 100)) * (1 + this.herbloreBonus.magicAccuracy / 100));
+        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.magicAttackBonus + 64) * (1 + (this.prayerBonus.magicAccuracy / 100)) * (1 + this.herbloreBonus.magicAccuracy / 100));
         if (this.spells.standard.isSelected) {
-          this.combatStats.maxHit = Math.floor(numberMultiplier * ((SPELLS[this.spells.standard.selectedID].maxHit + SPELLS[this.spells.standard.selectedID].maxHit * (this.equipStats.magicDamageBonus / 100)) * (1 + (this.playerLevels.Magic + 1) / 200) * (1 + this.prayerBonus.magicDamage / 100) * (1 + this.herbloreBonus.magicDamage / 100)));
-          this.combatStats.minHit = this.equipStats.increasedMinSpellDmg[SPELLS[this.spells.standard.selectedID].spellType];
+          this.combatStats.maxHit = Math.floor(numberMultiplier * ((SPELLS[this.spells.standard.selectedID].maxHit + SPELLS[this.spells.standard.selectedID].maxHit * (this.equipmentStats.magicDamageBonus / 100)) * (1 + (this.playerLevels.Magic + 1) / 200) * (1 + this.prayerBonus.magicDamage / 100) * (1 + this.herbloreBonus.magicDamage / 100)));
+          this.combatStats.minHit = this.equipmentStats.increasedMinSpellDmg[SPELLS[this.spells.standard.selectedID].spellType];
           // Cloudburst Water Spell Bonus
           if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Cloudburst_Staff && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
             this.combatStats.maxHit += items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage * numberMultiplier;
@@ -3570,25 +3496,25 @@
         } else {
           this.combatStats.maxHit = ANCIENT[this.spells.ancient.selectedID].maxHit * numberMultiplier;
         }
-        this.combatStats.attackSpeed = this.equipStats.attackSpeed;
+        this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
       } else {
         // Melee
         this.combatStats.attackType = CONSTANTS.attackType.Melee;
         if (this.petOwned[12]) attackStyleBonus += 3;
         effectiveAttackLevel = Math.floor(this.playerLevels.Attack + 8 + attackStyleBonus);
-        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipStats.attackBonus[this.attackStyle.Melee] + 64) * (1 + (this.prayerBonus.meleeAccuracy / 100)) * (1 + this.herbloreBonus.meleeAccuracy / 100));
+        this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.attackBonus[this.attackStyle.Melee] + 64) * (1 + (this.prayerBonus.meleeAccuracy / 100)) * (1 + this.herbloreBonus.meleeAccuracy / 100));
         let strengthLevelBonus = 1;
         if (this.petOwned[13]) strengthLevelBonus += 3;
         effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + strengthLevelBonus);
-        this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipStats.strengthBonus / 80 + effectiveStrengthLevel * this.equipStats.strengthBonus / 640) * (1 + (this.prayerBonus.meleeDamage / 100)) * (1 + this.herbloreBonus.meleeStrength / 100)));
-        this.combatStats.attackSpeed = this.equipStats.attackSpeed;
+        this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.strengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.strengthBonus / 640) * (1 + (this.prayerBonus.meleeDamage / 100)) * (1 + this.herbloreBonus.meleeStrength / 100)));
+        this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
       }
       const effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + meleeDefenceBonus);
-      this.combatStats.maxDefRoll = Math.floor(effectiveDefenceLevel * (this.equipStats.defenceBonus + 64) * (1 + (this.prayerBonus.meleeEvasion) / 100) * (1 + this.herbloreBonus.meleeEvasion / 100));
+      this.combatStats.maxDefRoll = Math.floor(effectiveDefenceLevel * (this.equipmentStats.defenceBonus + 64) * (1 + (this.prayerBonus.meleeEvasion) / 100) * (1 + this.herbloreBonus.meleeEvasion / 100));
       const effectiveRngDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1);
-      this.combatStats.maxRngDefRoll = Math.floor(effectiveRngDefenceLevel * (this.equipStats.rangedDefenceBonus + 64) * (1 + (this.prayerBonus.rangedEvasion) / 100) * (1 + this.herbloreBonus.rangedEvasion / 100));
+      this.combatStats.maxRngDefRoll = Math.floor(effectiveRngDefenceLevel * (this.equipmentStats.rangedDefenceBonus + 64) * (1 + (this.prayerBonus.rangedEvasion) / 100) * (1 + this.herbloreBonus.rangedEvasion / 100));
       const effectiveMagicDefenceLevel = Math.floor(this.playerLevels.Magic * 0.7 + this.playerLevels.Defence * 0.3 + 9);
-      this.combatStats.maxMagDefRoll = Math.floor(effectiveMagicDefenceLevel * (this.equipStats.magicDefenceBonus + 64) * (1 + (this.prayerBonus.magicEvasion / 100)) * (1 + this.herbloreBonus.magicEvasion / 100));
+      this.combatStats.maxMagDefRoll = Math.floor(effectiveMagicDefenceLevel * (this.equipmentStats.magicDefenceBonus + 64) * (1 + (this.prayerBonus.magicEvasion / 100)) * (1 + this.herbloreBonus.magicEvasion / 100));
       // Update aurora bonuses
       this.computeAuroraBonus();
       if (this.auroraBonus.meleeEvasionBuff !== 0) this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * (1 + this.auroraBonus.meleeEvasionBuff / 100));
@@ -3597,10 +3523,10 @@
       if (this.auroraBonus.increasedMaxHit !== 0 && this.spells.standard.isSelected) this.combatStats.maxHit += this.auroraBonus.increasedMaxHit;
       if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) this.combatStats.minHit += this.auroraBonus.increasedMinHit;
       // Calculate damage reduction
-      this.combatStats.damageReduction = this.equipStats.damageReduction + this.herbloreBonus.damageReduction + this.prayerBonus.damageReduction;
+      this.combatStats.damageReduction = this.equipmentStats.damageReduction + this.herbloreBonus.damageReduction + this.prayerBonus.damageReduction;
       if (this.petOwned[14]) this.combatStats.damageReduction++;
       // Max Hitpoints
-      this.combatStats.maxHitpoints = this.playerLevels.Hitpoints + this.equipStats.maxHitpointsBonus;
+      this.combatStats.maxHitpoints = this.playerLevels.Hitpoints + this.equipmentStats.maxHitpointsBonus;
       if (this.petOwned[15]) this.combatStats.maxHitpoints++;
       this.combatStats.maxHitpoints *= numberMultiplier;
     }
@@ -3751,32 +3677,7 @@
       this.herbloreBonus.divine = 0; // 10
       this.herbloreBonus.luckyHerb = 0; // 11
     }
-    /**
-    * Resets the equipment stats to their default values
-    */
-    resetEquipStats() {
-      this.equipStats.attackSpeed = 4000;
-      this.equipStats.strengthBonus = 0;
-      this.equipStats.attackBonus = [0, 0, 0];
-      this.equipStats.rangedAttackBonus = 0;
-      this.equipStats.rangedStrengthBonus = 0;
-      this.equipStats.magicAttackBonus = 0;
-      this.equipStats.magicDamageBonus = 0;
-      this.equipStats.defenceBonus = 0;
-      this.equipStats.damageReduction = 0;
-      this.equipStats.rangedDefenceBonus = 0;
-      this.equipStats.magicDefenceBonus = 0;
-      this.equipStats.attackLevelRequired = 1;
-      this.equipStats.rangedLevelRequired = 1;
-      this.equipStats.magicLevelRequired = 1;
-      this.equipStats.defenceLevelRequired = 1;
-      this.equipStats.slayerXPBonus = 0;
-      this.equipStats.chanceToDoubleLoot = 0;
-      this.equipStats.maxHitpointsBonus = 0;
-      this.equipStats.increasedMinSpellDmg.forEach((_element, index, array) => {
-        array[index] = 0;
-      });
-    }
+
     /**
     * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
     */
@@ -3784,7 +3685,7 @@
       this.simStartTime = performance.now();
       this.simCancelled = false;
       // Start by grabbing the player stats
-      /** @type {playerStats} */
+      /** @type {PlayerStats} */
       const playerStats = {
         attackSpeed: this.combatStats.attackSpeed,
         attackType: this.combatStats.attackType,
@@ -3806,27 +3707,24 @@
         startingGP: 50000000,
         levels: Object.assign({}, this.playerLevels), // Shallow copy of player levels
         activeItems: {
-          Hitpoints_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Ranged_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Magic_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Prayer_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Firemaking_Skillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          Cape_of_Arrow_Preservation: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation),
-
-          Gold_Ruby_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring), // Regen Boost
-          Gold_Diamond_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring), // Flee Combat
-          Gold_Emerald_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring), // XP Boost
-          Gold_Sapphire_Ring: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring), // Reflect
-
-          Fighter_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee), // Attack stun
-          Warlock_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === 2), // Magic Healing
-          Guardian_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet), // Damage reduction on getting hit
-          Deadeye_Amulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === 1), // Ranged criticals
-
-          Confetti_Crossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow),
-          Stormsnap: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap),
-          Slayer_Crossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow),
-          Big_Ron: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron),
+          hitpointsSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          rangedSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          magicSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          prayerSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          firemakingSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
+          capeOfArrowPreservation: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation),
+          goldRubyRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring),
+          goldDiamondRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring),
+          goldEmeraldRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring),
+          goldSapphireRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring),
+          fighterAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee),
+          warlockAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic),
+          guardianAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet),
+          deadeyeAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged),
+          confettiCrossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow),
+          stormsnap: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap),
+          slayerCrossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow),
+          bigRon: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron),
         },
         prayerPointsPerAttack: 0,
         prayerPointsPerEnemy: 0,
@@ -3857,17 +3755,17 @@
       // Regen Calculation
       if (!this.isHardcore) {
         playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / numberMultiplier);
-        if (playerStats.activeItems.Hitpoints_Skillcape) {
+        if (playerStats.activeItems.hitpointsSkillcape) {
           playerStats.avgHPRegen += 1 * numberMultiplier;
         }
         if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) playerStats.avgHPRegen *= 2;
         playerStats.avgHPRegen *= (1 + this.herbloreBonus.hpRegen / 100);
-        if (playerStats.activeItems.Gold_Ruby_Ring) {
+        if (playerStats.activeItems.goldRubyRing) {
           playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + items[CONSTANTS.item.Gold_Ruby_Ring].hpRegenBonus / 100));
         }
       }
       // Calculate Global XP Multiplier
-      if (playerStats.activeItems.Firemaking_Skillcape) {
+      if (playerStats.activeItems.firemakingSkillcape) {
         playerStats.globalXPMult += 0.05;
       }
       if (this.petOwned[2]) {
@@ -3875,7 +3773,7 @@
       }
 
       // Other Bonuses
-      if (playerStats.activeItems.Gold_Emerald_Ring) {
+      if (playerStats.activeItems.goldEmeraldRing) {
         playerStats.xpBonus = 0.07;
       }
       this.currentSim.canTopazDrop = false;
@@ -3887,14 +3785,14 @@
       } else {
         this.currentSim.gpBonus = 1;
       }
-      Object.assign(this.currentSim.equipStats, this.equipStats);
-      this.currentSim.lootBonus = 1 + this.equipStats.chanceToDoubleLoot / 100;
+      Object.assign(this.currentSim.equipmentStats, this.equipmentStats);
+      this.currentSim.lootBonus = 1 + this.equipmentStats.chanceToDoubleLoot / 100;
       if (this.petOwned[20]) this.currentSim.lootBonus += 0.01;
-      this.currentSim.slayerXPBonus = this.equipStats.slayerXPBonus;
+      this.currentSim.slayerXPBonus = this.equipmentStats.slayerXPBonus;
       this.currentSim.herbConvertChance = this.herbloreBonus.luckyHerb / 100;
       this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
       // Compute prayer point usage and xp gain
-      const hasPrayerCape = playerStats.activeItems.Prayer_Skillcape;
+      const hasPrayerCape = playerStats.activeItems.prayerSkillcape;
       for (let i = 0; i < PRAYER.length; i++) {
         if (this.prayerSelected[i]) {
           // Point Usage
@@ -3939,7 +3837,6 @@
       this.currentSim.isSlayerTask = this.isSlayerTask;
       Object.assign(this.currentSim.herbloreBonus, this.herbloreBonus);
       Object.assign(this.currentSim.prayerBonus, this.prayerBonus);
-      Object.assign(this.currentSim.combatStats, this.combatStats);
       Object.assign(this.currentSim.attackStyle, this.attackStyle);
       Object.assign(this.currentSim.virtualLevels, this.virtualLevels);
 
@@ -4209,30 +4106,30 @@
           break;
       }
       // Do preprocessing of player stats for special weapons
-      if (this.currentSim.playerStats.activeItems.Stormsnap || this.currentSim.playerStats.activeItems.Slayer_Crossbow) {
+      if (this.currentSim.playerStats.activeItems.stormsnap || this.currentSim.playerStats.activeItems.slayerCrossbow) {
         let attackStyleBonus = 1;
         // Ranged
         if (this.attackStyle.Ranged === 0) {
           attackStyleBonus += 3;
         }
-        let rangedStrengthBonus = this.currentSim.equipStats.rangedStrengthBonus;
-        let rangedAttackBonus = this.currentSim.equipStats.rangedAttackBonus;
-        if (this.currentSim.playerStats.activeItems.Stormsnap) {
+        let rangedStrengthBonus = this.currentSim.equipmentStats.rangedStrengthBonus;
+        let rangedAttackBonus = this.currentSim.equipmentStats.rangedAttackBonus;
+        if (this.currentSim.playerStats.activeItems.stormsnap) {
           rangedStrengthBonus += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
           rangedAttackBonus += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
         }
         const slayerTaskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
-        if (this.currentSim.playerStats.activeItems.Slayer_Crossbow && (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID)))) {
+        if (this.currentSim.playerStats.activeItems.slayerCrossbow && (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID)))) {
           rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
         }
         const effectiveAttackLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + 8 + attackStyleBonus);
         this.currentSim.playerStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (rangedAttackBonus + 64) * (1 + (this.currentSim.prayerBonus.rangedAccuracy / 100)) * (1 + this.currentSim.herbloreBonus.rangedAccuracy / 100));
         const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + attackStyleBonus);
         this.currentSim.playerStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + rangedStrengthBonus / 80 + effectiveStrengthLevel * rangedStrengthBonus / 640) * (1 + (this.currentSim.prayerBonus.rangedDamage / 100)) * (1 + this.currentSim.herbloreBonus.rangedStrength / 100)));
-      } else if (this.currentSim.playerStats.activeItems.Big_Ron) {
+      } else if (this.currentSim.playerStats.activeItems.bigRon) {
         // Melee
-        let meleeStrengthBonus = this.currentSim.equipStats.strengthBonus;
-        if (this.currentSim.playerStats.activeItems.Big_Ron && MONSTERS[monsterID].isBoss) {
+        let meleeStrengthBonus = this.currentSim.equipmentStats.strengthBonus;
+        if (this.currentSim.playerStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
           meleeStrengthBonus = Math.floor(meleeStrengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
         }
         const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Strength + 8 + 1);

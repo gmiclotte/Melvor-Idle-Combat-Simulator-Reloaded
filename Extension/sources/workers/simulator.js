@@ -15,73 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/** @typedef {Object} curse element of CURSES
- * @property {number} chance Chance for curse to apply (%)
- * @property {string} description Curse description
- * @property {number|number[]} effectValue Curse effect value(s)
- * @property {number} magicLevelRequired Magic level required to use curse
- * @property {string} media URL of curse image
- * @property {string} name Name of curse
- * @property {Object[]} runesRequired Runes needed to use curse
-*/
-
-/** @typedef {Object} enemyStats
-* @property {number} hitpoints Max Enemy HP
-* @property {number} attackSpeed Enemy attack speed (ms)
-* @property {number} attackType Enemy attack type
-* @property {number} maxAttackRoll Accuracy Rating
-* @property {number} maxHit Normal attack max hit
-* @property {number} maxDefRoll Melee Evasion Rating
-* @property {number} maxMagDefRoll Magic Evasion Rating
-* @property {number} maxRngDefRoll Ranged Evasion Rating
-* @property {boolean} hasSpecialAttack If enemy can do special attacks
-* @property {Array<number>} specialAttackChances Chance of each special attack
-* @property {Array<number>} specialIDs IDs of special attacks
-* @property {number} specialLength Number of special attacks
-*/
-
-/**
- * Stats of the player
- * @typedef {Object} playerStats
- * @property {number} attackSpeed Attack speed in ms
- * @property {number} attackType Attack Type Melee:0, Ranged:1, Magic:2
- * @property {number} maxAttackRoll Accuracy Rating
- * @property {number} maxHit Maximum Hit of Normal Attack
- * @property {number} minHit Minimum Hit of Normal Attack, for standard spells only
- * @property {number} maxDefRoll Melee Evasion Rating
- * @property {number} maxMagDefRoll Magic Evasion Rating
- * @property {number} maxRngDefRoll Ranged Evasion Rating
- * @property {number} xpBonus Fractional bonus to combat xp gain
- * @property {number} maxHitpoints Maximum hitpoints
- * @property {number} avgHPRegen Average HP gained per regen interval
- * @property {number} damageReduction Damage Reduction in %
- * @property {boolean} diamondLuck If player has diamond luck potion active
- * @property {boolean} hasSpecialAttack If player can special attack
- * @property {Object} specialData Data of player special attack
- * @property {number} startingGP Initial GP of player
- * @property {Object} levels Levels of player
- * @property {boolean[]} prayerSelected Prayers of PRAYER that player has active
- * @property {number} activeItems Special items the player has active
- * @property {number} prayerPointsPerAttack Prayer points consumed per player attack
- * @property {number} prayerPointsPerEnemy Prayer points consumed per enemy attack
- * @property {number} prayerPointsPerHeal Prayer points consumed per regen interval
- * @property {number} prayerXPperDamage Prayer xp gained per point of damage dealt
- * @property {boolean} isProtected Player has active protection prayer
- * @property {boolean} hardcore If player is in hardcore mode
- * @property {number} lifesteal Lifesteal from auroras
- * @property {number} attackSpeedDecrease Decreased attack interval from auroras
- * @property {boolean} usingAncient If player is using ancient magicks
- * @property {boolean} canCurse If the player can apply curses
- * @property {number} curseID The index of the selected CURSES
- * @property {curse} curseData The element of the selected CURSES
- * @property {number} globalXPMult Global XP multiplier from FM cape and pet
- */
+/// <reference path="../typedefs.js" />
 
 let combatSimulator;
 
 onmessage = (event) => {
-  // console.log('Message Received from Simulator');
   switch (event.data.action) {
     case 'RECEIVE_GAMEDATA':
       combatSimulator = new CombatSimulator(event.data);
@@ -148,16 +86,16 @@ class CombatSimulator {
     this.enemySpecialAttacks = data.enemySpecialAttacks;
     this.enemySpawnTimer = data.enemySpawnTimer;
     this.hitpointRegenInterval = data.hitpointRegenInterval;
-    this.deadeyeAmulet = data.Deadeye_Amulet;
-    this.confettiCrossbow = data.Confetti_Crossbow;
-    this.warlockAmulet = data.Warlock_Amulet;
+    this.deadeyeAmulet = data.deadeyeAmulet;
+    this.confettiCrossbow = data.confettiCrossbow;
+    this.warlockAmulet = data.warlockAmulet;
     this.CURSEIDS = data.CURSEIDS;
   }
 
   /**
    * Simulation Method for a single monster
-   * @param {enemyStats} enemyStats
-   * @param {playerStats} playerStats
+   * @param {EnemyStats} enemyStats
+   * @param {PlayerStats} playerStats
    * @param {number} trials
    * @param {number} maxActions
    * @return {Promise<Object>}
@@ -508,9 +446,8 @@ class CombatSimulator {
                   damageToEnemy *= playerStats.specialData.damageMultiplier;
                 }
                 if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-                if (playerStats.activeItems.Deadeye_Amulet) {
-                  const chance = Math.random() * 100;
-                  if (chance < this.deadeyeAmulet.chanceToCrit) damageToEnemy = Math.floor(damageToEnemy * this.deadeyeAmulet.critDamage);
+                if (playerStats.activeItems.deadeyeAmulet) {
+                  damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
                 }
                 if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
                 if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
@@ -542,18 +479,18 @@ class CombatSimulator {
                   canStun = playerStats.specialData.canStun;
                 }
                 if (canStun) stunTurns = playerStats.specialData.stunTurns;
-                if (playerStats.activeItems.Fighter_Amulet && damageToEnemy >= playerStats.maxHit * 0.70) {
+                if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
                   canStun = true;
                   stunTurns = 1;
                 }
-                if (playerStats.activeItems.Confetti_Crossbow) {
+                if (playerStats.activeItems.confettiCrossbow) {
                   // Add gp from this weapon
                   let gpMultiplier = playerStats.startingGP / 25000000;
                   if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
                   else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
                   stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
                 }
-                if (playerStats.activeItems.Warlock_Amulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
+                if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
                 if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
                 if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
                 // Enemy Slow
@@ -597,26 +534,25 @@ class CombatSimulator {
                   damageToEnemy = this.rollForDamage(playerStats);
                 }
                 if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-                if (playerStats.activeItems.Deadeye_Amulet) {
-                  const chance = Math.random() * 100;
-                  if (chance > this.deadeyeAmulet.chanceToCrit) damageToEnemy = Math.floor(damageToEnemy * this.deadeyeAmulet.critDamage);
+                if (playerStats.activeItems.deadeyeAmulet) {
+                  damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
                 }
                 if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
                 if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
                 enemy.hitpoints -= Math.floor(damageToEnemy);
                 if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
-                if (playerStats.activeItems.Fighter_Amulet && damageToEnemy >= playerStats.maxHit * 0.70) {
+                if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
                   canStun = true;
                   stunTurns = 1;
                 }
-                if (playerStats.activeItems.Confetti_Crossbow) {
+                if (playerStats.activeItems.confettiCrossbow) {
                   // Add gp from this weapon
                   let gpMultiplier = playerStats.startingGP / 25000000;
                   if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
                   else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
                   stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
                 }
-                if (playerStats.activeItems.Warlock_Amulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
+                if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
                 if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
               }
               player.actionTimer = player.currentSpeed;
@@ -713,9 +649,8 @@ class CombatSimulator {
               damageToEnemy *= playerStats.specialData.damageMultiplier;
             }
             if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-            if (playerStats.activeItems.Deadeye_Amulet) {
-              const chance = Math.random() * 100;
-              if (chance < this.deadeyeAmulet.chanceToCrit) damageToEnemy = Math.floor(damageToEnemy * this.deadeyeAmulet.critDamage);
+            if (playerStats.activeItems.deadeyeAmulet) {
+              damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
             }
             if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
             if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
@@ -748,18 +683,18 @@ class CombatSimulator {
               canStun = playerStats.specialData.canStun;
             }
             if (canStun) stunTurns = playerStats.specialData.stunTurns;
-            if (playerStats.activeItems.Fighter_Amulet && damageToEnemy >= playerStats.maxHit * 0.70) {
+            if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
               canStun = true;
               stunTurns = 1;
             }
-            if (playerStats.activeItems.Confetti_Crossbow) {
+            if (playerStats.activeItems.confettiCrossbow) {
               // Add gp from this weapon
               let gpMultiplier = playerStats.startingGP / 25000000;
               if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
               else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
               stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
             }
-            if (playerStats.activeItems.Warlock_Amulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
+            if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
             if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
             if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
             // Enemy Slow
@@ -887,7 +822,7 @@ class CombatSimulator {
                 if (player.isStunned) damageToPlayer *= currentSpecial.stunDamageMultiplier;
                 damageToPlayer -= Math.floor(player.damageReduction / 100 * damageToPlayer);
                 stats.damageTaken += damageToPlayer;
-                if (playerStats.activeItems.Gold_Sapphire_Ring && player.canRecoil) {
+                if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
                   const reflectDamage = Math.floor(Math.random() * 3 * this.numberMultiplier);
                   if (enemy.hitpoints > reflectDamage) {
                     enemy.hitpoints -= reflectDamage;
@@ -899,7 +834,7 @@ class CombatSimulator {
                 if (enemy.isCursed && enemy.curse.type === 'Confusion') {
                   enemy.hitpoints -= Math.floor(enemy.hitpoints * enemy.curse.confusionMult);
                 }
-                if (playerStats.activeItems.Guardian_Amulet && player.reductionBuff < 12) { };
+                if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) { };
                 // Apply Stun
                 if (currentSpecial.canStun && !player.isStunned) {
                   player.isStunned = true;
@@ -943,7 +878,7 @@ class CombatSimulator {
                 let damageToPlayer = Math.floor(Math.random() * enemy.maxHit) + 1;
                 damageToPlayer -= Math.floor(player.damageReduction / 100 * damageToPlayer);
                 stats.damageTaken += damageToPlayer;
-                if (playerStats.activeItems.Gold_Sapphire_Ring && player.canRecoil) {
+                if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
                   const reflectDamage = Math.floor(Math.random() * 3 * this.numberMultiplier);
                   if (enemy.hitpoints > reflectDamage) {
                     enemy.hitpoints -= reflectDamage;
@@ -955,7 +890,7 @@ class CombatSimulator {
                 if (enemy.isCursed && enemy.curse.type === 'Confusion') {
                   enemy.hitpoints -= Math.floor(enemy.hitpoints * enemy.curse.confusionMult);
                 }
-                if (playerStats.activeItems.Guardian_Amulet && player.reductionBuff < 12) {
+                if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) {
                   player.reductionBuff += 2;
                   player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * reductionModifier);
                 }
@@ -1055,7 +990,7 @@ class CombatSimulator {
             if (player.isStunned) damageToPlayer *= currentSpecial.stunDamageMultiplier;
             damageToPlayer -= Math.floor(player.damageReduction / 100 * damageToPlayer);
             stats.damageTaken += damageToPlayer;
-            if (playerStats.activeItems.Gold_Sapphire_Ring && player.canRecoil) {
+            if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
               const reflectDamage = Math.floor(Math.random() * 3 * this.numberMultiplier);
               if (enemy.hitpoints > reflectDamage) {
                 enemy.hitpoints -= reflectDamage;
@@ -1067,7 +1002,7 @@ class CombatSimulator {
             if (enemy.isCursed && enemy.curse.type === 'Confusion') {
               enemy.hitpoints -= Math.floor(enemy.hitpoints * enemy.curse.confusionMult);
             }
-            if (playerStats.activeItems.Guardian_Amulet && player.reductionBuff < 12) {
+            if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) {
               player.reductionBuff += 2;
               player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * reductionModifier);
             }
@@ -1288,6 +1223,19 @@ class CombatSimulator {
    */
   rollForDamage(playerStats) {
     return Math.ceil(Math.random() * (playerStats.maxHit - playerStats.minHit)) + playerStats.minHit;
+  }
+
+  /**
+   * Rolls for a chance of Deadeye Amulet's crit damage
+   * @param {damageToEnemy} damageToEnemy
+   * @returns {number} `damageToEnemy`, possibly multiplied by Deadeye Amulet's crit bonus
+   */
+  rollForDeadeyeAmulet(damageToEnemy) {
+    const chance = Math.random() * 100;
+    if (chance < this.deadeyeAmulet.chanceToCrit) {
+      damageToEnemy = Math.floor(damageToEnemy * this.deadeyeAmulet.critDamage);
+    }
+    return damageToEnemy;
   }
 
   /**
