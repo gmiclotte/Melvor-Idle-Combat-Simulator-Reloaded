@@ -612,10 +612,7 @@
       this.plotter.bars.forEach((bar) => {
         this.tippyInstances.concat(tippy(bar, { triggerTarget: bar.parentElement, ...tippyOptions }));
       });
-      this.tippySingletons = [];
-      $('#mcsModal .mcsMultiImageButtonContainer').parent().each((_, e) => {
-        this.tippySingletons.push(tippy.createSingleton($(e).find('[data-tippy-content]').toArray().map(e => e._tippy), { delay: [0, 200], ...tippyOptions }));
-      });
+      this.tippySingleton = tippy.createSingleton(this.tippyInstances, { delay: [0, 200], ...tippyOptions });
 
       // Setup the default state of the UI
       this.gpOptionsCard.container.style.display = 'none';
@@ -2505,7 +2502,7 @@
       this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
       this.newHeading.remove();
       this.tabDiv.remove();
-      this.tippySingletons.forEach(singleton => singleton.destroy());
+      this.tippySingleton.destroy();
       this.tippyInstances.forEach(instance => instance.destroy());
       $(this.mcsModal).modal('hide');
       $(this.mcsModal).modal('dispose');
