@@ -415,15 +415,19 @@
   align-self: flex-end;
 }
 
+.mcsBarCantEnter {
+  background-color: crimson !important;
+}
+
+.mcs-bar-max {
+  background-color: #d7b400 !important;
+}
+
 .mcsXAxisImageContainer {
   align-self: flex-start;
   width: 17px;
   height: 17px;
   position: relative;
-}
-
-.mcsBarCantEnter {
-  background-color: crimson !important;
 }
 
 .mcsRadioContainer {
