@@ -39,49 +39,38 @@ onmessage = (event) => {
 };
 
 class CombatSimulator {
-  /**
+  constructor(data) {
+    /**
    * [playerType][enemyType]
    * 0:Melee 1:Ranged 2:Magic
    */
-  combatTriangle = {
-    normal: {
-      damageModifier: [
-        [1, 1.1, 0.9],
-        [0.9, 1, 1.1],
-        [1.1, 0.9, 1],
-      ],
-      reductionModifier: [
-        [1, 1.25, 0.5],
-        [0.95, 1, 1.25],
-        [1.25, 0.85, 1],
-      ],
-    },
-    hardcore: {
-      damageModifier: [
-        [1, 1.1, 0.8],
-        [0.8, 1, 1.1],
-        [1.1, 0.8, 1],
-      ],
-      reductionModifier: [
-        [1, 1.25, 0.25],
-        [0.75, 1, 1.25],
-        [1.25, 0.75, 1],
-      ],
-    },
-  };
-
-  cancelStatus = false;
-  protectFromValue;
-  numberMultiplier;
-  enemySpecialAttacks;
-  enemySpawnTimer;
-  hitpointRegenInterval;
-  deadeyeAmulet;
-  confettiCrossbow;
-  warlockAmulet;
-  CURSEIDS;
-
-  constructor(data) {
+    this.combatTriangle = {
+      normal: {
+        damageModifier: [
+          [1, 1.1, 0.9],
+          [0.9, 1, 1.1],
+          [1.1, 0.9, 1],
+        ],
+        reductionModifier: [
+          [1, 1.25, 0.5],
+          [0.95, 1, 1.25],
+          [1.25, 0.85, 1],
+        ],
+      },
+      hardcore: {
+        damageModifier: [
+          [1, 1.1, 0.8],
+          [0.8, 1, 1.1],
+          [1.1, 0.8, 1],
+        ],
+        reductionModifier: [
+          [1, 1.25, 0.25],
+          [0.75, 1, 1.25],
+          [1.25, 0.75, 1],
+        ],
+      },
+    };
+    this.cancelStatus = false;
     this.protectFromValue = data.protectFromValue;
     this.numberMultiplier = data.numberMultiplier;
     this.enemySpecialAttacks = data.enemySpecialAttacks;
