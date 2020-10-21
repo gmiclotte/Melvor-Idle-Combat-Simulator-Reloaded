@@ -2326,7 +2326,6 @@
       this.simulator.updateSlayerXP();
       this.simulator.updateHerbloreXP();
       this.updatePlotData();
-      this.plotter.setBarColours(this.simulator.getEnterSet());
       // Undo bar selection if needed
       if (this.barSelected) {
         this.barSelected = false;
@@ -2355,7 +2354,6 @@
       this.plotter.inspectButton.style.display = '';
 
       this.updatePlotData();
-      this.plotter.setBarColours(this.simulator.getEnterSet());
       this.updateZoneInfoCard();
       this.plotter.displayGeneral();
     }
@@ -2494,7 +2492,6 @@
     /** Updates the display post simulation */
     updateDisplayPostSim() {
       this.updatePlotData();
-      this.plotter.setBarColours(this.simulator.getEnterSet());
       this.updateZoneInfoCard();
       document.getElementById('MCS Simulate Button').disabled = false;
       document.getElementById('MCS Simulate Button').textContent = 'Simulate';
@@ -2773,12 +2770,25 @@
      * @param {Array<number>} barData The new data to diplay
      */
     updateBarData(barData) {
-      let barMax = barData[0];
-      for (let i = 1; i < barData.length; i++) {
-        if (barData[i] > barMax) {
+      const enterSet = this.parent.simulator.getEnterSet();
+      let barMax = 0;
+      for (let i = 0; i < this.bars.length; i++) {
+        this.bars[i].className = 'mcsBar';
+        if (!enterSet[i]) {
+          this.bars[i].classList.add('mcsBarCantEnter');
+        }
+        if (i < barData.length && barData[i] > barMax) {
           barMax = barData[i];
         }
       }
+      if (!this.parent.isViewingDungeon) {
+        for (let i = 0; i < barData.length; i++) {
+          if (Math.abs(barData[i] - barMax) < 0.0000001) {
+            this.bars[i].classList.add('mcs-bar-max');
+          }
+        }
+      }
+
       let division;
       let Ndivs;
       let divMax;
@@ -2860,22 +2870,7 @@
         }
       }
     }
-    /**
-     * Changes the colour of bars to red if the user cannot enter that area
-     * @param {Array<boolean>} enterSet The array of areas that can be enetered
-     */
-    setBarColours(enterSet) {
-      for (let i = 0; i < enterSet.length; i++) {
-        if (enterSet[i]) {
-          this.bars[i].className = 'mcsBar';
-        } else {
-          this.bars[i].className = 'mcsBar mcsBarCantEnter';
-        }
-        if (this.parent.barSelected && this.parent.selectedBar === i) {
-          this.parent.setBarHighlight(i);
-        }
-      }
-    }
+
     /**
      * Changes the plot display to non-dungeon monsters and dungeon summary
      */
