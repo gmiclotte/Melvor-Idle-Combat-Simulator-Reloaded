@@ -17,6 +17,7 @@
 */
 /// <reference path="../typedefs.js" />
 
+/** @type {CombatSimulator} */
 let combatSimulator;
 
 onmessage = (event) => {
@@ -446,6 +447,9 @@ class CombatSimulator {
                   damageToEnemy *= playerStats.specialData.damageMultiplier;
                 }
                 if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
+                if (enemy.isStunned) {
+                  damageToEnemy *= playerStats.specialData.stunDamageMultiplier;
+                }
                 if (playerStats.activeItems.deadeyeAmulet) {
                   damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
                 }
@@ -1089,7 +1093,11 @@ class CombatSimulator {
           enemy.bleedTimer = enemy.bleedInterval;
         }
       }
-      enemyKills++;
+      if (isNaN(enemy.hitpoints)) {
+        simSuccess = false;
+      } else {
+        enemyKills++;
+      }
     }
     // Compute stats from simulation
     // Need to package this inside an object and send the result back to main script
