@@ -18,7 +18,7 @@
  * @property {boolean} hasSpecialAttack If player can special attack
  * @property {Object} specialData Data of player special attack
  * @property {number} startingGP Initial GP of player
- * @property {Object} levels Levels of player
+ * @property {Levels} levels Levels of player
  * @property {boolean[]} prayerSelected Prayers of PRAYER that player has active
  * @property {ActiveItems} activeItems Special items the player has active
  * @property {number} prayerPointsPerAttack Prayer points consumed per player attack
@@ -29,10 +29,23 @@
  * @property {boolean} hardcore If player is in hardcore mode
  * @property {number} lifesteal Lifesteal from auroras
  * @property {number} attackSpeedDecrease Decreased attack interval from auroras
- * @property {boolean} canCurse If the player can apply curses
- * @property {number} curseID The index of the selected CURSES
- * @property {curse} curseData The element of the selected CURSES
+ * @property {boolean} canCurse If the player can apply a curse
+ * @property {number} curseID The index of the selected curse in CURSES
+ * @property {curse} curseData The element of the selected curse from CURSES
  * @property {number} globalXPMult Global XP multiplier from FM cape and pet
+ * @property {RuneCosts} runeCosts The amount of runes it costs to use the selected spell, curse and aurora
+ */
+
+/**
+ * @typedef {Object} Levels
+ * @property {number} Attack
+ * @property {number} Strength
+ * @property {number} Defence
+ * @property {number} Hitpoints
+ * @property {number} Ranged
+ * @property {number} Magic
+ * @property {number} Prayer
+ * @property {number} Slayer
  */
 
 /**
@@ -41,8 +54,10 @@
  * @property {boolean} rangedSkillcape
  * @property {boolean} magicSkillcape
  * @property {boolean} prayerSkillcape
+ * @property {boolean} slayerSkillcape
  * @property {boolean} firemakingSkillcape
  * @property {boolean} capeOfArrowPreservation
+ * @property {boolean} skullCape
  * @property {boolean} goldRubyRing
  * @property {boolean} goldDiamondRing
  * @property {boolean} goldEmeraldRing
@@ -55,6 +70,8 @@
  * @property {boolean} stormsnap
  * @property {boolean} slayerCrossbow
  * @property {boolean} bigRon
+ * @property {boolean} mirrorShield
+ * @property {boolean} magicalRing
  */
 
 /**

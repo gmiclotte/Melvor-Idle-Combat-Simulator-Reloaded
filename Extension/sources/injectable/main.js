@@ -225,7 +225,7 @@
       // Generate equipment subsets
       this.equipmentSlotKeys = Object.keys(CONSTANTS.equipmentSlot);
       this.equipmentSubsets = [];
-      /** @type {Array<number>} */
+      /** @type {number[]} */
       this.equipmentSelected = [];
       for (let equipmentSlot = 0; equipmentSlot < this.equipmentSlotKeys.length; equipmentSlot++) {
         this.equipmentSubsets.push([this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]]);
@@ -577,9 +577,9 @@
       for (let i = 0; i < this.plotter.bars.length; i++) {
         this.plotter.bars[i].parentElement.onclick = (() => this.barOnClick(i));
       }
-      /** @type {Array<number>} */
+      /** @type {number[]} */
       this.barMonsterIDs = [];
-      /** @type {Array<boolean>} */
+      /** @type {boolean[]} */
       this.barIsDungeon = [];
 
       combatAreas.forEach((area) => {
@@ -594,7 +594,7 @@
           this.barIsDungeon.push(false);
         });
       });
-      /** @type {Array<number>} */
+      /** @type {number[]} */
       this.dungeonBarIDs = [];
       for (let i = 0; i < DUNGEONS.length; i++) {
         this.dungeonBarIDs.push(this.barMonsterIDs.length);
@@ -830,7 +830,7 @@
       const potionNames = [];
       const potionCallbacks = [];
       const tooltips = [];
-      /** @type {Array<number>} */
+      /** @type {number[]} */
       this.combatPotionIDs = [];
       for (let i = 0; i < herbloreItemData.length; i++) {
         if (herbloreItemData[i].category === 0) {
@@ -2767,7 +2767,7 @@
 
     /**
      * Changes the displayed data
-     * @param {Array<number>} barData The new data to diplay
+     * @param {number[]} barData The new data to diplay
      */
     updateBarData(barData) {
       const enterSet = this.parent.simulator.getEnterSet();
@@ -2988,6 +2988,7 @@
     constructor(parent, workerURL) {
       this.parent = parent;
       // Player combat stats
+    /** @type {Levels} */
       this.playerLevels = {
         Attack: 1,
         Strength: 1,
@@ -2998,6 +2999,7 @@
         Prayer: 1,
         Slayer: 1,
       };
+    /** @type {Levels} */
       this.virtualLevels = {
         Attack: 1,
         Strength: 1,
@@ -3057,7 +3059,7 @@
         maxHitpoints: 0,
       };
       // Prayer Stats
-      /** @type {Array<boolean>} */
+      /** @type {boolean[]} */
       this.prayerSelected = [];
       for (let i = 0; i < PRAYER.length; i++) {
         this.prayerSelected.push(false);
@@ -3153,12 +3155,12 @@
       this.trials = 10000;
       /** Number of hours to farm for signet ring */
       this.signetFarmTime = 1;
-      /** @type {Array<boolean>} */
+      /** @type {boolean[]} */
       this.monsterSimFilter = [];
-      /** @type {Array<boolean>} */
+      /** @type {boolean[]} */
       this.dungeonSimFilter = [];
       // Simulation data;
-      /** @type {Array<MonsterSimResult>} */
+      /** @type {MonsterSimResult[]} */
       this.monsterSimData = [];
       for (let i = 0; i < MONSTERS.length; i++) {
         this.monsterSimData.push({
@@ -3226,7 +3228,7 @@
         this.dungeonSimFilter.push(true);
       }
       // Pre Compute Monster Base Stats
-      /** @type {Array<EnemyStats>} */
+      /** @type {EnemyStats[]} */
       this.enemyStats = [];
       for (let i = 0; i < MONSTERS.length; i++) {
         this.enemyStats.push(this.getEnemyStats(i));
@@ -4214,7 +4216,7 @@
     /**
     * Extracts a set of data for plotting that matches the keyValue in monsterSimData and dungeonSimData
     * @param {string} keyValue
-    * @return {Array<number>}
+    * @return {number[]}
     */
     getDataSet(keyValue) {
       let dataMultiplier = 1;
@@ -4362,7 +4364,7 @@
     }
     /**
      * Finds the monsters/dungeons you can currently fight
-     * @return {Array<boolean>}
+     * @return {boolean[]}
      */
     getEnterSet() {
       const enterSet = [];
@@ -4378,12 +4380,12 @@
           canEnter = false;
         }
         if (this.currentSim.playerStats.activeItems.slayerSkillcape) {
-            canEnter = true;
+          canEnter = true;
         } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Mirror_Shield) {
           canEnter = this.currentSim.playerStats.activeItems.mirrorShield;
         } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Magical_Ring) {
           canEnter = this.currentSim.playerStats.activeItems.magicalRing;
-          }
+        }
         for (let j = 0; j < slayerAreas[i].monsters.length; j++) {
           enterSet.push(canEnter);
         }
@@ -4469,7 +4471,7 @@
     }
     /**
     * Gets an object array equal in length to the items array that determines if a particular item should be sold or kept
-    * @return {Array}
+    * @return {Object[]}
     */
     getSaleList() {
       const saleList = [];
@@ -4486,7 +4488,7 @@
     }
     /**
     * Gets an object array containing only items that are obtainable from combatAreas/Dungeons
-    * @return {Array}
+    * @return {Object[]}
     */
     getLootList() {
       const lootList = [];
@@ -5210,13 +5212,13 @@
     }
     /**
      * Creates multiple image buttons in a single container
-     * @param {Array<string>} sources The image source paths
-     * @param {Array<string>} idtexts The ids for the buttons
+     * @param {string[]} sources The image source paths
+     * @param {string[]} idtexts The ids for the buttons
      * @param {string} size The size of the buttons: Small, Medium
-     * @param {Array<Function>} onclickCallbacks The callbacks for the buttons
-     * @param {Array<string>} tooltips The tooltip contents
+     * @param {Function[]} onclickCallbacks The callbacks for the buttons
+     * @param {string[]} tooltips The tooltip contents
      * @param {string} containerWidth container width
-     * @return {Array<HTMLDivElement>} The image buttons
+     * @return {HTMLDivElement[]} The image buttons
      */
     addImageButtons(sources, idtexts, size, onclickCallbacks, tooltips = [], containerWidth) {
       const deleteMe = [];
@@ -5262,7 +5264,7 @@
      * @param {string[]} sources
      * @param {string[]} elIds
      * @param {HTMLElement} popups
-     * @param {Array<string>} tooltips The tooltip contents
+     * @param {string[]} tooltips The tooltip contents
      */
     addMultiPopupMenu(sources, elIds, popups, tooltips) {
       const newCCContainer = document.createElement('div');
@@ -5288,7 +5290,7 @@
     /**
     * Adds a dropdown to the card
     * @param {string} labelText The text to label the dropdown with
-    * @param {Array<string>} optionText The text of the dropdown's options
+    * @param {string[]} optionText The text of the dropdown's options
     * @param {Array} optionValues The values of the dropdown's options
     * @param {Function} onChangeCallback The callback for when the option is changed
     */
@@ -5305,7 +5307,7 @@
     }
     /**
      * Adds a dropdown to the card, but also returns a reference to it
-     * @param {Array<string>} optionText The text of the dropdown's options
+     * @param {string[]} optionText The text of the dropdown's options
      * @param {Array} optionValues The values of the dropdown's options
      * @param {string} dropDownID The id of the dropdown
      * @param {Function} onChangeCallback The callback for when the option is changed
@@ -5436,10 +5438,10 @@
     }
     /**
      * Adds an array of buttons to the card
-     * @param {Array<string>} buttonText The text to put on the buttons
+     * @param {string[]} buttonText The text to put on the buttons
      * @param {number} height The height of the buttons in pixels
      * @param {number} width The width of the buttons in pixels
-     * @param {Array<Function>} buttonCallbacks The callback function for when the buttons are clicked
+     * @param {Function[]} buttonCallbacks The callback function for when the buttons are clicked
      */
     addMultiButton(buttonText, buttonCallbacks, container = this.container) {
       let newButton;
@@ -5462,8 +5464,8 @@
      * @param {string} labelText The text for the option's label
      * @param {number} height The height of the radios in pixels
      * @param {string} radioName The name of the radio
-     * @param {Array<string>} radioLabels The labels for the individual radio buttons
-     * @param {Array<Function>} radioCallbacks The callbacks for the individual radio buttons
+     * @param {string[]} radioLabels The labels for the individual radio buttons
+     * @param {Function[]} radioCallbacks The callbacks for the individual radio buttons
      * @param {number} initialRadio The intial radio that is on
      * @param {string} imageSrc An optional string to specify the source of a label image, if '' an image is not added
      */
