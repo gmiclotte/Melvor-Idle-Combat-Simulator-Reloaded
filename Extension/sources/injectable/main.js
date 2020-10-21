@@ -5003,32 +5003,35 @@
     }
     /** Updates the chance to get a pet for the given skill*/
     updatePetChance() {
-      const xpSkills = ['Hitpoints', 'Prayer'];
+      const petSkills = ['Hitpoints', 'Prayer'];
+      if (this.currentSim.isSlayerTask) {
+        petSkills.push('Slayer');
+      }
       const attackType = this.currentSim.playerStats.attackType;
       switch (attackType) {
         case CONSTANTS.attackType.Melee:
           switch (this.currentSim.attackStyle.Melee) {
             case 0:
-              xpSkills.push('Attack');
+              petSkills.push('Attack');
               break;
             case 1:
-              xpSkills.push('Strength');
+              petSkills.push('Strength');
               break;
             case 2:
-              xpSkills.push('Defence');
+              petSkills.push('Defence');
               break;
           }
           break;
         case CONSTANTS.attackType.Ranged:
-          xpSkills.push('Ranged');
-          if (this.currentSim.attackStyle.Ranged === 2) xpSkills.push('Defence');
+          petSkills.push('Ranged');
+          if (this.currentSim.attackStyle.Ranged === 2) petSkills.push('Defence');
           break;
         case CONSTANTS.attackType.Magic:
-          xpSkills.push('Magic');
-          if (this.currentSim.attackStyle.Magic === 1) xpSkills.push('Defence');
+          petSkills.push('Magic');
+          if (this.currentSim.attackStyle.Magic === 1) petSkills.push('Defence');
           break;
       }
-      if (xpSkills.includes(this.petSkill)) {
+      if (petSkills.includes(this.petSkill)) {
         const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
         this.monsterSimData.forEach((simResult) => {
           if (!simResult.simSuccess) {
@@ -5043,7 +5046,7 @@
         });
         DUNGEONS.forEach((_, dungeonId) => {
           const dungeonResult = this.dungeonSimData[dungeonId];
-          if (!dungeonResult.simSuccess) {
+          if (!dungeonResult.simSuccess || this.petSkill === 'Slayer') {
             dungeonResult.petChance = 0;
             return;
           }
@@ -5057,27 +5060,6 @@
             return cumChanceToNotGet * chanceToNotGet;
           }, 1);
           dungeonResult.petChance *= 100;
-        });
-      } else if (this.petSkill === 'Slayer' && this.currentSim.isSlayerTask) {
-        // Slayer pet is currently only rolled once for the players attack speed per kill
-        const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
-        const computeForArea = (area) => {
-          area.monsters.forEach((mID) => {
-            const simResult = this.monsterSimData[mID];
-            if (!simResult.simSuccess) {
-              simResult.petChance = 0;
-              return;
-            }
-            const attackSpeed = this.currentSim.playerStats.attackSpeed - this.currentSim.playerStats.attackSpeedDecrease;
-            const numRolls = (this.timeMultiplier === -1) ? 1 : this.timeMultiplier / simResult.killTimeS;
-            simResult.petChance = 1 - Math.pow((1 - attackSpeed * petSkillLevel / 25000000000), numRolls);
-            simResult.petChance *= 100;
-          });
-        };
-        combatAreas.forEach(computeForArea);
-        slayerAreas.forEach(computeForArea);
-        this.dungeonSimData.forEach((simResult) => {
-          simResult.petChance = 0;
         });
       } else {
         this.monsterSimData.forEach((simResult) => {
