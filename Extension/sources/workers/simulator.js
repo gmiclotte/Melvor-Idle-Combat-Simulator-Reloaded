@@ -271,6 +271,7 @@ class CombatSimulator {
     }
     // var enemyReflectDamage = 0; //Damage caused by reflect
     // Start simulation for each trial
+    this.cancelStatus = false;
     while (enemyKills < trials && simSuccess) {
       // Check Cancellation every 250th trial
       if (enemyKills % 250 === 0 && await this.isCanceled()) {
