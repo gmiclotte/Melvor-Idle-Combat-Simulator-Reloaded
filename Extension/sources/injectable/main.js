@@ -444,7 +444,7 @@
           '',
           '',
           '',
-          this.media.combat,
+          this.media.attack,
           this.media.ranged,
           this.media.magic,
           '',
@@ -1219,7 +1219,7 @@
       }
 
       if (item.strengthBonus || (item.attackBonus && item.attackBonus.some(b => b))) {
-        tooltip += this.getTooltipIcon(this.media.combat);
+        tooltip += this.getTooltipIcon(this.media.attack);
         const statBonuses = [];
         if (item.strengthBonus) {
           statBonuses.push(this.getTooltipStatBonus('Strength', item.strengthBonus));
