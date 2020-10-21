@@ -3240,7 +3240,9 @@
         herbConvertChance: 0,
         doBonesAutoBury: false,
         /** @type {PlayerStats} */
-        playerStats: {},
+        playerStats: {
+          activeItems: {},
+        },
         /** @type {EquipmentStats} */
         equipmentStats: {},
         options: {},
@@ -3681,6 +3683,7 @@
       this.simStartTime = performance.now();
       this.simCancelled = false;
       // Start by grabbing the player stats
+      const maxCape = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Completion;
       /** @type {PlayerStats} */
       const playerStats = {
         attackSpeed: this.combatStats.attackSpeed,
@@ -3703,24 +3706,28 @@
         startingGP: 50000000,
         levels: Object.assign({}, this.playerLevels), // Shallow copy of player levels
         activeItems: {
-          hitpointsSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          rangedSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          magicSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          prayerSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          firemakingSkillcape: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape),
-          capeOfArrowPreservation: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation),
-          goldRubyRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring),
-          goldDiamondRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring),
-          goldEmeraldRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring),
-          goldSapphireRing: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring),
-          fighterAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee),
-          warlockAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic),
-          guardianAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet),
-          deadeyeAmulet: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged),
-          confettiCrossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow),
-          stormsnap: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap),
-          slayerCrossbow: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow),
-          bigRon: (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron),
+          hitpointsSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || maxCape,
+          rangedSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || maxCape,
+          magicSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || maxCape,
+          prayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || maxCape,
+          slayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || maxCape,
+          firemakingSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || maxCape,
+          capeOfArrowPreservation: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation,
+          skullCape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Skull_Cape,
+          goldRubyRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring,
+          goldDiamondRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring,
+          goldEmeraldRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring,
+          goldSapphireRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring,
+          fighterAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee,
+          warlockAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic,
+          guardianAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet,
+          deadeyeAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged,
+          confettiCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow,
+          stormsnap: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap,
+          slayerCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow,
+          bigRon: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron,
+          mirrorShield: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Shield] === CONSTANTS.item.Mirror_Shield,
+          magicalRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Magical_Ring,
         },
         prayerPointsPerAttack: 0,
         prayerPointsPerEnemy: 0,
@@ -4370,20 +4377,13 @@
         if (slayerAreas[i].slayerLevel !== undefined && this.playerLevels.Slayer < slayerAreas[i].slayerLevel) {
           canEnter = false;
         }
-        if (slayerAreas[i].slayerItem !== 0) {
-          let slayerItemFound = false;
-          for (let j = 0; j < this.parent.equipmentSelected.length; j++) {
-            if (this.parent.equipmentSelected[j] === slayerAreas[i].slayerItem) {
-              slayerItemFound = true;
-            }
-          }
-          if (!slayerItemFound) {
-            canEnter = false;
-          }
-          if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape) {
+        if (this.currentSim.playerStats.activeItems.slayerSkillcape) {
             canEnter = true;
+        } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Mirror_Shield) {
+          canEnter = this.currentSim.playerStats.activeItems.mirrorShield;
+        } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Magical_Ring) {
+          canEnter = this.currentSim.playerStats.activeItems.magicalRing;
           }
-        }
         for (let j = 0; j < slayerAreas[i].monsters.length; j++) {
           enterSet.push(canEnter);
         }
