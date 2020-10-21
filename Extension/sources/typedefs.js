@@ -24,7 +24,7 @@
  * @property {number} prayerPointsPerAttack Prayer points consumed per player attack
  * @property {number} prayerPointsPerEnemy Prayer points consumed per enemy attack
  * @property {number} prayerPointsPerHeal Prayer points consumed per regen interval
- * @property {number} prayerXPperDamage Prayer xp gained per point of damage dealt
+ * @property {number} prayerXpPerDamage Prayer xp gained per point of damage dealt
  * @property {boolean} isProtected Player has active protection prayer
  * @property {boolean} hardcore If player is in hardcore mode
  * @property {number} lifesteal Lifesteal from auroras
@@ -72,6 +72,13 @@
  * @property {boolean} bigRon
  * @property {boolean} mirrorShield
  * @property {boolean} magicalRing
+ */
+
+/**
+ * @typedef {Object} RuneCosts
+ * @property {number} spell
+ * @property {number} curse
+ * @property {number} aurora
  */
 
 /**

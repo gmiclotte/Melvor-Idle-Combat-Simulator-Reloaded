@@ -567,7 +567,7 @@ class CombatSimulator {
               xpToAdd = damageToEnemy / this.numberMultiplier * 4;
               if (xpToAdd < 4) xpToAdd = 4;
               stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
-              stats.totalPrayerXP += damageToEnemy * playerStats.prayerXPperDamage;
+              stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
               stats.totalCombatXP += xpToAdd;
             }
             // Apply Stun
@@ -714,7 +714,7 @@ class CombatSimulator {
             xpToAdd = damageToEnemy / this.numberMultiplier * 4;
             if (xpToAdd < 4) xpToAdd = 4;
             stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
-            stats.totalPrayerXP += damageToEnemy * playerStats.prayerXPperDamage;
+            stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
           }
           // Apply Stun

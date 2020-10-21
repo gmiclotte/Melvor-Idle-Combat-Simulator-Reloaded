@@ -3734,7 +3734,7 @@
         prayerPointsPerAttack: 0,
         prayerPointsPerEnemy: 0,
         prayerPointsPerHeal: 0,
-        prayerXPperDamage: 1 / numberMultiplier / 2,
+        prayerXpPerDamage: 0,
         isProtected: false,
         hardcore: this.isHardcore,
         lifesteal: this.auroraBonus.lifesteal,
@@ -3823,7 +3823,7 @@
             playerStats.prayerPointsPerHeal += PRAYER[i].pointsPerRegen;
           }
           // XP Gain
-          playerStats.prayerXPperDamage += 2 * PRAYER[i].pointsPerPlayer / numberMultiplier;
+          playerStats.prayerXpPerDamage += 2 * PRAYER[i].pointsPerPlayer / numberMultiplier;
         }
       }
       if (this.petOwned[18]) {
