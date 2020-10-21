@@ -1,10 +1,30 @@
 v1.1.0:
+    Updated for Melvor Idle v0.17
+
     Changes:
-    - Moved equipment tab to its own card
+    - Moved equipment tab to its own card so it's always visible
+    - The bar with the highest value gets highlighted
     - Added level requirements to equipment tooltips
+    - Reduced default max actions from 1000 to 300 to greatly speed up sims with lower damage
 
     Fixes:
+    - Implemented v0.17 changes
+        - Slayer pet now rolls on every attack
+        - Passive Prayer XP has been removed
+        - Player special attack stun damage multiplier implemented (only affects Frostbite in v0.17)
+        - Player special attack stun damage multiplier bug implemented :^) (makes monsters unkillable when using certain melee weapons' special attacks while they are stunned by the Fighter Amulet)
+        - Cape of Completion has the same bonuses as the Max Skillcape
+    - Deadeye Amulet gave a 75% crit chance for regular attacks
+    - When a Soul Split curse was selected its debuff was always active
+    - Curses were rolled for while still active, resetting their duration if successful
+    - Unequipping items (emptying a slot) didn't update stats
+    - In prayer tooltips the cost descriptions mixed up player and enemy attacks
+    - Skill levels were sometimes imported incorrectly
     - Style issues
+
+    Known issues:
+    - Slayer's Crossbow should no longer activate against slayer task monsters inside dungeon.
+      Because Combat Simulator simulates every monster individually and does not simulate these 14 monsters again specifically for dungeons, it cannot both apply this bonus outside of dungeons and not apply it inside of dungeons.
 
 v1.0.0:
     Changes:

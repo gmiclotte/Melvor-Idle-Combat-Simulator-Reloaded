@@ -18,7 +18,7 @@
 /// <reference path="../typedefs.js" />
 
 (() => {
-  const version = 'v1.0.0';
+  const version = 'v1.1.0';
 
   /**
    * Container Class for the Combat Simulator.
