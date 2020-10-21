@@ -1388,7 +1388,8 @@
       this.updateStyleDropdowns();
       // Update levels from in game levels
       this.skillKeys.forEach((key) => {
-        const virtualLevel = exp.xp_to_level(skillXP[CONSTANTS.skill[key]]) - 1;
+        const skillId = CONSTANTS.skill[key];
+        const virtualLevel = Math.max(skillLevel[skillId], exp.xp_to_level(skillXP[skillId]) - 1);
         document.getElementById(`MCS ${key} Input`).value = virtualLevel;
         this.simulator.playerLevels[key] = Math.min(virtualLevel, 99);
         this.simulator.virtualLevels[key] = virtualLevel;
