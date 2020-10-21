@@ -5664,9 +5664,9 @@
   window.addEventListener('message', onMessage, false);
 
   // Wait for page to finish loading, then create an instance of the combat sim
-  if (typeof isLoaded !== 'undefined') {
+  if (typeof confirmedLoaded !== 'undefined' && typeof currentlyCatchingUp !== 'undefined') {
     const melvorCombatSimLoader = setInterval(() => {
-      if (isLoaded) {
+      if (confirmedLoaded && !currentlyCatchingUp) {
         clearInterval(melvorCombatSimLoader);
         window.postMessage({ type: 'MCS_FROM_PAGE', action: 'REQUEST_URLS' });
       }
