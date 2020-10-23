@@ -105,6 +105,7 @@ This simulator assumes that the game is running with absolutely no slowdowns, an
 In addition the calculation for hitpoints used per second assumes there is no cap on player hitpoints (It simply sums the damage taken and subtracts all possible healing). Actual results will tend to be higher.
 
 ### Known Issues:
+- Combat Simulator simulates every monster individually and then builds dungeon simulations by combining the simulations of the monsters it contains. It does not simulate the 14 monsters that appear both outside of and inside of dungeons again specifically for dungeons. Because of this it incorrectly applies the Slayer's Crossbow's ranged strength bonus to these 14 monsters inside of dungeons if you have the Slayer Task option enabled.
 
 ## Screenshots
 ### Dark Mode

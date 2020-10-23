@@ -1,3 +1,8 @@
+v1.1.1
+    Fixes:
+    - Implemented game bugfixes
+        - Prayer pet now only rolls when you receive prayer xp
+
 v1.1.0:
     Updated for Melvor Idle v0.17
 
@@ -14,7 +19,7 @@ v1.1.0:
         - Player special attack stun damage multiplier implemented (only affects Frostbite in v0.17)
         - Player special attack stun damage multiplier bug implemented :^) (makes monsters unkillable when using certain melee weapons' special attacks while they are stunned by the Fighter Amulet)
         - Cape of Completion has the same bonuses as the Max Skillcape
-    - Deadeye Amulet gave a 75% crit chance for regular attacks
+    - Deadeye Amulet had a 75% instead of 25% crit chance for regular attacks
     - When a Soul Split curse was selected its debuff was always active
     - Curses were rolled for while still active, resetting their duration if successful
     - Unequipping items (emptying a slot) didn't update stats
@@ -23,7 +28,7 @@ v1.1.0:
     - Style issues
 
     Known issues:
-    - Slayer's Crossbow should no longer activate against slayer task monsters inside dungeon.
+    - Slayer's Crossbow should no longer activate against slayer task monsters inside dungeons.
       Because Combat Simulator simulates every monster individually and does not simulate these 14 monsters again specifically for dungeons, it cannot both apply this bonus outside of dungeons and not apply it inside of dungeons.
 
 v1.0.0:
