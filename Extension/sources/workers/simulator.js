@@ -139,6 +139,7 @@ class CombatSimulator {
       petRolls: {},
     };
     // Final Result from simulation
+    /** @type {MonsterSimResult} */
     const simResult = {
       simSuccess: false,
       attacksMade: 0,

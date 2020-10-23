@@ -3197,6 +3197,7 @@
         });
         this.monsterSimFilter.push(true);
       }
+      /** @type {MonsterSimResult[]} */
       this.dungeonSimData = [];
       for (let i = 0; i < DUNGEONS.length; i++) {
         this.dungeonSimData.push({
@@ -3211,6 +3212,7 @@
           attacksMade: 0,
           avgHitDmg: 0,
           killTimeS: 0,
+          killsPerSecond: 0,
           gpPerKill: 0,
           gpPerSecond: 0,
           prayerXpPerSecond: 0,
@@ -5034,7 +5036,7 @@
       if (petSkills.includes(this.petSkill)) {
         const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
         this.monsterSimData.forEach((simResult) => {
-          if (!simResult.simSuccess) {
+          if (!simResult.simSuccess || (this.petSkill === 'Prayer' && simResult.prayerXpPerSecond < 0.00001)) {
             simResult.petChance = 0;
             return;
           }
@@ -5046,7 +5048,7 @@
         });
         DUNGEONS.forEach((_, dungeonId) => {
           const dungeonResult = this.dungeonSimData[dungeonId];
-          if (!dungeonResult.simSuccess || this.petSkill === 'Slayer') {
+          if (!dungeonResult.simSuccess || this.petSkill === 'Slayer' || (this.petSkill === 'Prayer' && dungeonResult.prayerXpPerSecond < 0.00001)) {
             dungeonResult.petChance = 0;
             return;
           }
