@@ -1,6 +1,6 @@
 # Melvor Idle Combat Simulator Reloaded
-[![Mozilla Firefox](https://img.shields.io/amo/v/combat-simulator-reloaded?label=Get%20MCS%20Reloaded%20for%20Firefox&logo=firefox)](https://addons.mozilla.org/en-US/firefox/addon/combat-simulator-reloaded/)
-[![Google Chrome](https://img.shields.io/chrome-web-store/v/cgggfndkphggbgeimpplooflemnfndok?label=Get%20MCS%20Reloaded%20for%20Chrome&logo=Google%20Chrome)](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
+[![Mozilla Firefox](https://img.shields.io/amo/v/combat-simulator-reloaded?label=Get%20CSR%20for%20Firefox&logo=firefox)](https://addons.mozilla.org/en-US/firefox/addon/combat-simulator-reloaded/)
+[![Google Chrome](https://img.shields.io/chrome-web-store/v/cgggfndkphggbgeimpplooflemnfndok?label=Get%20CSR%20for%20Chrome&logo=Google%20Chrome)](https://chrome.google.com/webstore/detail/melvor-idle-combat-simula/cgggfndkphggbgeimpplooflemnfndok)
 
 A browser extension for the game [Melvor Idle](http://www.melvoridle.com/).
 
