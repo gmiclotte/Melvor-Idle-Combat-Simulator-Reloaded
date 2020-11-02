@@ -51,6 +51,7 @@
         'Attacks Taken per ',
         'Pet Chance per ',
         'Kills per ',
+        'Runes per ',
         // 'Simulation Time',
       ];
       this.plotTypeIsTime = [
@@ -67,6 +68,7 @@
         true,
         true,
         false,
+        true,
         true,
         true,
         true,
@@ -91,6 +93,7 @@
         'attacksTakenPerSecond',
         'petChance',
         'killsPerSecond',
+        'runesUsedPerSecond',
         // 'simulationTime',
       ];
       this.zoneInfoNames = [
@@ -111,6 +114,7 @@
         'Attacks Taken/',
         ' Pet Chance/',
         'Kills/',
+        'Runes/',
         // 'Sim Time',
       ];
       // Time unit options
@@ -2988,7 +2992,7 @@
     constructor(parent, workerURL) {
       this.parent = parent;
       // Player combat stats
-    /** @type {Levels} */
+      /** @type {Levels} */
       this.playerLevels = {
         Attack: 1,
         Strength: 1,
@@ -2999,7 +3003,7 @@
         Prayer: 1,
         Slayer: 1,
       };
-    /** @type {Levels} */
+      /** @type {Levels} */
       this.virtualLevels = {
         Attack: 1,
         Strength: 1,
@@ -3036,9 +3040,7 @@
         },
       };
       // Pet Selection
-      this.petOwned = PETS.map(() => {
-        return false;
-      });
+      this.petOwned = PETS.map(() => false);
       // Style Selection
       this.attackStyle = {
         Melee: 0,
@@ -3057,6 +3059,7 @@
         damageReduction: 0,
         attackType: 0,
         maxHitpoints: 0,
+        runePreservation: 0,
       };
       // Prayer Stats
       /** @type {boolean[]} */
@@ -3382,6 +3385,7 @@
     * Calculates the equipment's combined stats and stores them in `this.equipmentStats`
     */
     updateEquipmentStats() {
+      const maxCape = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Completion;
       /** @type {EquipmentStats} */
       const equipmentStats = {
         attackSpeed: 4000,
@@ -3403,6 +3407,32 @@
         chanceToDoubleLoot: 0,
         maxHitpointsBonus: 0,
         increasedMinSpellDmg: [0, 0, 0, 0],
+        runesProvidedByWeapon: {},
+        runesProvidedByShield: {},
+        activeItems: {
+          hitpointsSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || maxCape,
+          rangedSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || maxCape,
+          magicSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || maxCape,
+          prayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || maxCape,
+          slayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || maxCape,
+          firemakingSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || maxCape,
+          capeOfArrowPreservation: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation,
+          skullCape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Skull_Cape,
+          goldRubyRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring,
+          goldDiamondRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring,
+          goldEmeraldRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring,
+          goldSapphireRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring,
+          fighterAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee,
+          warlockAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic,
+          guardianAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet,
+          deadeyeAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged,
+          confettiCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow,
+          stormsnap: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap,
+          slayerCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow,
+          bigRon: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron,
+          mirrorShield: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Shield] === CONSTANTS.item.Mirror_Shield,
+          magicalRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Magical_Ring,
+        },
       };
 
       for (let equipmentSlot = 0; equipmentSlot < this.parent.equipmentSlotKeys.length; equipmentSlot++) {
@@ -3431,13 +3461,22 @@
             equipmentStats.attackBonus[j] += item.attackBonus[j];
           }
         }
+
         if (!(equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo)) {
           equipmentStats.rangedAttackBonus += item.rangedAttackBonus || 0;
           equipmentStats.rangedStrengthBonus += item.rangedStrengthBonus || 0;
           equipmentStats.rangedDefenceBonus += item.rangedDefenceBonus || 0;
         }
+
         if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
           equipmentStats.attackSpeed = item.attackSpeed || 4000;
+          if (item.providesRuneQty) {
+            item.providesRune.forEach((rune) => equipmentStats.runesProvidedByWeapon[rune] = item.providesRuneQty * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
+          }
+        } else if (equipmentSlot === CONSTANTS.equipmentSlot.Shield) {
+          if (item.providesRuneQty) {
+            item.providesRune.forEach((rune) => equipmentStats.runesProvidedByShield[rune] = item.providesRuneQty * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
+          }
         }
 
         if (item.attackLevelRequired > equipmentStats.attackLevelRequired) {
@@ -3463,6 +3502,7 @@
     updateCombatStats() {
       this.combatStats.attackSpeed = 4000;
       this.combatStats.minHit = 0;
+      this.combatStats.runePreservation = 0;
       let attackStyleBonus = 1;
       let meleeDefenceBonus = 1;
       const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
@@ -3499,6 +3539,12 @@
           this.combatStats.maxHit = ANCIENT[this.spells.ancient.selectedID].maxHit * numberMultiplier;
         }
         this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
+        if (this.equipmentStats.activeItems.skullCape) {
+          this.combatStats.runePreservation += 0.2;
+        }
+        if (this.petOwned[17]) {
+          this.combatStats.runePreservation += 0.05;
+        }
       } else {
         // Melee
         this.combatStats.attackType = CONSTANTS.attackType.Melee;
@@ -3687,7 +3733,6 @@
       this.simStartTime = performance.now();
       this.simCancelled = false;
       // Start by grabbing the player stats
-      const maxCape = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Completion;
       /** @type {PlayerStats} */
       const playerStats = {
         attackSpeed: this.combatStats.attackSpeed,
@@ -3704,35 +3749,13 @@
         avgHPRegen: 0,
         damageReduction: this.combatStats.damageReduction,
         diamondLuck: this.herbloreBonus.diamondLuck,
+        usingMagic: false,
         usingAncient: false,
         hasSpecialAttack: false,
         specialData: {},
         startingGP: 50000000,
         levels: Object.assign({}, this.playerLevels), // Shallow copy of player levels
-        activeItems: {
-          hitpointsSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || maxCape,
-          rangedSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || maxCape,
-          magicSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || maxCape,
-          prayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || maxCape,
-          slayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || maxCape,
-          firemakingSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || maxCape,
-          capeOfArrowPreservation: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation,
-          skullCape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Skull_Cape,
-          goldRubyRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring,
-          goldDiamondRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring,
-          goldEmeraldRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring,
-          goldSapphireRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring,
-          fighterAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee,
-          warlockAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic,
-          guardianAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet,
-          deadeyeAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged,
-          confettiCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow,
-          stormsnap: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap,
-          slayerCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow,
-          bigRon: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron,
-          mirrorShield: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Shield] === CONSTANTS.item.Mirror_Shield,
-          magicalRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Magical_Ring,
-        },
+        activeItems: { ...this.equipmentStats.activeItems },
         prayerPointsPerAttack: 0,
         prayerPointsPerEnemy: 0,
         prayerPointsPerHeal: 0,
@@ -3744,7 +3767,31 @@
         canCurse: false,
         curseID: -1,
         curseData: {},
+        runeCosts: {
+          spell: 0,
+          curse: 0,
+          aurora: 0,
+        },
+        runePreservation: this.combatStats.runePreservation,
       };
+      // Magic
+      if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
+        playerStats.usingMagic = true;
+
+        // Rune costs
+        if (!this.spells.ancient.isSelected && this.spells.curse.isSelected) {
+          playerStats.runeCosts.curse = this.getRuneCostForSpell(CURSES[this.spells.curse.selectedID]);
+        }
+        if (this.spells.aurora.isSelected) {
+          playerStats.runeCosts.aurora = this.getRuneCostForSpell(AURORAS[this.spells.aurora.selectedID], true);
+        }
+        if (this.spells.ancient.isSelected) {
+          playerStats.runeCosts.spell = this.getRuneCostForSpell(ANCIENT[this.spells.ancient.selectedID]);
+        } else {
+          playerStats.runeCosts.spell = this.getRuneCostForSpell(SPELLS[this.spells.standard.selectedID]);
+        }
+      }
+
       // Special Attack and Ancient Magicks
       if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.ancient.isSelected) {
         playerStats.usingAncient = true;
@@ -3753,12 +3800,14 @@
         playerStats.hasSpecialAttack = true;
         playerStats.specialData = playerSpecialAttacks[items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].specialAttackID];
       }
+
       // Curses
       if (this.combatStats.attackType === CONSTANTS.attackType.Magic && !this.spells.ancient.isSelected && this.spells.curse.isSelected) {
         playerStats.canCurse = true;
         playerStats.curseID = this.spells.curse.selectedID;
         playerStats.curseData = CURSES[this.spells.curse.selectedID];
       }
+
       // Regen Calculation
       if (!this.isHardcore) {
         playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / numberMultiplier);
@@ -3771,6 +3820,7 @@
           playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + items[CONSTANTS.item.Gold_Ruby_Ring].hpRegenBonus / 100));
         }
       }
+
       // Calculate Global XP Multiplier
       if (playerStats.activeItems.firemakingSkillcape) {
         playerStats.globalXPMult += 0.05;
@@ -3792,12 +3842,12 @@
       } else {
         this.currentSim.gpBonus = 1;
       }
-      Object.assign(this.currentSim.equipmentStats, this.equipmentStats);
       this.currentSim.lootBonus = 1 + this.equipmentStats.chanceToDoubleLoot / 100;
       if (this.petOwned[20]) this.currentSim.lootBonus += 0.01;
       this.currentSim.slayerXPBonus = this.equipmentStats.slayerXPBonus;
       this.currentSim.herbConvertChance = this.herbloreBonus.luckyHerb / 100;
       this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
+
       // Compute prayer point usage and xp gain
       const hasPrayerCape = playerStats.activeItems.prayerSkillcape;
       for (let i = 0; i < PRAYER.length; i++) {
@@ -3836,12 +3886,14 @@
       playerStats.prayerPointsPerAttack *= (1 - this.herbloreBonus.divine / 100);
       playerStats.prayerPointsPerEnemy *= (1 - this.herbloreBonus.divine / 100);
       playerStats.prayerPointsPerHeal *= (1 - this.herbloreBonus.divine / 100);
+
       this.currentSim.options = {
         trials: this.trials,
         maxActions: this.maxActions,
       };
       this.currentSim.playerStats = playerStats;
       this.currentSim.isSlayerTask = this.isSlayerTask;
+      Object.assign(this.currentSim.equipmentStats, this.equipmentStats);
       Object.assign(this.currentSim.herbloreBonus, this.herbloreBonus);
       Object.assign(this.currentSim.prayerBonus, this.prayerBonus);
       Object.assign(this.currentSim.attackStyle, this.attackStyle);
@@ -3890,6 +3942,17 @@
       // Start simulation workers
       document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
       this.initializeSimulationJobs();
+    }
+
+    /**
+     * Returns the combined amount of runes it costs to use a spell after discounts from equipment
+     * @param {Spell} spell The spell to get the rune cost for
+     * @param {boolean} [isAurora=false] If the spell is an aurora
+     * @returns {number} The amount of runes it costs to use the spell
+     */
+    getRuneCostForSpell(spell, isAurora = false) {
+      return spell.runesRequired.map((req) => Math.max(req.qty - (this.equipmentStats.runesProvidedByWeapon[req.id] || 0) - (isAurora ? (this.equipmentStats.runesProvidedByShield[req.id] || 0) : 0), 0))
+        .reduce((a, b) => a + b, 0);
     }
 
     /**
@@ -3960,31 +4023,21 @@
     /** Performs all data analysis post queue completion */
     performPostSimAnalysis() {
       // Perform calculation of dungeon stats
-      let totXp = 0;
-      let totHpXp = 0;
-      let totPrayXP = 0;
-      let totHits = 0;
-      let totHP = 0;
-      let totEnemyHP = 0;
-      let totTime = 0;
-      let totPrayerPoints = 0;
-      let totalGPFromDamage = 0;
-      let totalAttacksTaken = 0;
-      let totalSimTime = 0;
       for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
         if (this.dungeonSimFilter[dungeonId]) {
           this.dungeonSimData[dungeonId].simSuccess = true;
-          totXp = 0;
-          totHpXp = 0;
-          totPrayXP = 0;
-          totHits = 0;
-          totHP = 0;
-          totEnemyHP = 0;
-          totPrayerPoints = 0;
-          totTime = 0;
-          totalGPFromDamage = 0;
-          totalAttacksTaken = 0;
-          totalSimTime = 0;
+          let totXp = 0;
+          let totHpXp = 0;
+          let totPrayXP = 0;
+          let totHits = 0;
+          let totHP = 0;
+          let totEnemyHP = 0;
+          let totPrayerPoints = 0;
+          let totTime = 0;
+          let totalGPFromDamage = 0;
+          let totalAttacksTaken = 0;
+          let totalRunesUsed = 0;
+          let totalSimTime = 0;
           for (let i = 0; i < DUNGEONS[dungeonId].monsters.length; i++) {
             const monsterId = DUNGEONS[dungeonId].monsters[i];
             totXp += this.monsterSimData[monsterId].xpPerEnemy;
@@ -3997,6 +4050,7 @@
             totPrayerPoints += this.monsterSimData[monsterId].ppConsumedPerSecond * this.monsterSimData[monsterId].killTimeS;
             totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamage;
             totalAttacksTaken += this.monsterSimData[monsterId].attacksTaken;
+            totalRunesUsed += this.monsterSimData[monsterId].runesUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
             totalSimTime += this.monsterSimData[monsterId].simulationTime;
 
             if (!this.monsterSimData[monsterId].simSuccess) {
@@ -4004,22 +4058,24 @@
               break;
             }
           }
-          this.dungeonSimData[dungeonId].xpPerSecond = totXp / totTime * 1000;
+          const dungeonTime = totTime / 1000;
+          this.dungeonSimData[dungeonId].xpPerSecond = totXp / dungeonTime;
           this.dungeonSimData[dungeonId].xpPerHit = totXp / totHits;
-          this.dungeonSimData[dungeonId].hpxpPerSecond = totHpXp / totTime * 1000;
-          this.dungeonSimData[dungeonId].prayerXpPerSecond = totPrayXP / totTime * 1000;
-          this.dungeonSimData[dungeonId].hpPerSecond = totHP / totTime * 1000;
-          this.dungeonSimData[dungeonId].dmgPerSecond = totEnemyHP / totTime * 1000;
+          this.dungeonSimData[dungeonId].hpxpPerSecond = totHpXp / dungeonTime;
+          this.dungeonSimData[dungeonId].prayerXpPerSecond = totPrayXP / dungeonTime;
+          this.dungeonSimData[dungeonId].hpPerSecond = totHP / dungeonTime;
+          this.dungeonSimData[dungeonId].dmgPerSecond = totEnemyHP / dungeonTime;
           this.dungeonSimData[dungeonId].avgKillTime = totTime;
           this.dungeonSimData[dungeonId].attacksMade = totHits;
           this.dungeonSimData[dungeonId].avgHitDmg = totEnemyHP / totHits;
-          this.dungeonSimData[dungeonId].killTimeS = totTime / 1000;
-          this.dungeonSimData[dungeonId].killsPerSecond = 1 / this.dungeonSimData[dungeonId].killTimeS;
-          this.dungeonSimData[dungeonId].ppConsumedPerSecond = totPrayerPoints / this.dungeonSimData[dungeonId].killTimeS;
+          this.dungeonSimData[dungeonId].killTimeS = dungeonTime;
+          this.dungeonSimData[dungeonId].killsPerSecond = 1 / dungeonTime;
+          this.dungeonSimData[dungeonId].ppConsumedPerSecond = totPrayerPoints / dungeonTime;
           this.dungeonSimData[dungeonId].gpFromDamage = totalGPFromDamage;
           this.dungeonSimData[dungeonId].attacksTaken = totalAttacksTaken;
-          this.dungeonSimData[dungeonId].attacksTakenPerSecond = totalAttacksTaken / totTime * 1000;
-          this.dungeonSimData[dungeonId].attacksMadePerSecond = totHits / totTime * 1000;
+          this.dungeonSimData[dungeonId].attacksTakenPerSecond = totalAttacksTaken / dungeonTime;
+          this.dungeonSimData[dungeonId].attacksMadePerSecond = totHits / dungeonTime;
+          this.dungeonSimData[dungeonId].runesUsedPerSecond = totalRunesUsed / dungeonTime;
           this.dungeonSimData[dungeonId].simulationTime = totalSimTime;
         } else {
           this.dungeonSimData[dungeonId].simSuccess = false;

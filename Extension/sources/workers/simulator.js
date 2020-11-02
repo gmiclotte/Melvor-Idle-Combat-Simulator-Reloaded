@@ -138,6 +138,7 @@ class CombatSimulator {
       enemyActions: 0,
       /** @type {PetRolls} */
       petRolls: { Prayer: {}, other: {} },
+      runesUsed: 0,
     };
     // Final Result from simulation
     /** @type {MonsterSimResult} */
@@ -358,6 +359,9 @@ class CombatSimulator {
           } else {
             player.actionsTaken++;
             stats.playerAttackCalls++;
+            if (playerStats.usingMagic) {
+              stats.runesUsed += playerStats.runeCosts.spell * (1 - playerStats.runePreservation) + playerStats.runeCosts.aurora;
+            }
             let specialAttack = false;
             if (playerStats.usingAncient) {
               specialAttack = true;
@@ -376,6 +380,7 @@ class CombatSimulator {
             }
             // Apply curse
             if (playerStats.canCurse && !enemy.isCursed) {
+              stats.runesUsed += playerStats.runeCosts.curse;
               const curseRoll = Math.random() * 100;
               if (playerStats.curseData.chance > curseRoll) {
                 enemy.isCursed = true;
@@ -554,7 +559,7 @@ class CombatSimulator {
               stats.totalCombatXP += xpToAdd;
               if (playerStats.prayerXpPerDamage > 0) {
                 stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
-            }
+              }
             }
             // Apply Stun
             if (canStun && !enemy.isStunned) {
@@ -587,6 +592,7 @@ class CombatSimulator {
           }
           // Apply curse
           if (playerStats.canCurse && !enemy.isCursed) {
+            stats.runesUsed += playerStats.runeCosts.curse;
             const curseRoll = Math.random() * 100;
             if (playerStats.curseData.chance > curseRoll) {
               enemy.isCursed = true;
@@ -705,7 +711,7 @@ class CombatSimulator {
             stats.totalCombatXP += xpToAdd;
             if (playerStats.prayerXpPerDamage > 0) {
               stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
-          }
+            }
           }
           // Apply Stun
           if (canStun && !enemy.isStunned) {
@@ -1114,11 +1120,9 @@ class CombatSimulator {
       simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / trials - simResult.avgKillTime / this.hitpointRegenInterval * playerStats.avgHPRegen;
       if (simResult.hpPerEnemy < 0) simResult.hpPerEnemy = 0;
       simResult.hpPerSecond = simResult.hpPerEnemy / simResult.avgKillTime * 1000;
-
       simResult.dmgPerSecond = enemyStats.hitpoints / simResult.avgKillTime * 1000;
       simResult.xpPerEnemy = stats.totalCombatXP / trials;
       simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
-
       simResult.xpPerSecond = stats.totalCombatXP / trials / simResult.avgKillTime * 1000;
       simResult.hpxpPerEnemy = stats.totalHpXP / trials;
       simResult.hpxpPerSecond = stats.totalHpXP / trials / simResult.avgKillTime * 1000;
@@ -1126,12 +1130,12 @@ class CombatSimulator {
       simResult.killsPerSecond = 1 / simResult.killTimeS;
       simResult.prayerXpPerEnemy = stats.totalPrayerXP / trials;
       simResult.prayerXpPerSecond = stats.totalPrayerXP / trials / simResult.avgKillTime * 1000;
-
       simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / trials / simResult.killTimeS + playerStats.prayerPointsPerHeal / this.hitpointRegenInterval * 1000;
       simResult.gpFromDamage = stats.gpGainedFromDamage / trials;
       simResult.attacksTaken = stats.enemyAttackCalls / trials;
       simResult.attacksTakenPerSecond = stats.enemyAttackCalls / trials / simResult.killTimeS;
       simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
+      simResult.runesUsedPerSecond = stats.runesUsed / trials / simResult.killTimeS;
 
       // Throw pet rolls in here to be further processed later
       Object.keys(stats.petRolls).forEach((petType) =>

@@ -14,6 +14,7 @@
  * @property {number} avgHPRegen Average HP gained per regen interval
  * @property {number} damageReduction Damage Reduction in %
  * @property {boolean} diamondLuck If player has diamond luck potion active
+ * @property {boolean} usingMagic If the player is using magic
  * @property {boolean} usingAncient If player is using ancient magick
  * @property {boolean} hasSpecialAttack If player can special attack
  * @property {Object} specialData Data of player special attack
@@ -31,9 +32,10 @@
  * @property {number} attackSpeedDecrease Decreased attack interval from auroras
  * @property {boolean} canCurse If the player can apply a curse
  * @property {number} curseID The index of the selected curse in CURSES
- * @property {curse} curseData The element of the selected curse from CURSES
+ * @property {Spell & Curse} curseData The element of the selected curse from CURSES
  * @property {number} globalXPMult Global XP multiplier from FM cape and pet
  * @property {RuneCosts} runeCosts The amount of runes it costs to use the selected spell, curse and aurora
+ * @property {number} runePreservation The chance to not use runes
  */
 
 /**
@@ -103,6 +105,9 @@
  * @property {number} chanceToDoubleLoot
  * @property {number} maxHitpointsBonus
  * @property {[number, number, number, number]} increasedMinSpellDmg
+ * @property {{id: number, qty: number}} runesProvidedByWeapon The runes for which the weapon reduces spells costs
+ * @property {{id: number, qty: number}} runesProvidedByShield The runes for which the shield reduces spells costs
+ * @property {ActiveItems} activeItems
  */
 
 /** @typedef {Object} EnemyStats
@@ -120,14 +125,27 @@
 * @property {number} specialLength Number of special attacks
 */
 
+/** @typedef {Object} Spell A Standard Spell, Aurora, Curse or Ancient Magick
+ * @property {string} name The name of the spell
+ * @property {string} media The URL of the spell image
+ * @property {number} magicLevelRequired The Magic level required to use the spell
+ * @property {RuneRequired[]} runesRequired The runes required to cast the spell
+*/
+
+/** @typedef {Object} RuneRequired
+ * @property {number} id The id of the rune
+ * @property {number} qty The quantity required
+*/
+
+/** @typedef {Object} StandardSpell Element of SPELLS
+ * @property {number} maxHit The base max hit of the spell
+ * @property {number} spellType The element of the spell
+*/
+
 /** @typedef {Object} Curse Element of CURSES
- * @property {number} chance Chance for curse to apply (%)
- * @property {string} description Curse description
- * @property {number|number[]} effectValue Curse effect value(s)
- * @property {number} magicLevelRequired Magic level required to use curse
- * @property {string} media URL of curse image
- * @property {string} name Name of curse
- * @property {Object[]} runesRequired Runes needed to use curse
+ * @property {number} chance The % chance for curse to apply
+ * @property {string} description A description of the curse
+ * @property {number|number[]} effectValue The effect value(s)
 */
 
 /**
@@ -160,13 +178,14 @@
  * @property {number} attacksTakenPerSecond
  * @property {number} attacksMadePerSecond
  * @property {number} simulationTime
+ * @property {number} runesUsedPerSecond
  * @property {PetRolls} petRolls
  */
 
 /** @typedef {Object} PetRolls
  * @property {number[]} Prayer
  * @property {number[]} other
- */
+*/
 
 /** @typedef {Object} SimulationWorker
  * @property {Worker} worker
