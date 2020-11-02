@@ -3192,7 +3192,7 @@
           attacksTakenPerSecond: 0,
           attacksMadePerSecond: 0,
           simulationTime: 0,
-          petRolls: [],
+          petRolls: { other: [] },
           petChance: 0,
         });
         this.monsterSimFilter.push(true);
@@ -5036,19 +5036,20 @@
       if (petSkills.includes(this.petSkill)) {
         const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
         this.monsterSimData.forEach((simResult) => {
-          if (!simResult.simSuccess || (this.petSkill === 'Prayer' && simResult.prayerXpPerSecond < 0.00001)) {
+          if (!simResult.simSuccess) {
             simResult.petChance = 0;
             return;
           }
           const timePeriod = (this.timeMultiplier === -1) ? simResult.killTimeS : this.timeMultiplier;
-          simResult.petChance = 1 - simResult.petRolls.reduce((chanceToNotGet, petRoll) => {
+          const petRolls = simResult.petRolls[this.petSkill] || simResult.petRolls.other;
+          simResult.petChance = 1 - petRolls.reduce((chanceToNotGet, petRoll) => {
             return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * petRoll.rollsPerSecond);
           }, 1);
           simResult.petChance *= 100;
         });
         DUNGEONS.forEach((_, dungeonId) => {
           const dungeonResult = this.dungeonSimData[dungeonId];
-          if (!dungeonResult.simSuccess || this.petSkill === 'Slayer' || (this.petSkill === 'Prayer' && dungeonResult.prayerXpPerSecond < 0.00001)) {
+          if (!dungeonResult.simSuccess || this.petSkill === 'Slayer') {
             dungeonResult.petChance = 0;
             return;
           }
@@ -5056,10 +5057,11 @@
           dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterId) => {
             const monsterResult = this.monsterSimData[monsterId];
             const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;
-            const chanceToNotGet = monsterResult.petRolls.reduce((product, petRoll) => {
-              return product * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * timeRatio * petRoll.rollsPerSecond);
+            const petRolls = monsterResult.petRolls[this.petSkill] || monsterResult.petRolls.other;
+            const monsterChanceToNotGet = petRolls.reduce((chanceToNotGet, petRoll) => {
+              return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * timeRatio * petRoll.rollsPerSecond);
             }, 1);
-            return cumChanceToNotGet * chanceToNotGet;
+            return cumChanceToNotGet * monsterChanceToNotGet;
           }, 1);
           dungeonResult.petChance *= 100;
         });

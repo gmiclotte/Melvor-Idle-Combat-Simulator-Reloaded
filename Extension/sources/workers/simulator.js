@@ -136,7 +136,8 @@ class CombatSimulator {
       gpGainedFromDamage: 0,
       playerActions: 0,
       enemyActions: 0,
-      petRolls: {},
+      /** @type {PetRolls} */
+      petRolls: { Prayer: {}, other: {} },
     };
     // Final Result from simulation
     /** @type {MonsterSimResult} */
@@ -246,15 +247,6 @@ class CombatSimulator {
     if (playerStats.canCurse) {
       this.setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
     }
-    // Pre-populate pet rolls
-    stats.petRolls[playerStats.attackSpeed - playerStats.attackSpeedDecrease] = 0;
-    enemyStats.specialIDs.forEach((id) => {
-      const specialAttack = this.enemySpecialAttacks[id];
-      if (specialAttack.attackSpeedDebuff) {
-        const slowedSpeed = Math.floor(playerStats.attackSpeed * (1 + specialAttack.attackSpeedDebuff / 100)) - playerStats.attackSpeedDecrease;
-        stats.petRolls[slowedSpeed] = 0;
-      }
-    });
     // Adjust ancient magick forcehit
     if (playerStats.usingAncient && playerStats.specialData.forceHit) {
       playerStats.specialData.forceHit = playerStats.maxAttackRoll > 20000;
@@ -324,13 +316,13 @@ class CombatSimulator {
       enemy.rangedEvasionBuff = 1;
 
       // Simulate combat until enemy is dead or max actions has been reached
-      while (enemy.hitpoints > 0) {
+      let enemyAlive = true;
+      while (enemyAlive) {
         if (player.actionsTaken > maxActions) {
           simSuccess = false;
           break;
         }
         // Determine the smallest timer:
-        let enemyAlive = true;
         let timeStep = Infinity;
         if (player.isActing) timeStep = Math.min(timeStep, player.actionTimer);
         if (player.isAttacking) timeStep = Math.min(timeStep, player.attackTimer);
@@ -352,6 +344,7 @@ class CombatSimulator {
         if (enemy.isBleeding) enemy.bleedTimer -= timeStep;
         stats.totalTime += timeStep;
         // Perform actions for timers that have run out if applicable
+        // Perform attack or special
         if (player.isActing && player.actionTimer <= 0 && enemyAlive) {
           stats.playerActions++;
           // Do player action
@@ -425,7 +418,7 @@ class CombatSimulator {
                 if (playerAccuracy > hitChance) attackHits = true;
               }
               if (attackHits) {
-                stats.petRolls[player.currentSpeed]++;
+                stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
                 if (playerStats.specialData.setDamage) damageToEnemy = playerStats.specialData.setDamage * playerStats.specialData.damageMultiplier * damageModifier;
                 else if (playerStats.specialData.maxHit) damageToEnemy = playerStats.maxHit * playerStats.specialData.damageMultiplier;
                 else if (playerStats.specialData.stormsnap) damageToEnemy = (6 + 6 * playerStats.levels.Magic) * damageModifier;
@@ -521,7 +514,7 @@ class CombatSimulator {
                 if (playerAccuracy > hitChance) attackHits = true;
               }
               if (attackHits) {
-                stats.petRolls[player.currentSpeed]++;
+                stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
                 // Calculate attack Damage
                 if (alwaysMaxHit) {
                   damageToEnemy = playerStats.maxHit;
@@ -559,6 +552,9 @@ class CombatSimulator {
               stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
               stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
               stats.totalCombatXP += xpToAdd;
+              if (playerStats.prayerXpPerDamage > 0) {
+                stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
+            }
             }
             // Apply Stun
             if (canStun && !enemy.isStunned) {
@@ -576,9 +572,10 @@ class CombatSimulator {
                 player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
               }
             }
+            if (player.countMax <= 1 && enemy.hitpoints <= 0) enemyAlive = false;
           }
         }
-        if (enemy.hitpoints <= 0) enemyAlive = false;
+        // Perform next attack of a multi attack special
         if (player.isAttacking && player.attackTimer <= 0 && enemyAlive) {
           // Do player multi attacks
           stats.playerAttackCalls++;
@@ -631,7 +628,7 @@ class CombatSimulator {
             if (playerAccuracy > hitChance) attackHits = true;
           }
           if (attackHits) {
-            stats.petRolls[player.currentSpeed]++;
+            stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
             if (playerStats.specialData.setDamage) damageToEnemy = playerStats.specialData.setDamage * playerStats.specialData.damageMultiplier * damageModifier;
             else if (playerStats.specialData.maxHit) damageToEnemy = playerStats.maxHit * playerStats.specialData.damageMultiplier;
             else if (playerStats.specialData.stormsnap) damageToEnemy = (6 + 6 * playerStats.levels.Magic) * damageModifier;
@@ -706,6 +703,9 @@ class CombatSimulator {
             stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
             stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
+            if (playerStats.prayerXpPerDamage > 0) {
+              stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
+          }
           }
           // Apply Stun
           if (canStun && !enemy.isStunned) {
@@ -732,6 +732,7 @@ class CombatSimulator {
           } else {
             player.attackTimer = playerStats.specialData.attackInterval;
           }
+          if (enemy.hitpoints <= 0) enemyAlive = false;
         }
         if (player.isBurning && player.burnTimer <= 0 && enemyAlive) {
           // Do player burn damage
@@ -747,6 +748,7 @@ class CombatSimulator {
           player.canRecoil = true;
           player.isRecoiling = false;
         }
+        // Perform enemy attack or special
         if (enemy.isActing && enemy.actionTimer <= 0 && enemyAlive) {
           stats.enemyActions++;
           // Do enemy action
@@ -940,6 +942,7 @@ class CombatSimulator {
             }
           }
         }
+        // Perform next enemy attack of a multi attack special
         if (enemy.isAttacking && enemy.attackTimer <= 0 && enemyAlive) {
           // Do enemy multi attacks
           stats.enemyAttackCalls++;
@@ -1082,6 +1085,7 @@ class CombatSimulator {
             enemy.bleedCount++;
           }
           enemy.bleedTimer = enemy.bleedInterval;
+          if (enemy.hitpoints <= 0) enemyAlive = false;
         }
       }
       if (isNaN(enemy.hitpoints)) {
@@ -1130,12 +1134,11 @@ class CombatSimulator {
       simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
 
       // Throw pet rolls in here to be further processed later
-      simResult.petRolls = Object.keys(stats.petRolls).map((attackSpeed) => {
-        return {
+      Object.keys(stats.petRolls).forEach((petType) =>
+        simResult.petRolls[petType] = Object.keys(stats.petRolls[petType]).map((attackSpeed) => ({
           speed: parseInt(attackSpeed),
-          rollsPerSecond: stats.petRolls[attackSpeed] / trials / simResult.killTimeS,
-        };
-      });
+          rollsPerSecond: stats.petRolls[petType][attackSpeed] / trials / simResult.killTimeS,
+        })));
     }
     return simResult;
   };

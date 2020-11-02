@@ -160,7 +160,12 @@
  * @property {number} attacksTakenPerSecond
  * @property {number} attacksMadePerSecond
  * @property {number} simulationTime
- * @property {number[]} petRolls
+ * @property {PetRolls} petRolls
+ */
+
+/** @typedef {Object} PetRolls
+ * @property {number[]} Prayer
+ * @property {number[]} other
  */
 
 /** @typedef {Object} SimulationWorker
