@@ -1,5 +1,9 @@
 v1.1.1
+    Changes:
+    - Added runes used statistic
+
     Fixes:
+    - The 1st hit of a multi-attack special can't kill a monster (This affects attacks/kill and most things based on that in some way)
     - Implemented game bugfixes
         - Prayer pet now only rolls when you receive prayer xp
 
