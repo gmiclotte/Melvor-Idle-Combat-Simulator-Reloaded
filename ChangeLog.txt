@@ -1,3 +1,7 @@
+Next
+    Fixes:
+    - Surge's attack speed reduction wasn't applied to the first cast
+
 v1.1.2
     Fixes:
     - Fixed a bug introduced in the previous version causing multi attack specials to make an enemy unkillable by normal attacks, greatly increasing the attacks required to kill an enemy with some weapons

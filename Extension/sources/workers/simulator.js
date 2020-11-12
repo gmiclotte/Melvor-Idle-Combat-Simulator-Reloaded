@@ -265,13 +265,13 @@ class CombatSimulator {
       player.isStunned = false;
       player.stunTurns = 0;
       player.doingSpecial = false;
-      player.actionTimer = playerStats.attackSpeed;
+      player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
+      player.actionTimer = player.currentSpeed;
       player.isActing = true;
       player.isAttacking = false;
       player.isBurning = false;
       player.burnCount = 0;
       player.burnDamage = 0;
-      player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
       player.reductionBuff = 0;
       player.attackCount = 0;
       player.countMax = 0;
