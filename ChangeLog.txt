@@ -1,6 +1,7 @@
-Next
+v1.1.3
     Fixes:
     - Surge's attack speed reduction wasn't applied to the first cast
+    - Surge's attack speed reduction wasn't shown in the combat stats
 
 v1.1.2
     Fixes:
