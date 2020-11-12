@@ -2228,7 +2228,11 @@
      */
     updateCombatStats() {
       this.combatStatKeys.forEach((key) => {
-        document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();
+        if (key === 'attackSpeed') {
+          document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key] - this.simulator.auroraBonus.attackSpeedBuff;
+        } else {
+          document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();
+        }
       });
     }
     /**
@@ -3578,6 +3582,7 @@
       if (this.petOwned[15]) this.combatStats.maxHitpoints++;
       this.combatStats.maxHitpoints *= numberMultiplier;
     }
+
     /**
     * Computes the prayer bonuses for the selected prayers
     */
@@ -3591,6 +3596,7 @@
         }
       }
     }
+
     /**
      * Resets prayer bonuses to none
      */
@@ -3612,6 +3618,7 @@
       this.prayerBonus.hitpointHeal = 0;
       this.prayerBonus.damageReduction = 0;
     }
+
     /**
      * Sets aurora bonuses
      */
@@ -3646,6 +3653,7 @@
         }
       }
     }
+
     /**
      * Resets the aurora bonuses to default
      */
@@ -3654,6 +3662,7 @@
         this.auroraBonus[key] = 0;
       });
     }
+
     /**
      * Computes the potion bonuses for the selected potion
      * */
@@ -3706,6 +3715,7 @@
         }
       }
     }
+
     /**
      * Resets the potion bonuses to none
      */
