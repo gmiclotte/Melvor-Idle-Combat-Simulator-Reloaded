@@ -577,7 +577,7 @@ class CombatSimulator {
                 player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
               }
             }
-            if (player.countMax <= 1 && enemy.hitpoints <= 0) enemyAlive = false;
+            if (!player.isAttacking && enemy.hitpoints <= 0) enemyAlive = false;
           }
         }
         // Perform next attack of a multi attack special
