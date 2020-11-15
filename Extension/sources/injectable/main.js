@@ -3389,6 +3389,15 @@
     * Calculates the equipment's combined stats and stores them in `this.equipmentStats`
     */
     updateEquipmentStats() {
+      const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
+      if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
+        this.combatStats.attackType = CONSTANTS.attackType.Ranged;
+      } else if (items[weaponID].isMagic) {
+        this.combatStats.attackType = CONSTANTS.attackType.Magic;
+      } else {
+        this.combatStats.attackType = CONSTANTS.attackType.Melee;
+      }
+
       const maxCape = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Completion;
       /** @type {EquipmentStats} */
       const equipmentStats = {
@@ -3510,7 +3519,7 @@
       let attackStyleBonus = 1;
       let meleeDefenceBonus = 1;
       const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
-      if ((items[weaponID].type === 'Ranged Weapon') || items[weaponID].isRanged) {
+      if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
         // Ranged
         this.combatStats.attackType = CONSTANTS.attackType.Ranged;
         if (this.attackStyle.Ranged === 0) {
