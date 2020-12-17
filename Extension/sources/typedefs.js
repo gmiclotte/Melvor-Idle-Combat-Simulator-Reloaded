@@ -111,42 +111,42 @@
  */
 
 /** @typedef {Object} EnemyStats
-* @property {number} hitpoints Max Enemy HP
-* @property {number} attackSpeed Enemy attack speed (ms)
-* @property {number} attackType Enemy attack type
-* @property {number} maxAttackRoll Accuracy Rating
-* @property {number} maxHit Normal attack max hit
-* @property {number} maxDefRoll Melee Evasion Rating
-* @property {number} maxMagDefRoll Magic Evasion Rating
-* @property {number} maxRngDefRoll Ranged Evasion Rating
-* @property {boolean} hasSpecialAttack If enemy can do special attacks
-* @property {number[]} specialAttackChances Chance of each special attack
-* @property {number[]} specialIDs IDs of special attacks
-* @property {number} specialLength Number of special attacks
-*/
+ * @property {number} hitpoints Max Enemy HP
+ * @property {number} attackSpeed Enemy attack speed (ms)
+ * @property {number} attackType Enemy attack type
+ * @property {number} maxAttackRoll Accuracy Rating
+ * @property {number} maxHit Normal attack max hit
+ * @property {number} maxDefRoll Melee Evasion Rating
+ * @property {number} maxMagDefRoll Magic Evasion Rating
+ * @property {number} maxRngDefRoll Ranged Evasion Rating
+ * @property {boolean} hasSpecialAttack If enemy can do special attacks
+ * @property {number[]} specialAttackChances Chance of each special attack
+ * @property {number[]} specialIDs IDs of special attacks
+ * @property {number} specialLength Number of special attacks
+ */
 
 /** @typedef {Object} Spell A Standard Spell, Aurora, Curse or Ancient Magick
  * @property {string} name The name of the spell
  * @property {string} media The URL of the spell image
  * @property {number} magicLevelRequired The Magic level required to use the spell
  * @property {RuneRequired[]} runesRequired The runes required to cast the spell
-*/
+ */
 
 /** @typedef {Object} RuneRequired
  * @property {number} id The id of the rune
  * @property {number} qty The quantity required
-*/
+ */
 
 /** @typedef {Object} StandardSpell Element of SPELLS
  * @property {number} maxHit The base max hit of the spell
  * @property {number} spellType The element of the spell
-*/
+ */
 
 /** @typedef {Object} Curse Element of CURSES
  * @property {number} chance The % chance for curse to apply
  * @property {string} description A description of the curse
  * @property {number|number[]} effectValue The effect value(s)
-*/
+ */
 
 /**
  * Simulation result for a single monster
@@ -185,12 +185,12 @@
 /** @typedef {Object} PetRolls
  * @property {number[]} Prayer
  * @property {number[]} other
-*/
+ */
 
 /** @typedef {Object} SimulationWorker
  * @property {Worker} worker
  * @property {boolean} inUse
-*/
+ */
 
 /** @typedef {Object} SimulationJob
  * @property {number} monsterID

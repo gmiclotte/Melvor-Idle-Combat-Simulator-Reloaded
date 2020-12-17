@@ -18,28 +18,28 @@
 
 // Set up listener from page
 window.addEventListener('message', (event) => {
-  // We only accept messages from ourselves
-  if (event.source !== window) {
-    return;
-  }
-  if (event.data.type && (event.data.type === 'MCS_FROM_PAGE')) {
-    switch (event.data.action) {
-      case 'REQUEST_URLS':
-        // Send URLS of web accessible resources to page
-        const urls = {
-          crossedOut: chrome.runtime.getURL('icons/crossedOut.svg'),
-          simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js'),
-        };
-        window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'RECEIVE_URLS', urls: urls });
-        break;
+    // We only accept messages from ourselves
+    if (event.source !== window) {
+        return;
     }
-  }
+    if (event.data.type && (event.data.type === 'MCS_FROM_PAGE')) {
+        switch (event.data.action) {
+            case 'REQUEST_URLS':
+                // Send URLS of web accessible resources to page
+                const urls = {
+                    crossedOut: chrome.runtime.getURL('icons/crossedOut.svg'),
+                    simulationWorker: chrome.runtime.getURL('sources/workers/simulator.js'),
+                };
+                window.postMessage({type: 'MCS_FROM_CONTENT', action: 'RECEIVE_URLS', urls: urls});
+                break;
+        }
+    }
 }, false);
 
 // Perform script injection
 const injectableNames = ['main'];
 for (let i = 0; i < injectableNames.length; i++) {
-  injectScript(injectableNames[i]);
+    injectScript(injectableNames[i]);
 }
 
 /**
@@ -47,16 +47,16 @@ for (let i = 0; i < injectableNames.length; i++) {
  * @param {string} scriptName
  */
 function injectScript(scriptName) {
-  const scriptID = `mcs-${scriptName}`;
-  // Check if script already exists, if so delete it
-  if (document.getElementById(scriptID)) {
-    window.postMessage({ type: 'MCS_FROM_CONTENT', action: 'UNLOAD' });
-    document.getElementById(scriptID).remove();
-  }
-  // Inject script
-  const scriptPath = chrome.runtime.getURL(`sources/injectable/${scriptName}.js`);
-  const newScript = document.createElement('script');
-  newScript.setAttribute('id', scriptID);
-  newScript.src = scriptPath;
-  document.body.appendChild(newScript);
+    const scriptID = `mcs-${scriptName}`;
+    // Check if script already exists, if so delete it
+    if (document.getElementById(scriptID)) {
+        window.postMessage({type: 'MCS_FROM_CONTENT', action: 'UNLOAD'});
+        document.getElementById(scriptID).remove();
+    }
+    // Inject script
+    const scriptPath = chrome.runtime.getURL(`sources/injectable/${scriptName}.js`);
+    const newScript = document.createElement('script');
+    newScript.setAttribute('id', scriptID);
+    newScript.src = scriptPath;
+    document.body.appendChild(newScript);
 }
