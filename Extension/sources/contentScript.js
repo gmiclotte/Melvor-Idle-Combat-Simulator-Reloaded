@@ -36,8 +36,56 @@ window.addEventListener('message', (event) => {
     }
 }, false);
 
+
+// set global variable
+window.MICSR = {
+    /////////////
+    // logging //
+    /////////////
+    debug: (...args) => console.log('MICSR debugging:', ...args),
+    log: (...args) => console.log('MICSR:', ...args),
+    warn: (...args) => console.warn('MICSR:', ...args),
+    error: (...args) => console.error('MICSR:', ...args),
+
+    /////////////
+    // loading //
+    /////////////
+    loadedFiles: {},
+    // used to wait for variables from MICSR across different files
+    waitLoadOrder: (reqs, setup, id) => {
+        // check requirements
+        for (const req of reqs) {
+            if (MICSR.loadedFiles[req]) {
+                continue;
+            }
+            // not defined yet: try again later
+            MICSR.log(id + ' is waiting for ' + req)
+            setTimeout(() => MICSR.waitLoadOrder(reqs, setup, id), 50);
+            return;
+        }
+        // requirements met
+        MICSR.log('setting up ' + id)
+        setup();
+        // mark as loaded
+        MICSR.loadedFiles[id] = true;
+    }
+}
+
 // Perform script injection
-const injectableNames = ['main'];
+// Order of scripts shouldn't matter, `loadRequiredVariables` takes care of appropriate loading order
+const injectableNames = [
+    // independent definitions
+    'util',
+    'statNames',
+    // class files
+    'Card',
+    'Plotter',
+    'Simulator',
+    // uses the other classes
+    'App',
+    // should be last
+    'main',
+];
 for (let i = 0; i < injectableNames.length; i++) {
     injectScript(injectableNames[i]);
 }
