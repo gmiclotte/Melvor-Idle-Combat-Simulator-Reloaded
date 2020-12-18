@@ -98,15 +98,6 @@
          * @return {Promise<Object>}
          */
         async simulateMonster(enemyStats, playerStats, trials, maxActions) {
-            // Calculate Accuracy
-            let playerAccuracy = this.calculateAccuracy(playerStats, enemyStats);
-            let enemyAccuracy;
-            // Set accuracy if using protection prayer
-            if (playerStats.isProtected) {
-                enemyAccuracy = 100 - this.protectFromValue;
-            } else {
-                enemyAccuracy = this.calculateAccuracy(enemyStats, playerStats);
-            }
             let reductionModifier;
             let damageModifier;
             // Set Combat Triangle
@@ -121,15 +112,13 @@
             if (playerStats.specialData.setDamage) playerStats.specialData.setDamage *= this.numberMultiplier;
             // Multiply player max hit
             playerStats.maxHit = Math.floor(playerStats.maxHit * damageModifier);
-            // Determine if player always hits for maxHit
-            const alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit;
+
+
+
             // Start Monte Carlo simulation
             let enemyKills = 0;
-            let xpToAdd = 0;
-
-            let simSuccess = true;
-            let damageToEnemy = 0;
             let damageToPlayer = 0;
+
             // Stats from the simulation
             const stats = {
                 totalTime: 0,
@@ -147,114 +136,7 @@
                 petRolls: {Prayer: {}, other: {}},
                 runesUsed: 0,
             };
-            // Final Result from simulation
-            /** @type {MonsterSimResult} */
-            const simResult = {
-                simSuccess: false,
-                attacksMade: 0,
-                avgHitDmg: 0,
-                avgKillTime: 0,
-                hpPerEnemy: 0,
-                hpPerSecond: 0,
-                dmgPerSecond: 0,
-                xpPerEnemy: 0,
-                xpPerHit: 0,
-                xpPerSecond: 0,
-                hpxpPerEnemy: 0,
-                hpxpPerSecond: 0,
-                killTimeS: 0,
-                killsPerSecond: 0,
-                prayerXpPerEnemy: 0,
-                prayerXpPerSecond: 0,
-                ppConsumedPerSecond: 0,
-                gpFromDamage: 0,
-                attacksTaken: 0,
-                attacksTakenPerSecond: 0,
-                attacksMadePerSecond: 0,
-                petRolls: {},
-            };
 
-            // Variables for player and enemy to track status
-            const player = {
-                hitpoints: playerStats.levels.Hitpoints * this.numberMultiplier,
-                isStunned: false,
-                stunTurns: 0,
-                doingSpecial: false,
-                actionTimer: 0,
-                isActing: false,
-                attackTimer: 0,
-                isAttacking: false,
-                burnTimer: 0,
-                isBurning: false,
-                burnMaxCount: 10,
-                burnCount: 0,
-                burnDamage: 0,
-                burnInterval: 500,
-                currentSpeed: 0,
-                reductionBuff: 0,
-                damageReduction: Math.floor(playerStats.damageReduction * reductionModifier),
-                attackCount: 0,
-                countMax: 0,
-                isSlowed: false,
-                slowTurns: 0,
-                actionsTaken: 0,
-                canRecoil: true,
-                isRecoiling: false,
-                recoilTimer: 0,
-            };
-            const enemy = {
-                hitpoints: enemyStats.hitpoints,
-                isStunned: false,
-                stunTurns: 0,
-                doingSpecial: false,
-                actionTimer: 0,
-                isActing: false,
-                attackTimer: 0,
-                isAttacking: false,
-                bleedTimer: 0,
-                isBleeding: false,
-                bleedMaxCount: 0,
-                bleedInterval: 0,
-                bleedCount: 0,
-                bleedDamage: 0,
-                isSlowed: false,
-                slowTurns: 0,
-                currentSpeed: 0,
-                damageReduction: 0,
-                reflectMelee: 0,
-                specialID: null,
-                attackCount: 0,
-                countMax: 0,
-                attackInterval: 0,
-                isBuffed: false,
-                buffTurns: 0,
-                isCursed: false,
-                curseTurns: 0,
-                maxAttackRoll: enemyStats.maxAttackRoll,
-                maxHit: enemyStats.maxHit,
-                maxDefRoll: enemyStats.maxDefRoll,
-                maxMagDefRoll: enemyStats.maxMagDefRoll,
-                maxRngDefRoll: enemyStats.maxRngDefRoll,
-                rangedEvasionDebuff: 1,
-                meleeEvasionBuff: 1,
-                magicEvasionBuff: 1,
-                rangedEvasionBuff: 1,
-                attackType: enemyStats.attackType,
-                curse: {
-                    type: '',
-                    accuracyDebuff: 1,
-                    maxHitDebuff: 1,
-                    damageMult: 1,
-                    magicEvasionDebuff: 1,
-                    meleeEvasionDebuff: 1,
-                    rangedEvasionDebuff: 1,
-                    confusionMult: 0,
-                    decayDamage: 0,
-                },
-            };
-            if (playerStats.canCurse) {
-                this.setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
-            }
             // Adjust ancient magick forcehit
             if (playerStats.usingAncient && playerStats.specialData.forceHit) {
                 playerStats.specialData.forceHit = playerStats.maxAttackRoll > 20000;
@@ -262,490 +144,63 @@
             // var enemyReflectDamage = 0; //Damage caused by reflect
             // Start simulation for each trial
             this.cancelStatus = false;
-            while (enemyKills < trials && simSuccess) {
+            while (enemyKills < trials) {
                 // Check Cancellation every 250th trial
                 if (enemyKills % 250 === 0 && await this.isCanceled()) {
-                    return simResult;
+                    return {simSuccess: false};
                 }
                 // Reset Timers and statuses
-                player.hitpoints = 0;
-                player.isStunned = false;
-                player.stunTurns = 0;
-                player.doingSpecial = false;
-                player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
-                player.actionTimer = player.currentSpeed;
-                player.isActing = true;
-                player.isAttacking = false;
-                player.isBurning = false;
-                player.burnCount = 0;
-                player.burnDamage = 0;
-                player.reductionBuff = 0;
-                player.attackCount = 0;
-                player.countMax = 0;
-                player.isSlowed = false;
-                player.slowTurns = 0;
-                player.actionsTaken = 0;
-                player.canRecoil = true;
-                player.isRecoiling = false;
-                player.recoilTimer = 0;
-
-                enemy.hitpoints = enemyStats.hitpoints;
-                enemy.isStunned = false;
-                enemy.stunTurns = 0;
-                enemy.doingSpecial = false;
-                enemy.actionTimer = enemyStats.attackSpeed;
-                enemy.isActing = true;
-                enemy.isAttacking = false;
-                enemy.isBleeding = false;
-                enemy.bleedMaxCount = 0;
-                enemy.bleedInterval = 0;
-                enemy.bleedDamage = 0;
-                enemy.bleedCount = 0;
-                enemy.currentSpeed = enemyStats.attackSpeed;
-                enemy.damageReduction = 0;
-                enemy.reflectMelee = 0;
-                enemy.attackCount = 0;
-                enemy.countMax = 0;
-                enemy.isBuffed = false;
-                enemy.buffTurns = 0;
-                enemy.attackInterval = 0;
-                enemy.isSlowed = false;
-                enemy.slowTurns = 0;
-                enemy.isCursed = false;
-                enemy.curseTurns = 0;
-                enemy.maxAttackRoll = enemyStats.maxAttackRoll;
-                enemy.maxHit = enemyStats.maxHit;
-                enemy.maxDefRoll = enemyStats.maxDefRoll;
-                enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
-                enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
-                enemy.rangedEvasionDebuff = 1;
-                enemy.meleeEvasionBuff = 1;
-                enemy.magicEvasionBuff = 1;
-                enemy.rangedEvasionBuff = 1;
+                const player = this.resetPlayer(playerStats, enemyStats, reductionModifier, damageModifier);
+                const enemy = this.resetEnemy(playerStats, enemyStats);
+                if (playerStats.canCurse) {
+                    this.setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
+                }
 
                 // Simulate combat until enemy is dead or max actions has been reached
                 let enemyAlive = true;
                 while (enemyAlive) {
+                    // check player action limit
                     if (player.actionsTaken > maxActions) {
-                        simSuccess = false;
+                        return {simSuccess: false};
                         break;
                     }
-                    // Determine the smallest timer:
+
+                    // Determine the time step
                     let timeStep = Infinity;
+                    // player time
                     if (player.isActing) timeStep = Math.min(timeStep, player.actionTimer);
                     if (player.isAttacking) timeStep = Math.min(timeStep, player.attackTimer);
                     if (player.isBurning) timeStep = Math.min(timeStep, player.burnTimer);
                     if (player.isRecoiling) timeStep = Math.min(timeStep, player.recoilTimer);
+                    // enemy time
                     if (enemy.isActing) timeStep = Math.min(timeStep, enemy.actionTimer);
                     if (enemy.isAttacking) timeStep = Math.min(timeStep, enemy.attackTimer);
                     if (enemy.isBleeding) timeStep = Math.min(timeStep, enemy.bleedTimer);
-                    if (timeStep === 0) {
-                        throw Error('Error: Timestep zero.');
+                    // throw error on invalid time step
+                    if (timeStep <= 0) {
+                        throw Error('Error: Timestep ' + timeStep);
                     }
-                    // Subtract from timers and perform their actions if necessary
+
+                    // Process time step
+                    // player
                     if (player.isActing) player.actionTimer -= timeStep;
                     if (player.isAttacking) player.attackTimer -= timeStep;
                     if (player.isBurning) player.burnTimer -= timeStep;
                     if (player.isRecoiling) player.recoilTimer -= timeStep;
+                    //enemy
                     if (enemy.isActing) enemy.actionTimer -= timeStep;
                     if (enemy.isAttacking) enemy.attackTimer -= timeStep;
                     if (enemy.isBleeding) enemy.bleedTimer -= timeStep;
+                    // tracker
                     stats.totalTime += timeStep;
-                    // Perform actions for timers that have run out if applicable
-                    // Perform attack or special
+
+                    // Process player actions
                     if (player.isActing && player.actionTimer <= 0 && enemyAlive) {
-                        stats.playerActions++;
-                        // Do player action
-                        if (player.isStunned) {
-                            damageToEnemy = 0;
-                            player.stunTurns--;
-                            if (player.stunTurns <= 0) {
-                                player.isStunned = false;
-                            }
-                            player.actionTimer = player.currentSpeed;
-                        } else {
-                            player.actionsTaken++;
-                            stats.playerAttackCalls++;
-                            if (playerStats.usingMagic) {
-                                stats.runesUsed += playerStats.runeCosts.spell * (1 - playerStats.runePreservation) + playerStats.runeCosts.aurora;
-                            }
-                            let specialAttack = false;
-                            if (playerStats.usingAncient) {
-                                specialAttack = true;
-                            } else if (playerStats.hasSpecialAttack) {
-                                // Roll for player special
-                                const specialRoll = Math.floor(Math.random() * 100);
-                                if (specialRoll <= playerStats.specialData.chance) {
-                                    specialAttack = true;
-                                }
-                            }
-                            // Apply pre-attack special effects
-                            if (specialAttack && playerStats.specialData.decreasedRangedEvasion !== undefined) {
-                                enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
-                                this.setEvasionDebuffs(enemyStats, enemy);
-                                playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                            }
-                            // Apply curse
-                            if (playerStats.canCurse && !enemy.isCursed) {
-                                stats.runesUsed += playerStats.runeCosts.curse;
-                                const curseRoll = Math.random() * 100;
-                                if (playerStats.curseData.chance > curseRoll) {
-                                    enemy.isCursed = true;
-                                    enemy.curseTurns = 3;
-                                    // Update the curses that change stats
-                                    switch (enemy.curse.type) {
-                                        case 'Blinding':
-                                            enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
-                                            if (!playerStats.isProtected) {
-                                                enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
-                                            }
-                                            break;
-                                        case 'Soul Split':
-                                        case 'Decay':
-                                            this.setEvasionDebuffs(enemyStats, enemy);
-                                            playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                                            break;
-                                        case 'Weakening':
-                                            enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
-                                            break;
-                                    }
-                                }
-                            }
-                            // Attack parameters
-                            let canStun = false;
-                            let stunTurns = 0;
-                            damageToEnemy = 0;
-                            if (specialAttack) {
-                                // Does the attack hit?
-                                let attackHits = false;
-                                if (enemy.isStunned || playerStats.specialData.forceHit) {
-                                    attackHits = true;
-                                } else {
-                                    // Roll for hit
-                                    let hitChance = Math.floor(Math.random() * 100);
-                                    if (playerStats.diamondLuck) {
-                                        const hitChance2 = Math.floor(Math.random() * 100);
-                                        if (hitChance > hitChance2) hitChance = hitChance2;
-                                    }
-                                    if (playerAccuracy > hitChance) attackHits = true;
-                                }
-                                if (attackHits) {
-                                    stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
-                                    if (playerStats.specialData.setDamage) damageToEnemy = playerStats.specialData.setDamage * playerStats.specialData.damageMultiplier * damageModifier;
-                                    else if (playerStats.specialData.maxHit) damageToEnemy = playerStats.maxHit * playerStats.specialData.damageMultiplier;
-                                    else if (playerStats.specialData.stormsnap) damageToEnemy = (6 + 6 * playerStats.levels.Magic) * damageModifier;
-                                    else {
-                                        if (alwaysMaxHit) {
-                                            damageToEnemy = playerStats.maxHit;
-                                        } else {
-                                            damageToEnemy = this.rollForDamage(playerStats);
-                                        }
-                                        damageToEnemy *= playerStats.specialData.damageMultiplier;
-                                    }
-                                    if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-                                    if (enemy.isStunned) {
-                                        damageToEnemy *= playerStats.specialData.stunDamageMultiplier;
-                                    }
-                                    if (playerStats.activeItems.deadeyeAmulet) {
-                                        damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
-                                    }
-                                    if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
-                                    if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
-                                    enemy.hitpoints -= Math.floor(damageToEnemy);
-                                    if (playerStats.specialData.canBleed && !enemy.isBleeding) {
-                                        let applyBleed = false;
-                                        if (playerStats.specialData.bleedChance !== undefined) {
-                                            const bleedRoll = Math.random() * 100;
-                                            if (playerStats.specialData.bleedChance > bleedRoll) applyBleed = true;
-                                        } else {
-                                            applyBleed = true;
-                                        }
-                                        if (applyBleed) {
-                                            // Start bleed effect
-                                            enemy.isBleeding = true;
-                                            enemy.bleedMaxCount = playerStats.specialData.bleedCount;
-                                            enemy.bleedInterval = playerStats.specialData.bleedInterval;
-                                            enemy.bleedCount = 0;
-                                            enemy.bleedDamage = Math.floor(damageToEnemy * playerStats.specialData.totalBleedHP / enemy.bleedMaxCount);
-                                            enemy.bleedTimer = enemy.bleedInterval;
-                                        }
-                                    }
-                                    if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
-                                    // Enemy Stun
-                                    if (playerStats.specialData.stunChance !== undefined) {
-                                        const stunRoll = Math.random() * 100;
-                                        if (playerStats.specialData.stunChance > stunRoll) canStun = true;
-                                    } else {
-                                        canStun = playerStats.specialData.canStun;
-                                    }
-                                    if (canStun) stunTurns = playerStats.specialData.stunTurns;
-                                    if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
-                                        canStun = true;
-                                        stunTurns = 1;
-                                    }
-                                    if (playerStats.activeItems.confettiCrossbow) {
-                                        // Add gp from this weapon
-                                        let gpMultiplier = playerStats.startingGP / 25000000;
-                                        if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
-                                        else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
-                                        stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
-                                    }
-                                    if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
-                                    if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
-                                    if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
-                                    // Enemy Slow
-                                    if (playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
-                                        enemy.isSlowed = true;
-                                        enemy.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
-                                        enemy.currentSpeed = Math.floor(enemyStats.attackSpeed * (1 + playerStats.specialData.attackSpeedDebuff / 100));
-                                    }
-                                }
-                                // Multiple hit determination
-                                if (playerStats.specialData.attackCount > 1) {
-                                    player.attackCount = 1;
-                                    player.countMax = playerStats.specialData.attackCount;
-                                    player.isActing = false;
-                                    player.isAttacking = true;
-                                    player.attackTimer = playerStats.specialData.attackInterval;
-                                } else {
-                                    player.actionTimer = player.currentSpeed;
-                                }
-                            } else {
-                                // Perform a normal attack
-                                // Does the Attack Hit?
-                                let attackHits = false;
-                                if (enemy.isStunned) {
-                                    attackHits = true;
-                                } else {
-                                    // Roll for hit
-                                    let hitChance = Math.floor(Math.random() * 100);
-                                    if (playerStats.diamondLuck) {
-                                        const hitChance2 = Math.floor(Math.random() * 100);
-                                        if (hitChance > hitChance2) hitChance = hitChance2;
-                                    }
-                                    if (playerAccuracy > hitChance) attackHits = true;
-                                }
-                                if (attackHits) {
-                                    stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
-                                    // Calculate attack Damage
-                                    if (alwaysMaxHit) {
-                                        damageToEnemy = playerStats.maxHit;
-                                    } else {
-                                        damageToEnemy = this.rollForDamage(playerStats);
-                                    }
-                                    if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-                                    if (playerStats.activeItems.deadeyeAmulet) {
-                                        damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
-                                    }
-                                    if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
-                                    if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
-                                    enemy.hitpoints -= Math.floor(damageToEnemy);
-                                    if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
-                                    if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
-                                        canStun = true;
-                                        stunTurns = 1;
-                                    }
-                                    if (playerStats.activeItems.confettiCrossbow) {
-                                        // Add gp from this weapon
-                                        let gpMultiplier = playerStats.startingGP / 25000000;
-                                        if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
-                                        else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
-                                        stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
-                                    }
-                                    if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
-                                    if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
-                                }
-                                player.actionTimer = player.currentSpeed;
-                            }
-                            // XP Tracking
-                            if (damageToEnemy > 0) {
-                                xpToAdd = damageToEnemy / this.numberMultiplier * 4;
-                                if (xpToAdd < 4) xpToAdd = 4;
-                                stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
-                                stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
-                                stats.totalCombatXP += xpToAdd;
-                                if (playerStats.prayerXpPerDamage > 0) {
-                                    stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
-                                }
-                            }
-                            // Apply Stun
-                            if (canStun && !enemy.isStunned) {
-                                enemy.isStunned = true;
-                                enemy.stunTurns = stunTurns;
-                                enemy.isAttacking = false;
-                                enemy.actionTimer = enemy.currentSpeed;
-                                enemy.isActing = true;
-                            }
-                            // Player Slow Tracking
-                            if (player.isSlowed) {
-                                player.slowTurns--;
-                                if (player.slowTurns <= 0) {
-                                    player.isSlowed = false;
-                                    player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
-                                }
-                            }
-                            if (!player.isAttacking && enemy.hitpoints <= 0) enemyAlive = false;
-                        }
+                        enemyAlive = this.playerAction(stats, player, playerStats, enemy, enemyStats);
                     }
                     // Perform next attack of a multi attack special
                     if (player.isAttacking && player.attackTimer <= 0 && enemyAlive) {
-                        // Do player multi attacks
-                        stats.playerAttackCalls++;
-                        // Apply pre-attack special effects
-                        if (playerStats.specialData.decreasedRangedEvasion !== undefined) {
-                            enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
-                            this.setEvasionDebuffs(enemyStats, enemy);
-                            playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                        }
-                        // Apply curse
-                        if (playerStats.canCurse && !enemy.isCursed) {
-                            stats.runesUsed += playerStats.runeCosts.curse;
-                            const curseRoll = Math.random() * 100;
-                            if (playerStats.curseData.chance > curseRoll) {
-                                enemy.isCursed = true;
-                                enemy.curseTurns = 3;
-                                // Update the curses that change stats
-                                switch (enemy.curse.type) {
-                                    case 'Blinding':
-                                        enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
-                                        if (!playerStats.isProtected) {
-                                            enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
-                                        }
-                                        break;
-                                    case 'Soul Split':
-                                    case 'Decay':
-                                        this.setEvasionDebuffs(enemyStats, enemy);
-                                        playerAccuracy = this.calculateAccuracy(playerStats, enemy);
-                                        break;
-                                    case 'Weakening':
-                                        enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
-                                        break;
-                                }
-                            }
-                        }
-                        // Attack parameters
-                        let canStun = false;
-                        let stunTurns = 0;
-                        damageToEnemy = 0;
-                        // Does the attack hit?
-                        let attackHits = false;
-                        if (enemy.isStunned || playerStats.specialData.forceHit) {
-                            attackHits = true;
-                        } else {
-                            // Roll for hit
-                            let hitChance = Math.floor(Math.random() * 100);
-                            if (playerStats.diamondLuck) {
-                                const hitChance2 = Math.floor(Math.random() * 100);
-                                if (hitChance > hitChance2) hitChance = hitChance2;
-                            }
-                            if (playerAccuracy > hitChance) attackHits = true;
-                        }
-                        if (attackHits) {
-                            stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
-                            if (playerStats.specialData.setDamage) damageToEnemy = playerStats.specialData.setDamage * playerStats.specialData.damageMultiplier * damageModifier;
-                            else if (playerStats.specialData.maxHit) damageToEnemy = playerStats.maxHit * playerStats.specialData.damageMultiplier;
-                            else if (playerStats.specialData.stormsnap) damageToEnemy = (6 + 6 * playerStats.levels.Magic) * damageModifier;
-                            else {
-                                if (alwaysMaxHit) {
-                                    damageToEnemy = playerStats.maxHit;
-                                } else {
-                                    damageToEnemy = this.rollForDamage(playerStats);
-                                }
-                                damageToEnemy *= playerStats.specialData.damageMultiplier;
-                            }
-                            if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
-                            if (playerStats.activeItems.deadeyeAmulet) {
-                                damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
-                            }
-                            if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
-                            if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
-                            enemy.hitpoints -= Math.floor(damageToEnemy);
-
-                            if (playerStats.specialData.canBleed && !enemy.isBleeding) {
-                                let applyBleed = false;
-                                if (playerStats.specialData.bleedChance !== undefined) {
-                                    const bleedRoll = Math.random() * 100;
-                                    if (playerStats.specialData.bleedChance > bleedRoll) applyBleed = true;
-                                } else {
-                                    applyBleed = true;
-                                }
-                                if (applyBleed) {
-                                    // Start bleed effect
-                                    enemy.isBleeding = true;
-                                    enemy.bleedMaxCount = playerStats.specialData.bleedCount;
-                                    enemy.bleedInterval = playerStats.specialData.bleedInterval;
-                                    enemy.bleedCount = 0;
-                                    enemy.bleedDamage = Math.floor(damageToEnemy * playerStats.specialData.totalBleedHP / enemy.bleedMaxCount);
-                                    enemy.bleedTimer = enemy.bleedInterval;
-                                }
-                            }
-                            if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
-                            // Enemy Stun
-                            if (playerStats.specialData.stunChance !== undefined) {
-                                const stunRoll = Math.random() * 100;
-                                if (playerStats.specialData.stunChance > stunRoll) canStun = true;
-                            } else {
-                                canStun = playerStats.specialData.canStun;
-                            }
-                            if (canStun) stunTurns = playerStats.specialData.stunTurns;
-                            if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
-                                canStun = true;
-                                stunTurns = 1;
-                            }
-                            if (playerStats.activeItems.confettiCrossbow) {
-                                // Add gp from this weapon
-                                let gpMultiplier = playerStats.startingGP / 25000000;
-                                if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
-                                else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
-                                stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
-                            }
-                            if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
-                            if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
-                            if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
-                            // Enemy Slow
-                            if (playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
-                                enemy.isSlowed = true;
-                                enemy.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
-                                enemy.currentSpeed = Math.floor(enemyStats.attackSpeed * (1 + playerStats.specialData.attackSpeedDebuff / 100));
-                            }
-                        }
-                        // XP Tracking
-                        if (damageToEnemy > 0) {
-                            xpToAdd = damageToEnemy / this.numberMultiplier * 4;
-                            if (xpToAdd < 4) xpToAdd = 4;
-                            stats.totalHpXP += damageToEnemy / this.numberMultiplier * 1.33;
-                            stats.totalPrayerXP += damageToEnemy * playerStats.prayerXpPerDamage;
-                            stats.totalCombatXP += xpToAdd;
-                            if (playerStats.prayerXpPerDamage > 0) {
-                                stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
-                            }
-                        }
-                        // Apply Stun
-                        if (canStun && !enemy.isStunned) {
-                            enemy.isStunned = true;
-                            enemy.stunTurns = stunTurns;
-                            enemy.isAttacking = false;
-                            enemy.actionTimer = enemy.currentSpeed;
-                            enemy.isActing = true;
-                        }
-                        // Player Slow Tracking
-                        if (player.isSlowed) {
-                            player.slowTurns--;
-                            if (player.slowTurns <= 0) {
-                                player.isSlowed = false;
-                                player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
-                            }
-                        }
-                        // Track attacks and determine next action
-                        player.attackCount++;
-                        if (player.attackCount >= player.countMax) {
-                            player.isAttacking = false;
-                            player.isActing = true;
-                            player.actionTimer = player.currentSpeed;
-                        } else {
-                            player.attackTimer = playerStats.specialData.attackInterval;
-                        }
-                        if (enemy.hitpoints <= 0) enemyAlive = false;
+                        enemyAlive = this.playerContinueAction(stats, player, playerStats, enemy, enemyStats);
                     }
                     if (player.isBurning && player.burnTimer <= 0 && enemyAlive) {
                         // Do player burn damage
@@ -761,7 +216,8 @@
                         player.canRecoil = true;
                         player.isRecoiling = false;
                     }
-                    // Perform enemy attack or special
+
+                    // Process enemy actions
                     if (enemy.isActing && enemy.actionTimer <= 0 && enemyAlive) {
                         stats.enemyActions++;
                         // Do enemy action
@@ -805,7 +261,7 @@
                                     enemy.damageReduction = currentSpecial.increasedDamageReduction;
                                     // Modify Player Accuracy according to buff
                                     this.setEvasionDebuffs(enemyStats, enemy);
-                                    playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                                    player.accuracy= this.calculateAccuracy(playerStats, enemy);
                                 }
                                 // Apply Player Slow
                                 if (currentSpecial.attackSpeedDebuff && !player.isSlowed) {
@@ -821,7 +277,7 @@
                                 } else {
                                     // Roll for hit
                                     const hitChance = Math.floor(Math.random() * 100);
-                                    if (enemyAccuracy > hitChance) attackHits = true;
+                                    if (enemy.accuracy> hitChance) attackHits = true;
                                 }
                                 if (attackHits) {
                                     if (currentSpecial.setDamage !== null) {
@@ -884,7 +340,7 @@
                                 } else {
                                     // Roll for hit
                                     const hitChance = Math.floor(Math.random() * 100);
-                                    if (enemyAccuracy > hitChance) attackHits = true;
+                                    if (enemy.accuracy> hitChance) attackHits = true;
                                 }
                                 if (attackHits) {
                                     let damageToPlayer = Math.floor(Math.random() * enemy.maxHit) + 1;
@@ -916,7 +372,7 @@
                                     enemy.isBuffed = false;
                                     // Undo buffs
                                     this.setEvasionDebuffs(enemyStats, enemy);
-                                    playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                                    player.accuracy= this.calculateAccuracy(playerStats, enemy);
                                     enemy.reflectMelee = 0;
                                     enemy.damageReduction = 0;
                                 }
@@ -941,13 +397,13 @@
                                         case 'Blinding':
                                             enemy.maxAttackRoll = enemyStats.maxAttackRoll;
                                             if (!playerStats.isProtected) {
-                                                enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
+                                                enemy.accuracy= this.calculateAccuracy(enemy, playerStats);
                                             }
                                             break;
                                         case 'Soul Split':
                                         case 'Decay':
                                             this.setEvasionDebuffs(enemyStats, enemy);
-                                            playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                                            player.accuracy= this.calculateAccuracy(playerStats, enemy);
                                             break;
                                         case 'Weakening':
                                             enemy.maxHit = enemyStats.maxHit;
@@ -976,7 +432,7 @@
                             enemy.damageReduction = currentSpecial.increasedDamageReduction;
                             // Modify Player Accuracy according to buff
                             this.setEvasionDebuffs(enemyStats, enemy);
-                            playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                            player.accuracy= this.calculateAccuracy(playerStats, enemy);
                         }
                         // Apply Player Slow
                         if (currentSpecial.attackSpeedDebuff && !player.isSlowed) {
@@ -992,7 +448,7 @@
                         } else {
                             // Roll for hit
                             const hitChance = Math.floor(Math.random() * 100);
-                            if (enemyAccuracy > hitChance) attackHits = true;
+                            if (enemy.accuracy> hitChance) attackHits = true;
                         }
                         if (attackHits) {
                             if (currentSpecial.setDamage !== null) {
@@ -1042,7 +498,7 @@
                                 enemy.isBuffed = false;
                                 // Undo buffs
                                 this.setEvasionDebuffs(enemyStats, enemy);
-                                playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                                player.accuracy= this.calculateAccuracy(playerStats, enemy);
                                 enemy.reflectMelee = 0;
                                 enemy.damageReduction = 0;
                             }
@@ -1067,13 +523,13 @@
                                     case 'Blinding':
                                         enemy.maxAttackRoll = enemyStats.maxAttackRoll;
                                         if (!playerStats.isProtected) {
-                                            enemyAccuracy = this.calculateAccuracy(enemy, playerStats);
+                                            enemy.accuracy= this.calculateAccuracy(enemy, playerStats);
                                         }
                                         break;
                                     case 'Soul Split':
                                     case 'Decay':
                                         this.setEvasionDebuffs(enemyStats, enemy);
-                                        playerAccuracy = this.calculateAccuracy(playerStats, enemy);
+                                        player.accuracy= this.calculateAccuracy(playerStats, enemy);
                                         break;
                                     case 'Weakening':
                                         enemy.maxHit = enemyStats.maxHit;
@@ -1104,57 +560,433 @@
                     }
                 }
                 if (isNaN(enemy.hitpoints)) {
-                    simSuccess = false;
+                    return {simSuccess: false};
                 } else {
                     enemyKills++;
                 }
             }
-            // Compute stats from simulation
-            // Need to package this inside an object and send the result back to main script
-            simResult.simSuccess = simSuccess;
-            if (simSuccess) {
-                // Apply XP Bonuses
-                // Ring bonus
-                stats.totalCombatXP += stats.totalCombatXP * playerStats.xpBonus;
-                stats.totalHpXP += stats.totalHpXP * playerStats.xpBonus;
-                stats.totalPrayerXP += stats.totalPrayerXP * playerStats.xpBonus;
-                // Global XP Bonus
-                stats.totalCombatXP *= playerStats.globalXPMult;
-                stats.totalHpXP *= playerStats.globalXPMult;
-                stats.totalPrayerXP *= playerStats.globalXPMult;
-                // Tabulate Simulation results
-                simResult.attacksMade = stats.playerAttackCalls / trials;
-                simResult.avgHitDmg = enemyStats.hitpoints * trials / stats.playerAttackCalls;
-                simResult.avgKillTime = this.enemySpawnTimer + stats.totalTime / trials;
-                simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / trials - simResult.avgKillTime / this.hitpointRegenInterval * playerStats.avgHPRegen;
-                if (simResult.hpPerEnemy < 0) simResult.hpPerEnemy = 0;
-                simResult.hpPerSecond = simResult.hpPerEnemy / simResult.avgKillTime * 1000;
-                simResult.dmgPerSecond = enemyStats.hitpoints / simResult.avgKillTime * 1000;
-                simResult.xpPerEnemy = stats.totalCombatXP / trials;
-                simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
-                simResult.xpPerSecond = stats.totalCombatXP / trials / simResult.avgKillTime * 1000;
-                simResult.hpxpPerEnemy = stats.totalHpXP / trials;
-                simResult.hpxpPerSecond = stats.totalHpXP / trials / simResult.avgKillTime * 1000;
-                simResult.killTimeS = simResult.avgKillTime / 1000;
-                simResult.killsPerSecond = 1 / simResult.killTimeS;
-                simResult.prayerXpPerEnemy = stats.totalPrayerXP / trials;
-                simResult.prayerXpPerSecond = stats.totalPrayerXP / trials / simResult.avgKillTime * 1000;
-                simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / trials / simResult.killTimeS + playerStats.prayerPointsPerHeal / this.hitpointRegenInterval * 1000;
-                simResult.gpFromDamage = stats.gpGainedFromDamage / trials;
-                simResult.attacksTaken = stats.enemyAttackCalls / trials;
-                simResult.attacksTakenPerSecond = stats.enemyAttackCalls / trials / simResult.killTimeS;
-                simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
-                simResult.runesUsedPerSecond = stats.runesUsed / trials / simResult.killTimeS;
 
-                // Throw pet rolls in here to be further processed later
-                Object.keys(stats.petRolls).forEach((petType) =>
-                    simResult.petRolls[petType] = Object.keys(stats.petRolls[petType]).map((attackSpeed) => ({
-                        speed: parseInt(attackSpeed),
-                        rollsPerSecond: stats.petRolls[petType][attackSpeed] / trials / simResult.killTimeS,
-                    })));
-            }
-            return simResult;
+            // Compute stats from simulation if it was successful
+
+            // Apply XP Bonuses
+            // Ring bonus
+            stats.totalCombatXP += stats.totalCombatXP * playerStats.xpBonus;
+            stats.totalHpXP += stats.totalHpXP * playerStats.xpBonus;
+            stats.totalPrayerXP += stats.totalPrayerXP * playerStats.xpBonus;
+            // Global XP Bonus
+            stats.totalCombatXP *= playerStats.globalXPMult;
+            stats.totalHpXP *= playerStats.globalXPMult;
+            stats.totalPrayerXP *= playerStats.globalXPMult;
+
+            // Final Result from simulation
+            return this.simulationResult(stats, playerStats, enemyStats, trials);
         };
+
+        // @return `enemyAlive` bool
+        playerAction(stats, player, playerStats, enemy, enemyStats) {
+            // player action: reduce stun count or attack
+            stats.playerActions++;
+
+            // reduce stun
+            if (player.isStunned) {
+                player.stunTurns--;
+                if (player.stunTurns <= 0) {
+                    player.isStunned = false;
+                }
+                player.actionTimer = player.currentSpeed;
+                return true
+            }
+
+            // attack
+            player.actionsTaken++;
+            stats.playerAttackCalls++;
+            if (playerStats.usingMagic) {
+                stats.runesUsed += playerStats.runeCosts.spell * (1 - playerStats.runePreservation) + playerStats.runeCosts.aurora;
+            }
+            let specialAttack = false;
+            if (playerStats.usingAncient) {
+                specialAttack = true;
+            } else if (playerStats.hasSpecialAttack) {
+                // Roll for player special
+                const specialRoll = Math.floor(Math.random() * 100);
+                if (specialRoll <= playerStats.specialData.chance) {
+                    specialAttack = true;
+                }
+            }
+            // Apply pre-attack special effects
+            this.playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats);
+            // Apply curse
+            this.playerUseCurse(stats, player, playerStats, enemy, enemyStats);
+            // do normal or special attack
+            const attackResult = this.playerDoAttack(stats, player, playerStats, enemy, enemyStats, specialAttack, false)
+            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy);
+            player.actionTimer = player.currentSpeed;
+            // trigger multi attack
+            if (specialAttack && playerStats.specialData.attackCount > 1) {
+                player.attackCount = 1;
+                player.countMax = playerStats.specialData.attackCount;
+                player.isActing = false;
+                player.isAttacking = true;
+                player.attackTimer = playerStats.specialData.attackInterval;
+            }
+            // fight continues until player finishes attacking and until enemy runs out of health
+            return player.isAttacking || enemy.hitpoints > 0;
+        }
+
+        playerContinueAction(stats, player, playerStats, enemy, enemyStats) {
+            // Do player multi attacks
+            stats.playerAttackCalls++;
+            // Apply pre-attack special effects
+            this.playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats);
+            // Apply curse
+            this.playerUseCurse(stats, player, playerStats, enemy, enemyStats);
+            // perform continued attack
+            const attackResult = this.playerDoAttack(stats, player, playerStats, enemy, enemyStats,true, true);
+            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy);
+            // Track attacks and determine next action
+            player.attackCount++;
+            if (player.attackCount >= player.countMax) {
+                player.isAttacking = false;
+                player.isActing = true;
+                player.actionTimer = player.currentSpeed;
+            } else {
+                player.attackTimer = playerStats.specialData.attackInterval;
+            }
+            // stop the fight if the enemy is dead
+            return enemy.hitpoints > 0;
+        }
+
+        processPlayerAttackResult(attackResult, stats, player, playerStats, enemy) {
+            if (!attackResult.attackHits) {
+                // attack missed, nothing to do
+                return;
+            }
+            // XP Tracking
+            if (attackResult.damageToEnemy > 0) {
+                let xpToAdd = attackResult.damageToEnemy / this.numberMultiplier * 4;
+                if (xpToAdd < 4) {
+                    xpToAdd = 4;
+                }
+                stats.totalHpXP += attackResult.damageToEnemy / this.numberMultiplier * 1.33;
+                stats.totalPrayerXP += attackResult.damageToEnemy * playerStats.prayerXpPerDamage;
+                stats.totalCombatXP += xpToAdd;
+                if (playerStats.prayerXpPerDamage > 0) {
+                    stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
+                }
+            }
+            // Apply Stun
+            if (attackResult.canStun && !enemy.isStunned) {
+                enemy.isStunned = true;
+                enemy.stunTurns = attackResult.stunTurns;
+                enemy.isAttacking = false;
+                enemy.actionTimer = enemy.currentSpeed;
+                enemy.isActing = true;
+            }
+            // Player Slow Tracking
+            if (player.isSlowed) {
+                player.slowTurns--;
+                if (player.slowTurns <= 0) {
+                    player.isSlowed = false;
+                    player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
+                }
+            }
+        }
+
+        playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
+            if (playerStats.specialData.decreasedRangedEvasion !== undefined) {
+                enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
+                this.setEvasionDebuffs(enemyStats, enemy);
+                player.accuracy= this.calculateAccuracy(playerStats, enemy);
+            }
+        }
+
+        playerUseCurse(stats, player, playerStats, enemy, enemyStats) {
+            if (playerStats.canCurse && !enemy.isCursed) {
+                stats.runesUsed += playerStats.runeCosts.curse;
+                const curseRoll = Math.random() * 100;
+                if (playerStats.curseData.chance > curseRoll) {
+                    enemy.isCursed = true;
+                    enemy.curseTurns = 3;
+                    // Update the curses that change stats
+                    switch (enemy.curse.type) {
+                        case 'Blinding':
+                            enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
+                            if (!playerStats.isProtected) {
+                                enemy.accuracy= this.calculateAccuracy(enemy, playerStats);
+                            }
+                            break;
+                        case 'Soul Split':
+                        case 'Decay':
+                            this.setEvasionDebuffs(enemyStats, enemy);
+                            player.accuracy= this.calculateAccuracy(playerStats, enemy);
+                            break;
+                        case 'Weakening':
+                            enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
+                            break;
+                    }
+                }
+            }
+        }
+
+        playerDoAttack(stats, player, playerStats, enemy, enemyStats, isSpecial, isContinuation) {
+            // default return values
+            let canStun = false;
+            let stunTurns = 0;
+            let damageToEnemy = 0;
+
+            // Does the attack hit?
+            let attackHits = false;
+            if (enemy.isStunned || (isSpecial && playerStats.specialData.forceHit)) {
+                attackHits = true;
+            } else {
+                // Roll for hit
+                let hitChance = Math.floor(Math.random() * 100);
+                if (playerStats.diamondLuck) {
+                    const hitChance2 = Math.floor(Math.random() * 100);
+                    if (hitChance > hitChance2) hitChance = hitChance2;
+                }
+                if (player.accuracy> hitChance) attackHits = true;
+            }
+
+            if (!attackHits) {
+                // exit early
+                return {
+                    attackHits: false,
+                };
+            }
+
+            stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
+            // Calculate attack Damage
+            if (isSpecial && playerStats.specialData.setDamage) damageToEnemy = playerStats.specialData.setDamage * playerStats.specialData.damageMultiplier * player.damageModifier;
+            else if (isSpecial && playerStats.specialData.maxHit) damageToEnemy = playerStats.maxHit * playerStats.specialData.damageMultiplier;
+            else if (isSpecial && playerStats.specialData.stormsnap) damageToEnemy = (6 + 6 * playerStats.levels.Magic) * player.damageModifier;
+            else {
+                if (player.alwaysMaxHit) {
+                    damageToEnemy = playerStats.maxHit;
+                } else {
+                    damageToEnemy = this.rollForDamage(playerStats);
+                }
+                if (isSpecial) {
+                    damageToEnemy *= playerStats.specialData.damageMultiplier;
+                }
+            }
+            if (enemy.isCursed && enemy.curse.type === 'Anguish') damageToEnemy *= enemy.curse.damageMult;
+            // TODO: should stunDamageMultiplier apply to continued actions?
+            //  If yes, then change this check to `if (isSpecial && enemy.isStunned)` and remove the `isContinuation` parameter
+            // TODO: should stunDamageMultiplier apply to normal actions?
+            //  If yes, then change this check to `if (!isContinuation && enemy.isStunned)`
+            //  If both are yes, then change this check to `if (enemy.isStunned)`
+            if (isSpecial && !isContinuation && enemy.isStunned) {
+                damageToEnemy *= playerStats.specialData.stunDamageMultiplier;
+            }
+            if (playerStats.activeItems.deadeyeAmulet) {
+                damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
+            }
+            if (enemy.damageReduction > 0) damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
+            if (enemy.hitpoints < damageToEnemy) damageToEnemy = enemy.hitpoints;
+            enemy.hitpoints -= Math.floor(damageToEnemy);
+            if (isSpecial && playerStats.specialData.canBleed && !enemy.isBleeding) {
+                let applyBleed = false;
+                if (playerStats.specialData.bleedChance !== undefined) {
+                    const bleedRoll = Math.random() * 100;
+                    if (playerStats.specialData.bleedChance > bleedRoll) applyBleed = true;
+                } else {
+                    applyBleed = true;
+                }
+                if (applyBleed) {
+                    // Start bleed effect
+                    enemy.isBleeding = true;
+                    enemy.bleedMaxCount = playerStats.specialData.bleedCount;
+                    enemy.bleedInterval = playerStats.specialData.bleedInterval;
+                    enemy.bleedCount = 0;
+                    enemy.bleedDamage = Math.floor(damageToEnemy * playerStats.specialData.totalBleedHP / enemy.bleedMaxCount);
+                    enemy.bleedTimer = enemy.bleedInterval;
+                }
+            }
+            if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
+            // Enemy Stun
+            if (isSpecial) {
+                if (playerStats.specialData.stunChance !== undefined) {
+                    const stunRoll = Math.random() * 100;
+                    if (playerStats.specialData.stunChance > stunRoll) canStun = true;
+                } else {
+                    canStun = playerStats.specialData.canStun;
+                }
+                if (canStun) {
+                    stunTurns = playerStats.specialData.stunTurns;
+                }
+            }
+            if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
+                canStun = true;
+                stunTurns = 1;
+            }
+            // confetti crossbow
+            if (playerStats.activeItems.confettiCrossbow) {
+                // Add gp from this weapon
+                let gpMultiplier = playerStats.startingGP / 25000000;
+                if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
+                else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
+                stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
+            }
+            if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
+            if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
+            if (isSpecial) {
+                if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
+                // Enemy Slow
+                if (playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
+                    enemy.isSlowed = true;
+                    enemy.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
+                    enemy.currentSpeed = Math.floor(enemyStats.attackSpeed * (1 + playerStats.specialData.attackSpeedDebuff / 100));
+                }
+            }
+
+            // return the result of the attack
+            return {
+                attackHits: true,
+                canStun: canStun,
+                stunTurns: stunTurns,
+                damageToEnemy: damageToEnemy,
+            };
+        }
+
+        resetPlayer(playerStats, enemyStats, reductionModifier, damageModifier) {
+            const player = {
+                hitpoints: playerStats.levels.Hitpoints * this.numberMultiplier,
+                isStunned: false,
+                stunTurns: 0,
+                doingSpecial: false,
+                actionTimer: 0,
+                isActing: true,
+                attackTimer: 0,
+                isAttacking: false,
+                burnTimer: 0,
+                isBurning: false,
+                burnMaxCount: 10,
+                burnCount: 0,
+                burnDamage: 0,
+                burnInterval: 500,
+                currentSpeed: 0,
+                reductionBuff: 0,
+                damageReduction: Math.floor(playerStats.damageReduction * reductionModifier),
+                attackCount: 0,
+                countMax: 0,
+                isSlowed: false,
+                slowTurns: 0,
+                actionsTaken: 0,
+                canRecoil: true,
+                isRecoiling: false,
+                recoilTimer: 0,
+                accuracy: this.calculateAccuracy(playerStats, enemyStats),
+                damageModifier: damageModifier,
+                alwaysMaxHit: playerStats.minHit + 1 >= playerStats.maxHit, // Determine if player always hits for maxHit
+            };
+            player.hitpoints = 0;
+            player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
+            player.actionTimer = player.currentSpeed;
+            return player;
+        }
+
+        resetEnemy(playerStats, enemyStats) {
+            const enemy = {
+                hitpoints: enemyStats.hitpoints,
+                isStunned: false,
+                stunTurns: 0,
+                doingSpecial: false,
+                actionTimer: enemyStats.attackSpeed,
+                isActing: true,
+                attackTimer: 0,
+                isAttacking: false,
+                bleedTimer: 0,
+                isBleeding: false,
+                bleedMaxCount: 0,
+                bleedInterval: 0,
+                bleedCount: 0,
+                bleedDamage: 0,
+                isSlowed: false,
+                slowTurns: 0,
+                currentSpeed: enemyStats.attackSpeed,
+                damageReduction: 0,
+                reflectMelee: 0,
+                specialID: null,
+                attackCount: 0,
+                countMax: 0,
+                attackInterval: 0,
+                isBuffed: false,
+                buffTurns: 0,
+                isCursed: false,
+                curseTurns: 0,
+                maxAttackRoll: enemyStats.maxAttackRoll,
+                maxHit: enemyStats.maxHit,
+                maxDefRoll: enemyStats.maxDefRoll,
+                maxMagDefRoll: enemyStats.maxMagDefRoll,
+                maxRngDefRoll: enemyStats.maxRngDefRoll,
+                rangedEvasionDebuff: 1,
+                meleeEvasionBuff: 1,
+                magicEvasionBuff: 1,
+                rangedEvasionBuff: 1,
+                attackType: enemyStats.attackType,
+                curse: {
+                    type: '',
+                    accuracyDebuff: 1,
+                    maxHitDebuff: 1,
+                    damageMult: 1,
+                    magicEvasionDebuff: 1,
+                    meleeEvasionDebuff: 1,
+                    rangedEvasionDebuff: 1,
+                    confusionMult: 0,
+                    decayDamage: 0,
+                },
+            };
+            // Set accuracy based on protection prayers or stats
+            if (playerStats.isProtected) {
+                enemy.accuracy= 100 - this.protectFromValue;
+            } else {
+                enemy.accuracy= this.calculateAccuracy(enemyStats, playerStats);
+            }
+            return enemy
+        }
+
+        simulationResult(stats, playerStats, enemyStats, trials) {
+            /** @type {MonsterSimResult} */
+            const simResult = {
+                simSuccess: true,
+                petRolls: {},
+            };
+            simResult.attacksMade = stats.playerAttackCalls / trials;
+            simResult.avgHitDmg = enemyStats.hitpoints * trials / stats.playerAttackCalls;
+            simResult.avgKillTime = this.enemySpawnTimer + stats.totalTime / trials;
+            simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / trials - simResult.avgKillTime / this.hitpointRegenInterval * playerStats.avgHPRegen;
+            if (simResult.hpPerEnemy < 0) {
+                simResult.hpPerEnemy = 0;
+            }
+            simResult.hpPerSecond = simResult.hpPerEnemy / simResult.avgKillTime * 1000;
+            simResult.dmgPerSecond = enemyStats.hitpoints / simResult.avgKillTime * 1000;
+            simResult.xpPerEnemy = stats.totalCombatXP / trials;
+            simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
+            simResult.xpPerSecond = stats.totalCombatXP / trials / simResult.avgKillTime * 1000;
+            simResult.hpxpPerEnemy = stats.totalHpXP / trials;
+            simResult.hpxpPerSecond = stats.totalHpXP / trials / simResult.avgKillTime * 1000;
+            simResult.killTimeS = simResult.avgKillTime / 1000;
+            simResult.killsPerSecond = 1 / simResult.killTimeS;
+            simResult.prayerXpPerEnemy = stats.totalPrayerXP / trials;
+            simResult.prayerXpPerSecond = stats.totalPrayerXP / trials / simResult.avgKillTime * 1000;
+            simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / trials / simResult.killTimeS + playerStats.prayerPointsPerHeal / this.hitpointRegenInterval * 1000;
+            simResult.gpFromDamage = stats.gpGainedFromDamage / trials;
+            simResult.attacksTaken = stats.enemyAttackCalls / trials;
+            simResult.attacksTakenPerSecond = stats.enemyAttackCalls / trials / simResult.killTimeS;
+            simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
+            simResult.runesUsedPerSecond = stats.runesUsed / trials / simResult.killTimeS;
+
+            // Throw pet rolls in here to be further processed later
+            Object.keys(stats.petRolls).forEach((petType) =>
+                simResult.petRolls[petType] = Object.keys(stats.petRolls[petType]).map(attackSpeed => ({
+                    speed: parseInt(attackSpeed),
+                    rollsPerSecond: stats.petRolls[petType][attackSpeed] / trials / simResult.killTimeS,
+                }))
+            );
+            // return successful results
+            return simResult;
+        }
 
         /**
          * Computes the accuracy of attacker vs target
