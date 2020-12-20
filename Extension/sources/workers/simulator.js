@@ -89,6 +89,8 @@
             this.CURSEIDS = data.CURSEIDS;
         }
 
+        log = console.log;
+
         /**
          * Simulation Method for a single monster
          * @param {EnemyStats} enemyStats
@@ -141,6 +143,36 @@
             // var enemyReflectDamage = 0; //Damage caused by reflect
             // Start simulation for each trial
             this.cancelStatus = false;
+            // list of possible timed actions
+            const timedActions = [
+                {
+                    is: 'isActing',
+                    timer: 'actionTimer',
+                    player: this.playerAction,
+                    enemy: this.enemyAction,
+                },
+                {
+                    is: 'isAttacking',
+                    timer: 'attackTimer',
+                    player: this.playerContinueAction,
+                    enemy: this.enemyContinueAction,
+                },
+                {
+                    is: 'isBurning',
+                    timer: 'burnTimer',
+                    both: this.actorBurn,
+                },
+                {
+                    is: 'isRecoiling',
+                    timer: 'recoilTimer',
+                    both: this.actorRecoil,
+                },
+                {
+                    is: 'isBleeding',
+                    timer: 'bleedTimer',
+                    both: this.actorBleed,
+                },
+            ];
             while (enemyKills < trials) {
                 // Check Cancellation every 250th trial
                 if (enemyKills % 250 === 0 && await this.isCanceled()) {
@@ -163,65 +195,73 @@
 
                     // Determine the time step
                     let timeStep = Infinity;
-                    // player time
-                    if (player.isActing) timeStep = Math.min(timeStep, player.actionTimer);
-                    if (player.isAttacking) timeStep = Math.min(timeStep, player.attackTimer);
-                    if (player.isBurning) timeStep = Math.min(timeStep, player.burnTimer);
-                    if (player.isRecoiling) timeStep = Math.min(timeStep, player.recoilTimer);
-                    // enemy time
-                    if (enemy.isActing) timeStep = Math.min(timeStep, enemy.actionTimer);
-                    if (enemy.isAttacking) timeStep = Math.min(timeStep, enemy.attackTimer);
-                    if (enemy.isBleeding) timeStep = Math.min(timeStep, enemy.bleedTimer);
+                    [player, enemy].forEach(actor => {
+                        timedActions.forEach(action => {
+                            if (actor[action.is]) {
+                                timeStep = Math.min(timeStep, actor[action.timer]);
+                            }
+                        });
+                    });
                     // throw error on invalid time step
                     if (timeStep <= 0) {
                         throw Error('Error: Timestep ' + timeStep);
                     }
-
-                    // Process time step
-                    // player
-                    if (player.isActing) player.actionTimer -= timeStep;
-                    if (player.isAttacking) player.attackTimer -= timeStep;
-                    if (player.isBurning) player.burnTimer -= timeStep;
-                    if (player.isRecoiling) player.recoilTimer -= timeStep;
-                    //enemy
-                    if (enemy.isActing) enemy.actionTimer -= timeStep;
-                    if (enemy.isAttacking) enemy.attackTimer -= timeStep;
-                    if (enemy.isBleeding) enemy.bleedTimer -= timeStep;
-                    // tracker
+                    // combat time tracker
                     stats.totalTime += timeStep;
 
-                    // Process player actions
-                    if (player.isActing && player.actionTimer <= 0 && enemyAlive) {
-                        enemyAlive = this.playerAction(stats, player, playerStats, enemy, enemyStats);
-                    }
-                    // Perform next attack of a multi attack special
-                    if (player.isAttacking && player.attackTimer <= 0 && enemyAlive) {
-                        enemyAlive = this.playerContinueAction(stats, player, playerStats, enemy, enemyStats);
-                    }
-                    // Process player status effect
-                    this.playerBurn(stats, player, enemyAlive);
-                    if (player.isRecoiling && player.recoilTimer <= 0 && enemyAlive) {
-                        player.canRecoil = true;
-                        player.isRecoiling = false;
-                    }
+                    // Process time step
+                    [player, enemy].forEach(actor => {
+                        timedActions.forEach(action => {
+                            if (actor[action.is]) {
+                                actor[action.timer] -= timeStep;
+                            }
+                        });
+                    });
 
-                    // Process enemy actions
-                    if (enemy.isActing && enemy.actionTimer <= 0 && enemyAlive) {
-                        this.enemyAction(stats, player, playerStats, enemy, enemyStats);
-                    }
-                    // Perform next enemy attack of a multi attack special
-                    if (enemy.isAttacking && enemy.attackTimer <= 0 && enemyAlive) {
-                        this.enemyContinueAction(stats, player, playerStats, enemy, enemyStats)
-                    }
-                    // Process enemy status effect
-                    enemyAlive = this.enemyBleed(enemy, enemyAlive);
+                    // process actions
+                    [player, enemy].forEach(actor => {
+                        timedActions.forEach(action => {
+                            const initialHP = enemy.hitpoints;
+                            if (!actor[action.is] || actor[action.timer] > 0 || !enemyAlive) {
+                                // do not perform this action
+                                return;
+                            }
+                            // get the method to apply
+                            let method = action.both;
+                            if (method === undefined) {
+                                method = actor.isPlayer ? action.player : action.enemy;
+                            }
+                            // apply the method
+                            // TODO: why are these methods part of this class anyway
+                            if (action.both === undefined) {
+                                method.call(this, stats, player, playerStats, enemy, enemyStats);
+                            } else {
+                                method.call(this, actor);
+                            }
+                            // update enemy status
+                            // TODO: we need this check to ensure the player.isActing hack works
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                            }
+                            // TODO: do we really need this hack, i.e. do we keep multi-attacking for one hit, even though the enemy is dead
+                            if (actor.isPlayer && action.is === 'isActing' && player.isAttacking) {
+                                enemyAlive = true;
+                            }
+                        });
+                    });
+
+                    // update damage taken
+                    stats.damageTaken -= player.hitpoints;
+                    player.hitpoints = 0;
                 }
                 if (isNaN(enemy.hitpoints)) {
+                    this.log('Failed enemy simulation: ', enemyStats, enemy);
                     return {simSuccess: false};
                 } else {
                     enemyKills++;
                 }
             }
+
 
             // Apply XP Bonuses
             // Ring bonus
@@ -237,77 +277,120 @@
             return this.simulationResult(stats, playerStats, enemyStats, trials);
         };
 
-        playerBurn(stats, player, enemyAlive) {
-            if (player.isBurning && player.burnTimer <= 0 && enemyAlive) {
-                // Do player burn damage
-                if (player.burnCount >= player.burnMaxCount) {
-                    player.isBurning = false;
-                } else {
-                    stats.damageTaken += player.burnDamage;
-                    player.burnCount++;
-                }
-                player.burnTimer = player.burnInterval;
-            }
-
+        actorRecoil(actor) {
+            actor.canRecoil = true;
+            actor.isRecoiling = false;
         }
 
-        enemyBleed(enemy, enemyAlive) {
-            if (enemy.isBleeding && enemy.bleedTimer <= 0 && enemyAlive) {
-                // Do enemy bleed damage
-                if (enemy.bleedCount >= enemy.bleedMaxCount) {
-                    enemy.isBleeding = false;
-                } else if (enemy.hitpoints > 0) {
-                    enemy.hitpoints -= enemy.bleedDamage;
-                    enemy.bleedCount++;
-                }
-                enemy.bleedTimer = enemy.bleedInterval;
-                if (enemy.hitpoints <= 0) {
-                    enemyAlive = false;
-                }
+        actorBurn(actor) {
+            // reset timer
+            actor.burnTimer = actor.burnInterval;
+            // Check if stopped burning
+            if (actor.burnCount >= actor.burnMaxCount) {
+                actor.isBurning = false;
+                return;
             }
-            return enemyAlive;
+            // Apply burn damage
+            actor.hitPoints -= actor.burnDamage;
+            actor.burnCount++;
+        }
+
+        actorBleed(actor) {
+            // reset timer
+            actor.bleedTimer = actor.bleedInterval;
+            // Check if stopped bleeding
+            if (actor.bleedCount >= actor.bleedMaxCount) {
+                actor.isBleeding = false;
+                return;
+            }
+            // Apply bleed damage
+            actor.hitpoints -= actor.bleedDamage;
+            actor.bleedCount++;
         }
 
         enemyAction(stats, player, playerStats, enemy, enemyStats) {
             stats.enemyActions++;
             // Do enemy action
-            if (enemy.isStunned) {
-                enemy.stunTurns--;
-                if (enemy.stunTurns <= 0) {
-                    enemy.isStunned = false;
-                }
-                enemy.actionTimer = enemy.currentSpeed;
-            } else {
-                stats.enemyAttackCalls++;
-                // Check if doing special
-                let specialAttack = false;
-                if (enemyStats.hasSpecialAttack) {
-                    const chanceForSpec = Math.floor(Math.random() * 100);
-                    let specCount = 0;
-                    for (let i = 0; i < enemyStats.specialLength; i++) {
-                        if (chanceForSpec <= enemyStats.specialAttackChances[i] + specCount) {
-                            enemy.specialID = enemyStats.specialIDs[i];
-                            enemy.doingSpecial = true;
-                            specialAttack = true;
-                            break;
-                        }
-                        specCount += enemyStats.specialAttackChances[i];
-                    }
-                }
-                // Attack Parameters
-                this.enemyDoAttack(stats, player, playerStats, enemy, enemyStats, specialAttack);
-                this.enemyPostAttack(player, playerStats, enemy, enemyStats);
+            if (this.skipsTurn(enemy)) {
+                return;
             }
+            stats.enemyAttackCalls++;
+            // Check if doing special
+            let specialAttack = false;
+            if (enemyStats.hasSpecialAttack) {
+                const chanceForSpec = Math.floor(Math.random() * 100);
+                let specCount = 0;
+                for (let i = 0; i < enemyStats.specialLength; i++) {
+                    if (chanceForSpec <= enemyStats.specialAttackChances[i] + specCount) {
+                        enemy.specialID = enemyStats.specialIDs[i];
+                        enemy.doingSpecial = true;
+                        specialAttack = true;
+                        break;
+                    }
+                    specCount += enemyStats.specialAttackChances[i];
+                }
+            }
+            // Attack Parameters
+            this.enemyDoAttack(player, playerStats, enemy, enemyStats, specialAttack);
+            this.enemyPostAttack(player, playerStats, enemy, enemyStats);
         }
 
         enemyContinueAction(stats, player, playerStats, enemy, enemyStats) {
             // Do enemy multi attacks
             stats.enemyAttackCalls++;
-            this.enemyDoAttack(stats, player, playerStats, enemy, enemyStats, true);
+            this.enemyDoAttack(player, playerStats, enemy, enemyStats, true);
             this.enemyPostAttack(player, playerStats, enemy, enemyStats);
         }
 
-        enemyDoAttack(stats, player, playerStats, enemy, enemyStats, isSpecial) {
+        canNotDodge(target) {
+            return target.isStunned || target.sleep;
+        }
+
+        applyStatus(statusEffect, damage, target, targetStats) {
+            ////////////
+            // turned //
+            ////////////
+            // Apply Stun
+            if (statusEffect.canStun && !target.isStunned) {
+                target.isStunned = true;
+                target.stunTurns = statusEffect.stunTurns;
+                target.isAttacking = false;
+                target.isActing = true;
+                target.actionTimer = target.currentSpeed;
+            }
+            // Apply Sleep
+            if (statusEffect.canSleep && !target.sleep) {
+                target.sleep = true;
+                target.sleepTurns = statusEffect.sleepTurns;
+            }
+            // Apply Slow
+            if (statusEffect.isSlowed) {
+                target.isSlowed = true;
+                target.slowTurns = statusEffect.attackSpeedDebuffTurns;
+                target.currentSpeed = Math.floor(targetStats.attackSpeed * (1 + statusEffect.attackSpeedDebuff / 100));
+            }
+            ///////////
+            // timed //
+            ///////////
+            // Apply Burning
+            if (statusEffect.burnDebuff > 0 && !target.isBurning) {
+                target.isBurning = true;
+                target.burnCount = 0;
+                target.burnDamage = Math.floor((targetStats.levels.Hitpoints * this.numberMultiplier * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
+                target.burnTimer = target.burnInterval;
+            }
+            // Apply Bleeding
+            if (statusEffect.canBleed && !target.isBleeding) {
+                target.isBleeding = true;
+                target.bleedMaxCount = playerStats.specialData.bleedCount;
+                target.bleedInterval = playerStats.specialData.bleedInterval;
+                target.bleedCount = 0;
+                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
+                target.bleedTimer = target.bleedInterval;
+            }
+        }
+
+        enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial) {
             let forceHit = false;
             let currentSpecial;
             if (isSpecial) {
@@ -339,7 +422,7 @@
             }
             // Do the first hit
             let attackHits;
-            if (player.isStunned || forceHit) {
+            if (this.canNotDodge(player) || forceHit) {
                 attackHits = true;
             } else {
                 // Roll for hit
@@ -351,17 +434,8 @@
                 //////////////////
                 // apply damage //
                 //////////////////
-                let damageToPlayer;
-                if (isSpecial && currentSpecial.setDamage !== null) {
-                    damageToPlayer = currentSpecial.setDamage * this.numberMultiplier;
-                } else {
-                    damageToPlayer = Math.floor(Math.random() * enemy.maxHit) + 1;
-                }
-                if (isSpecial && player.isStunned) {
-                    damageToPlayer *= currentSpecial.stunDamageMultiplier;
-                }
-                damageToPlayer -= Math.floor(player.damageReduction / 100 * damageToPlayer);
-                stats.damageTaken += damageToPlayer;
+                const damage = this.enemyCalculateDamage(enemy, player, isSpecial, currentSpecial);
+                player.hitpoints -= damage;
                 //////////////////
                 // side effects //
                 //////////////////
@@ -384,20 +458,9 @@
                     player.reductionBuff += 2;
                     player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * reductionModifier);
                 }
-                // Apply Stun
-                if (isSpecial && currentSpecial.canStun && !player.isStunned) {
-                    player.isStunned = true;
-                    player.stunTurns = currentSpecial.stunTurns;
-                    player.isAttacking = false;
-                    player.isActing = true;
-                    player.actionTimer = player.currentSpeed;
-                }
-                // Apply Burning
-                if (isSpecial && currentSpecial.burnDebuff > 0 && !player.isBurning) {
-                    player.isBurning = true;
-                    player.burnCount = 0;
-                    player.burnDamage = Math.floor((playerStats.levels.Hitpoints * this.numberMultiplier * (currentSpecial.burnDebuff / 100)) / player.burnMaxCount);
-                    player.burnTimer = player.burnInterval;
+                // status effects
+                if(isSpecial) {
+                    this.applyStatus(currentSpecial, damage, player, playerStats)
                 }
             }
             // set up timer for next attack
@@ -488,18 +551,33 @@
             }
         }
 
-        // @return `enemyAlive` bool
+        skipsTurn(actor) {
+            // reduce stun
+            if (actor.isStunned) {
+                actor.stunTurns--;
+                if (actor.stunTurns <= 0) {
+                    actor.isStunned = false;
+                }
+                actor.actionTimer = actor.currentSpeed;
+                return true
+            }
+            // reduce sleep
+            if (actor.sleep) {
+                actor.sleepTurns--;
+                if (actor.sleepTurns <= 0) {
+                    actor.sleep = false;
+                    actor.sleepTurns = 0;
+                }
+                actor.actionTimer = actor.currentSpeed;
+                return true
+            }
+        }
+
         playerAction(stats, player, playerStats, enemy, enemyStats) {
             // player action: reduce stun count or attack
             stats.playerActions++;
-            // reduce stun
-            if (player.isStunned) {
-                player.stunTurns--;
-                if (player.stunTurns <= 0) {
-                    player.isStunned = false;
-                }
-                player.actionTimer = player.currentSpeed;
-                return true
+            if (this.skipsTurn(player)) {
+                return;
             }
             // attack
             player.actionsTaken++;
@@ -518,26 +596,24 @@
             }
             // do normal or special attack
             const attackResult = this.playerDoAttack(stats, player, playerStats, enemy, enemyStats, specialAttack)
-            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy);
-            this.playerUpdateActionTimer(player, specialAttack);
-            // fight continues until player finishes attacking and until enemy runs out of health
-            return player.isAttacking || enemy.hitpoints > 0;
+            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
+            this.playerUpdateActionTimer(player, playerStats, specialAttack);
         }
 
         playerContinueAction(stats, player, playerStats, enemy, enemyStats) {
             // perform continued attack
             const attackResult = this.playerDoAttack(stats, player, playerStats, enemy, enemyStats,true);
-            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy);
-            this.playerUpdateActionTimer(player, false);
-            // stop the fight if the enemy is dead
-            return enemy.hitpoints > 0;
+            this.processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
+            this.playerUpdateActionTimer(player, playerStats, false);
         }
 
-        processPlayerAttackResult(attackResult, stats, player, playerStats, enemy) {
+        processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats) {
             if (!attackResult.attackHits) {
                 // attack missed, nothing to do
                 return;
             }
+            // damage
+            enemy.hitpoints -= Math.floor(attackResult.damageToEnemy);
             // XP Tracking
             if (attackResult.damageToEnemy > 0) {
                 let xpToAdd = attackResult.damageToEnemy / this.numberMultiplier * 4;
@@ -551,21 +627,8 @@
                     stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
                 }
             }
-            // Apply Stun
-            if (attackResult.canStun && !enemy.isStunned) {
-                enemy.isStunned = true;
-                enemy.stunTurns = attackResult.stunTurns;
-                enemy.isAttacking = false;
-                enemy.actionTimer = enemy.currentSpeed;
-                enemy.isActing = true;
-            }
-            // Player Slow Tracking
-            if (player.isSlowed) {
-                player.slowTurns--;
-                if (player.slowTurns <= 0) {
-                    player.isSlowed = false;
-                    player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
-                }
+            if (attackResult.isSpecial) {
+                this.applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, enemy, enemyStats)
             }
         }
 
@@ -577,7 +640,15 @@
             }
         }
 
-        playerUpdateActionTimer(player, specialAttack) {
+        playerUpdateActionTimer(player, playerStats, specialAttack) {
+            // Player Slow Tracking
+            if (player.isSlowed) {
+                player.slowTurns--;
+                if (player.slowTurns <= 0) {
+                    player.isSlowed = false;
+                    player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
+                }
+            }
             player.actionTimer = player.currentSpeed;
             // process ongoing multi-attack
             if (player.isAttacking) {
@@ -638,9 +709,11 @@
             // Apply curse
             this.playerUseCurse(stats, player, playerStats, enemy, enemyStats);
             // default return values
-            let canStun = false;
-            let stunTurns = 0;
-            let damageToEnemy = 0;
+            const attackResult = {
+                attackHits: false,
+                isSpecial: isSpecial,
+                statusEffect: {},
+            };
             // Check for guaranteed hit
             let attackHits = enemy.isStunned || (isSpecial && playerStats.specialData.forceHit);
             if (!attackHits) {
@@ -654,74 +727,105 @@
             }
             if (!attackHits) {
                 // exit early
-                return {
-                    attackHits: false,
-                };
+                return attackResult;
             }
+            // roll for pets
             stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
-            damageToEnemy = this.playerCalculateDamage(player, playerStats, enemy, isSpecial);
-            enemy.hitpoints -= Math.floor(damageToEnemy);
+            // calculate damage
+            attackResult.damageToEnemy = this.playerCalculateDamage(player, playerStats, enemy, isSpecial);
+
+            // healing special
+            if (isSpecial && playerStats.specialData.healsFor > 0) {
+                stats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.specialData.healsFor);
+            }
+            // reflect melee damage
+            if (enemy.reflectMelee > 0) {
+                player.hitpoints -= enemy.reflectMelee * this.numberMultiplier;
+            }
+
+            ////////////////////
+            // status effects //
+            ////////////////////
+            let statusEffect = {}
+            // Bleed
             if (isSpecial && playerStats.specialData.canBleed && !enemy.isBleeding) {
-                let applyBleed = false;
+                statusEffect.canBleed = true;
                 if (playerStats.specialData.bleedChance !== undefined) {
                     const bleedRoll = Math.random() * 100;
-                    if (playerStats.specialData.bleedChance > bleedRoll) applyBleed = true;
-                } else {
-                    applyBleed = true;
-                }
-                if (applyBleed) {
-                    // Start bleed effect
-                    enemy.isBleeding = true;
-                    enemy.bleedMaxCount = playerStats.specialData.bleedCount;
-                    enemy.bleedInterval = playerStats.specialData.bleedInterval;
-                    enemy.bleedCount = 0;
-                    enemy.bleedDamage = Math.floor(damageToEnemy * playerStats.specialData.totalBleedHP / enemy.bleedMaxCount);
-                    enemy.bleedTimer = enemy.bleedInterval;
+                    statusEffect.canBleed = playerStats.specialData.bleedChance > bleedRoll;
                 }
             }
-            if (enemy.reflectMelee > 0) stats.damageTaken += enemy.reflectMelee * this.numberMultiplier;
-            // Enemy Stun
+            // Stun
             if (isSpecial) {
+                statusEffect.canStun = playerStats.specialData.canStun;
                 if (playerStats.specialData.stunChance !== undefined) {
                     const stunRoll = Math.random() * 100;
-                    if (playerStats.specialData.stunChance > stunRoll) canStun = true;
-                } else {
-                    canStun = playerStats.specialData.canStun;
+                    statusEffect.canStun = playerStats.specialData.stunChance > stunRoll;
                 }
-                if (canStun) {
-                    stunTurns = playerStats.specialData.stunTurns;
+                if (statusEffect.canStun) {
+                    statusEffect.stunTurns = playerStats.specialData.stunTurns;
                 }
             }
-            if (playerStats.activeItems.fighterAmulet && damageToEnemy >= playerStats.maxHit * 0.70) {
-                canStun = true;
-                stunTurns = 1;
+            if (playerStats.activeItems.fighterAmulet && attackResult.damageToEnemy >= playerStats.maxHit * 0.70) {
+                statusEffect.canStun = true;
+                statusEffect.stunTurns = 1;
             }
+            // Sleep
+            if (isSpecial && playerStats.specialData.canSleep) {
+                statusEffect.canSleep = true;
+                statusEffect.sleepTurns = playerStats.specialData.sleepTurns;
+            }
+            // lifesteal
+            if (playerStats.activeItems.warlockAmulet) {
+                stats.damageHealed += Math.floor(attackResult.damageToEnemy * this.warlockAmulet.spellHeal);
+            }
+            if (playerStats.lifesteal !== 0) {
+                stats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.lifesteal / 100);
+            }
+            // slow
+            if (isSpecial && playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
+                statusEffect.isSlowed = true;
+                statusEffect.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
+            }
+
             // confetti crossbow
             if (playerStats.activeItems.confettiCrossbow) {
                 // Add gp from this weapon
                 let gpMultiplier = playerStats.startingGP / 25000000;
-                if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
-                else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
+                if (gpMultiplier > this.confettiCrossbow.gpMultiplierCap) {
+                    gpMultiplier = this.confettiCrossbow.gpMultiplierCap;
+                } else if (gpMultiplier < this.confettiCrossbow.gpMultiplierMin) {
+                    gpMultiplier = this.confettiCrossbow.gpMultiplierMin;
+                }
                 stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
             }
-            if (playerStats.activeItems.warlockAmulet) stats.damageHealed += Math.floor(damageToEnemy * this.warlockAmulet.spellHeal);
-            if (playerStats.lifesteal !== 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.lifesteal / 100);
-            if (isSpecial) {
-                if (playerStats.specialData.healsFor > 0) stats.damageHealed += Math.floor(damageToEnemy * playerStats.specialData.healsFor);
-                // Enemy Slow
-                if (playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
-                    enemy.isSlowed = true;
-                    enemy.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
-                    enemy.currentSpeed = Math.floor(enemyStats.attackSpeed * (1 + playerStats.specialData.attackSpeedDebuff / 100));
-                }
-            }
+
             // return the result of the attack
-            return {
-                attackHits: true,
-                canStun: canStun,
-                stunTurns: stunTurns,
-                damageToEnemy: damageToEnemy,
-            };
+            attackResult.attackHits = true;
+            attackResult.statusEffect = statusEffect;
+            return attackResult;
+        }
+
+        enemyCalculateDamage(actor, target, isSpecial, special) {
+            let damage;
+            if (isSpecial && special.setDamage !== null) {
+                damage = special.setDamage * this.numberMultiplier;
+            } else {
+                damage = Math.floor(Math.random() * actor.maxHit) + 1;
+            }
+            return damage * this.damageModifiers(actor, target, isSpecial, special);
+        }
+
+        damageModifiers(actor, target, isSpecial, special) {
+            let modifier = 1;
+            if (isSpecial && !actor.isAttacking && target.isStunned) {
+                modifier *= special.stunDamageMultiplier;
+            }
+            if (isSpecial && !actor.isAttacking && target.sleep) {
+                modifier *= special.sleepDamageMultiplier;
+            }
+            modifier *= (1 - (target.damageReduction / 100))
+            return modifier;
         }
 
         playerCalculateDamage(player, playerStats, enemy, isSpecial) {
@@ -743,95 +847,94 @@
                     damageToEnemy *= playerStats.specialData.damageMultiplier;
                 }
             }
+            // player specific modifiers
             if (enemy.isCursed && enemy.curse.type === 'Anguish') {
                 damageToEnemy *= enemy.curse.damageMult;
             }
-            // TODO: should stunDamageMultiplier apply to continued actions?
-            //  If yes, then change this check to `if (isSpecial && enemy.isStunned)`
-            // TODO: should stunDamageMultiplier apply to normal actions?
-            //  If yes, then change this check to `if (!player.isAttacking && enemy.isStunned)`
-            //  If both are yes, then change this check to `if (enemy.isStunned)`
-            if (isSpecial && !player.isAttacking && enemy.isStunned) {
-                damageToEnemy *= playerStats.specialData.stunDamageMultiplier;
-            }
             if (playerStats.activeItems.deadeyeAmulet) {
-                damageToEnemy = this.rollForDeadeyeAmulet(damageToEnemy);
+                damageToEnemy *= this.critDamageModifier(damageToEnemy);
             }
-            if (enemy.damageReduction > 0) {
-                damageToEnemy = Math.floor(damageToEnemy * (1 - (enemy.damageReduction / 100)));
-            }
+            // common modifiers
+            damageToEnemy *= this.damageModifiers(player, enemy, isSpecial, playerStats.specialData)
+            // cap damage, no overkill
             if (enemy.hitpoints < damageToEnemy) {
                 damageToEnemy = enemy.hitpoints;
             }
             return damageToEnemy;
         }
 
-        resetPlayer(playerStats, enemyStats, reductionModifier, damageModifier) {
-            const player = {
-                hitpoints: playerStats.levels.Hitpoints * this.numberMultiplier,
-                isStunned: false,
-                stunTurns: 0,
+        commonStats(attackSpeed) {
+            return {
+                // action
                 doingSpecial: false,
-                actionTimer: 0,
                 isActing: true,
                 attackTimer: 0,
                 isAttacking: false,
-                burnTimer: 0,
-                isBurning: false,
-                burnMaxCount: 10,
-                burnCount: 0,
-                burnDamage: 0,
-                burnInterval: 500,
-                currentSpeed: 0,
-                reductionBuff: 0,
-                damageReduction: Math.floor(playerStats.damageReduction * reductionModifier),
-                attackCount: 0,
-                countMax: 0,
-                isSlowed: false,
-                slowTurns: 0,
-                actionsTaken: 0,
-                canRecoil: true,
-                isRecoiling: false,
-                recoilTimer: 0,
-                accuracy: this.calculateAccuracy(playerStats, enemyStats),
-                damageModifier: damageModifier,
-                alwaysMaxHit: playerStats.minHit + 1 >= playerStats.maxHit, // Determine if player always hits for maxHit
-            };
-            player.hitpoints = 0;
-            player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
-            player.actionTimer = player.currentSpeed;
-            return player;
-        }
-
-        resetEnemy(playerStats, enemyStats) {
-            const enemy = {
-                hitpoints: enemyStats.hitpoints,
+                // action speed
+                actionTimer: attackSpeed,
+                currentSpeed: attackSpeed,
+                // stun
                 isStunned: false,
                 stunTurns: 0,
-                doingSpecial: false,
-                actionTimer: enemyStats.attackSpeed,
-                isActing: true,
-                attackTimer: 0,
-                isAttacking: false,
+                // sleep
+                sleep: false,
+                sleepTurns: 0,
+                // bleed
                 bleedTimer: 0,
                 isBleeding: false,
                 bleedMaxCount: 0,
                 bleedInterval: 0,
                 bleedCount: 0,
                 bleedDamage: 0,
+                // burn
+                burnTimer: 0,
+                isBurning: false,
+                burnMaxCount: 10,
+                burnCount: 0,
+                burnDamage: 0,
+                burnInterval: 500,
+                // slow
                 isSlowed: false,
                 slowTurns: 0,
-                currentSpeed: enemyStats.attackSpeed,
+                // buff
+                isBuffed: false,
+                buffTurns: 0,
+                // curse
+                isCursed: false,
+                curseTurns: 0,
+                //recoil
+                canRecoil: true,
+                isRecoiling: false,
+                recoilTimer: 0,
+                // multi attack
+                attackCount: 0,
+                countMax: 0,
+            }
+        }
+
+        resetPlayer(playerStats, enemyStats, reductionModifier, damageModifier) {
+            const player = {
+                ...this.commonStats(playerStats.attackSpeed - playerStats.attackSpeedDecrease),
+                isPlayer: true,
+                reductionBuff: 0,
+                damageReduction: Math.floor(playerStats.damageReduction * reductionModifier),
+                actionsTaken: 0,
+                accuracy: this.calculateAccuracy(playerStats, enemyStats),
+                damageModifier: damageModifier,
+                alwaysMaxHit: playerStats.minHit + 1 >= playerStats.maxHit, // Determine if player always hits for maxHit
+            };
+            return player;
+        }
+
+        resetEnemy(playerStats, enemyStats) {
+            const enemy = {
+                ...this.commonStats(enemyStats.attackSpeed),
+                isPlayer: false,
+                hitpoints: enemyStats.hitpoints,
                 damageReduction: 0,
                 reflectMelee: 0,
                 specialID: null,
-                attackCount: 0,
-                countMax: 0,
                 attackInterval: 0,
-                isBuffed: false,
-                buffTurns: 0,
-                isCursed: false,
-                curseTurns: 0,
                 maxAttackRoll: enemyStats.maxAttackRoll,
                 maxHit: enemyStats.maxHit,
                 maxDefRoll: enemyStats.maxDefRoll,
@@ -856,9 +959,9 @@
             };
             // Set accuracy based on protection prayers or stats
             if (playerStats.isProtected) {
-                enemy.accuracy= 100 - this.protectFromValue;
+                enemy.accuracy = 100 - this.protectFromValue;
             } else {
-                enemy.accuracy= this.calculateAccuracy(enemyStats, playerStats);
+                enemy.accuracy = this.calculateAccuracy(enemyStats, playerStats);
             }
             return enemy
         }
@@ -994,12 +1097,12 @@
          * @param {damageToEnemy} damageToEnemy
          * @returns {damageToEnemy} `damageToEnemy`, possibly multiplied by Deadeye Amulet's crit bonus
          */
-        rollForDeadeyeAmulet(damageToEnemy) {
+        critDamageModifier(damageToEnemy) {
             const chance = Math.random() * 100;
             if (chance < this.deadeyeAmulet.chanceToCrit) {
-                damageToEnemy = Math.floor(damageToEnemy * this.deadeyeAmulet.critDamage);
+                return this.deadeyeAmulet.critDamage;
             }
-            return damageToEnemy;
+            return 1;
         }
 
         /**
