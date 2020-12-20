@@ -116,10 +116,10 @@
         increasedGP: {implemented: false},
 
         // magic
-        increasedMinAirSpellDmg: {implemented: false},
-        increasedMinEarthSpellDmg: {implemented: false},
-        increasedMinFireSpellDmg: {implemented: false},
-        increasedMinWaterSpellDmg: {implemented: false},
+        increasedMinAirSpellDmg: {implemented: true},
+        increasedMinEarthSpellDmg: {implemented: true},
+        increasedMinFireSpellDmg: {implemented: true},
+        increasedMinWaterSpellDmg: {implemented: true},
         spellHeal: {implemented: false},
 
         // hitpoints

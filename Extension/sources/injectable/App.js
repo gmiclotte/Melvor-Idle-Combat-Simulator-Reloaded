@@ -941,7 +941,7 @@
             }
 
             filterSlayer(item) {
-                return item.slayerAreaEffectNegationPercent != undefined || item.slayerBonusXP !== undefined
+                return item.slayerAreaEffectNegationPercent !== undefined || item.slayerBonusXP !== undefined
             }
 
             filterRemainingPassive(item) {

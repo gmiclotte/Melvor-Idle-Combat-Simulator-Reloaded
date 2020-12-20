@@ -41,7 +41,7 @@
                     Slayer: 1,
                 };
                 /** @type {EquipmentStats} */
-                this.equipmentStats;
+                this.equipmentStats = {};
                 // Spell Selection
                 this.spells = {
                     standard: {
@@ -476,12 +476,6 @@
                     const item = items[itemID];
 
                     // passive stats
-                    /*
-                    equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Air] += item.increasedMinAirSpellDmg || 0;
-                    equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Water] += item.increasedMinWaterSpellDmg || 0;
-                    equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Earth] += item.increasedMinEarthSpellDmg || 0;
-                    equipmentStats.increasedMinSpellDmg[CONSTANTS.spellType.Fire] += item.increasedMinFireSpellDmg || 0;
-                    */
                     Object.getOwnPropertyNames(MICSR.passiveStatNames).forEach(stat => {
                         equipmentStats[stat] += item[stat] || 0;
                     });
