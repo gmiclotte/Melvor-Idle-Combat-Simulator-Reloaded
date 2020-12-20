@@ -435,7 +435,6 @@
                         firemakingSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || maxCape,
                         capeOfArrowPreservation: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation,
                         skullCape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Skull_Cape,
-                        goldRubyRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Ruby_Ring,
                         goldDiamondRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring,
                         goldEmeraldRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring,
                         goldSapphireRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring,
@@ -882,9 +881,7 @@
                         playerStats.avgHPRegen *= 2;
                     }
                     playerStats.avgHPRegen *= (1 + this.herbloreBonus.hpRegen / 100);
-                    if (playerStats.activeItems.goldRubyRing) {
-                        playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + items[CONSTANTS.item.Gold_Ruby_Ring].hpRegenBonus / 100));
-                    }
+                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.equipmentStats.hpRegenBonus / 100));
                 }
 
                 // Calculate Global XP Multiplier

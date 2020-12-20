@@ -124,7 +124,7 @@
 
         // hitpoints
         decreasedAutoEatEfficiency: {implemented: false},
-        hpRegenBonus: {implemented: false},
+        hpRegenBonus: {implemented: true},
         increasedAutoEat: {implemented: false},
         increasedHPRegen: {implemented: true},
         increasedMaxHitpoints: {implemented: false},
