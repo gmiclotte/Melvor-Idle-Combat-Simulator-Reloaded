@@ -485,7 +485,7 @@
                 player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * reductionModifier);
             }
             // status effects
-            if(isSpecial) {
+            if (isSpecial) {
                 applyStatus(currentSpecial, damage, player, playerStats)
             }
         }
@@ -528,7 +528,7 @@
                 enemy.isBuffed = false;
                 // Undo buffs
                 setEvasionDebuffs(enemyStats, enemy);
-                player.accuracy= calculateAccuracy(playerStats, enemy);
+                player.accuracy = calculateAccuracy(playerStats, enemy);
                 enemy.reflectMelee = 0;
                 enemy.damageReduction = 0;
             }
@@ -628,7 +628,7 @@
 
     function playerContinueAction(stats, player, playerStats, enemy, enemyStats) {
         // perform continued attack
-        const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats,true);
+        const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, true);
         processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
         playerUpdateActionTimer(player, playerStats, false);
     }
@@ -658,11 +658,11 @@
         }
     }
 
-    function  playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
+    function playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
         if (playerStats.specialData.decreasedRangedEvasion !== undefined) {
             enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
             setEvasionDebuffs(enemyStats, enemy);
-            player.accuracy= calculateAccuracy(playerStats, enemy);
+            player.accuracy = calculateAccuracy(playerStats, enemy);
         }
     }
 
@@ -749,7 +749,7 @@
                 const hitChance2 = Math.floor(Math.random() * 100);
                 if (hitChance > hitChance2) hitChance = hitChance2;
             }
-            if (player.accuracy> hitChance) attackHits = true;
+            if (player.accuracy > hitChance) attackHits = true;
         }
         if (!attackHits) {
             // exit early
