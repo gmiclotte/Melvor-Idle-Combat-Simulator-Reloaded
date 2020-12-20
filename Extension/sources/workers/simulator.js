@@ -152,36 +152,6 @@
             // var enemyReflectDamage = 0; //Damage caused by reflect
             // Start simulation for each trial
             this.cancelStatus = false;
-            // list of possible timed actions
-            const timedActions = [
-                {
-                    is: 'isActing',
-                    timer: 'actionTimer',
-                    player: playerAction,
-                    enemy: enemyAction,
-                },
-                {
-                    is: 'isAttacking',
-                    timer: 'attackTimer',
-                    player: playerContinueAction,
-                    enemy: enemyContinueAction,
-                },
-                {
-                    is: 'isBurning',
-                    timer: 'burnTimer',
-                    both: actorBurn,
-                },
-                {
-                    is: 'isRecoiling',
-                    timer: 'recoilTimer',
-                    both: actorRecoil,
-                },
-                {
-                    is: 'isBleeding',
-                    timer: 'bleedTimer',
-                    both: actorBleed,
-                },
-            ];
             const player = {};
             const enemy = {};
             const actors = [player, enemy];
@@ -207,13 +177,38 @@
 
                     // Determine the time step
                     let timeStep = Infinity;
-                    actors.forEach(actor => {
-                        timedActions.forEach(action => {
-                            if (actor[action.is]) {
-                                timeStep = Math.min(timeStep, actor[action.timer]);
-                            }
-                        });
-                    });
+                    // player
+                    if (player.isActing) {
+                        timeStep = Math.min(timeStep, player.actionTimer);
+                    }
+                    if (player.isAttacking) {
+                        timeStep = Math.min(timeStep, player.attackTimer);
+                    }
+                    if (player.isBurning) {
+                        timeStep = Math.min(timeStep, player.burnTimer);
+                    }
+                    if (player.isRecoiling) {
+                        timeStep = Math.min(timeStep, player.recoilTimer);
+                    }
+                    if (player.isBleeding) {
+                        timeStep = Math.min(timeStep, player.bleedTimer);
+                    }
+                    //enemy
+                    if (enemy.isActing) {
+                        timeStep = Math.min(timeStep, enemy.actionTimer);
+                    }
+                    if (enemy.isAttacking) {
+                        timeStep = Math.min(timeStep, enemy.attackTimer);
+                    }
+                    if (enemy.isBurning) {
+                        timeStep = Math.min(timeStep, enemy.burnTimer);
+                    }
+                    if (enemy.isRecoiling) {
+                        timeStep = Math.min(timeStep, enemy.recoilTimer);
+                    }
+                    if (enemy.isBleeding) {
+                        timeStep = Math.min(timeStep, enemy.bleedTimer);
+                    }
 
                     // throw error on invalid time step
                     if (timeStep <= 0) {
@@ -221,43 +216,96 @@
                     }
                     // combat time tracker
                     stats.totalTime += timeStep;
-
-                    // process actions
-                    actors.forEach(actor => {
-                        timedActions.forEach(action => {
-                            if (!enemyAlive || !actor[action.is]) {
-                                return;
-                            }
-                            // Process time step
-                            actor[action.timer] -= timeStep;
-                            const initialHP = enemy.hitpoints;
-                            if (actor[action.timer] > 0) {
-                                // do not perform this action
-                                return;
-                            }
-                            // get the method to apply
-                            let method = action.both;
-                            if (method === undefined) {
-                                method = actor.isPlayer ? action.player : action.enemy;
-                            }
-                            // apply the method
-                            // TODO: why are these methods part of this class anyway
-                            if (action.both === undefined) {
-                                method(stats, player, playerStats, enemy, enemyStats);
-                            } else {
-                                method(actor);
-                            }
-                            // update enemy status
-                            // TODO: we need this check to ensure the player.isActing hack works
-                            if (initialHP !== enemy.hitpoints) {
-                                enemyAlive = enemy.hitpoints > 0;
-                            }
-                            // TODO: do we really need this hack, i.e. do we keep multi-attacking for one hit, even though the enemy is dead
-                            if (actor.isPlayer && action.is === 'isActing' && player.isAttacking) {
-                                enemyAlive = true;
-                            }
-                        });
-                    });
+                    let initialHP = enemy.hitpoints;
+                    if (enemyAlive && player.isActing) {
+                        player.actionTimer -= timeStep;
+                        if (player.actionTimer <= 0) {
+                            playerAction(stats, player, playerStats, enemy, enemyStats);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                        // TODO: do we need this hack?
+                        if (player.isAttacking) {
+                            enemyAlive = true;
+                        }
+                    }
+                    if (enemyAlive && player.isAttacking) {
+                        player.attackTimer -= timeStep;
+                        if (player.attackTimer <= 0) {
+                            playerContinueAction(stats, player, playerStats, enemy, enemyStats);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                    }
+                    if (enemyAlive && player.isBurning) {
+                        player.burnTimer -= timeStep;
+                        if (player.burnTimer <= 0) {
+                            actorBurn(player);
+                        }
+                    }
+                    if (enemyAlive && player.isRecoiling) {
+                        player.recoilTimer -= timeStep;
+                        if (player.recoilTimer <= 0) {
+                            actorRecoil(player);
+                        }
+                    }
+                    if (enemyAlive && player.isBleeding) {
+                        player.bleedTimer -= timeStep;
+                        if (player.bleedTimer <= 0) {
+                            actorBleed(player);
+                        }
+                    }
+                    //enemy
+                    if (enemyAlive && enemy.isActing) {
+                        enemy.actionTimer -= timeStep;
+                        if (enemy.actionTimer <= 0) {
+                            enemyAction(stats, player, playerStats, enemy, enemyStats);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                    }
+                    if (enemyAlive && enemy.isAttacking) {
+                        enemy.attackTimer -= timeStep;
+                        if (enemy.attackTimer <= 0) {
+                            enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                    }
+                    if (enemyAlive && enemy.isBurning) {
+                        enemy.burnTimer -= timeStep;
+                        if (enemy.burnTimer <= 0) {
+                            actorBurn(enemy);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                    }
+                    if (enemyAlive && enemy.isRecoiling) {
+                        enemy.recoilTimer -= timeStep;
+                        if (enemy.recoilTimer <= 0) {
+                            actorRecoil(enemy);
+                        }
+                    }
+                    if (enemyAlive && enemy.isBleeding) {
+                        enemy.bleedTimer -= timeStep;
+                        if (enemy.bleedTimer <= 0) {
+                            actorBleed(enemy);
+                        }
+                        if (initialHP !== enemy.hitpoints) {
+                            enemyAlive = enemy.hitpoints > 0;
+                            initialHP = enemy.hitpoints;
+                        }
+                    }
 
                     // update damage taken
                     stats.damageTaken -= player.hitpoints;
