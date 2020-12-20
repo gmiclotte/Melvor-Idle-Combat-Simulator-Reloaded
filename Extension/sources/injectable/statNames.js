@@ -126,7 +126,7 @@
         decreasedAutoEatEfficiency: {implemented: false},
         hpRegenBonus: {implemented: false},
         increasedAutoEat: {implemented: false},
-        increasedHPRegen: {implemented: false},
+        increasedHPRegen: {implemented: true},
         increasedMaxHitpoints: {implemented: false},
         lifesteal: {implemented: false},
 

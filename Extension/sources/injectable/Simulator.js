@@ -874,10 +874,13 @@
                 // Regen Calculation
                 if (!this.isHardcore) {
                     playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / numberMultiplier);
+                    playerStats.avgHPRegen += this.equipmentStats.increasedHPRegen;
                     if (playerStats.activeItems.hitpointsSkillcape) {
                         playerStats.avgHPRegen += 1 * numberMultiplier;
                     }
-                    if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) playerStats.avgHPRegen *= 2;
+                    if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) {
+                        playerStats.avgHPRegen *= 2;
+                    }
                     playerStats.avgHPRegen *= (1 + this.herbloreBonus.hpRegen / 100);
                     if (playerStats.activeItems.goldRubyRing) {
                         playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + items[CONSTANTS.item.Gold_Ruby_Ring].hpRegenBonus / 100));
