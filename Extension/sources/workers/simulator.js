@@ -544,6 +544,10 @@
             //////////////////
             // side effects //
             //////////////////
+            // lifesteal
+            if (isSpecial && currentSpecial.lifesteal) {
+                    enemy.hitpoints += damage * currentSpecial.lifestealMultiplier;
+            }
             // player recoil
             if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
                 const reflectDamage = Math.floor(Math.random() * 3 * numberMultiplier);
