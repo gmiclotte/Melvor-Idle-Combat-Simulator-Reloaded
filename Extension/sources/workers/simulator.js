@@ -163,11 +163,8 @@
             const player = {};
             const enemy = {};
             const actors = [player, enemy];
+            let innerCount = 0;
             while (enemyKills < trials) {
-                // Check Cancellation every 250th trial
-                if (enemyKills % 250 === 0 && await this.isCanceled()) {
-                    return {simSuccess: false};
-                }
                 // Reset Timers and statuses
                 resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier);
                 resetEnemy(enemy, playerStats, enemyStats);
@@ -178,9 +175,14 @@
                 // Simulate combat until enemy is dead or max actions has been reached
                 let enemyAlive = true;
                 while (enemyAlive) {
+                    innerCount++
+                    // Check Cancellation every 250th loop
+                    if (innerCount % 250 === 0 && await this.isCanceled()) {
+                        return {simSuccess: false, reason: 'cancelled'};
+                    }
                     // check player action limit
                     if (player.actionsTaken > maxActions) {
-                        return {simSuccess: false};
+                        return {simSuccess: false, reason: 'too many actions'};
                     }
 
                     // Determine the time step
@@ -323,7 +325,7 @@
                 }
                 if (isNaN(enemy.hitpoints)) {
                     console.log('Failed enemy simulation: ', enemyStats, enemy);
-                    return {simSuccess: false};
+                    return {simSuccess: false, reason: 'bogus enemy hp'};
                 } else {
                     enemyKills++;
                 }
