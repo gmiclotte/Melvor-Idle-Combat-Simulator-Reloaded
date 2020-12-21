@@ -176,8 +176,8 @@
                 let enemyAlive = true;
                 while (enemyAlive) {
                     innerCount++
-                    // Check Cancellation every 250th loop
-                    if (innerCount % 250 === 0 && await this.isCanceled()) {
+                    // Check Cancellation every 10000th loop
+                    if (innerCount % 10000 === 0 && await this.isCanceled()) {
                         return {simSuccess: false, reason: 'cancelled'};
                     }
                     // check player action limit
