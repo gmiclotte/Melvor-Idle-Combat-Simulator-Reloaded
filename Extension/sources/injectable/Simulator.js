@@ -481,58 +481,52 @@
                         equipmentStats[stat] += item[stat] || 0;
                     });
 
+                    // level requirements
+                    Object.getOwnPropertyNames(MICSR.requiredStatNames).forEach(stat => {
+                        const itemStat = item[stat];
+                        if (itemStat === undefined || itemStat === null) {
+                            return;
+                        }
+                        equipmentStats[stat] = Math.max(equipmentStats[stat], item[stat] || 0);
+                    });
 
                     // equipment stats
                     if (equipmentSlot !== CONSTANTS.equipmentSlot.Passive) {
-                        // general
-                        equipmentStats.damageReduction += item.damageReduction || 0;
-
-                        if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
-                            equipmentStats.attackSpeed = item.attackSpeed || 4000;
-                        }
-
-                        // melee
-                        if (item.attackBonus) {
-                            for (let j = 0; j < 3; j++) {
-                                equipmentStats.attackBonus[j] += item.attackBonus[j];
+                        Object.getOwnPropertyNames(MICSR.equipmentStatNames).forEach(stat => {
+                            const itemStat = item[stat];
+                            if (itemStat === undefined || itemStat === null) {
+                                return;
                             }
-                        }
-                        equipmentStats.strengthBonus += item.strengthBonus || 0;
-                        equipmentStats.defenceBonus += item.defenceBonus || 0;
-
-                        // ranged
-                        if (!(equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo)) {
-                            equipmentStats.rangedAttackBonus += item.rangedAttackBonus || 0;
-                            equipmentStats.rangedStrengthBonus += item.rangedStrengthBonus || 0;
-                            equipmentStats.rangedDefenceBonus += item.rangedDefenceBonus || 0;
-                        }
-
-                        // magic
-                        equipmentStats.magicAttackBonus += item.magicAttackBonus || 0;
-                        equipmentStats.magicDamageBonus += item.magicDamageBonus || 0;
-                        equipmentStats.magicDefenceBonus += item.magicDefenceBonus || 0;
-                        if (item.providesRuneQty) {
-                            if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
-                                item.providesRune.forEach((rune) => equipmentStats.runesProvidedByWeapon[rune] = item.providesRuneQty * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
+                            // special cases
+                            switch (stat) {
+                                case 'attackBonus':
+                                    for (let j = 0; j < 3; j++) {
+                                        equipmentStats[stat][j] += itemStat[j];
+                                    }
+                                    return;
+                                case 'attackSpeed':
+                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
+                                        equipmentStats.attackSpeed = item.attackSpeed || 4000;
+                                    }
+                                    return;
+                                case 'providesRuneQty':
+                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
+                                        item.providesRune.forEach((rune) => equipmentStats.runesProvidedByWeapon[rune] = itemStat * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
+                                    } else if (equipmentSlot === CONSTANTS.equipmentSlot.Shield) {
+                                        item.providesRune.forEach((rune) => equipmentStats.runesProvidedByShield[rune] = itemStat * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
+                                    } else {
+                                        console.error(`Runes provided by ${item.name} are not taken into account!`)
+                                    }
+                                    return;
+                                case 'rangedAttackBonus', 'rangedStrengthBonus', 'rangedDefenceBonus' :
+                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                                        return;
+                                    }
+                                    break;
                             }
-                            if (equipmentSlot === CONSTANTS.equipmentSlot.Shield) {
-                                item.providesRune.forEach((rune) => equipmentStats.runesProvidedByShield[rune] = item.providesRuneQty * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
-                            }
-                        }
-
-                        // level requirements
-                        if (item.attackLevelRequired > equipmentStats.attackLevelRequired) {
-                            equipmentStats.attackLevelRequired = item.attackLevelRequired;
-                        }
-                        if (item.rangedLevelRequired > equipmentStats.rangedLevelRequired) {
-                            equipmentStats.rangedLevelRequired = item.rangedLevelRequired;
-                        }
-                        if (item.magicLevelRequired > equipmentStats.magicLevelRequired) {
-                            equipmentStats.magicLevelRequired = item.magicLevelRequired;
-                        }
-                        if (item.defenceLevelRequired > equipmentStats.defenceLevelRequired) {
-                            equipmentStats.defenceLevelRequired = item.defenceLevelRequired;
-                        }
+                            // standard stats
+                            equipmentStats[stat] += itemStat || 0;
+                        });
                     }
                 }
 
