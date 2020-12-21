@@ -475,7 +475,13 @@
             target.bleedMaxCount = statusEffect.bleedCount;
             target.bleedInterval = statusEffect.bleedInterval;
             target.bleedCount = 0;
-            target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
+            if (statusEffect.totalBleedHP > 0) {
+                // bleed for `statusEffect.totalBleedHP` times initial damage
+                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
+            } else {
+                // bleed for `statusEffect.totalBleedHPPercent` % of max HP
+                target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / target.bleedMaxCount);
+            }
             target.bleedTimer = target.bleedInterval;
         }
     }
@@ -839,6 +845,7 @@
             }
             if (statusEffect.canBleed) {
                 statusEffect.bleedCount = playerStats.specialData.bleedCount;
+                statusEffect.totalBleedHPPercent = playerStats.specialData.totalBleedHPPercent;
                 statusEffect.bleedInterval = playerStats.specialData.bleedInterval;
                 statusEffect.totalBleedHP = playerStats.specialData.totalBleedHP;
             }
