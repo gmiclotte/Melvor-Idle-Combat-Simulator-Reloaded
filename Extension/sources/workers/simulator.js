@@ -890,7 +890,7 @@
             } else if (gpMultiplier < confettiCrossbow.gpMultiplierMin) {
                 gpMultiplier = confettiCrossbow.gpMultiplierMin;
             }
-            stats.gpGainedFromDamage += Math.floor(damageToEnemy * gpMultiplier);
+            stats.gpGainedFromDamage += Math.floor(attackResult.damageToEnemy * gpMultiplier);
         }
 
         // return the result of the attack
