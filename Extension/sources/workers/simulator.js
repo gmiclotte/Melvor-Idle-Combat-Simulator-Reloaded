@@ -469,8 +469,8 @@
         // Apply Bleeding
         if (statusEffect.canBleed && !target.isBleeding) {
             target.isBleeding = true;
-            target.bleedMaxCount = playerStats.specialData.bleedCount;
-            target.bleedInterval = playerStats.specialData.bleedInterval;
+            target.bleedMaxCount = statusEffect.bleedCount;
+            target.bleedInterval = statusEffect.bleedInterval;
             target.bleedCount = 0;
             target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
             target.bleedTimer = target.bleedInterval;
@@ -840,6 +840,11 @@
             if (playerStats.specialData.bleedChance !== undefined) {
                 const bleedRoll = Math.random() * 100;
                 statusEffect.canBleed = playerStats.specialData.bleedChance > bleedRoll;
+            }
+            if (statusEffect.canBleed) {
+                statusEffect.bleedCount = playerStats.specialData.bleedCount;
+                statusEffect.bleedInterval = playerStats.specialData.bleedInterval;
+                statusEffect.totalBleedHP = playerStats.specialData.totalBleedHP;
             }
         }
         // Stun
