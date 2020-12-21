@@ -7,42 +7,39 @@
 
         // general
         attackSpeed: {
-            implemented: false,
+            implemented: true,
             name: 'Attack Speed',
             icon: 'combat',
         },
-        bossStrengthMultiplier: {implemented: false},
-        chanceToCrit: {implemented: false},
-        critDamage: {implemented: false},
-        gpMultiplierCap: {implemented: false},
-        gpMultiplierMin: {implemented: false},
-        hasSpecialAttack: {implemented: false},
-        isTwoHanded: {implemented: false},
+        isTwoHanded: {implemented: true},
         prayerBonus: {implemented: false},
-        specialAttackID: {implemented: false},
 
-        // slot
-        equipmentSlot: {implemented: false},
-        isPassiveItem: {implemented: false},
+        // special attack TODO: non-weapon special attacks
+        specialAttackID: {implemented: true},
+        hasSpecialAttack: {implemented: true},
+
+        // slot TODO unequip identical item if already equipped
+        equipmentSlot: {implemented: true},
+        isPassiveItem: {implemented: true},
 
         // defence
         damageReduction: {
-            implemented: false,
+            implemented: true,
             name: 'Damage Reduction',
             icon: 'defence',
         },
         defenceBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Melee Defence',
             icon: 'defence',
         },
         magicDefenceBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Magic Defence',
             icon: 'defence',
         },
         rangedDefenceBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Ranged Defence',
             icon: 'defence',
         },
@@ -50,65 +47,77 @@
         // melee
         attackBonus: [
             {
-                implemented: false,
+                implemented: true,
                 name: 'Stab',
                 icon: 'attack',
             },
             {
-                implemented: false,
+                implemented: true,
                 name: 'Slash',
                 icon: 'strength',
             },
             {
-                implemented: false,
+                implemented: true,
                 name: 'Block',
                 icon: 'defence',
             },
         ],
         strengthBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Melee Strength',
             icon: 'strength',
         },
 
         // ranged
         ammoPreservation: {implemented: false},
-        ammoTypeRequired: {implemented: false},
-        ammoType: {implemented: false},
-        isAmmo: {implemented: false},
+        ammoTypeRequired: {implemented: true},
+        ammoType: {implemented: true},
+        isAmmo: {implemented: true},
         rangedAttackBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Ranged Attack',
             icon: 'ranged',
         },
         rangedStrengthBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Ranged Strength',
             icon: 'ranged',
         },
 
         // magic
-        increasedWaterSpellDamage: {implemented: false},
-        isMagic: {implemented: false},
+        isMagic: {implemented: true},
         magicAttackBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Magic Attack',
             icon: 'magic',
         },
         magicDamageBonus: {
-            implemented: false,
+            implemented: true,
             name: 'Magic % Damage',
             icon: 'magic',
         },
-        providesRune: {implemented: false},
-        providesRuneQty: {implemented: false},
+        providesRune: {implemented: true},
+        providesRuneQty: {implemented: true},
 
-        // slayer
-        slayerStrengthMultiplier: {implemented: false},
         // miolite sceptre
         canUseMagic: {implemented: true},
 
+        // Cloudburst Staff
+        increasedWaterSpellDamage: {implemented: true},
 
+        // slayer crossbow
+        slayerStrengthMultiplier: {implemented: true},
+
+        // confetti crossbow
+        gpMultiplierCap: {implemented: true},
+        gpMultiplierMin: {implemented: true},
+
+        // deadeye amulet
+        chanceToCrit: {implemented: true},
+        critDamage: {implemented: true},
+
+        // big ol ron
+        bossStrengthMultiplier: {implemented: true},
     };
 
     // passive stats that apply to combat
@@ -119,7 +128,7 @@
         reflectDamage: {implemented: false},
 
         // loot
-        chanceToDoubleLoot: {implemented: false},
+        chanceToDoubleLoot: {implemented: true},
         gpMultiplier: {implemented: false},
         increasedGP: {implemented: false},
 
@@ -135,7 +144,7 @@
         hpRegenBonus: {implemented: true},
         increasedAutoEat: {implemented: false},
         increasedHPRegen: {implemented: true},
-        increasedMaxHitpoints: {implemented: false},
+        increasedMaxHitpoints: {implemented: true},
         lifesteal: {implemented: true},
 
         // prayer
@@ -144,7 +153,7 @@
         // slayer
         slayerAreaEffectNegationFlat: {implemented: false},
         slayerAreaEffectNegationPercent: {implemented: false},
-        slayerBonusXP: {implemented: false},
+        slayerBonusXP: {implemented: true},
 
     };
 
@@ -153,29 +162,29 @@
 
         // level requirements
         attackLevelRequired: {
-            implemented: false,
+            implemented: true,
             name: 'Level Required',
             icon: 'attack',
         },
         defenceLevelRequired: {
-            implemented: false,
+            implemented: true,
             name: 'Level Required',
             icon: 'defence',
         },
         magicLevelRequired: {
-            implemented: false,
+            implemented: true,
             name: 'Level Required',
             icon: 'magic',
         },
         rangedLevelRequired: {
-            implemented: false,
+            implemented: true,
             name: 'Level Required',
             icon: 'ranged',
         },
 
         // other requirements
         slayerLevelRequired: {
-            implemented: false,
+            implemented: true,
             name: 'Level Required',
             icon: 'slayer',
         },
@@ -187,83 +196,83 @@
     MICSR.irrelevantStatNames = {
 
         // crafting
-        craftingID: {implemented: false},
-        craftingLevel: {implemented: false},
-        craftingXP: {implemented: false},
-        craftQty: {implemented: false},
-        craftReq: {implemented: false},
+        craftingID: {},
+        craftingLevel: {},
+        craftingXP: {},
+        craftQty: {},
+        craftReq: {},
 
         // fishing
-        fishingBonusXP: {implemented: false},
-        fishingCatchWeight: {implemented: false},
-        fishingSpeedBonus: {implemented: false},
+        fishingBonusXP: {},
+        fishingCatchWeight: {},
+        fishingSpeedBonus: {},
 
         // fletching
-        fletchQty: {implemented: false},
-        fletchReq: {implemented: false},
-        fletchingCategory: {implemented: false},
-        fletchingID: {implemented: false},
-        fletchingLevel: {implemented: false},
-        fletchingXP: {implemented: false},
+        fletchQty: {},
+        fletchReq: {},
+        fletchingCategory: {},
+        fletchingID: {},
+        fletchingLevel: {},
+        fletchingXP: {},
 
         // runecrafting
-        runecraftingCategory: {implemented: false},
-        runecraftingID: {implemented: false},
-        runecraftingLevel: {implemented: false},
-        runecraftingXP: {implemented: false},
-        runecraftQty: {implemented: false},
-        runecraftReq: {implemented: false},
+        runecraftingCategory: {},
+        runecraftingID: {},
+        runecraftingLevel: {},
+        runecraftingXP: {},
+        runecraftQty: {},
+        runecraftReq: {},
 
         // smithing
-        smithingLevel: {implemented: false},
-        smithingQty: {implemented: false},
-        smithingXP: {implemented: false},
-        smithReq: {implemented: false},
-        smithingID: {implemented: false},
+        smithingLevel: {},
+        smithingQty: {},
+        smithingXP: {},
+        smithReq: {},
+        smithingID: {},
 
         // thieving
-        increasedSuccessRate: {implemented: false},
+        increasedSuccessRate: {},
 
         // various
-        baseChanceToPreserve: {implemented: false},
-        baseDropRate: {implemented: false},
-        bonusMasteryXP: {implemented: false},
-        bonusSkillXP: {implemented: false},
-        buysFor: {implemented: false},
-        canEquip: {implemented: false},
-        canMultiUpgrade: {implemented: false},
-        canUpgrade: {implemented: false},
-        category: {implemented: false},
-        chanceToDoubleResources: {implemented: false},
-        chanceToPreserve: {implemented: false},
-        description: {implemented: false},
-        gloveID: {implemented: false},
-        harvestBonus: {implemented: false},
-        hasAnimation: {implemented: false},
-        hasStats: {implemented: false},
-        id: {implemented: false},
-        ignoreCompletion: {implemented: false},
-        increasedItemChance: {implemented: false},
-        itemID: {implemented: false},
-        itemsRequired: {implemented: false},
-        masteryID: {implemented: false},
-        maxDropRate: {implemented: false},
-        media: {implemented: false},
-        mediaAnimation: {implemented: false},
-        name: {implemented: false},
-        sellsFor: {implemented: false},
-        slayerCost: {implemented: false},
-        tier: {implemented: false},
-        trimmedGPCost: {implemented: false},
-        trimmedItemID: {implemented: false},
-        type: {implemented: false},
+        baseChanceToPreserve: {},
+        baseDropRate: {},
+        bonusMasteryXP: {},
+        bonusSkillXP: {},
+        buysFor: {},
+        canEquip: {},
+        canMultiUpgrade: {},
+        canUpgrade: {},
+        category: {},
+        chanceToDoubleResources: {},
+        chanceToPreserve: {},
+        description: {},
+        gloveID: {},
+        harvestBonus: {},
+        hasAnimation: {},
+        hasStats: {},
+        id: {},
+        ignoreCompletion: {},
+        increasedItemChance: {},
+        itemID: {},
+        itemsRequired: {},
+        masteryID: {},
+        maxDropRate: {},
+        media: {},
+        mediaAnimation: {},
+        name: {},
+        sellsFor: {},
+        slayerCost: {},
+        tier: {},
+        trimmedGPCost: {},
+        trimmedItemID: {},
+        type: {},
 
     };
 
     // stats bugged in the base game
     MICSR.brokenStatNames = {
-        increasedWaterAirSpellDmg: {implemented: false},
-        increasedEarthFireSpellDmg: {implemented: false},
+        increasedWaterAirSpellDmg: {},
+        increasedEarthFireSpellDmg: {},
     }
 
     // construct a list of stats that are not in any of the previous categories

@@ -429,6 +429,8 @@
                     runesProvidedByWeapon: {},
                     runesProvidedByShield: {},
                     activeItems: {
+                        // TODO: check which of these items are passive slot items
+                        //   also check any other use of `CONSTANTS.item` and `items`
                         hitpointsSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || maxCape,
                         rangedSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || maxCape,
                         magicSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || maxCape,
@@ -854,6 +856,7 @@
                 }
 
                 // Special Attack and Ancient Magicks
+                // TODO: support non-weapon special attack items
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.ancient.isSelected) {
                     playerStats.usingAncient = true;
                     playerStats.specialData = playerSpecialAttacks[ANCIENT[this.spells.ancient.selectedID].specID];
