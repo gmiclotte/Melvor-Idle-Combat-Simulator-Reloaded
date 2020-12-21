@@ -12,7 +12,6 @@
             icon: 'combat',
         },
         bossStrengthMultiplier: {implemented: false},
-        canUseMagic: {implemented: false},
         chanceToCrit: {implemented: false},
         critDamage: {implemented: false},
         gpMultiplierCap: {implemented: false},
@@ -106,6 +105,9 @@
 
         // slayer
         slayerStrengthMultiplier: {implemented: false},
+        // miolite sceptre
+        canUseMagic: {implemented: true},
+
 
     };
 

@@ -672,7 +672,7 @@
              */
             computeAuroraBonus() {
                 this.resetAuroraBonus();
-                if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.aurora.isSelected) {
+                if ((this.combatStats.attackType === CONSTANTS.attackType.Magic || this.equipmentStats.canUseMagic) && this.spells.aurora.isSelected) {
                     const auroraID = this.spells.aurora.selectedID;
                     switch (auroraID) {
                         case CONSTANTS.aurora.Surge_I:
@@ -832,8 +832,8 @@
                     },
                     runePreservation: this.combatStats.runePreservation,
                 };
-                // Magic
-                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
+                // Magic curses and auroras
+                if (this.combatStats.attackType === CONSTANTS.attackType.Magic || this.equipmentStats.canUseMagic) {
                     playerStats.usingMagic = true;
 
                     // Rune costs
@@ -843,6 +843,9 @@
                     if (this.spells.aurora.isSelected) {
                         playerStats.runeCosts.aurora = this.getRuneCostForSpell(AURORAS[this.spells.aurora.selectedID], true);
                     }
+                }
+                // spells
+                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
                     if (this.spells.ancient.isSelected) {
                         playerStats.runeCosts.spell = this.getRuneCostForSpell(ANCIENT[this.spells.ancient.selectedID]);
                     } else {
@@ -861,7 +864,7 @@
                 // MICSR.log({...playerStats.specialData});
 
                 // Curses
-                if (this.combatStats.attackType === CONSTANTS.attackType.Magic && !this.spells.ancient.isSelected && this.spells.curse.isSelected) {
+                if (this.spells.curse.isSelected && (this.combatStats.attackType === CONSTANTS.attackType.Magic && !this.spells.ancient.isSelected || this.equipmentStats.canUseMagic)) {
                     playerStats.canCurse = true;
                     playerStats.curseID = this.spells.curse.selectedID;
                     playerStats.curseData = CURSES[this.spells.curse.selectedID];
