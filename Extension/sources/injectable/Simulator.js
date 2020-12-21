@@ -864,6 +864,7 @@
                     playerStats.hasSpecialAttack = true;
                     playerStats.specialData = playerSpecialAttacks[items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].specialAttackID];
                 }
+                // MICSR.log({...playerStats.specialData});
 
                 // Curses
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic && !this.spells.ancient.isSelected && this.spells.curse.isSelected) {
@@ -1284,7 +1285,8 @@
              * @param {number} workerID The ID of the worker that sent the message
              */
             processWorkerMessage(event, workerID) {
-                // MICSR.log(`Received Message from worker: ${workerID}`);
+                // MICSR.log(`Received Message ${event.data.action} from worker: ${workerID}`);
+                // MICSR.log({...event.data});
                 switch (event.data.action) {
                     case 'FINISHED_SIM':
                         // Send next job in queue to worker
