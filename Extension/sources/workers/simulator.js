@@ -221,24 +221,26 @@
                         player.actionTimer -= timeStep;
                         if (player.actionTimer <= 0) {
                             playerAction(stats, player, playerStats, enemy, enemyStats);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
-                        }
-                        // TODO: do we need this hack?
-                        if (player.isAttacking) {
-                            enemyAlive = true;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
+                            // TODO: how to handle multi-attacks when the monster is dead?
+                            /*
+                            if (player.isAttacking) {
+                                enemyAlive = true;
+                            }
+                            */
                         }
                     }
                     if (enemyAlive && player.isAttacking) {
                         player.attackTimer -= timeStep;
                         if (player.attackTimer <= 0) {
                             playerContinueAction(stats, player, playerStats, enemy, enemyStats);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
                         }
                     }
                     if (enemyAlive && player.isBurning) {
@@ -264,30 +266,30 @@
                         enemy.actionTimer -= timeStep;
                         if (enemy.actionTimer <= 0) {
                             enemyAction(stats, player, playerStats, enemy, enemyStats);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
                         }
                     }
                     if (enemyAlive && enemy.isAttacking) {
                         enemy.attackTimer -= timeStep;
                         if (enemy.attackTimer <= 0) {
                             enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
                         }
                     }
                     if (enemyAlive && enemy.isBurning) {
                         enemy.burnTimer -= timeStep;
                         if (enemy.burnTimer <= 0) {
                             actorBurn(enemy);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
                         }
                     }
                     if (enemyAlive && enemy.isRecoiling) {
@@ -300,10 +302,10 @@
                         enemy.bleedTimer -= timeStep;
                         if (enemy.bleedTimer <= 0) {
                             actorBleed(enemy);
-                        }
-                        if (initialHP !== enemy.hitpoints) {
-                            enemyAlive = enemy.hitpoints > 0;
-                            initialHP = enemy.hitpoints;
+                            if (initialHP !== enemy.hitpoints) {
+                                enemyAlive = enemy.hitpoints > 0;
+                                initialHP = enemy.hitpoints;
+                            }
                         }
                     }
 
@@ -450,6 +452,7 @@
         if (statusEffect.burnDebuff > 0 && !target.isBurning) {
             target.isBurning = true;
             target.burnCount = 0;
+            // TODO: fix this `targetStats.levels.Hitpoints`
             target.burnDamage = Math.floor((targetStats.levels.Hitpoints * numberMultiplier * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
             target.burnTimer = target.burnInterval;
         }
@@ -860,6 +863,7 @@
         if (isSpecial && playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
             statusEffect.isSlowed = true;
             statusEffect.slowTurns = playerStats.specialData.attackSpeedDebuffTurns;
+            statusEffect.attackSpeedDebuff = playerStats.specialData.attackSpeedDebuff;
         }
 
         // confetti crossbow
