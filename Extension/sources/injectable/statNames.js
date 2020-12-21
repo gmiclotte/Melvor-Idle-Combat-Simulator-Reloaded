@@ -113,7 +113,7 @@
     MICSR.passiveStatNames = {
 
         // general
-        decreasedAttackSpeed: {implemented: false},
+        decreasedAttackSpeed: {implemented: true},
         reflectDamage: {implemented: false},
 
         // loot

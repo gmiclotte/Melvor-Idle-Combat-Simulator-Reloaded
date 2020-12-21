@@ -2296,7 +2296,7 @@
             updateCombatStats() {
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
-                        document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key] - this.simulator.auroraBonus.attackSpeedBuff;
+                        document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key] - this.simulator.auroraBonus.attackSpeedBuff - this.simulator.equipmentStats.decreasedAttackSpeed;
                     } else {
                         document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();
                     }

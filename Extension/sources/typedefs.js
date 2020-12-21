@@ -29,7 +29,7 @@
  * @property {boolean} isProtected Player has active protection prayer
  * @property {boolean} hardcore If player is in hardcore mode
  * @property {number} lifesteal Lifesteal from auroras
- * @property {number} attackSpeedDecrease Decreased attack interval from auroras
+ * @property {number} decreasedAttackSpeed Decreased attack interval from auroras or gear
  * @property {boolean} canCurse If the player can apply a curse
  * @property {number} curseID The index of the selected curse in CURSES
  * @property {Spell & Curse} curseData The element of the selected curse from CURSES

@@ -454,8 +454,8 @@
             target.isSlowed = true;
             target.slowTurns = statusEffect.attackSpeedDebuffTurns;
             target.currentSpeed = Math.floor(targetStats.attackSpeed * (1 + statusEffect.attackSpeedDebuff / 100));
-            if (targetStats.attackSpeedDecrease) {
-                target.currentSpeed -= targetStats.attackSpeedDecrease
+            if (targetStats.decreasedAttackSpeed) {
+                target.currentSpeed -= targetStats.decreasedAttackSpeed
             }
         }
         ///////////
@@ -729,7 +729,7 @@
             player.slowTurns--;
             if (player.slowTurns <= 0) {
                 player.isSlowed = false;
-                player.currentSpeed = playerStats.attackSpeed - playerStats.attackSpeedDecrease;
+                player.currentSpeed = playerStats.attackSpeed - playerStats.decreasedAttackSpeed;
             }
         }
         player.actionTimer = player.currentSpeed;
@@ -1000,7 +1000,7 @@
     }
 
     function resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier) {
-        resetCommonStats(player, playerStats.attackSpeed - playerStats.attackSpeedDecrease);
+        resetCommonStats(player, playerStats.attackSpeed - playerStats.decreasedAttackSpeed);
         player.isPlayer = true;
         player.hitpoints = 0;
         player.reductionBuff = 0;

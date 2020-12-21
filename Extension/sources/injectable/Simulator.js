@@ -827,7 +827,7 @@
                     isProtected: false,
                     hardcore: this.isHardcore,
                     lifesteal: this.auroraBonus.lifesteal,
-                    attackSpeedDecrease: this.auroraBonus.attackSpeedBuff,
+                    decreasedAttackSpeed: this.auroraBonus.attackSpeedBuff + this.equipmentStats.decreasedAttackSpeed,
                     canCurse: false,
                     curseID: -1,
                     curseData: {},
