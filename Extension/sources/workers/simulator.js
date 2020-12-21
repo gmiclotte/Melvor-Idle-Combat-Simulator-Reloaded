@@ -44,6 +44,14 @@
                 break;
         }
     };
+
+    onerror = (error) => {
+        postMessage({
+            action: 'ERR_SIM',
+            error: error,
+        });
+    }
+
     // TODO move these globals
     let combatTriangle;
     let protectFromValue;

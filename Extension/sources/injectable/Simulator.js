@@ -1299,6 +1299,9 @@
                         // Attempt to add another job to the worker
                         this.startJob(workerID);
                         break;
+                    case 'ERR_SIM':
+                        MICSR.error(event.data.error);
+                        break;
                 }
             }
 
