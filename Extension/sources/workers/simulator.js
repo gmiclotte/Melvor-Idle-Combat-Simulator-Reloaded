@@ -1006,6 +1006,7 @@
     function resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier) {
         resetCommonStats(player, playerStats.attackSpeed - playerStats.attackSpeedDecrease);
         player.isPlayer = true;
+        player.hitpoints = 0;
         player.reductionBuff = 0;
         player.damageReduction = Math.floor(playerStats.damageReduction * reductionModifier);
         player.actionsTaken = 0;
