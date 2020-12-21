@@ -34,17 +34,17 @@
         },
         defenceBonus: {
             implemented: false,
-            name: 'Defence Bonus',
+            name: 'Melee Defence',
             icon: 'defence',
         },
         magicDefenceBonus: {
             implemented: false,
-            name: 'Defence Bonus',
+            name: 'Magic Defence',
             icon: 'defence',
         },
         rangedDefenceBonus: {
             implemented: false,
-            name: 'Defence Bonus',
+            name: 'Ranged Defence',
             icon: 'defence',
         },
 
@@ -52,23 +52,23 @@
         attackBonus: [
             {
                 implemented: false,
-                name: 'Stab Bonus',
+                name: 'Stab',
                 icon: 'attack',
             },
             {
                 implemented: false,
-                name: 'Slash Bonus',
+                name: 'Slash',
                 icon: 'strength',
             },
             {
                 implemented: false,
-                name: 'Block Bonus',
+                name: 'Block',
                 icon: 'defence',
             },
         ],
         strengthBonus: {
             implemented: false,
-            name: 'Strength Bonus',
+            name: 'Melee Strength',
             icon: 'strength',
         },
 
@@ -79,22 +79,26 @@
         isAmmo: {implemented: false},
         rangedAttackBonus: {
             implemented: false,
-            name: 'Attack Bonus',
-            icon: 'attack',
+            name: 'Ranged Attack',
+            icon: 'ranged',
         },
         rangedStrengthBonus: {
             implemented: false,
-            name: 'Strength Bonus',
-            icon: 'strength',
+            name: 'Ranged Strength',
+            icon: 'ranged',
         },
 
         // magic
         increasedWaterSpellDamage: {implemented: false},
         isMagic: {implemented: false},
-        magicAttackBonus: {implemented: false},
+        magicAttackBonus: {
+            implemented: false,
+            name: 'Magic Attack',
+            icon: 'magic',
+        },
         magicDamageBonus: {
             implemented: false,
-            name: '% Damage Bonus',
+            name: 'Magic % Damage',
             icon: 'magic',
         },
         providesRune: {implemented: false},

@@ -367,16 +367,20 @@
                     this.equipStatCard.addSectionTitle('Equipment Stats');
                     this.equipKeys = [
                         'attackSpeed',
-                        'strengthBonus',
+                        // melee
                         ['attackBonus', 0],
                         ['attackBonus', 1],
                         ['attackBonus', 2],
+                        'strengthBonus',
+                        // ranged
                         'rangedAttackBonus',
                         'rangedStrengthBonus',
+                        // magic
                         'magicAttackBonus',
                         'magicDamageBonus',
-                        'defenceBonus',
+                        // defence
                         'damageReduction',
+                        'defenceBonus',
                         'rangedDefenceBonus',
                         'magicDefenceBonus',
                     ];
