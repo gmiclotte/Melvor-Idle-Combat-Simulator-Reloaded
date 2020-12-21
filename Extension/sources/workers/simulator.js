@@ -495,16 +495,32 @@
             // Activate Buffs
             if (currentSpecial.activeBuffs && !enemy.isBuffed) {
                 enemy.isBuffed = true;
-                if (currentSpecial.activeBuffTurns !== null && currentSpecial.activeBuffTurns !== undefined) enemy.buffTurns = currentSpecial.activeBuffTurns;
-                else enemy.buffTurns = currentSpecial.attackCount;
+                if (currentSpecial.activeBuffTurns !== null && currentSpecial.activeBuffTurns !== undefined) {
+                    enemy.buffTurns = currentSpecial.activeBuffTurns;
+                } else {
+                    enemy.buffTurns = currentSpecial.attackCount;
+                }
                 // Set evasion buffs
-                enemy.meleeEvasionBuff = 1 + currentSpecial.increasedMeleeEvasion / 100;
-                enemy.rangedEvasionBuff = 1 + currentSpecial.increasedRangedEvasion / 100;
-                enemy.magicEvasionBuff = 1 + currentSpecial.increasedMagicEvasion / 100;
-                enemy.reflectMelee = currentSpecial.reflectMelee;
-                enemy.damageReduction = currentSpecial.increasedDamageReduction;
-                // Modify Player Accuracy according to buff
+                if (currentSpecial.increasedMeleeEvasion) {
+                    enemy.meleeEvasionBuff = 1 + currentSpecial.increasedMeleeEvasion / 100;
+                }
+                if (currentSpecial.increasedRangedEvasion) {
+                    enemy.rangedEvasionBuff = 1 + currentSpecial.increasedRangedEvasion / 100;
+                }
+                if (currentSpecial.increasedMagicEvasion) {
+                    enemy.magicEvasionBuff = 1 + currentSpecial.increasedMagicEvasion / 100;
+                }
+                // set reflect melee attack buff
+                if (currentSpecial.reflectMelee) {
+                    enemy.reflectMelee = currentSpecial.reflectMelee;
+                }
+                // set increased DR buff
+                if (currentSpecial.increasedDamageReduction) {
+                    enemy.damageReduction = currentSpecial.increasedDamageReduction;
+                }
+                // update enemy max def rolls
                 setEvasionDebuffs(enemyStats, enemy);
+                // update player accuracy according to buffs
                 player.accuracy = calculateAccuracy(playerStats, enemy);
             }
             forceHit = currentSpecial.forceHit;
