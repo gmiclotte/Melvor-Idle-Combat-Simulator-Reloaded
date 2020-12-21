@@ -450,10 +450,13 @@
             target.sleepTurns = statusEffect.sleepTurns;
         }
         // Apply Slow
-        if (statusEffect.isSlowed) {
+        if (statusEffect.attackSpeedDebuff && !target.isSlowed) {
             target.isSlowed = true;
             target.slowTurns = statusEffect.attackSpeedDebuffTurns;
             target.currentSpeed = Math.floor(targetStats.attackSpeed * (1 + statusEffect.attackSpeedDebuff / 100));
+            if (targetStats.attackSpeedDecrease) {
+                target.currentSpeed -= targetStats.attackSpeedDecrease
+            }
         }
         ///////////
         // timed //
@@ -497,13 +500,6 @@
                 // Modify Player Accuracy according to buff
                 setEvasionDebuffs(enemyStats, enemy);
                 player.accuracy = calculateAccuracy(playerStats, enemy);
-            }
-            // Apply Player Slow
-            if (currentSpecial.attackSpeedDebuff && !player.isSlowed) {
-                // Modify current player speed
-                player.isSlowed = true;
-                player.currentSpeed = Math.floor(playerStats.attackSpeed * (1 + currentSpecial.attackSpeedDebuff / 100)) - playerStats.attackSpeedDecrease;
-                player.slowTurns = currentSpecial.attackSpeedDebuffTurns;
             }
             forceHit = currentSpecial.forceHit;
         }
