@@ -1,5 +1,7 @@
 (() => {
 
+    const MICSR = window.MICSR;
+
     MICSR.version = 'v1.1.3';
 
     /**

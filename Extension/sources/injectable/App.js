@@ -1,5 +1,7 @@
 (() => {
 
+    const MICSR = window.MICSR;
+
     const reqs = [
         'util',
         'statNames',

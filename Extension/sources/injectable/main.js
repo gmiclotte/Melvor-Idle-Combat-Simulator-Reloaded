@@ -19,6 +19,8 @@
 
 (() => {
 
+    const MICSR = window.MICSR;
+
     const reqs = [
         'util',
         'App',

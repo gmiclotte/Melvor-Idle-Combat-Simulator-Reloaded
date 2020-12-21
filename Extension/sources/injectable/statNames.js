@@ -1,5 +1,7 @@
 (() => {
 
+    const MICSR = window.MICSR;
+
     // equipment stats are non-passive stats that apply to combat
     MICSR.equipmentStatNames = {
 
