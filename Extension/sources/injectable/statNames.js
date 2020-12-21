@@ -136,7 +136,7 @@
         increasedAutoEat: {implemented: false},
         increasedHPRegen: {implemented: true},
         increasedMaxHitpoints: {implemented: false},
-        lifesteal: {implemented: false},
+        lifesteal: {implemented: true},
 
         // prayer
         prayerCostReduction: {implemented: false},

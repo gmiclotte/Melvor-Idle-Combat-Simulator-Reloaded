@@ -884,6 +884,9 @@
                     playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.equipmentStats.hpRegenBonus / 100));
                 }
 
+                // Life Steal from gear
+                playerStats.lifesteal += this.equipmentStats.lifesteal;
+
                 // Calculate Global XP Multiplier
                 if (playerStats.activeItems.firemakingSkillcape) {
                     playerStats.globalXPMult += 0.05;
