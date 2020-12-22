@@ -8,7 +8,7 @@
         // general
         attackSpeed: {
             implemented: true,
-            name: 'Attack Speed',
+            name: 'Weapon Speed',
             icon: 'combat',
         },
         isTwoHanded: {implemented: true},

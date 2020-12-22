@@ -842,7 +842,7 @@
             }
 
             createPetSelectCard() {
-                this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+                this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23];
                 const combatPets = PETS.filter((_pet, petID) => {
                     return this.combatPetsIds.includes(petID);
                 });
@@ -2296,7 +2296,8 @@
             updateCombatStats() {
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
-                        document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key] - this.simulator.auroraBonus.attackSpeedBuff - this.simulator.equipmentStats.decreasedAttackSpeed;
+                        const attackSpeed = this.simulator.combatStats[key] - this.simulator.decreasedAttackSpeed();
+                        document.getElementById(`MCS ${key} CS Output`).textContent = attackSpeed.toLocaleString();
                     } else {
                         document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();
                     }

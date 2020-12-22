@@ -617,19 +617,39 @@
                 this.combatStats.maxRngDefRoll = Math.floor(effectiveRngDefenceLevel * (this.equipmentStats.rangedDefenceBonus + 64) * (1 + (this.prayerBonus.rangedEvasion) / 100) * (1 + this.herbloreBonus.rangedEvasion / 100));
                 const effectiveMagicDefenceLevel = Math.floor(this.playerLevels.Magic * 0.7 + this.playerLevels.Defence * 0.3 + 9);
                 this.combatStats.maxMagDefRoll = Math.floor(effectiveMagicDefenceLevel * (this.equipmentStats.magicDefenceBonus + 64) * (1 + (this.prayerBonus.magicEvasion / 100)) * (1 + this.herbloreBonus.magicEvasion / 100));
+                // Peri
+                if (this.petOwned[22]) {
+                    this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * 1.05);
+                    this.combatStats.maxRngDefRoll = Math.floor(this.combatStats.maxRngDefRoll * 1.05);
+                    this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * 1.05);
+                }
                 // Update aurora bonuses
                 this.computeAuroraBonus();
-                if (this.auroraBonus.meleeEvasionBuff !== 0) this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * (1 + this.auroraBonus.meleeEvasionBuff / 100));
-                if (this.auroraBonus.rangedEvasionBuff !== 0) this.combatStats.maxRngDefRoll = Math.floor(this.combatStats.maxRngDefRoll * (1 + this.auroraBonus.rangedEvasionBuff / 100));
-                if (this.auroraBonus.magicEvasionBuff !== 0) this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * (1 + this.auroraBonus.magicEvasionBuff / 100));
-                if (this.auroraBonus.increasedMaxHit !== 0 && this.spells.standard.isSelected) this.combatStats.maxHit += this.auroraBonus.increasedMaxHit;
-                if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) this.combatStats.minHit += this.auroraBonus.increasedMinHit;
+                if (this.auroraBonus.meleeEvasionBuff !== 0) {
+                    this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * (1 + this.auroraBonus.meleeEvasionBuff / 100));
+                }
+                if (this.auroraBonus.rangedEvasionBuff !== 0) {
+                    this.combatStats.maxRngDefRoll = Math.floor(this.combatStats.maxRngDefRoll * (1 + this.auroraBonus.rangedEvasionBuff / 100));
+                }
+                if (this.auroraBonus.magicEvasionBuff !== 0) {
+                    this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * (1 + this.auroraBonus.magicEvasionBuff / 100));
+                }
+                if (this.auroraBonus.increasedMaxHit !== 0 && this.spells.standard.isSelected) {
+                    this.combatStats.maxHit += this.auroraBonus.increasedMaxHit;
+                }
+                if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
+                    this.combatStats.minHit += this.auroraBonus.increasedMinHit;
+                }
                 // Calculate damage reduction
                 this.combatStats.damageReduction = this.equipmentStats.damageReduction + this.herbloreBonus.damageReduction + this.prayerBonus.damageReduction;
-                if (this.petOwned[14]) this.combatStats.damageReduction++;
+                if (this.petOwned[14]) {
+                    this.combatStats.damageReduction++;
+                }
                 // Max Hitpoints
                 this.combatStats.maxHitpoints = this.playerLevels.Hitpoints + this.equipmentStats.increasedMaxHitpoints;
-                if (this.petOwned[15]) this.combatStats.maxHitpoints++;
+                if (this.petOwned[15]) {
+                    this.combatStats.maxHitpoints++;
+                }
                 this.combatStats.maxHitpoints *= numberMultiplier;
             }
 
@@ -786,6 +806,15 @@
                 this.herbloreBonus.luckyHerb = 0; // 11
             }
 
+            decreasedAttackSpeed() {
+                let decrease = this.auroraBonus.attackSpeedBuff + this.equipmentStats.decreasedAttackSpeed;
+                // Otto
+                if (this.petOwned[23]) {
+                    decrease += 100;
+                }
+                return decrease;
+            }
+
             /**
              * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
              */
@@ -823,7 +852,7 @@
                     isProtected: false,
                     hardcore: this.isHardcore,
                     lifesteal: this.auroraBonus.lifesteal,
-                    decreasedAttackSpeed: this.auroraBonus.attackSpeedBuff + this.equipmentStats.decreasedAttackSpeed,
+                    decreasedAttackSpeed: this.decreasedAttackSpeed(),
                     canCurse: false,
                     curseID: -1,
                     curseData: {},
@@ -834,6 +863,7 @@
                     },
                     runePreservation: this.combatStats.runePreservation,
                 };
+
                 // Magic curses and auroras
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic || this.equipmentStats.canUseMagic) {
                     playerStats.usingMagic = true;
