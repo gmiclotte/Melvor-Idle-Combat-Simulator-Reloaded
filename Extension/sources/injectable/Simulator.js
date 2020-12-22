@@ -974,6 +974,7 @@
                             playerStats.prayerPointsPerHeal += PRAYER[i].pointsPerRegen;
                         }
                         // XP Gain
+                        // TODO: this matches the bugged behaviour of 0.18?613 of Melvor Idle
                         playerStats.prayerXpPerDamage += 2 * PRAYER[i].pointsPerPlayer / numberMultiplier;
                     }
                 }

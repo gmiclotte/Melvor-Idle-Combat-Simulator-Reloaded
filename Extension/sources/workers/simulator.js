@@ -336,7 +336,8 @@
             // Ring bonus
             stats.totalCombatXP += stats.totalCombatXP * playerStats.xpBonus;
             stats.totalHpXP += stats.totalHpXP * playerStats.xpBonus;
-            stats.totalPrayerXP += stats.totalPrayerXP * playerStats.xpBonus;
+            // TODO: this matches the bugged behaviour of 0.18?613 of Melvor Idle
+            stats.totalPrayerXP += stats.totalPrayerXP * playerStats.xpBonus / 2;
             // Global XP Bonus
             stats.totalCombatXP *= playerStats.globalXPMult;
             stats.totalHpXP *= playerStats.globalXPMult;
