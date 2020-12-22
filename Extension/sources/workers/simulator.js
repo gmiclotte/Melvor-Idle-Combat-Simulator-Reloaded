@@ -786,10 +786,6 @@
             return;
         }
         stats.runesUsed += playerStats.runeCosts.curse;
-        const curseRoll = Math.random() * 100;
-        if (playerStats.curseData.chance <= curseRoll) {
-            return;
-        }
         enemy.isCursed = true;
         enemy.curseTurns = 3;
         // Update the curses that change stats
