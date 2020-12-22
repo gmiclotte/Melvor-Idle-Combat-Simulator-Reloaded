@@ -601,9 +601,10 @@
             //////////////////
             // side effects //
             //////////////////
-            // lifesteal
+            // life steal
             if (isSpecial && currentSpecial.lifesteal) {
                 enemy.hitpoints += damage * currentSpecial.lifestealMultiplier;
+                enemy.hitpoints = Math.min(enemy.hitpoints, enemyStats.hitpoints);
             }
             // player recoil
             if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
