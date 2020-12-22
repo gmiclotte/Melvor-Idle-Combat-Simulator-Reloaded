@@ -69,7 +69,7 @@
                 ];
                 this.plotTypeDropdownValues = [
                     'xpPerSecond',
-                    'hpxpPerSecond',
+                    'hpXpPerSecond',
                     'prayerXpPerSecond',
                     'slayerXpPerSecond',
                     'xpPerHit',

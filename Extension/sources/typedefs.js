@@ -156,7 +156,7 @@
  * @property {number} xpPerEnemy
  * @property {number} xpPerSecond
  * @property {number} xpPerHit
- * @property {number} hpxpPerEnemy
+ * @property {number} hpXpPerEnemy
  * @property {number} hpPerEnemy
  * @property {number} hpPerSecond
  * @property {number} dmgPerSecond

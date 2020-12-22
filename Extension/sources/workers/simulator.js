@@ -131,6 +131,8 @@
             if (playerStats.specialData.setDamage) playerStats.specialData.setDamage *= numberMultiplier;
             // Multiply player max hit
             playerStats.maxHit = Math.floor(playerStats.maxHit * damageModifier);
+            playerStats.damageTaken = 0;
+            playerStats.damageHealed = 0;
 
             // Start Monte Carlo simulation
             let enemyKills = 0;
@@ -140,8 +142,6 @@
                 totalTime: 0,
                 playerAttackCalls: 0,
                 enemyAttackCalls: 0,
-                damageTaken: 0,
-                damageHealed: 0,
                 totalCombatXP: 0,
                 totalHpXP: 0,
                 totalPrayerXP: 0,
@@ -164,6 +164,7 @@
             const enemy = {};
             const actors = [player, enemy];
             let innerCount = 0;
+            let tooManyActions = 0;
             while (enemyKills < trials) {
                 // Reset Timers and statuses
                 resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier);
@@ -182,7 +183,7 @@
                     }
                     // check player action limit
                     if (player.actionsTaken > maxActions) {
-                        return {simSuccess: false, reason: 'too many actions'};
+                        break;
                     }
 
                     // Determine the time step
@@ -226,12 +227,12 @@
                     }
                     // combat time tracker
                     stats.totalTime += timeStep;
-                    let initialHP = enemy.hitpoints;
+                    let initialHP = enemyStats.damageTaken;
                     if (enemyAlive && player.isActing) {
                         player.actionTimer -= timeStep;
                         if (player.actionTimer <= 0) {
                             playerAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemy.hitpoints) {
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
@@ -247,7 +248,7 @@
                         player.attackTimer -= timeStep;
                         if (player.attackTimer <= 0) {
                             playerContinueAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemy.hitpoints) {
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
@@ -256,19 +257,19 @@
                     if (enemyAlive && player.isBurning) {
                         player.burnTimer -= timeStep;
                         if (player.burnTimer <= 0) {
-                            actorBurn(player);
+                            actorBurn(player, playerStats);
                         }
                     }
                     if (enemyAlive && player.isRecoiling) {
                         player.recoilTimer -= timeStep;
                         if (player.recoilTimer <= 0) {
-                            actorRecoil(player);
+                            actorRecoilCD(player);
                         }
                     }
                     if (enemyAlive && player.isBleeding) {
                         player.bleedTimer -= timeStep;
                         if (player.bleedTimer <= 0) {
-                            actorBleed(player);
+                            actorBleed(player, playerStats);
                         }
                     }
                     //enemy
@@ -276,7 +277,7 @@
                         enemy.actionTimer -= timeStep;
                         if (enemy.actionTimer <= 0) {
                             enemyAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemy.hitpoints) {
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
@@ -286,7 +287,7 @@
                         enemy.attackTimer -= timeStep;
                         if (enemy.attackTimer <= 0) {
                             enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemy.hitpoints) {
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
@@ -295,8 +296,8 @@
                     if (enemyAlive && enemy.isBurning) {
                         enemy.burnTimer -= timeStep;
                         if (enemy.burnTimer <= 0) {
-                            actorBurn(enemy);
-                            if (initialHP !== enemy.hitpoints) {
+                            actorBurn(enemy, enemyStats);
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
@@ -305,32 +306,29 @@
                     if (enemyAlive && enemy.isRecoiling) {
                         enemy.recoilTimer -= timeStep;
                         if (enemy.recoilTimer <= 0) {
-                            actorRecoil(enemy);
+                            actorRecoilCD(enemy);
                         }
                     }
                     if (enemyAlive && enemy.isBleeding) {
                         enemy.bleedTimer -= timeStep;
                         if (enemy.bleedTimer <= 0) {
-                            actorBleed(enemy);
-                            if (initialHP !== enemy.hitpoints) {
+                            actorBleed(enemy, enemyStats);
+                            if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
                         }
                     }
-
-                    // update damage taken
-                    stats.damageTaken -= player.hitpoints;
-                    player.hitpoints = 0;
                 }
                 if (isNaN(enemy.hitpoints)) {
                     console.log('Failed enemy simulation: ', enemyStats, enemy);
                     return {simSuccess: false, reason: 'bogus enemy hp'};
-                } else {
-                    enemyKills++;
                 }
+                if (enemy.hitpoints > 0) {
+                    tooManyActions++;
+                }
+                enemyKills++;
             }
-
 
             // Apply XP Bonuses
             // Ring bonus
@@ -344,7 +342,7 @@
             stats.totalPrayerXP *= playerStats.globalXPMult;
 
             // Final Result from simulation
-            return simulationResult(stats, playerStats, enemyStats, trials);
+            return simulationResult(stats, playerStats, enemyStats, trials, tooManyActions);
         };
 
         /**
@@ -364,12 +362,12 @@
         }
     }
 
-    function actorRecoil(actor) {
+    function actorRecoilCD(actor) {
         actor.canRecoil = true;
         actor.isRecoiling = false;
     }
 
-    function actorBurn(actor) {
+    function actorBurn(actor, actorStats) {
         // reset timer
         actor.burnTimer = actor.burnInterval;
         // Check if stopped burning
@@ -378,11 +376,11 @@
             return;
         }
         // Apply burn damage
-        actor.hitPoints -= actor.burnDamage;
+        dealDamage(actor, actorStats, actor.burnDamage);
         actor.burnCount++;
     }
 
-    function actorBleed(actor) {
+    function actorBleed(actor, actorStats) {
         // reset timer
         actor.bleedTimer = actor.bleedInterval;
         // Check if stopped bleeding
@@ -391,7 +389,7 @@
             return;
         }
         // Apply bleed damage
-        actor.hitpoints -= actor.bleedDamage;
+        dealDamage(actor, actorStats, actor.bleedDamage);
         actor.bleedCount++;
     }
 
@@ -597,7 +595,7 @@
             // apply damage //
             //////////////////
             const damage = enemyCalculateDamage(enemy, player, isSpecial, currentSpecial);
-            player.hitpoints -= damage;
+            dealDamage(player, playerStats, damage);
             //////////////////
             // side effects //
             //////////////////
@@ -610,7 +608,7 @@
             if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
                 const reflectDamage = Math.floor(Math.random() * 3 * numberMultiplier);
                 if (enemy.hitpoints > reflectDamage) {
-                    enemy.hitpoints -= reflectDamage;
+                    dealDamage(enemy, enemyStats, reflectDamage);
                     player.canRecoil = false;
                     player.isRecoiling = true;
                     player.recoilTimer = 2000;
@@ -618,7 +616,7 @@
             }
             // confusion curse
             if (enemy.isCursed && enemy.curse.type === 'Confusion') {
-                enemy.hitpoints -= Math.floor(enemy.hitpoints * enemy.curse.confusionMult);
+                dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
             }
             // guardian amulet
             if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) {
@@ -666,7 +664,7 @@
         }
         // Apply decay
         if (enemy.curse.type === 'Decay') {
-            enemy.hitpoints -= enemy.curse.decayDamage;
+            dealDamage(enemy, enemyStats, enemy.curse.decayDamage);
         }
         // reduce remaining curse turns
         enemy.curseTurns--;
@@ -748,13 +746,18 @@
         playerUpdateActionTimer(player, playerStats, false);
     }
 
+    function dealDamage(target, targetStats, damage) {
+        target.hitpoints -= Math.floor(damage);
+        targetStats.damageTaken += Math.floor(damage);
+    }
+
     function processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats) {
         if (!attackResult.attackHits) {
             // attack missed, nothing to do
             return;
         }
         // damage
-        enemy.hitpoints -= Math.floor(attackResult.damageToEnemy);
+        dealDamage(enemy, enemyStats, Math.floor(attackResult.damageToEnemy));
         // XP Tracking
         if (attackResult.damageToEnemy > 0) {
             let xpToAdd = attackResult.damageToEnemy / numberMultiplier * 4;
@@ -774,8 +777,8 @@
     }
 
     function playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
-        if (playerStats.specialData.decreasedRangedEvasion !== undefined) {
-            enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
+        if (playerStats.specialData.decreasedRangedEvasion) {
+            enemy.decreasedRangedEvasion = playerStats.specialData.decreasedRangedEvasion;
             player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
         }
     }
@@ -871,13 +874,12 @@
 
         // healing special
         if (isSpecial && playerStats.specialData.healsFor > 0) {
-            stats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.specialData.healsFor);
+            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.specialData.healsFor);
         }
         // reflect melee damage
         if (enemy.reflectMelee > 0) {
-            player.hitpoints -= enemy.reflectMelee * numberMultiplier;
+            dealDamage(player, playerStats, enemy.reflectMelee * numberMultiplier);
         }
-
         ////////////////////
         // status effects //
         ////////////////////
@@ -918,10 +920,10 @@
         }
         // lifesteal
         if (playerStats.activeItems.warlockAmulet) {
-            stats.damageHealed += Math.floor(attackResult.damageToEnemy * warlockAmulet.spellHeal);
+            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * warlockAmulet.spellHeal);
         }
         if (playerStats.lifesteal !== 0) {
-            stats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.lifesteal / 100);
+            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.lifesteal / 100);
         }
         // slow
         if (isSpecial && playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {
@@ -1083,7 +1085,7 @@
         enemy.maxDefRoll = enemyStats.maxDefRoll;
         enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
         enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
-        enemy.rangedEvasionDebuff = 1;
+        enemy.decreasedRangedEvasion = 0;
         enemy.meleeEvasionBuff = 1;
         enemy.magicEvasionBuff = 1;
         enemy.rangedEvasionBuff = 1;
@@ -1108,42 +1110,60 @@
         }
     }
 
-    function simulationResult(stats, playerStats, enemyStats, trials) {
+    function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
         /** @type {MonsterSimResult} */
         const simResult = {
             simSuccess: true,
             petRolls: {},
+            tooManyActions: tooManyActions,
         };
-        simResult.attacksMade = stats.playerAttackCalls / trials;
-        simResult.avgHitDmg = enemyStats.hitpoints * trials / stats.playerAttackCalls;
-        simResult.avgKillTime = enemySpawnTimer + stats.totalTime / trials;
-        simResult.hpPerEnemy = (stats.damageTaken - stats.damageHealed) / trials - simResult.avgKillTime / hitpointRegenInterval * playerStats.avgHPRegen;
-        if (simResult.hpPerEnemy < 0) {
-            simResult.hpPerEnemy = 0;
-        }
-        simResult.hpPerSecond = simResult.hpPerEnemy / simResult.avgKillTime * 1000;
-        simResult.dmgPerSecond = enemyStats.hitpoints / simResult.avgKillTime * 1000;
-        simResult.xpPerEnemy = stats.totalCombatXP / trials;
+
+
         simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
-        simResult.xpPerSecond = stats.totalCombatXP / trials / simResult.avgKillTime * 1000;
-        simResult.hpxpPerEnemy = stats.totalHpXP / trials;
-        simResult.hpxpPerSecond = stats.totalHpXP / trials / simResult.avgKillTime * 1000;
-        simResult.killTimeS = simResult.avgKillTime / 1000;
-        simResult.killsPerSecond = 1 / simResult.killTimeS;
-        simResult.prayerXpPerEnemy = stats.totalPrayerXP / trials;
-        simResult.prayerXpPerSecond = stats.totalPrayerXP / trials / simResult.avgKillTime * 1000;
-        simResult.ppConsumedPerSecond = (stats.playerAttackCalls * playerStats.prayerPointsPerAttack + stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy) / trials / simResult.killTimeS + playerStats.prayerPointsPerHeal / hitpointRegenInterval * 1000;
-        simResult.gpFromDamage = stats.gpGainedFromDamage / trials;
-        simResult.attacksTaken = stats.enemyAttackCalls / trials;
-        simResult.attacksTakenPerSecond = stats.enemyAttackCalls / trials / simResult.killTimeS;
-        simResult.attacksMadePerSecond = stats.playerAttackCalls / trials / simResult.killTimeS;
-        simResult.runesUsedPerSecond = stats.runesUsed / trials / simResult.killTimeS;
+        // xp per second
+        const totalTime = (trials - tooManyActions) * enemySpawnTimer + stats.totalTime;
+        simResult.xpPerSecond = stats.totalCombatXP / totalTime * 1000;
+        simResult.hpXpPerSecond = stats.totalHpXP / totalTime * 1000;
+        simResult.prayerXpPerSecond = stats.totalPrayerXP / totalTime * 1000;
+        // resource use
+        // pp
+        simResult.ppConsumedPerSecond = stats.playerAttackCalls * playerStats.prayerPointsPerAttack / totalTime * 1000;
+        simResult.ppConsumedPerSecond += stats.enemyAttackCalls * playerStats.prayerPointsPerEnemy / totalTime * 1000;
+        simResult.ppConsumedPerSecond += playerStats.prayerPointsPerHeal / hitpointRegenInterval * 1000;
+        // hp
+        let damage = playerStats.damageTaken;
+        damage -= playerStats.damageHealed;
+        damage -= playerStats.avgHPRegen * totalTime / hitpointRegenInterval;
+        simResult.hpPerSecond = Math.max(0, damage / totalTime * 1000);
+        // runes
+        simResult.runesUsedPerSecond = stats.runesUsed / totalTime * 1000;
+        // attacks
+        simResult.attacksTakenPerSecond = stats.enemyAttackCalls / totalTime * 1000;
+        simResult.attacksMadePerSecond = stats.playerAttackCalls / totalTime * 1000;
+        // damage
+        simResult.avgHitDmg = enemyStats.damageTaken / stats.playerAttackCalls;
+        simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;
+        // gp
+        simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
+
+        // stats depending on kills
+        if (tooManyActions === 0) {
+            // kill time
+            simResult.avgKillTime = totalTime / trials;
+            simResult.killTimeS = simResult.avgKillTime / 1000;
+            simResult.killsPerSecond = 1 / simResult.killTimeS;
+        } else {
+            // kill time
+            simResult.avgKillTime = NaN;
+            simResult.killTimeS = NaN;
+            simResult.killsPerSecond = 0;
+        }
 
         // Throw pet rolls in here to be further processed later
         Object.keys(stats.petRolls).forEach((petType) =>
             simResult.petRolls[petType] = Object.keys(stats.petRolls[petType]).map(attackSpeed => ({
                 speed: parseInt(attackSpeed),
-                rollsPerSecond: stats.petRolls[petType][attackSpeed] / trials / simResult.killTimeS,
+                rollsPerSecond: stats.petRolls[petType][attackSpeed] / totalTime * 1000,
             }))
         );
         // return successful results
@@ -1261,8 +1281,8 @@
         enemy.maxDefRoll = enemyStats.maxDefRoll;
         enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
         enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
-        if (enemy.rangedEvasionDebuff !== 1) {
-            enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.rangedEvasionDebuff);
+        if (enemy.decreasedRangedEvasion) {
+            enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * (1 - enemy.decreasedRangedEvasion / 100));
         }
         if (enemy.isBuffed) {
             enemy.maxDefRoll = Math.floor(enemy.maxDefRoll * enemy.meleeEvasionBuff);
@@ -1306,12 +1326,12 @@
             if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
                 evasionDebuff = calculateAreaEffectValue(30, playerStats);
             }
-            let maxMagDefRoll = playerStats.maxRngDefRoll;
-            if (player.rangedEvasionBuff) {
-                maxMagDefRoll = Math.floor(maxMagDefRoll * (1 + player.rangedEvasionBuff / 100));
+            let maxMagDefRoll = playerStats.maxMagDefRoll;
+            if (player.magicEvasionBuff) {
+                maxMagDefRoll = Math.floor(maxMagDefRoll * (1 + player.magicEvasionBuff / 100));
             }
-            maxMagDefRoll = Math.floor(maxMagDefRoll * (1 - (player.rangedEvasionDebuff + evasionDebuff) / 100));
-            player.maxRngDefRoll = maxMagDefRoll;
+            maxMagDefRoll = Math.floor(maxMagDefRoll * (1 - (player.magicEvasionDebuff + evasionDebuff) / 100));
+            player.maxMagDefRoll = maxMagDefRoll;
         }
     }
 
