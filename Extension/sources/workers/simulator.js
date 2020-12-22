@@ -1115,6 +1115,7 @@
         return simResult;
     }
 
+    // TODO: duplicated in injectable/Simulator.js
     /**
      * Computes the accuracy of attacker vs target
      * @param {Object} attacker
@@ -1127,6 +1128,7 @@
      * @return {number}
      */
     function calculateAccuracy(attacker, target) {
+        // determine relevant defence roll
         let targetDefRoll;
         if (attacker.attackType === 0) {
             targetDefRoll = target.maxDefRoll;
@@ -1135,13 +1137,11 @@
         } else {
             targetDefRoll = target.maxMagDefRoll;
         }
-        let accuracy;
+        // accuracy based on attack roll and defence roll
         if (attacker.maxAttackRoll < targetDefRoll) {
-            accuracy = (0.5 * attacker.maxAttackRoll / targetDefRoll) * 100;
-        } else {
-            accuracy = (1 - 0.5 * targetDefRoll / attacker.maxAttackRoll) * 100;
+            return (0.5 * attacker.maxAttackRoll / targetDefRoll) * 100;
         }
-        return accuracy;
+        return (1 - 0.5 * targetDefRoll / attacker.maxAttackRoll) * 100;
     }
 
     /**
