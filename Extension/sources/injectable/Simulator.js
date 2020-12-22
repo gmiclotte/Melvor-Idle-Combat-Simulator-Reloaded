@@ -826,6 +826,7 @@
                 const playerStats = {
                     attackSpeed: this.combatStats.attackSpeed,
                     attackType: this.combatStats.attackType,
+                    isMagic: this.combatStats.attackType !== CONSTANTS.attackType.Magic,
                     maxAttackRoll: this.combatStats.maxAttackRoll,
                     maxHit: this.combatStats.maxHit,
                     minHit: this.combatStats.minHit,
@@ -862,6 +863,9 @@
                         aurora: 0,
                     },
                     runePreservation: this.combatStats.runePreservation,
+                    // area effects
+                    slayerAreaEffectNegationPercent: this.equipmentStats.slayerAreaEffectNegationPercent,
+                    slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
                 };
 
                 // Magic curses and auroras
@@ -1063,6 +1067,7 @@
             getEnemyStats(monsterID) {
                 /** @type {enemyStats} */
                 const enemyStats = {
+                    monsterID: monsterID,
                     hitpoints: 0,
                     attackSpeed: 0,
                     attackType: 0,
@@ -1076,6 +1081,17 @@
                     specialIDs: [],
                     specialLength: 0,
                 };
+                // Determine slayer zone
+                zone: for(const area of slayerAreas) {
+                    let slayerIdx = 0;
+                    for (const id of area.monsters) {
+                        if (id === monsterID) {
+                            enemyStats.slayerArea = slayerIdx;
+                            break zone;
+                        }
+                        slayerIdx++;
+                    }
+                }
                 // Calculate Enemy Stats
                 enemyStats.hitpoints = MONSTERS[monsterID].hitpoints * numberMultiplier;
                 enemyStats.attackSpeed = MONSTERS[monsterID].attackSpeed;

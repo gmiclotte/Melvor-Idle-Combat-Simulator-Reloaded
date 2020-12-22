@@ -403,7 +403,7 @@
         }
         stats.enemyAttackCalls++;
         // Check if doing special
-        let specialAttack = false;
+        let isSpecial = false;
         if (enemyStats.hasSpecialAttack) {
             const chanceForSpec = Math.floor(Math.random() * 100);
             let specCount = 0;
@@ -411,22 +411,56 @@
                 if (chanceForSpec <= enemyStats.specialAttackChances[i] + specCount) {
                     enemy.specialID = enemyStats.specialIDs[i];
                     enemy.doingSpecial = true;
-                    specialAttack = true;
+                    isSpecial = true;
                     break;
                 }
                 specCount += enemyStats.specialAttackChances[i];
             }
         }
         // Attack Parameters
-        enemyDoAttack(player, playerStats, enemy, enemyStats, specialAttack);
+        const special = enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial);
         enemyPostAttack(player, playerStats, enemy, enemyStats);
+        enemyActionTimer(player, playerStats, enemy, enemyStats, isSpecial, special);
     }
 
     function enemyContinueAction(stats, player, playerStats, enemy, enemyStats) {
         // Do enemy multi attacks
         stats.enemyAttackCalls++;
-        enemyDoAttack(player, playerStats, enemy, enemyStats, true);
+        const special = enemyDoAttack(player, playerStats, enemy, enemyStats, true);
         enemyPostAttack(player, playerStats, enemy, enemyStats);
+        enemyActionTimer(player, playerStats, enemy, enemyStats, true, special);
+    }
+
+    function enemyActionTimer(player, playerStats, enemy, enemyStats, isSpecial, special) {
+        // set up timer for next attack
+        if (isSpecial && enemy.isAttacking) {
+            // handle multi-attack
+            // Track attacks and determine next action
+            enemy.attackCount++;
+            if (enemy.attackCount >= enemy.countMax) {
+                enemy.isAttacking = false;
+                enemy.isActing = true;
+                enemy.actionTimer = enemy.currentSpeed;
+            } else {
+                enemy.attackTimer = enemy.attackInterval;
+            }
+        } else if (isSpecial) {
+            // Set up subsequent hits if required
+            const isDOT = special.setDOTDamage !== null;
+            const maxCount = isDOT ? special.DOTMaxProcs : special.attackCount;
+            if (maxCount > 1) {
+                enemy.attackCount = 1;
+                enemy.countMax = maxCount;
+                enemy.isActing = false;
+                enemy.isAttacking = true;
+                enemy.attackInterval = isDOT ? special.DOTInterval : special.attackInterval;
+                enemy.attackTimer = enemy.attackInterval;
+            } else {
+                enemy.actionTimer = enemy.currentSpeed;
+            }
+        } else {
+            enemy.actionTimer = enemy.currentSpeed;
+        }
     }
 
     function canNotDodge(target) {
@@ -485,6 +519,30 @@
             }
             target.bleedTimer = target.bleedInterval;
         }
+        ////////////
+        // debuff //
+        ////////////
+        // evasion debuffs
+        if (statusEffect.applyDebuffs && !target.activeDebuffs) {
+            target.activeDebuffs = true;
+            if (statusEffect.applyDebuffTurns !== null && statusEffect.applyDebuffTurns !== undefined) {
+                target.debuffTurns = statusEffect.applyDebuffTurns;
+            } else {
+                target.debuffTurns = 2;
+            }
+            target.meleeEvasionDebuff = statusEffect.meleeEvasionDebuff;
+            target.rangedEvasionDebuff = statusEffect.rangedEvasionDebuff;
+            target.magicEvasionDebuff = statusEffect.magicEvasionDebuff;
+        }
+        // accuracy debuffs
+        if (statusEffect.decreasePlayerAccuracy !== undefined) {
+            if (statusEffect.decreasePlayerAccuracyStack) {
+                target.decreasedAccuracy += statusEffect.decreasePlayerAccuracy;
+                target.decreasedAccuracy = Math.min(target.decreasedAccuracy, statusEffect.decreasePlayerAccuracyLimit);
+            } else {
+                target.decreasedAccuracy += statusEffect.decreasePlayerAccuracy;
+            }
+        }
     }
 
     function enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial) {
@@ -519,10 +577,8 @@
                 if (currentSpecial.increasedDamageReduction) {
                     enemy.damageReduction = currentSpecial.increasedDamageReduction;
                 }
-                // update enemy max def rolls
-                setEvasionDebuffs(enemyStats, enemy);
-                // update player accuracy according to buffs
-                player.accuracy = calculateAccuracy(playerStats, enemy);
+                // update player accuracy
+                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
             }
             forceHit = currentSpecial.forceHit;
         }
@@ -547,7 +603,7 @@
             //////////////////
             // lifesteal
             if (isSpecial && currentSpecial.lifesteal) {
-                    enemy.hitpoints += damage * currentSpecial.lifestealMultiplier;
+                enemy.hitpoints += damage * currentSpecial.lifestealMultiplier;
             }
             // player recoil
             if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
@@ -573,35 +629,7 @@
                 applyStatus(currentSpecial, damage, player, playerStats)
             }
         }
-        // set up timer for next attack
-        if (isSpecial && enemy.isAttacking) {
-            // handle multi-attack
-            // Track attacks and determine next action
-            enemy.attackCount++;
-            if (enemy.attackCount >= enemy.countMax) {
-                enemy.isAttacking = false;
-                enemy.isActing = true;
-                enemy.actionTimer = enemy.currentSpeed;
-            } else {
-                enemy.attackTimer = enemy.attackInterval;
-            }
-        } else if (isSpecial) {
-            // Set up subsequent hits if required
-            const isDOT = currentSpecial.setDOTDamage !== null;
-            const maxCount = isDOT ? currentSpecial.DOTMaxProcs : currentSpecial.attackCount;
-            if (maxCount > 1) {
-                enemy.attackCount = 1;
-                enemy.countMax = maxCount;
-                enemy.isActing = false;
-                enemy.isAttacking = true;
-                enemy.attackInterval = isDOT ? currentSpecial.DOTInterval : currentSpecial.attackInterval;
-                enemy.attackTimer = enemy.attackInterval;
-            } else {
-                enemy.actionTimer = enemy.currentSpeed;
-            }
-        } else {
-            enemy.actionTimer = enemy.currentSpeed;
-        }
+        return currentSpecial;
     }
 
     function enemyPostAttack(player, playerStats, enemy, enemyStats) {
@@ -611,8 +639,7 @@
             if (enemy.buffTurns <= 0) {
                 enemy.isBuffed = false;
                 // Undo buffs
-                setEvasionDebuffs(enemyStats, enemy);
-                player.accuracy = calculateAccuracy(playerStats, enemy);
+                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
                 enemy.reflectMelee = 0;
                 enemy.damageReduction = 0;
             }
@@ -632,6 +659,10 @@
     }
 
     function enemyCurseUpdate(player, enemy, enemyStats) {
+        // don't curse
+        if (enemy.isAttacking) {
+            return;
+        }
         // Apply decay
         if (enemy.curse.type === 'Decay') {
             enemy.hitpoints -= enemy.curse.decayDamage;
@@ -647,13 +678,12 @@
             case 'Blinding':
                 enemy.maxAttackRoll = enemyStats.maxAttackRoll;
                 if (!playerStats.isProtected) {
-                    enemy.accuracy = calculateAccuracy(enemy, playerStats);
+                    enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
                 }
                 break;
             case 'Soul Split':
             case 'Decay':
-                setEvasionDebuffs(enemyStats, enemy);
-                player.accuracy = calculateAccuracy(playerStats, enemy);
+                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
                 enemy.maxHit = enemyStats.maxHit;
@@ -745,8 +775,7 @@
     function playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
         if (playerStats.specialData.decreasedRangedEvasion !== undefined) {
             enemy.rangedEvasionDebuff = 1 - playerStats.specialData.decreasedRangedEvasion / 100;
-            setEvasionDebuffs(enemyStats, enemy);
-            player.accuracy = calculateAccuracy(playerStats, enemy);
+            player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
         }
     }
 
@@ -794,13 +823,12 @@
             case 'Blinding':
                 enemy.maxAttackRoll = Math.floor(enemy.maxAttackRoll * enemy.curse.accuracyDebuff);
                 if (!playerStats.isProtected) {
-                    enemy.accuracy = calculateAccuracy(enemy, playerStats);
+                    enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
                 }
                 break;
             case 'Soul Split':
             case 'Decay':
-                setEvasionDebuffs(enemyStats, enemy);
-                player.accuracy = calculateAccuracy(playerStats, enemy);
+                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
                 enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
@@ -1021,6 +1049,11 @@
         // multi attack
         common.attackCount = 0;
         common.countMax = 0;
+        // debuffs
+        common.magicEvasionDebuff = 0;
+        common.meleeEvasionDebuff = 0;
+        common.rangedEvasionDebuff = 0;
+        common.decreasedAccuracy = 0;
     }
 
     function resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier) {
@@ -1030,7 +1063,7 @@
         player.reductionBuff = 0;
         player.damageReduction = Math.floor(playerStats.damageReduction * reductionModifier);
         player.actionsTaken = 0;
-        player.accuracy = calculateAccuracy(playerStats, enemyStats);
+        player.accuracy = calculateAccuracy(playerStats, playerStats, enemyStats, enemyStats);
         player.damageModifier = damageModifier;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
@@ -1070,7 +1103,7 @@
         if (playerStats.isProtected) {
             enemy.accuracy = 100 - protectFromValue;
         } else {
-            enemy.accuracy = calculateAccuracy(enemyStats, playerStats);
+            enemy.accuracy = calculateAccuracy(enemyStats, enemyStats, playerStats, playerStats);
         }
     }
 
@@ -1118,31 +1151,36 @@
 
     // TODO: duplicated in injectable/Simulator.js
     /**
-     * Computes the accuracy of attacker vs target
-     * @param {Object} attacker
-     * @param {number} attacker.attackType Attack Type Melee:0, Ranged:1, Magic:2
-     * @param {number} attacker.maxAttackRoll Accuracy Rating
+     * Computes the accuracy of actor vs target
+     * @param {Object} actor
+     * @param {number} actor.attackType Attack Type Melee:0, Ranged:1, Magic:2
+     * @param {number} actor.maxAttackRoll Accuracy Rating
      * @param {Object} target
      * @param {number} target.maxDefRoll Melee Evasion Rating
      * @param {number} target.maxRngDefRoll Ranged Evasion Rating
      * @param {number} target.maxMagDefRoll Magic Evasion Rating
      * @return {number}
      */
-    function calculateAccuracy(attacker, target) {
+    function calculateAccuracy(actor, actorStats, target, targetStats) {
+        if (target.isPlayer) {
+            setEvasionDebuffsPlayer(target, targetStats, actorStats);
+        } else {
+            setEvasionDebuffsEnemy(target, targetStats);
+        }
         // determine relevant defence roll
         let targetDefRoll;
-        if (attacker.attackType === 0) {
+        if (actor.attackType === 0) {
             targetDefRoll = target.maxDefRoll;
-        } else if (attacker.attackType === 1) {
+        } else if (actor.attackType === 1) {
             targetDefRoll = target.maxRngDefRoll;
         } else {
             targetDefRoll = target.maxMagDefRoll;
         }
         // accuracy based on attack roll and defence roll
-        if (attacker.maxAttackRoll < targetDefRoll) {
-            return (0.5 * attacker.maxAttackRoll / targetDefRoll) * 100;
+        if (actor.maxAttackRoll < targetDefRoll) {
+            return (0.5 * actor.maxAttackRoll / targetDefRoll) * 100;
         }
-        return (1 - 0.5 * targetDefRoll / attacker.maxAttackRoll) * 100;
+        return (1 - 0.5 * targetDefRoll / actor.maxAttackRoll) * 100;
     }
 
     /**
@@ -1218,7 +1256,7 @@
      * @param {enemyStats} enemyStats
      * @param {Object} enemy
      */
-    function setEvasionDebuffs(enemyStats, enemy) {
+    function setEvasionDebuffsEnemy(enemy, enemyStats) {
         enemy.maxDefRoll = enemyStats.maxDefRoll;
         enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
         enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
@@ -1235,6 +1273,55 @@
             enemy.maxMagDefRoll = Math.floor(enemy.maxMagDefRoll * enemy.curse.magicEvasionDebuff);
             enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.curse.rangedEvasionDebuff);
         }
+    }
+
+    function setEvasionDebuffsPlayer(player, playerStats, enemyStats) {
+        let evasionDebuff = 0;
+        if (enemyStats.slayerArea === 9 /*Perilous Peaks*/) {
+            evasionDebuff = calculateAreaEffectValue(30, playerStats);
+        }
+
+        // melee
+        {
+            let maxDefRoll = playerStats.maxDefRoll;
+            if (player.meleeEvasionBuff) {
+                maxDefRoll = Math.floor(maxDefRoll * (1 + player.meleeEvasionBuff / 100));
+            }
+            maxDefRoll = Math.floor(maxDefRoll * (1 - (player.meleeEvasionDebuff + evasionDebuff) / 100));
+            player.maxDefRoll = maxDefRoll;
+        }
+
+        // ranged
+        {
+            let maxRngDefRoll = playerStats.maxRngDefRoll;
+            if (player.rangedEvasionBuff) {
+                maxRngDefRoll = Math.floor(maxRngDefRoll * (1 + player.rangedEvasionBuff / 100));
+            }
+            maxRngDefRoll = Math.floor(maxRngDefRoll * (1 - (player.rangedEvasionDebuff + evasionDebuff) / 100));
+            player.maxRngDefRoll = maxRngDefRoll;
+        }
+        // magic
+        {
+            if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
+                evasionDebuff = calculateAreaEffectValue(30, playerStats);
+            }
+            let maxMagDefRoll = playerStats.maxRngDefRoll;
+            if (player.rangedEvasionBuff) {
+                maxMagDefRoll = Math.floor(maxMagDefRoll * (1 + player.rangedEvasionBuff / 100));
+            }
+            maxMagDefRoll = Math.floor(maxMagDefRoll * (1 - (player.rangedEvasionDebuff + evasionDebuff) / 100));
+            player.maxRngDefRoll = maxMagDefRoll;
+        }
+    }
+
+    // Slayer area effect value
+    function calculateAreaEffectValue(base, playerStats) {
+        let value = Math.floor(base * (1 - playerStats.slayerAreaEffectNegationPercent / 100));
+        value -= playerStats.slayerAreaEffectNegationFlat;
+        if (value < 0) {
+            value = 0;
+        }
+        return value;
     }
 
 })();
