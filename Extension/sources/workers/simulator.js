@@ -143,6 +143,20 @@
 
             setAreaEffects(playerStats, enemyStats);
 
+            if (!playerStats.isMelee && enemyStats.monsterID === 147) {
+                return {simSuccess: false, reason: 'wrong style'};
+            }
+            if (!playerStats.isRanged && enemyStats.monsterID === 148) {
+                return {simSuccess: false, reason: 'wrong style'};
+            }
+            if (!playerStats.isMagic && enemyStats.monsterID === 149) {
+                return {simSuccess: false, reason: 'wrong style'};
+            }
+            if (enemyStats.monsterID === 147 || enemyStats.monsterID === 148) {
+                // can't curse these monsters
+                playerStats.canCurse = false;
+            }
+
             // Adjust ancient magick forcehit
             if (playerStats.usingAncient && playerStats.specialData.forceHit) {
                 playerStats.specialData.forceHit = playerStats.maxAttackRoll > 20000;
