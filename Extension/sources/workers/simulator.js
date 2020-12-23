@@ -119,8 +119,6 @@
         async simulateMonster(enemyStats, playerStats, trials, maxActions) {
             // Multiply player special setDamage
             if (playerStats.specialData.setDamage) playerStats.specialData.setDamage *= numberMultiplier;
-            // Multiply player max hit
-            playerStats.maxHit = Math.floor(playerStats.maxHit * damageModifier);
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
 
@@ -161,6 +159,8 @@
                 player.reductionModifier = combatTriangle.normal.reductionModifier[playerStats.attackType][enemyStats.attackType];
                 player.damageModifier = combatTriangle.normal.damageModifier[playerStats.attackType][enemyStats.attackType];
             }
+            // Multiply player max hit
+            playerStats.maxHit = Math.floor(playerStats.maxHit * player.damageModifier);
             const enemy = {};
             const actors = [player, enemy];
             let innerCount = 0;
