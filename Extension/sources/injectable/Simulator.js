@@ -1575,7 +1575,7 @@
              * @return {number}
              */
             computeAverageCoins(monsterID) {
-                return (MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] + this.currentSim.increasedGP - 1) * this.currentSim.gpBonus / 2;
+                return ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP) * this.currentSim.gpBonus;
             }
 
             /**
