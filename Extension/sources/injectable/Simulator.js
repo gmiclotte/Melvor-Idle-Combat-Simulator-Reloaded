@@ -412,7 +412,7 @@
                     this.combatStats.attackType = CONSTANTS.attackType.Melee;
                 }
 
-                const maxCape = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Max_Skillcape || this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Completion;
+                const maxCape = this.parent.equipmentSelected.includes(CONSTANTS.item.Max_Skillcape) || this.parent.equipmentSelected.includes(CONSTANTS.item.Cape_of_Completion);
                 /** @type {EquipmentStats} */
                 const equipmentStats = {
                     runesProvidedByWeapon: {},
@@ -420,27 +420,28 @@
                     activeItems: {
                         // TODO: check which of these items are passive slot items
                         //   also check any other use of `CONSTANTS.item` and `items`
-                        hitpointsSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Hitpoints_Skillcape || maxCape,
-                        rangedSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Ranged_Skillcape || maxCape,
-                        magicSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Magic_Skillcape || maxCape,
-                        prayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Prayer_Skillcape || maxCape,
-                        slayerSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Slayer_Skillcape || maxCape,
-                        firemakingSkillcape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Firemaking_Skillcape || maxCape,
-                        capeOfArrowPreservation: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Cape_of_Arrow_Preservation,
-                        skullCape: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Cape] === CONSTANTS.item.Skull_Cape,
-                        goldDiamondRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Diamond_Ring,
-                        goldEmeraldRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Emerald_Ring,
-                        goldSapphireRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Sapphire_Ring,
-                        fighterAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Fighter_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Melee,
-                        warlockAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Warlock_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Magic,
-                        guardianAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Guardian_Amulet,
-                        deadeyeAmulet: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Deadeye_Amulet && this.combatStats.attackType === CONSTANTS.attackType.Ranged,
-                        confettiCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Confetti_Crossbow,
-                        stormsnap: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Stormsnap,
-                        slayerCrossbow: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Slayer_Crossbow,
-                        bigRon: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Big_Ron,
-                        mirrorShield: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Shield] === CONSTANTS.item.Mirror_Shield,
-                        magicalRing: this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Magical_Ring,
+                        hitpointsSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Hitpoints_Skillcape) || maxCape,
+                        rangedSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Ranged_Skillcape) || maxCape,
+                        magicSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Magic_Skillcape) || maxCape,
+                        prayerSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Prayer_Skillcape) || maxCape,
+                        slayerSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Slayer_Skillcape) || maxCape,
+                        firemakingSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Firemaking_Skillcape) || maxCape,
+                        capeOfArrowPreservation: this.parent.equipmentSelected.includes(CONSTANTS.item.Cape_of_Arrow_Preservation),
+                        skullCape: this.parent.equipmentSelected.includes(CONSTANTS.item.Skull_Cape),
+                        goldDiamondRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Gold_Diamond_Ring),
+                        goldEmeraldRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Gold_Emerald_Ring),
+                        goldSapphireRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Gold_Sapphire_Ring),
+                        fighterAmulet: this.parent.equipmentSelected.includes(CONSTANTS.item.Fighter_Amulet) && this.combatStats.attackType === CONSTANTS.attackType.Melee,
+                        warlockAmulet: this.parent.equipmentSelected.includes(CONSTANTS.item.Warlock_Amulet) && this.combatStats.attackType === CONSTANTS.attackType.Magic,
+                        guardianAmulet: this.parent.equipmentSelected.includes(CONSTANTS.item.Guardian_Amulet),
+                        deadeyeAmulet: this.parent.equipmentSelected.includes(CONSTANTS.item.Deadeye_Amulet) && this.combatStats.attackType === CONSTANTS.attackType.Ranged,
+                        confettiCrossbow: this.parent.equipmentSelected.includes(CONSTANTS.item.Confetti_Crossbow),
+                        stormsnap: this.parent.equipmentSelected.includes(CONSTANTS.item.Stormsnap),
+                        slayerCrossbow: this.parent.equipmentSelected.includes(CONSTANTS.item.Slayer_Crossbow),
+                        bigRon: this.parent.equipmentSelected.includes(CONSTANTS.item.Big_Ron),
+                        // slayer gear
+                        mirrorShield: this.parent.equipmentSelected.includes(CONSTANTS.item.Mirror_Shield),
+                        magicalRing: this.parent.includes(CONSTANTS.item.Magical_Ring),
                     },
                 };
 
@@ -575,7 +576,7 @@
                             default:
                         }
                         // Cloudburst Water Spell Bonus
-                        if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon] === CONSTANTS.item.Cloudburst_Staff && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
+                        if (this.parent.equipmentSelected.includes(CONSTANTS.item.Cloudburst_Staff) && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
                             this.combatStats.maxHit += items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage * numberMultiplier;
                         }
                     } else {
@@ -930,10 +931,10 @@
                     playerStats.xpBonus = 0.07;
                 }
                 this.currentSim.canTopazDrop = false;
-                if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Gold_Topaz_Ring) {
+                if (this.parent.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
                     this.currentSim.gpBonus = 1.15;
                     this.currentSim.canTopazDrop = true;
-                } else if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Ring] === CONSTANTS.item.Aorpheats_Signet_Ring) {
+                } else if (this.parent.equipmentSelected.includes(CONSTANTS.item.Aorpheats_Signet_Ring)) {
                     this.currentSim.gpBonus = 2;
                 } else {
                     this.currentSim.gpBonus = 1;
@@ -942,7 +943,7 @@
                 if (this.petOwned[20]) this.currentSim.lootBonus += 0.01;
                 this.currentSim.slayerBonusXP = this.equipmentStats.slayerBonusXP;
                 this.currentSim.herbConvertChance = this.herbloreBonus.luckyHerb / 100;
-                this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
+                this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
 
 
                 // adjust prayer usage
