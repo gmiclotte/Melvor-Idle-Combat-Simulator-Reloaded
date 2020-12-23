@@ -929,7 +929,7 @@
         if (isSpecial && playerStats.specialData.healsFor) {
             lifeSteal += playerStats.specialData.healsFor * 100;
         }
-        if (playerStats.spellHeal) {
+        if (playerStats.spellHeal && playerStats.isMagic) {
             lifeSteal += playerStats.spellHeal;
         }
         if (playerStats.lifesteal !== 0) {
