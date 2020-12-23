@@ -941,45 +941,34 @@
                 this.currentSim.herbConvertChance = this.herbloreBonus.luckyHerb / 100;
                 this.currentSim.doBonesAutoBury = (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Amulet] === CONSTANTS.item.Bone_Necklace);
 
+
+                // adjust prayer usage
+                const adjustPP = (pp) => {
+                    if (pp > 0) {
+                        pp -= this.equipmentStats.prayerCostReduction;
+                    }
+                    if (playerStats.activeItems.prayerSkillcape && pp > 0) {
+                        pp = Math.max(1, Math.floor(pp / 2));
+                    }
+                    let save = this.herbloreBonus.divine;
+                    if (this.petOwned[18]) {
+                        save += 5;
+                    }
+                    pp *= 1 - save / 100;
+                    return pp;
+                }
                 // Compute prayer point usage and xp gain
-                const hasPrayerCape = playerStats.activeItems.prayerSkillcape;
                 for (let i = 0; i < PRAYER.length; i++) {
                     if (this.prayerSelected[i]) {
-                        // Point Usage
-                        if (hasPrayerCape) {
-                            let attQty = Math.floor(PRAYER[i].pointsPerPlayer / 2);
-                            if (attQty === 0 && PRAYER[i].pointsPerPlayer !== 0) {
-                                attQty = 1;
-                            }
-                            let enemyQty = Math.floor(PRAYER[i].pointsPerEnemy / 2);
-                            if (enemyQty === 0 && PRAYER[i].pointsPerEnemy !== 0) {
-                                enemyQty = 1;
-                            }
-                            let healQty = Math.floor(PRAYER[i].pointsPerRegen / 2);
-                            if (healQty === 0 && PRAYER[i].pointsPerRegen !== 0) {
-                                healQty = 1;
-                            }
-                            playerStats.prayerPointsPerAttack += attQty;
-                            playerStats.prayerPointsPerEnemy += enemyQty;
-                            playerStats.prayerPointsPerHeal += healQty;
-                        } else {
-                            playerStats.prayerPointsPerAttack += PRAYER[i].pointsPerPlayer;
-                            playerStats.prayerPointsPerEnemy += PRAYER[i].pointsPerEnemy;
-                            playerStats.prayerPointsPerHeal += PRAYER[i].pointsPerRegen;
-                        }
+                        // Base PP Usage
+                        playerStats.prayerPointsPerAttack += adjustPP(PRAYER[i].pointsPerPlayer);
+                        playerStats.prayerPointsPerEnemy += adjustPP(PRAYER[i].pointsPerEnemy);
+                        playerStats.prayerPointsPerHeal += adjustPP(PRAYER[i].pointsPerRegen);
                         // XP Gain
                         // TODO: this matches the bugged behaviour of 0.18?613 of Melvor Idle
                         playerStats.prayerXpPerDamage += 2 * PRAYER[i].pointsPerPlayer / numberMultiplier;
                     }
                 }
-                if (this.petOwned[18]) {
-                    playerStats.prayerPointsPerAttack *= 0.95;
-                    playerStats.prayerPointsPerEnemy *= 0.95;
-                    playerStats.prayerPointsPerHeal *= 0.95;
-                }
-                playerStats.prayerPointsPerAttack *= (1 - this.herbloreBonus.divine / 100);
-                playerStats.prayerPointsPerEnemy *= (1 - this.herbloreBonus.divine / 100);
-                playerStats.prayerPointsPerHeal *= (1 - this.herbloreBonus.divine / 100);
 
                 this.currentSim.options = {
                     trials: this.trials,

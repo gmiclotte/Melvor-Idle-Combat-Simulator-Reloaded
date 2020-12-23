@@ -148,7 +148,7 @@
         lifesteal: {implemented: true},
 
         // prayer
-        prayerCostReduction: {implemented: false},
+        prayerCostReduction: {implemented: true},
 
         // slayer
         slayerAreaEffectNegationFlat: {implemented: true},
