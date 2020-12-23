@@ -117,16 +117,6 @@
          * @return {Promise<Object>}
          */
         async simulateMonster(enemyStats, playerStats, trials, maxActions) {
-            let reductionModifier;
-            let damageModifier;
-            // Set Combat Triangle
-            if (playerStats.hardcore) {
-                reductionModifier = combatTriangle.hardcore.reductionModifier[playerStats.attackType][enemyStats.attackType];
-                damageModifier = combatTriangle.hardcore.damageModifier[playerStats.attackType][enemyStats.attackType];
-            } else {
-                reductionModifier = combatTriangle.normal.reductionModifier[playerStats.attackType][enemyStats.attackType];
-                damageModifier = combatTriangle.normal.damageModifier[playerStats.attackType][enemyStats.attackType];
-            }
             // Multiply player special setDamage
             if (playerStats.specialData.setDamage) playerStats.specialData.setDamage *= numberMultiplier;
             // Multiply player max hit
@@ -163,13 +153,21 @@
             // Start simulation for each trial
             this.cancelStatus = false;
             const player = {};
+            // Set Combat Triangle
+            if (playerStats.hardcore) {
+                player.reductionModifier = combatTriangle.hardcore.reductionModifier[playerStats.attackType][enemyStats.attackType];
+                player.damageModifier = combatTriangle.hardcore.damageModifier[playerStats.attackType][enemyStats.attackType];
+            } else {
+                player.reductionModifier = combatTriangle.normal.reductionModifier[playerStats.attackType][enemyStats.attackType];
+                player.damageModifier = combatTriangle.normal.damageModifier[playerStats.attackType][enemyStats.attackType];
+            }
             const enemy = {};
             const actors = [player, enemy];
             let innerCount = 0;
             let tooManyActions = 0;
             while (enemyKills < trials) {
                 // Reset Timers and statuses
-                resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier);
+                resetPlayer(player, playerStats, enemyStats);
                 resetEnemy(enemy, playerStats, enemyStats);
                 if (playerStats.canCurse) {
                     setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
@@ -629,7 +627,7 @@
             // guardian amulet
             if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) {
                 player.reductionBuff += 2;
-                player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * reductionModifier);
+                player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * player.reductionModifier);
             }
             // status effects
             if (isSpecial) {
@@ -1075,15 +1073,14 @@
         common.decreasedAccuracy = 0;
     }
 
-    function resetPlayer(player, playerStats, enemyStats, reductionModifier, damageModifier) {
+    function resetPlayer(player, playerStats, enemyStats) {
         resetCommonStats(player, playerStats.attackSpeed - playerStats.decreasedAttackSpeed);
         player.isPlayer = true;
         player.hitpoints = 0;
         player.reductionBuff = 0;
-        player.damageReduction = Math.floor(playerStats.damageReduction * reductionModifier);
+        player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
         player.accuracy = calculateAccuracy(playerStats, playerStats, enemyStats, enemyStats);
-        player.damageModifier = damageModifier;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
 
