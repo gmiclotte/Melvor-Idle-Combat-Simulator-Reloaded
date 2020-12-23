@@ -12,7 +12,6 @@
             icon: 'combat',
         },
         isTwoHanded: {implemented: true},
-        prayerBonus: {implemented: false},
 
         // special attack TODO: non-weapon special attacks
         specialAttackID: {implemented: true},
@@ -98,6 +97,9 @@
         providesRune: {implemented: true},
         providesRuneQty: {implemented: true},
 
+        ////////////////////
+        // weapon effects //
+        ////////////////////
         // miolite sceptre
         canUseMagic: {implemented: true},
 
@@ -142,9 +144,7 @@
         spellHeal: {implemented: true},
 
         // hitpoints
-        decreasedAutoEatEfficiency: {implemented: false},
         hpRegenBonus: {implemented: true},
-        increasedAutoEat: {implemented: false},
         increasedHPRegen: {implemented: true},
         increasedMaxHitpoints: {implemented: true},
         lifesteal: {implemented: true},
@@ -156,7 +156,6 @@
         slayerAreaEffectNegationFlat: {implemented: true},
         slayerAreaEffectNegationPercent: {implemented: true},
         slayerBonusXP: {implemented: true},
-
     };
 
     // requirements to wear gear
@@ -190,12 +189,17 @@
             name: 'Level Required',
             icon: 'slayer',
         },
-        slayerTaskRequirement: {implemented: false},
-
     };
 
     // stats that do not apply to combat
     MICSR.irrelevantStatNames = {
+
+        // auto eat - TODO: handle this and tie it to food cost? -  more general: all resource costs
+        decreasedAutoEatEfficiency: {implemented: false},
+        increasedAutoEat: {implemented: false},
+
+        // this does nothing
+        prayerBonus: {implemented: false},
 
         // crafting
         craftingID: {},
@@ -264,6 +268,7 @@
         name: {},
         sellsFor: {},
         slayerCost: {},
+        slayerTaskRequirement: {},
         tier: {},
         trimmedGPCost: {},
         trimmedItemID: {},
