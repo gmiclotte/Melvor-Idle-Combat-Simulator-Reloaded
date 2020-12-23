@@ -318,7 +318,13 @@
     ].forEach(statType => {
         const stats = MICSR[statType + 'StatNames'];
         Object.getOwnPropertyNames(stats).forEach(stat => {
-            if (!stats[stat].implemented) {
+            if (Array.isArray(stats[stat])) {
+                for (const substat of stats[stat]) {
+                    if (!substat.implemented) {
+                        MICSR.log("Stat not yet implemented: " + stat);
+                    }
+                }
+            } else if (!stats[stat].implemented) {
                 MICSR.log("Stat not yet implemented: " + stat);
             }
         })
