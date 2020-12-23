@@ -817,7 +817,9 @@
                 const playerStats = {
                     attackSpeed: this.combatStats.attackSpeed,
                     attackType: this.combatStats.attackType,
-                    isMagic: this.combatStats.attackType !== CONSTANTS.attackType.Magic,
+                    isMelee: this.combatStats.attackType === CONSTANTS.attackType.Melee,
+                    isRanged: this.combatStats.attackType === CONSTANTS.attackType.Ranged,
+                    isMagic: this.combatStats.attackType === CONSTANTS.attackType.Magic,
                     maxAttackRoll: this.combatStats.maxAttackRoll,
                     maxHit: this.combatStats.maxHit,
                     minHit: this.combatStats.minHit,
