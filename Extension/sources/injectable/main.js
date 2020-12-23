@@ -44,7 +44,7 @@
                         // MICSR.log('Loading sim with provided URLS');
                         let tryLoad = true;
                         let wrongVersion = false;
-                        if (gameVersion !== 'Alpha v0.18') {
+                        if (gameVersion !== MICSR.gameVersion) {
                             wrongVersion = true;
                             tryLoad = window.confirm('Combat Simulator Reloaded\nA different game version was detected. Loading the combat sim may cause unexpected behaviour or result in inaccurate simulation results.\n Try loading it anyways?');
                         }
