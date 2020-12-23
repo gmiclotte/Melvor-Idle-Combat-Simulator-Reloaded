@@ -38,6 +38,20 @@
         return `mcs-${name.toLowerCase().replace(/ /g, '-')}`;
     }
 
+    MICSR.checkImplemented = (stats, msg) => {
+        Object.getOwnPropertyNames(stats).forEach(stat => {
+            if (Array.isArray(stats[stat])) {
+                for (const substat of stats[stat]) {
+                    if (!substat.implemented) {
+                        MICSR.log(msg + " stat not yet implemented: " + stat);
+                    }
+                }
+            } else if (!stats[stat].implemented) {
+                MICSR.log(msg + " stat not yet implemented: " + stat);
+            }
+        })
+    }
+
     MICSR.loadedFiles.util = true;
 
 })();

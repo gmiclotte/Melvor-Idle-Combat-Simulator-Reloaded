@@ -41,8 +41,11 @@ window.addEventListener('message', (event) => {
 const injectableNames = [
     //
     'MICSR',
-    // independent definitions
+    // common
     'util',
+    // independent definitions
+    'enemySpecialNames',
+    'playerSpecialNames',
     'statNames',
     // class files
     'Card',

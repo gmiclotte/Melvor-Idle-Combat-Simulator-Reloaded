@@ -2,334 +2,326 @@
 
     const MICSR = window.MICSR;
 
-    // equipment stats are non-passive stats that apply to combat
-    MICSR.equipmentStatNames = {
+    const reqs = [
+        'util',
+    ];
 
-        // general
-        attackSpeed: {
-            implemented: true,
-            name: 'Weapon Speed',
-            icon: 'combat',
-        },
-        isTwoHanded: {implemented: true},
+    const setup = () => {
 
-        // special attack TODO: non-weapon special attacks
-        specialAttackID: {implemented: true},
-        hasSpecialAttack: {implemented: true},
+        // equipment stats are non-passive stats that apply to combat
+        MICSR.equipmentStatNames = {
 
-        // slot TODO unequip identical item if already equipped
-        equipmentSlot: {implemented: true},
-        isPassiveItem: {implemented: true},
-
-        // defence
-        damageReduction: {
-            implemented: true,
-            name: 'Damage Reduction',
-            icon: 'defence',
-        },
-        defenceBonus: {
-            implemented: true,
-            name: 'Melee Defence',
-            icon: 'defence',
-        },
-        magicDefenceBonus: {
-            implemented: true,
-            name: 'Magic Defence',
-            icon: 'defence',
-        },
-        rangedDefenceBonus: {
-            implemented: true,
-            name: 'Ranged Defence',
-            icon: 'defence',
-        },
-
-        // melee
-        attackBonus: [
-            {
+            // general
+            attackSpeed: {
                 implemented: true,
-                name: 'Stab',
-                icon: 'attack',
+                name: 'Weapon Speed',
+                icon: 'combat',
             },
-            {
+            isTwoHanded: {implemented: true},
+
+            // special attack TODO: non-weapon special attacks
+            specialAttackID: {implemented: true},
+            hasSpecialAttack: {implemented: true},
+
+            // slot TODO unequip identical item if already equipped
+            equipmentSlot: {implemented: true},
+            isPassiveItem: {implemented: true},
+
+            // defence
+            damageReduction: {
                 implemented: true,
-                name: 'Slash',
-                icon: 'strength',
-            },
-            {
-                implemented: true,
-                name: 'Block',
+                name: 'Damage Reduction',
                 icon: 'defence',
             },
-        ],
-        strengthBonus: {
-            implemented: true,
-            name: 'Melee Strength',
-            icon: 'strength',
-        },
+            defenceBonus: {
+                implemented: true,
+                name: 'Melee Defence',
+                icon: 'defence',
+            },
+            magicDefenceBonus: {
+                implemented: true,
+                name: 'Magic Defence',
+                icon: 'defence',
+            },
+            rangedDefenceBonus: {
+                implemented: true,
+                name: 'Ranged Defence',
+                icon: 'defence',
+            },
 
-        // ranged
-        ammoTypeRequired: {implemented: true},
-        ammoType: {implemented: true},
-        isAmmo: {implemented: true},
-        rangedAttackBonus: {
-            implemented: true,
-            name: 'Ranged Attack',
-            icon: 'ranged',
-        },
-        rangedStrengthBonus: {
-            implemented: true,
-            name: 'Ranged Strength',
-            icon: 'ranged',
-        },
+            // melee
+            attackBonus: [
+                {
+                    implemented: true,
+                    name: 'Stab',
+                    icon: 'attack',
+                },
+                {
+                    implemented: true,
+                    name: 'Slash',
+                    icon: 'strength',
+                },
+                {
+                    implemented: true,
+                    name: 'Block',
+                    icon: 'defence',
+                },
+            ],
+            strengthBonus: {
+                implemented: true,
+                name: 'Melee Strength',
+                icon: 'strength',
+            },
 
-        // magic
-        isMagic: {implemented: true},
-        magicAttackBonus: {
-            implemented: true,
-            name: 'Magic Attack',
-            icon: 'magic',
-        },
-        magicDamageBonus: {
-            implemented: true,
-            name: 'Magic % Damage',
-            icon: 'magic',
-        },
-        providesRune: {implemented: true},
-        providesRuneQty: {implemented: true},
+            // ranged
+            ammoTypeRequired: {implemented: true},
+            ammoType: {implemented: true},
+            isAmmo: {implemented: true},
+            rangedAttackBonus: {
+                implemented: true,
+                name: 'Ranged Attack',
+                icon: 'ranged',
+            },
+            rangedStrengthBonus: {
+                implemented: true,
+                name: 'Ranged Strength',
+                icon: 'ranged',
+            },
 
-        ////////////////////
-        // weapon effects //
-        ////////////////////
-        // miolite sceptre
-        canUseMagic: {implemented: true},
+            // magic
+            isMagic: {implemented: true},
+            magicAttackBonus: {
+                implemented: true,
+                name: 'Magic Attack',
+                icon: 'magic',
+            },
+            magicDamageBonus: {
+                implemented: true,
+                name: 'Magic % Damage',
+                icon: 'magic',
+            },
+            providesRune: {implemented: true},
+            providesRuneQty: {implemented: true},
 
-        // Cloudburst Staff
-        increasedWaterSpellDamage: {implemented: true},
+            ////////////////////
+            // weapon effects //
+            ////////////////////
+            // miolite sceptre
+            canUseMagic: {implemented: true},
 
-        // slayer crossbow
-        slayerStrengthMultiplier: {implemented: true},
+            // Cloudburst Staff
+            increasedWaterSpellDamage: {implemented: true},
 
-        // confetti crossbow
-        gpMultiplierCap: {implemented: true},
-        gpMultiplierMin: {implemented: true},
+            // slayer crossbow
+            slayerStrengthMultiplier: {implemented: true},
 
-        // deadeye amulet
-        chanceToCrit: {implemented: true},
-        critDamage: {implemented: true},
+            // confetti crossbow
+            gpMultiplierCap: {implemented: true},
+            gpMultiplierMin: {implemented: true},
 
-        // big ol ron
-        bossStrengthMultiplier: {implemented: true},
-    };
+            // deadeye amulet
+            chanceToCrit: {implemented: true},
+            critDamage: {implemented: true},
 
-    // passive stats that apply to combat
-    MICSR.passiveStatNames = {
+            // big ol ron
+            bossStrengthMultiplier: {implemented: true},
+        };
 
-        // general
-        decreasedAttackSpeed: {implemented: true},
-        reflectDamage: {implemented: true},
+        // passive stats that apply to combat
+        MICSR.passiveStatNames = {
 
-        // loot
-        chanceToDoubleLoot: {implemented: true},
-        gpMultiplier: {implemented: true}, // not properly defined for Gold Topaz Ring and Almight Lute
-        increasedGP: {implemented: true},
+            // general
+            decreasedAttackSpeed: {implemented: true},
+            reflectDamage: {implemented: true},
 
-        // ranged
-        ammoPreservation: {implemented: true},
+            // loot
+            chanceToDoubleLoot: {implemented: true},
+            gpMultiplier: {implemented: true}, // not properly defined for Gold Topaz Ring and Almight Lute
+            increasedGP: {implemented: true},
 
-        // magic
-        increasedMinAirSpellDmg: {implemented: true},
-        increasedMinEarthSpellDmg: {implemented: true},
-        increasedMinFireSpellDmg: {implemented: true},
-        increasedMinWaterSpellDmg: {implemented: true},
-        spellHeal: {implemented: true},
+            // ranged
+            ammoPreservation: {implemented: true},
 
-        // hitpoints
-        hpRegenBonus: {implemented: true},
-        increasedHPRegen: {implemented: true},
-        increasedMaxHitpoints: {implemented: true},
-        lifesteal: {implemented: true},
+            // magic
+            increasedMinAirSpellDmg: {implemented: true},
+            increasedMinEarthSpellDmg: {implemented: true},
+            increasedMinFireSpellDmg: {implemented: true},
+            increasedMinWaterSpellDmg: {implemented: true},
+            spellHeal: {implemented: true},
 
-        // prayer
-        prayerCostReduction: {implemented: true},
+            // hitpoints
+            hpRegenBonus: {implemented: true},
+            increasedHPRegen: {implemented: true},
+            increasedMaxHitpoints: {implemented: true},
+            lifesteal: {implemented: true},
 
-        // slayer
-        slayerAreaEffectNegationFlat: {implemented: true},
-        slayerAreaEffectNegationPercent: {implemented: true},
-        slayerBonusXP: {implemented: true},
-    };
+            // prayer
+            prayerCostReduction: {implemented: true},
 
-    // requirements to wear gear
-    MICSR.requiredStatNames = {
+            // slayer
+            slayerAreaEffectNegationFlat: {implemented: true},
+            slayerAreaEffectNegationPercent: {implemented: true},
+            slayerBonusXP: {implemented: true},
+        };
 
-        // level requirements
-        attackLevelRequired: {
-            implemented: true,
-            name: 'Level Required',
-            icon: 'attack',
-        },
-        defenceLevelRequired: {
-            implemented: true,
-            name: 'Level Required',
-            icon: 'defence',
-        },
-        magicLevelRequired: {
-            implemented: true,
-            name: 'Level Required',
-            icon: 'magic',
-        },
-        rangedLevelRequired: {
-            implemented: true,
-            name: 'Level Required',
-            icon: 'ranged',
-        },
+        // requirements to wear gear
+        MICSR.requiredStatNames = {
 
-        // other requirements
-        slayerLevelRequired: {
-            implemented: true,
-            name: 'Level Required',
-            icon: 'slayer',
-        },
-    };
+            // level requirements
+            attackLevelRequired: {
+                implemented: true,
+                name: 'Level Required',
+                icon: 'attack',
+            },
+            defenceLevelRequired: {
+                implemented: true,
+                name: 'Level Required',
+                icon: 'defence',
+            },
+            magicLevelRequired: {
+                implemented: true,
+                name: 'Level Required',
+                icon: 'magic',
+            },
+            rangedLevelRequired: {
+                implemented: true,
+                name: 'Level Required',
+                icon: 'ranged',
+            },
 
-    // stats that do not apply to combat
-    MICSR.irrelevantStatNames = {
+            // other requirements
+            slayerLevelRequired: {
+                implemented: true,
+                name: 'Level Required',
+                icon: 'slayer',
+            },
+        };
 
-        // auto eat - TODO: handle this and tie it to food cost? -  more general: all resource costs
-        decreasedAutoEatEfficiency: {implemented: false},
-        increasedAutoEat: {implemented: false},
+        // stats that do not apply to combat
+        MICSR.irrelevantStatNames = {
 
-        // this does nothing
-        prayerBonus: {implemented: false},
+            // auto eat - TODO: handle this and tie it to food cost? -  more general: all resource costs
+            decreasedAutoEatEfficiency: {implemented: false},
+            increasedAutoEat: {implemented: false},
 
-        // crafting
-        craftingID: {},
-        craftingLevel: {},
-        craftingXP: {},
-        craftQty: {},
-        craftReq: {},
+            // this does nothing
+            prayerBonus: {implemented: false},
 
-        // fishing
-        fishingBonusXP: {},
-        fishingCatchWeight: {},
-        fishingSpeedBonus: {},
+            // crafting
+            craftingID: {},
+            craftingLevel: {},
+            craftingXP: {},
+            craftQty: {},
+            craftReq: {},
 
-        // fletching
-        fletchQty: {},
-        fletchReq: {},
-        fletchingCategory: {},
-        fletchingID: {},
-        fletchingLevel: {},
-        fletchingXP: {},
+            // fishing
+            fishingBonusXP: {},
+            fishingCatchWeight: {},
+            fishingSpeedBonus: {},
 
-        // runecrafting
-        runecraftingCategory: {},
-        runecraftingID: {},
-        runecraftingLevel: {},
-        runecraftingXP: {},
-        runecraftQty: {},
-        runecraftReq: {},
+            // fletching
+            fletchQty: {},
+            fletchReq: {},
+            fletchingCategory: {},
+            fletchingID: {},
+            fletchingLevel: {},
+            fletchingXP: {},
 
-        // smithing
-        smithingLevel: {},
-        smithingQty: {},
-        smithingXP: {},
-        smithReq: {},
-        smithingID: {},
+            // runecrafting
+            runecraftingCategory: {},
+            runecraftingID: {},
+            runecraftingLevel: {},
+            runecraftingXP: {},
+            runecraftQty: {},
+            runecraftReq: {},
 
-        // thieving
-        increasedSuccessRate: {},
+            // smithing
+            smithingLevel: {},
+            smithingQty: {},
+            smithingXP: {},
+            smithReq: {},
+            smithingID: {},
 
-        // various
-        baseChanceToPreserve: {},
-        baseDropRate: {},
-        bonusMasteryXP: {},
-        bonusSkillXP: {},
-        buysFor: {},
-        canEquip: {},
-        canMultiUpgrade: {},
-        canUpgrade: {},
-        category: {},
-        chanceToDoubleResources: {},
-        chanceToPreserve: {},
-        description: {},
-        gloveID: {},
-        harvestBonus: {},
-        hasAnimation: {},
-        hasStats: {},
-        id: {},
-        ignoreCompletion: {},
-        increasedItemChance: {},
-        itemID: {},
-        itemsRequired: {},
-        masteryID: {},
-        maxDropRate: {},
-        media: {},
-        mediaAnimation: {},
-        name: {},
-        sellsFor: {},
-        slayerCost: {},
-        slayerTaskRequirement: {},
-        tier: {},
-        trimmedGPCost: {},
-        trimmedItemID: {},
-        type: {},
+            // thieving
+            increasedSuccessRate: {},
 
-    };
+            // various
+            baseChanceToPreserve: {},
+            baseDropRate: {},
+            bonusMasteryXP: {},
+            bonusSkillXP: {},
+            buysFor: {},
+            canEquip: {},
+            canMultiUpgrade: {},
+            canUpgrade: {},
+            category: {},
+            chanceToDoubleResources: {},
+            chanceToPreserve: {},
+            description: {},
+            gloveID: {},
+            harvestBonus: {},
+            hasAnimation: {},
+            hasStats: {},
+            id: {},
+            ignoreCompletion: {},
+            increasedItemChance: {},
+            itemID: {},
+            itemsRequired: {},
+            masteryID: {},
+            maxDropRate: {},
+            media: {},
+            mediaAnimation: {},
+            name: {},
+            sellsFor: {},
+            slayerCost: {},
+            slayerTaskRequirement: {},
+            tier: {},
+            trimmedGPCost: {},
+            trimmedItemID: {},
+            type: {},
 
-    // stats bugged in the base game
-    MICSR.brokenStatNames = {
-        increasedWaterAirSpellDmg: {},
-        increasedEarthFireSpellDmg: {},
+        };
+
+        // stats bugged in the base game
+        MICSR.brokenStatNames = {
+            increasedWaterAirSpellDmg: {},
+            increasedEarthFireSpellDmg: {},
+        }
+
+        // construct a list of stats that are not in any of the previous categories
+        MICSR.unknownStatNames = {};
+        items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem).forEach(item => {
+            Object.getOwnPropertyNames(item).forEach(stat => {
+                // check if any bugged stats are still present
+                if (MICSR.brokenStatNames[stat] !== undefined) {
+                    MICSR.log("Item stat " + stat + " is bugged for " + item.name + "!")
+                    return;
+                }
+                // check if we already know this stat
+                if (MICSR.equipmentStatNames[stat] !== undefined
+                    || MICSR.passiveStatNames[stat] !== undefined
+                    || MICSR.requiredStatNames[stat] !== undefined
+                    || MICSR.irrelevantStatNames[stat] !== undefined) {
+                    return;
+                }
+                // unknown stat found !
+                if (MICSR.unknownStatNames[stat] === undefined) {
+                    MICSR.unknownStatNames[stat] = [];
+                }
+                MICSR.unknownStatNames[stat].push(item.name);
+            })
+        })
+
+        Object.getOwnPropertyNames(MICSR.unknownStatNames).forEach(stat => {
+            MICSR.log("Unknown stat " + stat + " for items: ", MICSR.unknownStatNames[stat]);
+        });
+
+        // report stats that are known but not implemented
+        MICSR.checkImplemented(MICSR.equipmentStatNames, "Item equipment");
+        MICSR.checkImplemented(MICSR.passiveStatNames, "Item passive");
+        MICSR.checkImplemented(MICSR.requiredStatNames, "Item required");
     }
 
-    // construct a list of stats that are not in any of the previous categories
-    MICSR.unknownStatNames = {};
-    items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem).forEach(item => {
-        Object.getOwnPropertyNames(item).forEach(stat => {
-            // check if any bugged stats are still present
-            if (MICSR.brokenStatNames[stat] !== undefined) {
-                MICSR.log("Item stat " + stat + " is bugged for " + item.name + "!")
-                return;
-            }
-            // check if we already know this stat
-            if (MICSR.equipmentStatNames[stat] !== undefined
-                || MICSR.passiveStatNames[stat] !== undefined
-                || MICSR.requiredStatNames[stat] !== undefined
-                || MICSR.irrelevantStatNames[stat] !== undefined) {
-                return;
-            }
-            // unknown stat found !
-            if (MICSR.unknownStatNames[stat] === undefined) {
-                MICSR.unknownStatNames[stat] = [];
-            }
-            MICSR.unknownStatNames[stat].push(item.name);
-        })
-    })
-
-    Object.getOwnPropertyNames(MICSR.unknownStatNames).forEach(stat => {
-        MICSR.log("Unknown stat " + stat + " for items: ", MICSR.unknownStatNames[stat]);
-    });
-
-    // report stats that are known but not implemented
-    [
-        'equipment',
-        'passive',
-        'required',
-    ].forEach(statType => {
-        const stats = MICSR[statType + 'StatNames'];
-        Object.getOwnPropertyNames(stats).forEach(stat => {
-            if (Array.isArray(stats[stat])) {
-                for (const substat of stats[stat]) {
-                    if (!substat.implemented) {
-                        MICSR.log("Stat not yet implemented: " + stat);
-                    }
-                }
-            } else if (!stats[stat].implemented) {
-                MICSR.log("Stat not yet implemented: " + stat);
-            }
-        })
-    })
-
-    MICSR.loadedFiles.statNames = true;
+    MICSR.waitLoadOrder(reqs, setup, 'statNames')
 
 })();
