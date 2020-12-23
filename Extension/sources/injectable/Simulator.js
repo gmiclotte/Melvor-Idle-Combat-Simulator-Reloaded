@@ -422,7 +422,6 @@
                         // TODO: check which of these items are passive slot items
                         //   also check any other use of `CONSTANTS.item` and `items`
                         hitpointsSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Hitpoints_Skillcape) || maxCape,
-                        rangedSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Ranged_Skillcape) || maxCape,
                         magicSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Magic_Skillcape) || maxCape,
                         prayerSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Prayer_Skillcape) || maxCape,
                         slayerSkillcape: this.parent.equipmentSelected.includes(CONSTANTS.item.Slayer_Skillcape) || maxCape,
@@ -471,6 +470,9 @@
 
                     // passive stats
                     Object.getOwnPropertyNames(MICSR.passiveStatNames).forEach(stat => {
+                        if (stat === 'ammoPreservation' && equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                            return;
+                        }
                         equipmentStats[stat] += item[stat] || 0;
                     });
 
@@ -511,7 +513,7 @@
                                         console.error(`Runes provided by ${item.name} are not taken into account!`)
                                     }
                                     return;
-                                case 'rangedAttackBonus', 'rangedStrengthBonus', 'rangedDefenceBonus' :
+                                case 'rangedAttackBonus', 'rangedStrengthBonus', 'rangedDefenceBonus':
                                     if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
                                         return;
                                     }
@@ -846,10 +848,13 @@
                     isProtected: false,
                     hardcore: this.isHardcore,
                     // passive stats
+                    ammoPreservation: this.equipmentStats.ammoPreservation,
                     lifesteal: this.auroraBonus.lifesteal + this.equipmentStats.lifesteal,
                     spellheal: this.equipmentStats.spellheal,
                     reflectDamage: this.equipmentStats.reflectDamage,
                     decreasedAttackSpeed: this.decreasedAttackSpeed(),
+                    runePreservation: this.combatStats.runePreservation,
+                    // curses
                     canCurse: false,
                     curseID: -1,
                     curseData: {},
@@ -858,7 +863,6 @@
                         curse: 0,
                         aurora: 0,
                     },
-                    runePreservation: this.combatStats.runePreservation,
                     // area effects
                     slayerAreaEffectNegationPercent: this.equipmentStats.slayerAreaEffectNegationPercent,
                     slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
@@ -1076,7 +1080,7 @@
                 };
                 // Determine slayer zone
                 let slayerIdx = 0;
-                zone: for(const area of slayerAreas) {
+                zone: for (const area of slayerAreas) {
                     for (const id of area.monsters) {
                         if (id === monsterID) {
                             enemyStats.slayerArea = slayerIdx;
@@ -1145,6 +1149,7 @@
                         let totalGPFromDamage = 0;
                         let totalAttacksMade = 0;
                         let totalAttacksTaken = 0;
+                        let totalAmmoUsed = 0;
                         let totalRunesUsed = 0;
                         let totalSimTime = 0;
                         for (const monsterId of DUNGEONS[dungeonId].monsters) {
@@ -1161,6 +1166,7 @@
                             totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamagePerSecond * this.monsterSimData[monsterId].killTimeS;
                             totalAttacksMade += this.monsterSimData[monsterId].attacksMadePerSecond * this.monsterSimData[monsterId].killTimeS;
                             totalAttacksTaken += this.monsterSimData[monsterId].attacksTakenPerSecond * this.monsterSimData[monsterId].killTimeS;
+                            totalAmmoUsed += this.monsterSimData[monsterId].ammoUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
                             totalRunesUsed += this.monsterSimData[monsterId].runesUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
                             totTime += this.monsterSimData[monsterId].avgKillTime;
                             totalSimTime += this.monsterSimData[monsterId].simulationTime;
@@ -1180,6 +1186,7 @@
                         this.dungeonSimData[dungeonId].gpFromDamagePerSecond = totalGPFromDamage / dungeonTime;
                         this.dungeonSimData[dungeonId].attacksTakenPerSecond = totalAttacksTaken / dungeonTime;
                         this.dungeonSimData[dungeonId].attacksMadePerSecond = totalAttacksMade / dungeonTime;
+                        this.dungeonSimData[dungeonId].ammoUsedPerSecond = totalAmmoUsed / dungeonTime;
                         this.dungeonSimData[dungeonId].runesUsedPerSecond = totalRunesUsed / dungeonTime;
                         this.dungeonSimData[dungeonId].simulationTime = totalSimTime;
                     } else {

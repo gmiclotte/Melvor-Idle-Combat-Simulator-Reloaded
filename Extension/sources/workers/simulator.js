@@ -1148,11 +1148,14 @@
         damage -= playerStats.damageHealed;
         damage -= playerStats.avgHPRegen * totalTime / hitpointRegenInterval;
         simResult.hpPerSecond = Math.max(0, damage / totalTime * 1000);
-        // runes
-        simResult.runesUsedPerSecond = stats.runesUsed / totalTime * 1000;
         // attacks
         simResult.attacksTakenPerSecond = stats.enemyAttackCalls / totalTime * 1000;
         simResult.attacksMadePerSecond = stats.playerAttackCalls / totalTime * 1000;
+        // ammo
+        simResult.ammoUsedPerSecond = playerStats.isRanged ? simResult.attacksMadePerSecond : 0;
+        simResult.ammoUsedPerSecond *= 1 - playerStats.ammoPreservation / 100;
+        // runes
+        simResult.runesUsedPerSecond = stats.runesUsed / totalTime * 1000;
         // damage
         simResult.avgHitDmg = enemyStats.damageTaken / stats.playerAttackCalls;
         simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;

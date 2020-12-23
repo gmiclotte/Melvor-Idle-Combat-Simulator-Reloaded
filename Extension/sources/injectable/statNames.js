@@ -69,7 +69,6 @@
         },
 
         // ranged
-        ammoPreservation: {implemented: false},
         ammoTypeRequired: {implemented: true},
         ammoType: {implemented: true},
         isAmmo: {implemented: true},
@@ -131,6 +130,9 @@
         chanceToDoubleLoot: {implemented: true},
         gpMultiplier: {implemented: true}, // not properly defined for Gold Topaz Ring and Almight Lute
         increasedGP: {implemented: true},
+
+        // ranged
+        ammoPreservation: {implemented: true},
 
         // magic
         increasedMinAirSpellDmg: {implemented: true},

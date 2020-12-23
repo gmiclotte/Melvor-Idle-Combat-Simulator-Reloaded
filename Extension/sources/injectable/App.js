@@ -43,6 +43,7 @@
                     'Attacks Taken per ',
                     'Pet Chance per ',
                     'Kills per ',
+                    'Ammo per ',
                     'Runes per ',
                     // 'Simulation Time',
                 ];
@@ -60,6 +61,7 @@
                     true,
                     true,
                     false,
+                    true,
                     true,
                     true,
                     true,
@@ -85,6 +87,7 @@
                     'attacksTakenPerSecond',
                     'petChance',
                     'killsPerSecond',
+                    'ammoUsedPerSecond',
                     'runesUsedPerSecond',
                     // 'simulationTime',
                 ];
@@ -106,6 +109,7 @@
                     'Attacks Taken/',
                     ' Pet Chance/',
                     'Kills/',
+                    'Ammo/',
                     'Runes/',
                     // 'Sim Time',
                 ];
