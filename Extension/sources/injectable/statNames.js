@@ -288,33 +288,9 @@
             increasedEarthFireSpellDmg: {},
         }
 
-        // construct a list of stats that are not in any of the previous categories
-        MICSR.unknownStatNames = {};
-        items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem).forEach(item => {
-            Object.getOwnPropertyNames(item).forEach(stat => {
-                // check if any bugged stats are still present
-                if (MICSR.brokenStatNames[stat] !== undefined) {
-                    MICSR.log("Item stat " + stat + " is bugged for " + item.name + "!")
-                    return;
-                }
-                // check if we already know this stat
-                if (MICSR.equipmentStatNames[stat] !== undefined
-                    || MICSR.passiveStatNames[stat] !== undefined
-                    || MICSR.requiredStatNames[stat] !== undefined
-                    || MICSR.irrelevantStatNames[stat] !== undefined) {
-                    return;
-                }
-                // unknown stat found !
-                if (MICSR.unknownStatNames[stat] === undefined) {
-                    MICSR.unknownStatNames[stat] = [];
-                }
-                MICSR.unknownStatNames[stat].push(item.name);
-            })
-        })
-
-        Object.getOwnPropertyNames(MICSR.unknownStatNames).forEach(stat => {
-            MICSR.log("Unknown stat " + stat + " for items: ", MICSR.unknownStatNames[stat]);
-        });
+        // report unknown stats
+        const known = [MICSR.equipmentStatNames, MICSR.passiveStatNames, MICSR.requiredStatNames, MICSR.irrelevantStatNames];
+        MICSR.checkUnknown(items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem), 'Item', 'items', known, MICSR.brokenStatNames);
 
         // report stats that are known but not implemented
         MICSR.checkImplemented(MICSR.equipmentStatNames, "Item equipment");

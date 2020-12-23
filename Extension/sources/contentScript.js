@@ -44,8 +44,7 @@ const injectableNames = [
     // common
     'util',
     // independent definitions
-    'enemySpecialNames',
-    'playerSpecialNames',
+    'specialNames',
     'statNames',
     // class files
     'Card',
