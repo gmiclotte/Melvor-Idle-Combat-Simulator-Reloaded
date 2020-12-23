@@ -442,7 +442,7 @@
                         bigRon: this.parent.equipmentSelected.includes(CONSTANTS.item.Big_Ron),
                         // slayer gear
                         mirrorShield: this.parent.equipmentSelected.includes(CONSTANTS.item.Mirror_Shield),
-                        magicalRing: this.parent.includes(CONSTANTS.item.Magical_Ring),
+                        magicalRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Magical_Ring),
                     },
                 };
 
