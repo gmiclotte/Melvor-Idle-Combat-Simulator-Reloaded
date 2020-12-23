@@ -129,8 +129,8 @@
 
         // loot
         chanceToDoubleLoot: {implemented: true},
-        gpMultiplier: {implemented: false},
-        increasedGP: {implemented: false},
+        gpMultiplier: {implemented: true}, // not properly defined for Gold Topaz Ring and Almight Lute
+        increasedGP: {implemented: true},
 
         // magic
         increasedMinAirSpellDmg: {implemented: true},

@@ -257,6 +257,7 @@
                 }
                 /** Variables of currently stored simulation */
                 this.currentSim = {
+                    increasedGP: 0,
                     gpBonus: 1,
                     lootBonus: 1,
                     slayerBonusXP: 0,
@@ -931,13 +932,19 @@
                     playerStats.xpBonus = 0.07;
                 }
                 this.currentSim.canTopazDrop = false;
+                // base gp increase
+                this.currentSim.increasedGP = this.equipmentStats.increasedGP;
+                // multiplier gp increase
+                this.currentSim.gpBonus = 1;
                 if (this.parent.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
-                    this.currentSim.gpBonus = 1.15;
+                    this.currentSim.gpBonus *= 1.15;
                     this.currentSim.canTopazDrop = true;
-                } else if (this.parent.equipmentSelected.includes(CONSTANTS.item.Aorpheats_Signet_Ring)) {
-                    this.currentSim.gpBonus = 2;
-                } else {
-                    this.currentSim.gpBonus = 1;
+                }
+                if (this.parent.equipmentSelected.includes(CONSTANTS.item.Aorpheats_Signet_Ring)) {
+                    this.currentSim.gpBonus *= 2;
+                }
+                if (this.parent.equipmentSelected.includes(CONSTANTS.item.Almighty_Lute)) {
+                    this.currentSim.gpBonus *= 5;
                 }
                 this.currentSim.lootBonus = 1 + this.equipmentStats.chanceToDoubleLoot / 100;
                 if (this.petOwned[20]) this.currentSim.lootBonus += 0.01;
@@ -1568,7 +1575,7 @@
              * @return {number}
              */
             computeAverageCoins(monsterID) {
-                return (MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) * this.currentSim.gpBonus / 2;
+                return (MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] + this.currentSim.increasedGP - 1) * this.currentSim.gpBonus / 2;
             }
 
             /**
