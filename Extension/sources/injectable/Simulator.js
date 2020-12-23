@@ -844,6 +844,7 @@
                     // passive stats
                     lifesteal: this.auroraBonus.lifesteal + this.equipmentStats.lifesteal,
                     spellheal: this.equipmentStats.spellheal,
+                    reflectDamage: this.equipmentStats.reflectDamage,
                     decreasedAttackSpeed: this.decreasedAttackSpeed(),
                     canCurse: false,
                     curseID: -1,

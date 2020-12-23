@@ -607,9 +607,15 @@
                 enemy.hitpoints = Math.min(enemy.hitpoints, enemyStats.hitpoints);
             }
             // player recoil
-            if (playerStats.activeItems.goldSapphireRing && player.canRecoil) {
-                const reflectDamage = Math.floor(Math.random() * 3 * numberMultiplier);
-                if (enemy.hitpoints > reflectDamage) {
+            if (player.canRecoil) {
+                let reflectDamage = 0;
+                if (playerStats.activeItems.goldSapphireRing) {
+                    reflectDamage += Math.floor(Math.random() * 3 * numberMultiplier);
+                }
+                if (playerStats.reflectDamage) {
+                    reflectDamage += damage * playerStats.reflectDamage / 100
+                }
+                if (enemy.hitpoints > reflectDamage && reflectDamage > 0) {
                     dealDamage(enemy, enemyStats, reflectDamage);
                     player.canRecoil = false;
                     player.isRecoiling = true;

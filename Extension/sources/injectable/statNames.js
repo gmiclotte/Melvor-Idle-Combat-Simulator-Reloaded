@@ -125,7 +125,7 @@
 
         // general
         decreasedAttackSpeed: {implemented: true},
-        reflectDamage: {implemented: false},
+        reflectDamage: {implemented: true},
 
         // loot
         chanceToDoubleLoot: {implemented: true},
