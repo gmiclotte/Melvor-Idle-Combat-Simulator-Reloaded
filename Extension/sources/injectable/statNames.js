@@ -137,7 +137,7 @@
         increasedMinEarthSpellDmg: {implemented: true},
         increasedMinFireSpellDmg: {implemented: true},
         increasedMinWaterSpellDmg: {implemented: true},
-        spellHeal: {implemented: false},
+        spellHeal: {implemented: true},
 
         // hitpoints
         decreasedAutoEatEfficiency: {implemented: false},

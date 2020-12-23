@@ -920,12 +920,20 @@
             statusEffect.canSleep = true;
             statusEffect.sleepTurns = playerStats.specialData.sleepTurns;
         }
-        // lifesteal
-        if (playerStats.activeItems.warlockAmulet) {
-            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * warlockAmulet.spellHeal);
+        // life steal
+        let lifeSteal = 0;
+        if (isSpecial && playerStats.specialData.healsFor) {
+            lifeSteal += playerStats.specialData.healsFor * 100;
+        }
+        if (playerStats.spellHeal) {
+            lifeSteal += playerStats.spellHeal;
         }
         if (playerStats.lifesteal !== 0) {
-            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * playerStats.lifesteal / 100);
+            // fervor + passive item stat
+            lifeSteal += playerStats.lifesteal;
+        }
+        if (lifeSteal > 0) {
+            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * lifeSteal / 100);
         }
         // slow
         if (isSpecial && playerStats.specialData.attackSpeedDebuff && !enemy.isSlowed) {

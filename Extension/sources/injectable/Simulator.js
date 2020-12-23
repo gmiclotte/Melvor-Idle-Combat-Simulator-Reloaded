@@ -841,7 +841,9 @@
                     prayerXpPerDamage: 0,
                     isProtected: false,
                     hardcore: this.isHardcore,
-                    lifesteal: this.auroraBonus.lifesteal,
+                    // passive stats
+                    lifesteal: this.auroraBonus.lifesteal + this.equipmentStats.lifesteal,
+                    spellheal: this.equipmentStats.spellheal,
                     decreasedAttackSpeed: this.decreasedAttackSpeed(),
                     canCurse: false,
                     curseID: -1,
