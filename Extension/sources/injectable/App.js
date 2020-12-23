@@ -236,6 +236,9 @@
                     this.equipmentSubsets.push([this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]]);
                     this.equipmentSelected.push(0);
                     for (let i = 0; i < items.length; i++) {
+                        if (i === CONSTANTS.item.Candy_Cane) {
+                            continue;
+                        }
                         if (items[i].equipmentSlot === CONSTANTS.equipmentSlot[this.equipmentSlotKeys[equipmentSlot]]) {
                             this.equipmentSubsets[equipmentSlot].push(items[i]);
                             this.equipmentSubsets[equipmentSlot][this.equipmentSubsets[equipmentSlot].length - 1].itemID = i;
