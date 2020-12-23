@@ -1073,15 +1073,15 @@
                     specialLength: 0,
                 };
                 // Determine slayer zone
+                let slayerIdx = 0;
                 zone: for(const area of slayerAreas) {
-                    let slayerIdx = 0;
                     for (const id of area.monsters) {
                         if (id === monsterID) {
                             enemyStats.slayerArea = slayerIdx;
                             break zone;
                         }
-                        slayerIdx++;
                     }
+                    slayerIdx++;
                 }
                 // Calculate Enemy Stats
                 enemyStats.hitpoints = MONSTERS[monsterID].hitpoints * numberMultiplier;

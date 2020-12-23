@@ -151,8 +151,8 @@
         prayerCostReduction: {implemented: false},
 
         // slayer
-        slayerAreaEffectNegationFlat: {implemented: false},
-        slayerAreaEffectNegationPercent: {implemented: false},
+        slayerAreaEffectNegationFlat: {implemented: true},
+        slayerAreaEffectNegationPercent: {implemented: true},
         slayerBonusXP: {implemented: true},
 
     };

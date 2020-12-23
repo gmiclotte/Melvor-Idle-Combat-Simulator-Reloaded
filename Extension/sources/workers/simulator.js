@@ -153,6 +153,8 @@
                 runesUsed: 0,
             };
 
+            setAreaEffects(playerStats, enemyStats);
+
             // Adjust ancient magick forcehit
             if (playerStats.usingAncient && playerStats.specialData.forceHit) {
                 playerStats.specialData.forceHit = playerStats.maxAttackRoll > 20000;
@@ -1343,6 +1345,23 @@
             value = 0;
         }
         return value;
+    }
+
+    function setAreaEffects(playerStats, enemyStats) {
+        // 0: "Penumbra" - no area effect
+        // 1: "Strange Cave" - no area effect
+        // 2: "High Lands" - no area effect
+        // 3: "Holy Isles" - no area effect
+        // 4: "Forest of Goo" - no area effect
+        // 5: "Desolate Plains" - no area effect
+        // 6: "Runic Ruins" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
+        // 7: "Arid Plains" - reduced food efficiency -> not relevant
+        // 8: "Shrouded Badlands"
+        if (enemyStats.slayerArea === 8 /*Shrouded Badlands*/) {
+            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(30, playerStats) / 100));
+        }
+        // 9: "Perilous Peaks" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
+        // 10: "Dark Waters" TODO: dark waters permanent Slow is not implemented in game
     }
 
 })();
