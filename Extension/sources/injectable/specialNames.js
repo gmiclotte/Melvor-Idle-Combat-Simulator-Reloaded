@@ -10,35 +10,28 @@
 
         MICSR.commonSpecialNames = {
             // general
-            chance: {implemented: false},
-            forceHit: {implemented: false},
-            // DOT
-            DOTInterval: {implemented: false},
-            DOTMaxProcs: {implemented: false},
+            chance: {implemented: true},
+            forceHit: {implemented: true},
             // burn
-            burnDebuff: {implemented: false},
+            burnDebuff: {implemented: true},
             // slow
-            attackSpeedDebuff: {implemented: false},
-            attackSpeedDebuffTurns: {implemented: false},
-            attackSpeedSlow: {implemented: false},
-            attackSpeedSlowTurns: {implemented: false},
+            attackSpeedDebuff: {implemented: true},
+            attackSpeedDebuffTurns: {implemented: true},
             // sleep
-            canSleep: {implemented: false},
-            sleepDamageMultiplier: {implemented: false},
-            sleepTurns: {implemented: false},
+            canSleep: {implemented: true},
+            sleepDamageMultiplier: {implemented: true},
+            sleepTurns: {implemented: true},
             // stun
-            canStun: {implemented: false},
-            stunChance: {implemented: false},
-            stunDamageMultiplier: {implemented: false},
-            stunTurns: {implemented: false},
+            canStun: {implemented: true},
+            stunChance: {implemented: true},
+            stunDamageMultiplier: {implemented: true},
+            stunTurns: {implemented: true},
             // fixed damage
-            setDOTDamage: {implemented: false},
-            setDamage: {implemented: false},
-            setHPDamage: {implemented: false},
-            // other
-            activeBuffs: {implemented: false},
-            attackCount: {implemented: false},
-            attackInterval: {implemented: false},
+            setDamage: {implemented: true},
+            setHPDamage: {implemented: true},
+            // multi-attack
+            attackCount: {implemented: true},
+            attackInterval: {implemented: true},
 
             // irrelevant
             description: {implemented: true},
@@ -53,62 +46,69 @@
             maxHit: {implemented: false},
 
             // bleed
-            bleedChance: {implemented: false},
-            bleedCount: {implemented: false},
-            bleedInterval: {implemented: false},
-            canBleed: {implemented: false},
-            totalBleedHP: {implemented: false},
-            totalBleedHPCustom: {implemented: false},
-            totalBleedHPPercent: {implemented: false},
+            bleedChance: {implemented: true},
+            bleedCount: {implemented: true},
+            bleedInterval: {implemented: true},
+            canBleed: {implemented: true},
+            totalBleedHP: {implemented: true},
+            totalBleedHPCustom: {implemented: true},
+            totalBleedHPPercent: {implemented: true},
 
             // debuff
             decreasedAccuracy: {implemented: false},
-            decreasedMagicEvasion: {implemented: false},
-            decreasedMeleeEvasion: {implemented: false},
-            decreasedRangedEvasion: {implemented: false},
+            decreasedMagicEvasion: {implemented: true},
+            decreasedMeleeEvasion: {implemented: true},
+            decreasedRangedEvasion: {implemented: true},
 
             // lifesteal
-            healsFor: {implemented: false},
+            healsFor: {implemented: true},
 
             // unique
-            stormsnap: {implemented: false},
+            stormsnap: {implemented: true},
         };
 
         MICSR.enemySpecialNames = {
             // buff
-            activeBuffTurns: {implemented: false},
+            activeBuffs: {implemented: true},
+            activeBuffTurns: {implemented: true},
             increasedAttackSpeed: {implemented: false},
-            increasedDamageReduction: {implemented: false},
-            increasedMagicEvasion: {implemented: false},
-            increasedMeleeEvasion: {implemented: false},
-            increasedRangedEvasion: {implemented: false},
+            increasedDamageReduction: {implemented: true},
+            increasedMeleeEvasion: {implemented: true},
+            increasedRangedEvasion: {implemented: true},
+            increasedMagicEvasion: {implemented: true},
 
             // 50% of target max hit
-            customDamageModifier: {implemented: false},
+            customDamageModifier: {implemented: true},
 
             // debuff
-            applyDebuffTurns: {implemented: false},
-            applyDebuffs: {implemented: false},
-            decreasePlayerAccuracy: {implemented: false},
-            decreasePlayerAccuracyLimit: {implemented: false},
-            decreasePlayerAccuracyStack: {implemented: false},
-            magicEvasionDebuff: {implemented: false},
-            meleeEvasionDebuff: {implemented: false},
-            rangedEvasionDebuff: {implemented: false},
+            applyDebuffTurns: {implemented: true},
+            applyDebuffs: {implemented: true},
+            meleeEvasionDebuff: {implemented: true},
+            rangedEvasionDebuff: {implemented: true},
+            magicEvasionDebuff: {implemented: true},
+
+            // decrease player accuracy
+            decreasePlayerAccuracy: {implemented: true},
+            decreasePlayerAccuracyLimit: {implemented: true},
+            decreasePlayerAccuracyStack: {implemented: true},
 
             // lifesteal
-            lifesteal: {implemented: false},
-            lifestealMultiplier: {implemented: false},
+            lifesteal: {implemented: true},
+            lifestealMultiplier: {implemented: true},
 
             // reflect
-            reflectMagic: {implemented: false},
-            reflectMelee: {implemented: false},
-            reflectRanged: {implemented: false},
-            // heal overtime
-            setDOTHeal: {implemented: false},
-            intoTheMist: {implemented: false},
+            reflectMelee: {implemented: true},
+            reflectRanged: {implemented: true},
+            reflectMagic: {implemented: true},
+
             // unique
             markOfDeath: {implemented: false},
+            intoTheMist: {implemented: false},
+
+            // DOT
+            DOTInterval: {implemented: false},
+            DOTMaxProcs: {implemented: false},
+            setDOTHeal: {implemented: false},
         };
 
         // report unknown stats

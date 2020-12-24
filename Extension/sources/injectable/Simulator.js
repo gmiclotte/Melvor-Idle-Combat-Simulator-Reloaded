@@ -891,13 +891,17 @@
                 }
 
                 // Special Attack and Ancient Magicks
-                // TODO: support non-weapon special attack items
+                playerStats.specialData = [];
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic && this.spells.ancient.isSelected) {
                     playerStats.usingAncient = true;
-                    playerStats.specialData = playerSpecialAttacks[ANCIENT[this.spells.ancient.selectedID].specID];
-                } else if (items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].hasSpecialAttack) {
-                    playerStats.hasSpecialAttack = true;
-                    playerStats.specialData = playerSpecialAttacks[items[this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].specialAttackID];
+                    playerStats.specialData.push(playerSpecialAttacks[ANCIENT[this.spells.ancient.selectedID].specID]);
+                } else {
+                    for (const itemId of this.parent.equipmentSelected) {
+                        if (items[itemId].hasSpecialAttack) {
+                            playerStats.hasSpecialAttack = true;
+                            playerStats.specialData.push(playerSpecialAttacks[items[itemId].specialAttackID]);
+                        }
+                    }
                 }
                 // MICSR.log({...playerStats.specialData});
 
