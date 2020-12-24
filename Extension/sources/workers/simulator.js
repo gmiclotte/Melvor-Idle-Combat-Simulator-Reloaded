@@ -600,7 +600,7 @@
         target.bleedInterval = statusEffect.bleedInterval;
         target.bleedTimer = target.bleedInterval;
         target.bleedCount = 0;
-        if (statusEffect.totalBleedHP) {
+        if (statusEffect.totalBleedHP > 0) {
             if (statusEffect.totalBleedHPCustom === 1) {
                 target.bleedDamage = Math.floor((Math.random() * (damage * statusEffect.totalBleedHP)) / target.bleedCount);
             } else {
