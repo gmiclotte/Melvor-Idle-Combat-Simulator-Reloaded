@@ -1068,6 +1068,9 @@
                     damageTaken: 0,
                     attackSpeed: 0,
                     attackType: 0,
+                    isMelee: false,
+                    isRanged: false,
+                    isMagic: false,
                     maxAttackRoll: 0,
                     maxHit: 0,
                     maxDefRoll: 0,
@@ -1100,6 +1103,9 @@
                 const effectiveMagicDefenceLevel = Math.floor((Math.floor(MONSTERS[monsterID].magicLevel * 0.7) + Math.floor(MONSTERS[monsterID].defenceLevel * 0.3)) + 8 + 1);
                 enemyStats.maxMagDefRoll = effectiveMagicDefenceLevel * (MONSTERS[monsterID].defenceBonusMagic + 64);
                 enemyStats.attackType = MONSTERS[monsterID].attackType;
+                enemyStats.isMelee = enemyStats.attackType === CONSTANTS.attackType.Melee;
+                enemyStats.isRanged = enemyStats.attackType === CONSTANTS.attackType.Ranged;
+                enemyStats.isMagic = enemyStats.attackType === CONSTANTS.attackType.Magic;
 
                 if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Melee) {
                     const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].attackLevel + 8 + 1);

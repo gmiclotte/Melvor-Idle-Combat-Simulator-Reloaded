@@ -157,11 +157,6 @@
                 playerStats.canCurse = false;
             }
 
-            // Adjust ancient magick forcehit
-            if (playerStats.usingAncient && playerStats.specialData.forceHit) {
-                playerStats.specialData.forceHit = playerStats.maxAttackRoll > 20000;
-            }
-            // var enemyReflectDamage = 0; //Damage caused by reflect
             // Start simulation for each trial
             this.cancelStatus = false;
             const player = {};
@@ -1213,25 +1208,45 @@
      * @return {number}
      */
     function calculateAccuracy(actor, actorStats, target, targetStats) {
+        // determine attack roll
+        let maxAttackRoll = actorStats.maxAttackRoll;
+        if (actor.decreasedAccuracy) {
+            maxAttackRoll = Math.floor(maxAttackRoll * (1 - actor.decreasedAccuracy / 100));
+        }
+        if (actor.isCursed && actor.curse.accuracyDebuff) {
+            maxAttackRoll = Math.floor(maxAttackRoll * actor.curse.accuracyDebuff);
+        }
+        // handle player and enemy cases
         if (target.isPlayer) {
+            if (targetStats.isProtected) {
+                return 100 - protectFromValue;
+            }
             setEvasionDebuffsPlayer(target, targetStats, actorStats);
         } else {
+            // Adjust ancient magick forcehit
+            if (actorStats.usingAncient && (actorStats.specialData[0].forceHit || actorStats.specialData[0].checkForceHit)) {
+                actorStats.specialData[0].forceHit = maxAttackRoll > 20000;
+                actorStats.specialData[0].checkForceHit = true;
+            }
             setEvasionDebuffsEnemy(target, targetStats);
         }
         // determine relevant defence roll
         let targetDefRoll;
-        if (actor.attackType === 0) {
+        if (actor.isMelee) {
             targetDefRoll = target.maxDefRoll;
-        } else if (actor.attackType === 1) {
+        } else if (actor.isRanged) {
             targetDefRoll = target.maxRngDefRoll;
         } else {
             targetDefRoll = target.maxMagDefRoll;
         }
         // accuracy based on attack roll and defence roll
-        if (actor.maxAttackRoll < targetDefRoll) {
-            return (0.5 * actor.maxAttackRoll / targetDefRoll) * 100;
+        let acc;
+        if (maxAttackRoll < targetDefRoll) {
+            acc = (0.5 * maxAttackRoll / targetDefRoll) * 100;
+        } else {
+            acc = (1 - 0.5 * targetDefRoll / maxAttackRoll) * 100;
         }
-        return (1 - 0.5 * targetDefRoll / actor.maxAttackRoll) * 100;
+        return acc;
     }
 
     /**
