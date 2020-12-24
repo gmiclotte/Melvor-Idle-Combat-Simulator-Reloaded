@@ -888,7 +888,7 @@
         }
         const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, isSpecial)
         processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
-        postAttack(enemy, enemyStats, player, playerStats);
+        postAttack(player, playerStats, enemy, enemyStats);
         multiAttackTimer(player);
     }
 
@@ -899,7 +899,7 @@
         }
         const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, true);
         processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
-        postAttack(enemy, enemyStats, player, playerStats);
+        postAttack(player, playerStats, enemy, enemyStats);
         multiAttackTimer(player);
     }
 
