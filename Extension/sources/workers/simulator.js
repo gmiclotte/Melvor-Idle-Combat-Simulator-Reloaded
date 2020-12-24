@@ -1190,6 +1190,7 @@
         // buff
         common.isBuffed = false;
         common.buffTurns = 0;
+        common.increasedDamageReduction = 0;
         // curse
         common.isCursed = false;
         common.curseTurns = 0;
@@ -1224,7 +1225,6 @@
         enemy.hitpoints = enemyStats.hitpoints;
         enemy.maxHitpoints = enemyStats.maxHitpoints;
         enemy.damageReduction = 0;
-        enemy.increasedDamageReduction = 0;
         enemy.reflectMelee = 0;
         enemy.reflectRanged = 0;
         enemy.reflectMagic = 0;
