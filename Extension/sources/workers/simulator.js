@@ -1279,9 +1279,9 @@
         }
         // determine relevant defence roll
         let targetDefRoll;
-        if (actor.isMelee) {
+        if (actorStats.isMelee) {
             targetDefRoll = target.maxDefRoll;
-        } else if (actor.isRanged) {
+        } else if (actorStats.isRanged) {
             targetDefRoll = target.maxRngDefRoll;
         } else {
             targetDefRoll = target.maxMagDefRoll;
