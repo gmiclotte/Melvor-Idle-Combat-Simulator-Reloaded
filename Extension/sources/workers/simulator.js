@@ -1143,6 +1143,9 @@
         if (playerStats.activeItems.deadeyeAmulet) {
             damage *= critDamageModifier(damage);
         }
+        if (playerStats.isSlayerTask && playerStats.activeItems.slayerSkillcape) {
+            damage *= 1.05;
+        }
         // common modifiers
         damage *= damageModifiers(player, enemy, isSpecial, player.currentSpecial)
         // cap damage, no overkill

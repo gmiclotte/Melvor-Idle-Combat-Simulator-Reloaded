@@ -997,6 +997,7 @@
                 };
                 this.currentSim.playerStats = playerStats;
                 this.currentSim.isSlayerTask = this.isSlayerTask;
+                this.currentSim.playerStats.isSlayerTask = this.isSlayerTask;
                 Object.assign(this.currentSim.equipmentStats, this.equipmentStats);
                 Object.assign(this.currentSim.herbloreBonus, this.herbloreBonus);
                 Object.assign(this.currentSim.prayerBonus, this.prayerBonus);
