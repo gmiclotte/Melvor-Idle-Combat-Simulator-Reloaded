@@ -227,7 +227,7 @@
             this.forceRangedArmour = [CONSTANTS.item.Slayer_Cowl_Basic, CONSTANTS.item.Slayer_Leather_Body_Basic];
             this.forceMagicArmour = [CONSTANTS.item.Slayer_Wizard_Hat_Basic, CONSTANTS.item.Slayer_Wizard_Robes_Basic, CONSTANTS.item.Enchanted_Shield];
             // Generate equipment subsets
-            this.equipmentSlotKeys = Object.keys(CONSTANTS.equipmentSlot);
+            this.equipmentSlotKeys = ["Helmet", "Platebody", "Platelegs", "Boots", "Weapon", "Shield", "Amulet", "Ring", "Gloves", "Quiver", "Cape"];//Object.keys(CONSTANTS.equipmentSlot);
             this.equipmentSubsets = [];
             /** @type {number[]} */
             this.equipmentSelected = [];
