@@ -42,8 +42,8 @@
 
         MICSR.playerSpecialNames = {
             // general
-            damageMultiplier: {implemented: false},
-            maxHit: {implemented: false},
+            damageMultiplier: {implemented: true},
+            maxHit: {implemented: true},
 
             // bleed
             bleedChance: {implemented: true},
@@ -71,7 +71,7 @@
             // buff
             activeBuffs: {implemented: true},
             activeBuffTurns: {implemented: true},
-            increasedAttackSpeed: {implemented: false},
+            increasedAttackSpeed: {implemented: true},
             increasedDamageReduction: {implemented: true},
             increasedMeleeEvasion: {implemented: true},
             increasedRangedEvasion: {implemented: true},
@@ -102,13 +102,13 @@
             reflectMagic: {implemented: true},
 
             // unique
-            markOfDeath: {implemented: false},
-            intoTheMist: {implemented: false},
+            markOfDeath: {implemented: true},
+            intoTheMist: {implemented: true},
 
             // DOT
-            DOTInterval: {implemented: false},
-            DOTMaxProcs: {implemented: false},
-            setDOTHeal: {implemented: false},
+            DOTInterval: {implemented: true},
+            DOTMaxProcs: {implemented: true},
+            setDOTHeal: {implemented: true},
         };
 
         // report unknown stats
