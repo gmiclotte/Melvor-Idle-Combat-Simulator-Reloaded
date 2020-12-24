@@ -180,6 +180,9 @@
                 if (playerStats.canCurse) {
                     setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
                 }
+                // Set accuracy based on protection prayers or stats
+                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+                enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
 
                 // Simulate combat until enemy is dead or max actions has been reached
                 let enemyAlive = true;
@@ -1137,7 +1140,6 @@
         player.reductionBuff = 0;
         player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
-        player.accuracy = calculateAccuracy(playerStats, playerStats, enemyStats, enemyStats);
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
 
@@ -1175,8 +1177,6 @@
         enemy.curse.rangedEvasionDebuff = 1;
         enemy.curse.confusionMult = 0;
         enemy.curse.decayDamage = 0;
-        // Set accuracy based on protection prayers or stats
-        enemy.accuracy = calculateAccuracy(enemyStats, enemyStats, playerStats, playerStats);
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
