@@ -181,7 +181,7 @@
                 };
                 // Simulation settings
                 /** Max number of player actions to attempt before timeout */
-                this.maxActions = 1000;
+                this.maxActions = 300;
                 /** Number of enemy kills to simulate */
                 this.trials = 10000;
                 /** Number of hours to farm for signet ring */
