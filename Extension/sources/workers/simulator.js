@@ -916,6 +916,10 @@
             enemy.decreasedMagicEvasion = player.currentSpecial.decreasedMagicEvasion;
             player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
         }
+        if (player.currentSpecial.decreasedAccuracy && !enemy.decreasedAccuracy) {
+            enemy.decreasedAccuracy = player.currentSpecial.decreasedAccuracy;
+            enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
+        }
     }
 
     function playerUseCurse(stats, player, playerStats, enemy, enemyStats) {

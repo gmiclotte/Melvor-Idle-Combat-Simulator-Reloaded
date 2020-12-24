@@ -55,7 +55,7 @@
             totalBleedHPPercent: {implemented: true},
 
             // debuff
-            decreasedAccuracy: {implemented: false},
+            decreasedAccuracy: {implemented: true},
             decreasedMagicEvasion: {implemented: true},
             decreasedMeleeEvasion: {implemented: true},
             decreasedRangedEvasion: {implemented: true},
