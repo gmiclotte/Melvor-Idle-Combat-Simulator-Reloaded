@@ -824,6 +824,7 @@
         let isSpecial = false;
         player.currentSpecial = {};
         if (playerStats.usingAncient) {
+            isSpecial = true;
             player.currentSpecial = playerStats.specialData[0];
         } else if (playerStats.hasSpecialAttack) {
             const specialRoll = Math.floor(Math.random() * 100);
