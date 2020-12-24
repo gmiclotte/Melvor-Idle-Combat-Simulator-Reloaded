@@ -315,8 +315,14 @@
                     }
                 }
                 if (isNaN(enemy.hitpoints)) {
-                    console.log('Failed enemy simulation: ', enemyStats, enemy);
-                    return {simSuccess: false, reason: 'bogus enemy hp'};
+                    return {
+                        simSuccess: false,
+                        reason: 'bogus enemy hp',
+                        playerStats: {...playerStats},
+                        player: {...player},
+                        enemyStats: {...enemyStats},
+                        enemy: {...enemy},
+                    };
                 }
                 if (enemy.hitpoints > 0) {
                     tooManyActions++;

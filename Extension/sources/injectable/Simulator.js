@@ -1338,7 +1338,9 @@
              */
             processWorkerMessage(event, workerID) {
                 // MICSR.log(`Received Message ${event.data.action} from worker: ${workerID}`);
-                // MICSR.log({...event.data});
+                if (!event.data.simResult.simSuccess || event.data.simResult.tooManyActions > 0) {
+                    MICSR.log({...event.data.simResult});
+                }
                 switch (event.data.action) {
                     case 'FINISHED_SIM':
                         // Send next job in queue to worker
