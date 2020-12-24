@@ -173,7 +173,6 @@
             // Multiply player max hit
             playerStats.maxHit = Math.floor(playerStats.maxHit * player.damageModifier);
             const enemy = {};
-            const actors = [player, enemy];
             let innerCount = 0;
             let tooManyActions = 0;
             while (enemyKills < trials) {
@@ -484,23 +483,23 @@
         // turned //
         ////////////
         // Apply Stun
-        if (statusEffect.canStun && !target.isStunned) {
-            target.isStunned = true;
-            target.stunTurns = statusEffect.stunTurns;
+        if (canApplyStatus(statusEffect.canStun, target.isStunned, statusEffect.stunChance)) {
+            applyStun(statusEffect, target);
+        }
+        // Apply Sleep
+        if (canApplyStatus(statusEffect.canSleep, target.isSleeping)) {
+            target.isSleeping = true;
+            target.sleepTurns = statusEffect.sleepTurns;
             target.isAttacking = false;
             target.isActing = true;
             target.actionTimer = target.currentSpeed;
         }
-        // Apply Sleep
-        if (statusEffect.canSleep && !target.sleep) {
-            target.sleep = true;
-            target.sleepTurns = statusEffect.sleepTurns;
-        }
         // Apply Slow
-        if (statusEffect.attackSpeedDebuff && !target.isSlowed) {
+        if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
             target.isSlowed = true;
-            target.slowTurns = statusEffect.attackSpeedDebuffTurns;
+            target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
             target.currentSpeed = Math.floor(targetStats.attackSpeed * (1 + statusEffect.attackSpeedDebuff / 100));
+            // take attack speed reduction into account
             if (targetStats.decreasedAttackSpeed) {
                 target.currentSpeed -= targetStats.decreasedAttackSpeed
             }
@@ -509,27 +508,15 @@
         // timed //
         ///////////
         // Apply Burning
-        if (statusEffect.burnDebuff > 0 && !target.isBurning) {
+        if (canApplyStatus(statusEffect.burnDebuff, target.isBurning)) {
             target.isBurning = true;
             target.burnCount = 0;
-            // TODO: fix this `targetStats.levels.Hitpoints`
-            target.burnDamage = Math.floor((targetStats.levels.Hitpoints * numberMultiplier * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
+            target.burnDamage = Math.floor((targetStats.maxHitpoints * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
             target.burnTimer = target.burnInterval;
         }
         // Apply Bleeding
-        if (statusEffect.canBleed && !target.isBleeding) {
-            target.isBleeding = true;
-            target.bleedMaxCount = statusEffect.bleedCount;
-            target.bleedInterval = statusEffect.bleedInterval;
-            target.bleedCount = 0;
-            if (statusEffect.totalBleedHP > 0) {
-                // bleed for `statusEffect.totalBleedHP` times initial damage
-                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
-            } else {
-                // bleed for `statusEffect.totalBleedHPPercent` % of max HP
-                target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / target.bleedMaxCount);
-            }
-            target.bleedTimer = target.bleedInterval;
+        if (canApplyStatus(statusEffect.canBleed, target.isBleeding, statusEffect.bleedChance)) {
+            applyBleeding(statusEffect, damage, target, targetStats);
         }
         ////////////
         // debuff //
@@ -554,6 +541,46 @@
             } else {
                 target.decreasedAccuracy += statusEffect.decreasePlayerAccuracy;
             }
+        }
+    }
+
+    function canApplyStatus(can, is, chance) {
+        if (!can || is) {
+            return false;
+        }
+        if (chance !== undefined) {
+            const stunRoll = Math.random() * 100;
+            return chance > stunRoll;
+        }
+        return true;
+    }
+
+    function applyStun(statusEffect, target) {
+        // apply new stun
+        target.isStunned = true;
+        target.stunTurns = statusEffect.stunTurns;
+        target.isAttacking = false;
+        target.isActing = true;
+        target.actionTimer = target.currentSpeed;
+    }
+
+    function applyBleeding(statusEffect, damage, target, targetStats) {
+        //apply new bleed
+        target.isBleeding = true;
+        target.bleedMaxCount = statusEffect.bleedCount;
+        target.bleedInterval = statusEffect.bleedInterval;
+        target.bleedTimer = target.bleedInterval;
+        target.bleedCount = 0;
+        if (statusEffect.totalBleedHP) {
+            if (statusEffect.totalBleedHPCustom === 1) {
+                target.bleedDamage = Math.floor((Math.random() * (damage * statusEffect.totalBleedHP)) / target.bleedCount);
+            } else {
+                // bleed for `statusEffect.totalBleedHP` times initial damage
+                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
+            }
+        } else {
+            // bleed for `statusEffect.totalBleedHPPercent` % of max HP
+            target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / target.bleedMaxCount);
         }
     }
 
