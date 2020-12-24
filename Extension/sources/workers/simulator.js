@@ -1023,7 +1023,7 @@
             damage = actorStats.maxHit;
             cbTriangleAlreadyApplied = true;
         } else if (isSpecial && currentSpecial.stormsnap) {
-            damage = (6 + 6 * actor.levels.Magic);
+            damage = (6 + 6 * actorStats.levels.Magic);
         } else {
             return undefined
         }
