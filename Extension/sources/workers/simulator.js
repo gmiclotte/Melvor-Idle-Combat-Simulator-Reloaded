@@ -538,11 +538,7 @@
         if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
             target.isSlowed = true;
             target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
-            target.currentSpeed = Math.floor(targetStats.attackSpeed * (1 + statusEffect.attackSpeedDebuff / 100));
-            // take attack speed reduction into account
-            if (targetStats.decreasedAttackSpeed) {
-                target.currentSpeed -= targetStats.decreasedAttackSpeed
-            }
+            calculateSpeed(target, targetStats);
         }
         ///////////
         // timed //
@@ -637,6 +633,11 @@
                 } else {
                     enemy.buffTurns = currentSpecial.attackCount;
                 }
+                // set increased attack speed buff
+                if (currentSpecial.increasedAttackSpeed) {
+                    enemy.increasedAttackSpeed = currentSpecial.increasedAttackSpeed;
+                    calculateSpeed(enemy, enemyStats);
+                }
                 // Set evasion buffs
                 if (currentSpecial.increasedMeleeEvasion) {
                     enemy.meleeEvasionBuff = 1 + currentSpecial.increasedMeleeEvasion / 100;
@@ -723,6 +724,17 @@
         return currentSpecial;
     }
 
+    function calculateSpeed(actor, actorStats) {
+        // slow
+        actor.currentSpeed = Math.floor(actorStats.attackSpeed * (1 + actor.attackSpeedDebuff / 100));
+        // increased attack speed buff
+        actor.currentSpeed = Math.floor(actorStats.attackSpeed * (1 + actor.increasedAttackSpeed / 100));
+        // take attack speed reduction into account
+        if (actorStats.decreasedAttackSpeed) {
+            actor.currentSpeed -= actorStats.decreasedAttackSpeed
+        }
+    }
+
     function postAttack(actor, actorStats, target, targetStats) {
         // Buff tracking
         if (actor.isBuffed) {
@@ -730,6 +742,8 @@
             if (actor.buffTurns <= 0) {
                 actor.isBuffed = false;
                 // Undo buffs
+                actor.increasedAttackSpeed = 0;
+                calculateSpeed(actor, actorStats)
                 actor.meleeEvasionBuff = 1;
                 actor.rangedEvasionBuff = 1;
                 actor.magicEvasionBuff = 1;
@@ -745,7 +759,7 @@
             actor.attackSpeedDebuffTurns--;
             if (actor.attackSpeedDebuffTurns <= 0) {
                 actor.isSlowed = false;
-                actor.currentSpeed = actorStats.attackSpeed;
+                calculateSpeed(actor, actorStats)
             }
         }
         // Curse Tracking
@@ -1179,6 +1193,7 @@
         enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
         enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
         enemy.decreasedRangedEvasion = 0;
+        enemy.increasedAttackSpeed = 0;
         enemy.meleeEvasionBuff = 1;
         enemy.magicEvasionBuff = 1;
         enemy.rangedEvasionBuff = 1;
