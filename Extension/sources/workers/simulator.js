@@ -202,9 +202,23 @@
                     timeStep = determineTimeStep(player, timeStep);
                     timeStep = determineTimeStep(enemy, timeStep);
 
-                    // throw error on invalid time step
+                    // exit on invalid time step
                     if (timeStep <= 0) {
-                        throw Error('Error: Timestep ' + timeStep);
+                        return {
+                            simSuccess: false,
+                            reason: 'invalid time step: ' + timeStep,
+                            playerActing: player.isActing,
+                            playerActionTimer: player.actionTimer,
+                            playerAttacking: player.isAttacking,
+                            playerAttackTimer: player.attackTimer,
+                            enemyActing: enemy.isActing,
+                            enemyActionTimer: enemy.actionTimer,
+                            enemyAttacking: enemy.isAttacking,
+                            enemyAttackTimer: enemy.attackTimer,
+                            player: player,
+                            enemy: enemy,
+                            monsterID: enemyStats.monsterID,
+                        };
                     }
                     // combat time tracker
                     stats.totalTime += timeStep;
