@@ -582,9 +582,15 @@
             } else {
                 target.debuffTurns = 2;
             }
-            target.meleeEvasionDebuff = statusEffect.meleeEvasionDebuff;
-            target.rangedEvasionDebuff = statusEffect.rangedEvasionDebuff;
-            target.magicEvasionDebuff = statusEffect.magicEvasionDebuff;
+            if (statusEffect.meleeEvasionDebuff) {
+                target.meleeEvasionDebuff = statusEffect.meleeEvasionDebuff;
+            }
+            if (statusEffect.rangedEvasionDebuff) {
+                target.rangedEvasionDebuff = statusEffect.rangedEvasionDebuff;
+            }
+            if (statusEffect.magicEvasionDebuff) {
+                target.magicEvasionDebuff = statusEffect.magicEvasionDebuff;
+            }
         }
         // accuracy debuffs
         if (statusEffect.decreasePlayerAccuracy !== undefined) {
