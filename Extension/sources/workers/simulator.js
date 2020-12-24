@@ -1355,22 +1355,24 @@
      * @param {Object} enemy
      */
     function setEvasionDebuffsEnemy(enemy, enemyStats) {
-        enemy.maxDefRoll = enemyStats.maxDefRoll;
-        enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
-        enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
-        if (enemy.decreasedRangedEvasion) {
-            enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * (1 - enemy.decreasedRangedEvasion / 100));
+        const isCursed = enemy.isCursed && (curse.type === 'Decay' || curse.type === 'Soul Split');
+        enemy.maxDefRoll = calculateEnemyEvasion(enemyStats.maxDefRoll, enemy.decreasedMeleeEvasion, enemy.meleeEvasionBuff, isCursed ? enemy.curse.meleeEvasionDebuff : 0);
+        enemy.maxRngDefRoll = calculateEnemyEvasion(enemyStats.maxRngDefRoll, enemy.decreasedRangedEvasion, enemy.rangedEvasionBuff, isCursed ? enemy.curse.rangedEvasionDebuff : 0);
+        enemy.maxMagDefRoll = calculateEnemyEvasion(enemyStats.maxMagDefRoll, enemy.decreasedMagicEvasion, enemy.magicEvasionBuff, isCursed ? enemy.curse.magicEvasionDebuff : 0);
+    }
+
+    function calculateEnemyEvasion(initial, decreasedEvasion, evasionBuff, curseEvasionDebuff) {
+        let maxRoll = initial;
+        if (decreasedEvasion) {
+            maxRoll = Math.floor(maxRoll * (1 - decreasedEvasion / 100));
         }
-        if (enemy.isBuffed) {
-            enemy.maxDefRoll = Math.floor(enemy.maxDefRoll * enemy.meleeEvasionBuff);
-            enemy.maxMagDefRoll = Math.floor(enemy.maxMagDefRoll * enemy.magicEvasionBuff);
-            enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.rangedEvasionBuff);
+        if (evasionBuff) {
+            maxRoll = Math.floor(maxRoll * evasionBuff);
         }
-        if (enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split')) {
-            enemy.maxDefRoll = Math.floor(enemy.maxDefRoll * enemy.curse.meleeEvasionDebuff);
-            enemy.maxMagDefRoll = Math.floor(enemy.maxMagDefRoll * enemy.curse.magicEvasionDebuff);
-            enemy.maxRngDefRoll = Math.floor(enemy.maxRngDefRoll * enemy.curse.rangedEvasionDebuff);
+        if (curseEvasionDebuff) {
+            maxRoll = Math.floor(maxRoll * curseEvasionDebuff);
         }
+        return maxRoll
     }
 
     function setEvasionDebuffsPlayer(player, playerStats, enemyStats) {
