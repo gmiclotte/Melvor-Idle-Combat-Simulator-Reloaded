@@ -1157,11 +1157,7 @@
         enemy.curse.confusionMult = 0;
         enemy.curse.decayDamage = 0;
         // Set accuracy based on protection prayers or stats
-        if (playerStats.isProtected) {
-            enemy.accuracy = 100 - protectFromValue;
-        } else {
-            enemy.accuracy = calculateAccuracy(enemyStats, enemyStats, playerStats, playerStats);
-        }
+        enemy.accuracy = calculateAccuracy(enemyStats, enemyStats, playerStats, playerStats);
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
