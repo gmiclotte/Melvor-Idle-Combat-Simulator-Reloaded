@@ -493,6 +493,10 @@
         enemyDoAttack(player, playerStats, enemy, enemyStats, true);
         postAttack(enemy, enemyStats, player, playerStats);
         multiAttackTimer(enemy);
+        if (!enemy.isAttacking && enemy.intoTheMist) {
+            enemy.intoTheMist = false;
+            enemy.increasedDamageReduction = 0;
+        }
         if (!enemy.isAttacking && player.removeMarkOfDeath) {
             player.markOfDeath = false;
             player.markOfDeathTurns = 0;
@@ -690,8 +694,12 @@
             // life steal
             if (isSpecial && currentSpecial.lifesteal) {
                 enemy.hitpoints += Math.floor(damage * currentSpecial.lifestealMultiplier);
-                enemy.hitpoints = Math.min(enemy.hitpoints, enemyStats.hitpoints);
             }
+            if (isSpecial && currentSpecial.setDOTHeal) {
+                enemy.intoTheMist = true;
+                enemy.hitpoints += Math.floor(currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
+            }
+            enemy.hitpoints = Math.min(enemy.hitpoints, enemyStats.hitpoints);
             // player recoil
             if (player.canRecoil) {
                 let reflectDamage = 0;
@@ -767,6 +775,10 @@
         // Curse Tracking
         if (actor.isCursed) {
             enemyCurseUpdate(target, actor, actorStats);
+        }
+        // if target is into the mist, then increase its DR
+        if (target.intoTheMist) {
+            target.increasedDamageReduction += 10;
         }
     }
 
