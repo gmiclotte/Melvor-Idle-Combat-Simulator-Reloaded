@@ -234,12 +234,10 @@
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
                             }
-                            // TODO: how to handle multi-attacks when the monster is dead?
-                            /*
-                            if (player.isAttacking) {
-                                enemyAlive = true;
+                            // Multi attack once more when the monster died on the first hit
+                            if (!enemyAlive && player.isAttacking && player.attackCount < player.countMax) {
+                                stats.totalTime += player.attackInterval;
                             }
-                            */
                         }
                     }
                     if (enemyAlive && player.isAttacking) {
