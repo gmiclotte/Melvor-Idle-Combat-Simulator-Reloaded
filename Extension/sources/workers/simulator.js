@@ -197,38 +197,8 @@
 
                     // Determine the time step
                     let timeStep = Infinity;
-                    // player
-                    if (player.isActing) {
-                        timeStep = Math.min(timeStep, player.actionTimer);
-                    }
-                    if (player.isAttacking) {
-                        timeStep = Math.min(timeStep, player.attackTimer);
-                    }
-                    if (player.isBurning) {
-                        timeStep = Math.min(timeStep, player.burnTimer);
-                    }
-                    if (player.isRecoiling) {
-                        timeStep = Math.min(timeStep, player.recoilTimer);
-                    }
-                    if (player.isBleeding) {
-                        timeStep = Math.min(timeStep, player.bleedTimer);
-                    }
-                    //enemy
-                    if (enemy.isActing) {
-                        timeStep = Math.min(timeStep, enemy.actionTimer);
-                    }
-                    if (enemy.isAttacking) {
-                        timeStep = Math.min(timeStep, enemy.attackTimer);
-                    }
-                    if (enemy.isBurning) {
-                        timeStep = Math.min(timeStep, enemy.burnTimer);
-                    }
-                    if (enemy.isRecoiling) {
-                        timeStep = Math.min(timeStep, enemy.recoilTimer);
-                    }
-                    if (enemy.isBleeding) {
-                        timeStep = Math.min(timeStep, enemy.bleedTimer);
-                    }
+                    timeStep = determineTimeStep(player, timeStep);
+                    timeStep = determineTimeStep(enemy, timeStep);
 
                     // throw error on invalid time step
                     if (timeStep <= 0) {
@@ -369,6 +339,25 @@
         cancelSimulation() {
             this.cancelStatus = true;
         }
+    }
+
+    function determineTimeStep(actor, timeStep) {
+        if (actor.isActing) {
+            timeStep = Math.min(timeStep, actor.actionTimer);
+        }
+        if (actor.isAttacking) {
+            timeStep = Math.min(timeStep, actor.attackTimer);
+        }
+        if (actor.isBurning) {
+            timeStep = Math.min(timeStep, actor.burnTimer);
+        }
+        if (actor.isRecoiling) {
+            timeStep = Math.min(timeStep, actor.recoilTimer);
+        }
+        if (actor.isBleeding) {
+            timeStep = Math.min(timeStep, actor.bleedTimer);
+        }
+        return timeStep;
     }
 
     function actorRecoilCD(actor) {
