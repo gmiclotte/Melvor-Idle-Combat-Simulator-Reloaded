@@ -228,7 +228,6 @@
 
                     let initialHP = enemyStats.damageTaken;
                     if (enemyAlive && player.isActing) {
-                        player.actionTimer -= timeStep;
                         if (player.actionTimer <= 0) {
                             playerAction(stats, player, playerStats, enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
@@ -244,7 +243,6 @@
                         }
                     }
                     if (enemyAlive && player.isAttacking) {
-                        player.attackTimer -= timeStep;
                         if (player.attackTimer <= 0) {
                             playerContinueAction(stats, player, playerStats, enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
@@ -254,26 +252,22 @@
                         }
                     }
                     if (enemyAlive && player.isBurning) {
-                        player.burnTimer -= timeStep;
                         if (player.burnTimer <= 0) {
                             actorBurn(player, playerStats);
                         }
                     }
                     if (enemyAlive && player.isRecoiling) {
-                        player.recoilTimer -= timeStep;
                         if (player.recoilTimer <= 0) {
                             actorRecoilCD(player);
                         }
                     }
                     if (enemyAlive && player.isBleeding) {
-                        player.bleedTimer -= timeStep;
                         if (player.bleedTimer <= 0) {
                             actorBleed(player, playerStats);
                         }
                     }
                     //enemy
                     if (enemyAlive && enemy.isActing) {
-                        enemy.actionTimer -= timeStep;
                         if (enemy.actionTimer <= 0) {
                             enemyAction(stats, player, playerStats, enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
@@ -283,7 +277,6 @@
                         }
                     }
                     if (enemyAlive && enemy.isAttacking) {
-                        enemy.attackTimer -= timeStep;
                         if (enemy.attackTimer <= 0) {
                             enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
@@ -293,7 +286,6 @@
                         }
                     }
                     if (enemyAlive && enemy.isBurning) {
-                        enemy.burnTimer -= timeStep;
                         if (enemy.burnTimer <= 0) {
                             actorBurn(enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
@@ -303,13 +295,11 @@
                         }
                     }
                     if (enemyAlive && enemy.isRecoiling) {
-                        enemy.recoilTimer -= timeStep;
                         if (enemy.recoilTimer <= 0) {
                             actorRecoilCD(enemy);
                         }
                     }
                     if (enemyAlive && enemy.isBleeding) {
-                        enemy.bleedTimer -= timeStep;
                         if (enemy.bleedTimer <= 0) {
                             actorBleed(enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
