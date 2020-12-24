@@ -4,6 +4,8 @@
 
     MICSR.version = 'v1.1.3';
     MICSR.gameVersion = 'Alpha v0.18.1';
+    MICSR.maxActions = 300;
+    MICSR.trials = 10000;
 
     /**
      }
