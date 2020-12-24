@@ -939,8 +939,14 @@
             isSpecial: isSpecial,
             statusEffect: {},
         };
-        // Check for guaranteed hit
-        let attackHits = enemy.isStunned || (isSpecial && player.currentSpecial.forceHit);
+        let attackHits;
+        if (canNotDodge(enemy) || (isSpecial && player.currentSpecial.forceHit)) {
+            attackHits = true;
+        } else {
+            // Roll for hit
+            const hitChance = Math.floor(Math.random() * 100);
+            attackHits = player.accuracy > hitChance;
+        }
         if (!attackHits) {
             // Roll for hit
             let hitChance = Math.floor(Math.random() * 100);
