@@ -1374,42 +1374,25 @@
     }
 
     function setEvasionDebuffsPlayer(player, playerStats, enemyStats) {
-        let evasionDebuff = 0;
+        let areaEvasionDebuff = 0;
         if (enemyStats.slayerArea === 9 /*Perilous Peaks*/) {
-            evasionDebuff = calculateAreaEffectValue(30, playerStats);
+            areaEvasionDebuff = calculateAreaEffectValue(30, playerStats);
         }
+        player.maxDefRoll = calculatePlayerEvasion(playerStats.maxDefRoll, player.meleeEvasionBuff, player.meleeEvasionDebuff + areaEvasionDebuff);
+        player.maxDefRoll = calculatePlayerEvasion(playerStats.maxRngDefRoll, player.rangedEvasionBuff, player.rangedEvasionDebuff + areaEvasionDebuff);
+        if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
+            areaEvasionDebuff = calculateAreaEffectValue(30, playerStats);
+        }
+        player.maxDefRoll = calculatePlayerEvasion(playerStats.maxMagDefRoll, player.magicEvasionBuff, player.magicEvasionDebuff + areaEvasionDebuff);
+    }
 
-        // melee
-        {
-            let maxDefRoll = playerStats.maxDefRoll;
-            if (player.meleeEvasionBuff) {
-                maxDefRoll = Math.floor(maxDefRoll * (1 + player.meleeEvasionBuff / 100));
-            }
-            maxDefRoll = Math.floor(maxDefRoll * (1 - (player.meleeEvasionDebuff + evasionDebuff) / 100));
-            player.maxDefRoll = maxDefRoll;
+    function calculatePlayerEvasion(initial, evasionBuff, evasionDebuff) {
+        let maxRoll = initial;
+        if (evasionBuff) {
+            maxRoll = Math.floor(maxRoll * (1 + evasionBuff / 100));
         }
-
-        // ranged
-        {
-            let maxRngDefRoll = playerStats.maxRngDefRoll;
-            if (player.rangedEvasionBuff) {
-                maxRngDefRoll = Math.floor(maxRngDefRoll * (1 + player.rangedEvasionBuff / 100));
-            }
-            maxRngDefRoll = Math.floor(maxRngDefRoll * (1 - (player.rangedEvasionDebuff + evasionDebuff) / 100));
-            player.maxRngDefRoll = maxRngDefRoll;
-        }
-        // magic
-        {
-            if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
-                evasionDebuff = calculateAreaEffectValue(30, playerStats);
-            }
-            let maxMagDefRoll = playerStats.maxMagDefRoll;
-            if (player.magicEvasionBuff) {
-                maxMagDefRoll = Math.floor(maxMagDefRoll * (1 + player.magicEvasionBuff / 100));
-            }
-            maxMagDefRoll = Math.floor(maxMagDefRoll * (1 - (player.magicEvasionDebuff + evasionDebuff) / 100));
-            player.maxMagDefRoll = maxMagDefRoll;
-        }
+        maxRoll = Math.floor(maxRoll * (1 - evasionDebuff / 100));
+        return maxRoll
     }
 
     // Slayer area effect value
