@@ -222,6 +222,10 @@
                     }
                     // combat time tracker
                     stats.totalTime += timeStep;
+
+                    processTimeStep(player, timeStep);
+                    processTimeStep(enemy, timeStep);
+
                     let initialHP = enemyStats.damageTaken;
                     if (enemyAlive && player.isActing) {
                         player.actionTimer -= timeStep;
@@ -378,6 +382,25 @@
         }
         if (actor.isBleeding) {
             timeStep = Math.min(timeStep, actor.bleedTimer);
+        }
+        return timeStep;
+    }
+
+    function processTimeStep(actor, timeStep) {
+        if (actor.isActing) {
+            actor.actionTimer -= timeStep;
+        }
+        if (actor.isAttacking) {
+            actor.attackTimer -= timeStep;
+        }
+        if (actor.isBurning) {
+            actor.burnTimer -= timeStep;
+        }
+        if (actor.isRecoiling) {
+            actor.recoilTimer -= timeStep;
+        }
+        if (actor.isBleeding) {
+            actor.bleedTimer -= timeStep;
         }
         return timeStep;
     }
