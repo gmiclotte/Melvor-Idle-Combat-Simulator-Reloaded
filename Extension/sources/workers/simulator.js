@@ -499,6 +499,7 @@
         }
         if (!enemy.isAttacking && player.removeMarkOfDeath) {
             player.markOfDeath = false;
+            player.removeMarkOfDeath = false;
             player.markOfDeathTurns = 0;
             player.markOfDeathStacks = 0;
         }
@@ -562,6 +563,17 @@
         ////////////
         // debuff //
         ////////////
+        // mark of death
+        if (statusEffect.markOfDeath) {
+            target.markOfDeath = true;
+            target.removeMarkOfDeath = false;
+            if (target.markOfDeathStacks <= 0) {
+                target.markOfDeathTurns = 3;
+            }
+            if (target.markOfDeathStacks < 3) {
+                target.markOfDeathStacks++;
+            }
+        }
         // evasion debuffs
         if (statusEffect.applyDebuffs && !target.activeDebuffs) {
             target.activeDebuffs = true;
@@ -1096,7 +1108,11 @@
         if (isSpecial && !actor.isAttacking && target.isSleeping) {
             modifier *= special.sleepDamageMultiplier;
         }
-        modifier *= (1 - (target.damageReduction / 100))
+        let damageReduction = target.damageReduction + target.increasedDamageReduction;
+        if (target.markOfDeath) {
+            damageReduction = Math.floor(damageReduction / 2);
+        }
+        modifier *= (1 - (damageReduction / 100));
         return modifier;
     }
 
@@ -1202,6 +1218,7 @@
         enemy.hitpoints = enemyStats.hitpoints;
         enemy.maxHitpoints = enemyStats.maxHitpoints;
         enemy.damageReduction = 0;
+        enemy.increasedDamageReduction = 0;
         enemy.reflectMelee = 0;
         enemy.reflectRanged = 0;
         enemy.reflectMagic = 0;
