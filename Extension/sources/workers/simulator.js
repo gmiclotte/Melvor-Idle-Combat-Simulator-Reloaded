@@ -538,6 +538,7 @@
         if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
             target.isSlowed = true;
             target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
+            target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
             calculateSpeed(target, targetStats);
         }
         ///////////
@@ -759,6 +760,7 @@
             actor.attackSpeedDebuffTurns--;
             if (actor.attackSpeedDebuffTurns <= 0) {
                 actor.isSlowed = false;
+                actor.attackSpeedDebuff = 0;
                 calculateSpeed(actor, actorStats)
             }
         }
@@ -1145,6 +1147,8 @@
         // slow
         common.isSlowed = false;
         common.attackSpeedDebuffTurns = 0;
+        common.attackSpeedDebuff = 0;
+        common.increasedAttackSpeed = 0;
         // buff
         common.isBuffed = false;
         common.buffTurns = 0;
@@ -1193,7 +1197,6 @@
         enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
         enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
         enemy.decreasedRangedEvasion = 0;
-        enemy.increasedAttackSpeed = 0;
         enemy.meleeEvasionBuff = 1;
         enemy.magicEvasionBuff = 1;
         enemy.rangedEvasionBuff = 1;
