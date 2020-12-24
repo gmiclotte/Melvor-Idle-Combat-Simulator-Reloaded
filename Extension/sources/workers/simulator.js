@@ -121,6 +121,8 @@
             if (playerStats.specialData.setDamage) playerStats.specialData.setDamage *= numberMultiplier;
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
+            playerStats.isPlayer = true;
+            enemyStats.isPlayer = false;
 
             // Start Monte Carlo simulation
             let enemyKills = 0;
