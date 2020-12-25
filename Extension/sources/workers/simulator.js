@@ -632,14 +632,14 @@
         target.bleedCount = 0;
         if (statusEffect.totalBleedHP > 0) {
             if (statusEffect.totalBleedHPCustom === 1) {
-                target.bleedDamage = Math.floor((Math.random() * (damage * statusEffect.totalBleedHP)) / target.bleedCount);
+                target.bleedDamage = Math.floor((Math.random() * damage * statusEffect.totalBleedHP) / statusEffect.bleedCount);
             } else {
                 // bleed for `statusEffect.totalBleedHP` times initial damage
-                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / target.bleedMaxCount);
+                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / statusEffect.bleedCount);
             }
         } else {
             // bleed for `statusEffect.totalBleedHPPercent` % of max HP
-            target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / target.bleedMaxCount);
+            target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / statusEffect.bleedCount);
         }
     }
 
