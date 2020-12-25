@@ -1070,6 +1070,7 @@
                 const enemyStats = {
                     monsterID: monsterID,
                     hitpoints: 0,
+                    maxHitpoints: 0,
                     damageTaken: 0,
                     attackSpeed: 0,
                     attackType: 0,
@@ -1098,7 +1099,7 @@
                     slayerIdx++;
                 }
                 // Calculate Enemy Stats
-                enemyStats.hitpoints = MONSTERS[monsterID].hitpoints * numberMultiplier;
+                enemyStats.maxHitpoints = MONSTERS[monsterID].hitpoints * numberMultiplier;
                 enemyStats.attackSpeed = MONSTERS[monsterID].attackSpeed;
                 const effectiveDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
                 enemyStats.maxDefRoll = effectiveDefenceLevel * (MONSTERS[monsterID].defenceBonus + 64);

@@ -175,8 +175,8 @@
             let tooManyActions = 0;
             while (enemyKills < trials) {
                 // Reset Timers and statuses
-                resetPlayer(player, playerStats, enemyStats);
-                resetEnemy(enemy, playerStats, enemyStats);
+                resetPlayer(player, playerStats);
+                resetEnemy(enemy, enemyStats);
                 if (playerStats.canCurse) {
                     setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
                 }
@@ -553,7 +553,7 @@
         if (canApplyStatus(statusEffect.burnDebuff, target.isBurning)) {
             target.isBurning = true;
             target.burnCount = 0;
-            target.burnDamage = Math.floor((targetStats.maxHitpoints * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
+            target.burnDamage = Math.floor((target.maxHitpoints * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
             target.burnTimer = target.burnInterval;
         }
         // Apply Bleeding
@@ -640,7 +640,7 @@
             }
         } else {
             // bleed for `statusEffect.totalBleedHPPercent` % of max HP
-            totalBleedDamage = targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100;
+            totalBleedDamage = target.maxHitpoints * statusEffect.totalBleedHPPercent / 100;
         }
         target.bleedDamage = Math.floor(totalBleedDamage / statusEffect.bleedCount);
     }
@@ -719,7 +719,7 @@
                 enemy.intoTheMist = true;
                 enemy.hitpoints += Math.floor(currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
             }
-            enemy.hitpoints = Math.min(enemy.hitpoints, enemyStats.hitpoints);
+            enemy.hitpoints = Math.min(enemy.hitpoints, enemy.maxHitpoints);
             // player recoil
             if (player.canRecoil) {
                 let reflectDamage = 0;
@@ -908,6 +908,12 @@
     function dealDamage(target, targetStats, damage) {
         target.hitpoints -= Math.floor(damage);
         targetStats.damageTaken += Math.floor(damage);
+        if (!target.isPlayer && targetStats.monsterID === 143 && target.hitpoints <= 0) {
+            let random = Math.random() * 100;
+            if (random < 40) {
+                target.hitpoints = targetStats.maxHitpoints;
+            }
+        }
     }
 
     function processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats) {
@@ -1082,7 +1088,7 @@
         // check if any set damage cases apply
         if (currentSpecial.setHPDamage !== undefined) {
             // TODO: crude estimate is based on auto eat 3 40%->80%
-            let currHP = actor.isPlayer ? actorStats.maxHitpoints * .6 : actor.hitpoints;
+            let currHP = actor.isPlayer ? actor.maxHitpoints * .6 : actor.hitpoints;
             let setHPDamage = (currentSpecial.setHPDamage / 100) * currHP;
             damage = Math.floor(Math.random() * setHPDamage + 10);
         } else if (currentSpecial.customDamageModifier !== undefined) {
@@ -1210,10 +1216,11 @@
         common.decreasedAccuracy = 0;
     }
 
-    function resetPlayer(player, playerStats, enemyStats) {
+    function resetPlayer(player, playerStats) {
         resetCommonStats(player, playerStats.attackSpeed - playerStats.decreasedAttackSpeed);
         player.isPlayer = true;
         player.hitpoints = 0;
+        player.maxHitpoints = playerStats.maxHitpoints;
         player.reductionBuff = 0;
         player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
@@ -1221,10 +1228,10 @@
     }
 
 
-    function resetEnemy(enemy, playerStats, enemyStats) {
+    function resetEnemy(enemy, enemyStats) {
         resetCommonStats(enemy, enemyStats.attackSpeed);
         enemy.isPlayer = false;
-        enemy.hitpoints = enemyStats.hitpoints;
+        enemy.hitpoints = enemyStats.maxHitpoints;
         enemy.maxHitpoints = enemyStats.maxHitpoints;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
