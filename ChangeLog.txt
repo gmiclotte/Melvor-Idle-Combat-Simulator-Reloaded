@@ -1,6 +1,6 @@
-Next
-    Fixes:
-    - Deadeye, Warlock and Fighter Amulet sometimes didn't activate when swapping between melee, ranged and magic attack
+v1.2.0
+    - Refactor many things
+    - Implement v0.18 changes
 
 v1.1.3
     Fixes:
