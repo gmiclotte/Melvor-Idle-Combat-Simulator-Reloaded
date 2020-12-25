@@ -993,17 +993,14 @@
             attackHits = true;
         } else {
             // Roll for hit
-            const hitChance = Math.floor(Math.random() * 100);
-            attackHits = player.accuracy > hitChance;
-        }
-        if (!attackHits) {
-            // Roll for hit
             let hitChance = Math.floor(Math.random() * 100);
             if (playerStats.diamondLuck) {
                 const hitChance2 = Math.floor(Math.random() * 100);
-                if (hitChance > hitChance2) hitChance = hitChance2;
+                if (hitChance > hitChance2) {
+                    hitChance = hitChance2;
+                }
             }
-            if (player.accuracy > hitChance) attackHits = true;
+            attackHits = player.accuracy > hitChance;
         }
         if (!attackHits) {
             // exit early
