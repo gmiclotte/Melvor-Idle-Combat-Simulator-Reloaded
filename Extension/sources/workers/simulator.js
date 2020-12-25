@@ -1033,7 +1033,7 @@
         ////////////////////
         let statusEffect = {...player.currentSpecial};
         // Fighter amulet stun overrides special attack stun
-        if (playerStats.activeItems.fighterAmulet && attackResult.damageToEnemy >= playerStats.maxHit * 0.70) {
+        if (playerStats.activeItems.fighterAmulet && playerStats.isMelee && attackResult.damageToEnemy >= playerStats.maxHit * 0.70) {
             statusEffect.canStun = true;
             statusEffect.stunChance = undefined;
             statusEffect.stunTurns = 1;
@@ -1145,7 +1145,7 @@
         if (enemy.isCursed && enemy.curse.type === 'Anguish') {
             damage *= enemy.curse.damageMult;
         }
-        if (playerStats.activeItems.deadeyeAmulet) {
+        if (playerStats.activeItems.deadeyeAmulet && playerStats.isRanged) {
             damage *= critDamageModifier(damage);
         }
         if (playerStats.isSlayerTask && playerStats.activeItems.slayerSkillcape) {
