@@ -630,17 +630,19 @@
         target.bleedInterval = statusEffect.bleedInterval;
         target.bleedTimer = target.bleedInterval;
         target.bleedCount = 0;
+        let totalBleedDamage = 1;
         if (statusEffect.totalBleedHP > 0) {
+            // bleed for `statusEffect.totalBleedHP` times initial damage
+            totalBleedDamage = damage * statusEffect.totalBleedHP;
             if (statusEffect.totalBleedHPCustom === 1) {
-                target.bleedDamage = Math.floor((Math.random() * damage * statusEffect.totalBleedHP) / statusEffect.bleedCount);
-            } else {
-                // bleed for `statusEffect.totalBleedHP` times initial damage
-                target.bleedDamage = Math.floor(damage * statusEffect.totalBleedHP / statusEffect.bleedCount);
+                // bleed for up to `statusEffect.totalBleedHP` times initial damage
+                totalBleedDamage *= Math.random();
             }
         } else {
             // bleed for `statusEffect.totalBleedHPPercent` % of max HP
-            target.bleedDamage = Math.floor(targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100 / statusEffect.bleedCount);
+            totalBleedDamage = targetStats.hitpoints * statusEffect.totalBleedHPPercent / 100;
         }
+        target.bleedDamage = Math.floor(totalBleedDamage / statusEffect.bleedCount);
     }
 
     function enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial) {
