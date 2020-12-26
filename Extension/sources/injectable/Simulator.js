@@ -812,6 +812,47 @@
              * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
              */
             simulateCombat() {
+                this.setupCurrentSim();
+                // Start simulation workers
+                document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
+                this.initializeSimulationJobs();
+            }
+
+            /*
+             * Export currentsim variables
+             */
+            exportCurrentSim() {
+                // configure current sim object
+                this.setupCurrentSim();
+                // configure spellSelected object
+                const spellSelected = {};
+                Object.getOwnPropertyNames(this.spells).forEach(x => {
+                    spellSelected[x] = {
+                        isSelected: this.spells[x].isSelected,
+                        selectedID: this.spells[x].selectedID,
+                    }
+                });
+                // configure the potionSelected object
+                const potionSelected = {
+                    potionSelected: this.potionSelected,
+                    potionID: this.potionID,
+                    potionTier: this.potionTier,
+                };
+                // return the settings
+                return {
+                    currentSim: this.currentSim,
+                    equipmentSelected: this.parent.equipmentSelected,
+                    spellSelected: spellSelected,
+                    prayerSelected: this.prayerSelected,
+                    potionSelected: potionSelected,
+                    petSelected: this.petOwned,
+                };
+            }
+
+            /**
+             * Setup currentsim variables
+             */
+            setupCurrentSim() {
                 this.simStartTime = performance.now();
                 this.simCancelled = false;
                 // Start by grabbing the player stats
@@ -1044,9 +1085,6 @@
                     const jobBComplex = this.enemyStats[jobB.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobB.monsterID]);
                     return jobBComplex - jobAComplex;
                 });
-                // Start simulation workers
-                document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
-                this.initializeSimulationJobs();
             }
 
             /**

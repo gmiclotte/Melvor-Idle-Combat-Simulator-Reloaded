@@ -461,6 +461,7 @@
                     this.combatStatCard.addSectionTitle('Simulate/Export');
                     this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
                     this.combatStatCard.addButton('Export Data', () => this.exportDataOnClick());
+                    this.combatStatCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
                     this.combatStatCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
                 }
                 // Export Options Card
@@ -1796,6 +1797,12 @@
                 }
             }
 
+            exportSettingButtonOnClick() {
+                const currentSim = this.simulator.exportCurrentSim();
+                const data = JSON.stringify(currentSim, null, 1);
+                this.popExport(data);
+            }
+
             /**
              * Callback for when the sell bones option is changed
              * @param {Event} event The change event for a radio
@@ -1982,15 +1989,25 @@
                 this.updateZoneInfoCard();
             }
 
+            popExport(data) {
+                navigator.clipboard.writeText(data).then(() => {
+                }, (error) => {
+                    Swal.fire({
+                        title: "Clipboard API error!",
+                        html: `<h5 class="font-w600 text-combat-smoke mb-1">Manually copy the data below, e.g. with ctrl-A ctrl-C.</h5><textarea class="mcsLabel mb-1">${data}</textarea>`,
+                        showCancelButton: false,
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "Bye",
+                    });
+                });
+            }
+
             /**
              * The callback for when the export button is clicked
              */
             exportDataOnClick() {
-                navigator.clipboard.writeText(this.simulator.exportData()).then(() => {
-
-                }, (error) => {
-                    throw error;
-                });
+                let data = this.simulator.exportData();
+                this.popExport(data);
             }
 
             /**
