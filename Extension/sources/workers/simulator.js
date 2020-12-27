@@ -29,7 +29,7 @@
                 break;
             case 'START_SIMULATION':
                 const startTime = performance.now();
-                combatSimulator.simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions).then((simResult) => {
+                combatSimulator.simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
                     postMessage({
                         action: 'FINISHED_SIM',
@@ -116,7 +116,7 @@
          * @param {number} maxActions
          * @return {Promise<Object>}
          */
-        async simulateMonster(enemyStats, playerStats, trials, maxActions) {
+        async simulateMonster(enemyStats, playerStats, trials, maxActions, forceFullSim) {
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
             playerStats.isPlayer = true;
@@ -311,6 +311,7 @@
                     return {
                         simSuccess: false,
                         reason: 'bogus enemy hp',
+                        monsterID: enemyStats.monsterID,
                         playerStats: {...playerStats},
                         player: {...player},
                         enemyStats: {...enemyStats},
@@ -319,6 +320,13 @@
                 }
                 if (enemy.hitpoints > 0) {
                     tooManyActions++;
+                    if (!forceFullSim) {
+                        return {
+                            simSuccess: false,
+                            reason: 'too many actions',
+                            monsterID: enemyStats.monsterID,
+                        }
+                    }
                 }
                 enemyKills++;
             }

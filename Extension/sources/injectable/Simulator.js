@@ -184,6 +184,8 @@
                 this.maxActions = MICSR.maxActions;
                 /** Number of enemy kills to simulate */
                 this.trials = MICSR.trials;
+                /** force full sim when too many actions are taken */
+                this.forceFullSim = false;
                 /** Number of hours to farm for signet ring */
                 this.signetFarmTime = 1;
                 /** @type {boolean[]} */
@@ -1035,6 +1037,7 @@
                 this.currentSim.options = {
                     trials: this.trials,
                     maxActions: this.maxActions,
+                    forceFullSim: this.forceFullSim,
                 };
                 this.currentSim.playerStats = playerStats;
                 this.currentSim.isSlayerTask = this.isSlayerTask;

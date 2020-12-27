@@ -488,6 +488,7 @@
                     this.simOptionsCard.addSectionTitle('Simulation Options');
                     this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
                     this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
+                    this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
                     this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
                     const dropDownOptionNames = [];
                     for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
@@ -1839,6 +1840,14 @@
              */
             hardcoreRadioOnChange(newState) {
                 this.simulator.isHardcore = newState;
+            }
+
+            /**
+             * Callback for when the hardcore option is changed
+             * @param {boolean} newState The new value for the option
+             */
+            fullSimRadioOnChange(newState) {
+                this.simulator.forceFullSim = newState;
             }
 
             /**
