@@ -181,8 +181,8 @@
                     setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
                 }
                 // Set accuracy based on protection prayers or stats
-                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
-                enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
+                setAccuracy(player, playerStats, enemy, enemyStats);
+                setAccuracy(enemy, enemyStats, player, playerStats);
 
                 // Simulate combat until enemy is dead or max actions has been reached
                 let enemyAlive = true;
@@ -696,7 +696,7 @@
                     enemy.damageReduction = currentSpecial.increasedDamageReduction;
                 }
                 // update player accuracy
-                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+                setAccuracy(player, playerStats, enemy, enemyStats);
             }
             forceHit = currentSpecial.forceHit;
         }
@@ -788,7 +788,7 @@
                 actor.reflectRanged = 0;
                 actor.reflectMagic = 0;
                 actor.damageReduction = 0;
-                target.accuracy = calculateAccuracy(target, targetStats, actor, actorStats);
+                setAccuracy(target, targetStats, actor, actorStats);
             }
         }
         // Slow Tracking
@@ -828,11 +828,11 @@
         enemy.isCursed = false;
         switch (enemy.curse.type) {
             case 'Blinding':
-                enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
+                setAccuracy(enemy, enemyStats, player, playerStats);
                 break;
             case 'Soul Split':
             case 'Decay':
-                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+                setAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
                 enemy.maxHit = enemyStats.maxHit;
@@ -952,19 +952,19 @@
     function playerUsePreAttackSpecial(player, playerStats, enemy, enemyStats) {
         if (playerStats.isMelee && player.currentSpecial.decreasedMeleeEvasion) {
             enemy.decreasedMeleeEvasion = player.currentSpecial.decreasedMeleeEvasion;
-            player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+            setAccuracy(player, playerStats, enemy, enemyStats);
         }
         if (playerStats.isRanged && player.currentSpecial.decreasedRangedEvasion) {
             enemy.decreasedRangedEvasion = player.currentSpecial.decreasedRangedEvasion;
-            player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+            setAccuracy(player, playerStats, enemy, enemyStats);
         }
         if (playerStats.isMagic && player.currentSpecial.decreasedMagicEvasion) {
             enemy.decreasedMagicEvasion = player.currentSpecial.decreasedMagicEvasion;
-            player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+            setAccuracy(player, playerStats, enemy, enemyStats);
         }
         if (player.currentSpecial.decreasedAccuracy && !enemy.decreasedAccuracy) {
             enemy.decreasedAccuracy = player.currentSpecial.decreasedAccuracy;
-            enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
+            setAccuracy(enemy, enemyStats, player, playerStats);
         }
     }
 
@@ -978,11 +978,11 @@
         // Update the curses that change stats
         switch (enemy.curse.type) {
             case 'Blinding':
-                enemy.accuracy = calculateAccuracy(enemy, enemyStats, player, playerStats);
+                setAccuracy(enemy, enemyStats, player, playerStats);
                 break;
             case 'Soul Split':
             case 'Decay':
-                player.accuracy = calculateAccuracy(player, playerStats, enemy, enemyStats);
+                setAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
                 enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
@@ -1336,7 +1336,7 @@
 
     // TODO: duplicated in injectable/Simulator.js
     /**
-     * Computes the accuracy of actor vs target
+     * Sets the accuracy of actor vs target
      * @param {Object} actor
      * @param {number} actor.attackType Attack Type Melee:0, Ranged:1, Magic:2
      * @param {number} actor.maxAttackRoll Accuracy Rating
@@ -1344,9 +1344,13 @@
      * @param {number} target.maxDefRoll Melee Evasion Rating
      * @param {number} target.maxRngDefRoll Ranged Evasion Rating
      * @param {number} target.maxMagDefRoll Magic Evasion Rating
-     * @return {number}
      */
-    function calculateAccuracy(actor, actorStats, target, targetStats) {
+    function setAccuracy(actor, actorStats, target, targetStats) {
+        // if target is player using protection prayer: return early
+        if (target.isPlayer && targetStats.isProtected) {
+            actor.accuracy = 100 - protectFromValue;
+            return;
+        }
         // determine attack roll
         let maxAttackRoll = actorStats.maxAttackRoll;
         if (actor.decreasedAccuracy) {
@@ -1357,9 +1361,6 @@
         }
         // handle player and enemy cases
         if (target.isPlayer) {
-            if (targetStats.isProtected) {
-                return 100 - protectFromValue;
-            }
             setEvasionDebuffsPlayer(target, targetStats, actorStats);
         } else {
             // Adjust ancient magick forcehit
@@ -1385,7 +1386,7 @@
         } else {
             acc = (1 - 0.5 * targetDefRoll / maxAttackRoll) * 100;
         }
-        return acc;
+        actor.accuracy = acc;
     }
 
     /**
