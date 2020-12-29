@@ -566,7 +566,7 @@
         }
         // Apply Bleeding
         if (canApplyStatus(statusEffect.canBleed, target.isBleeding, statusEffect.bleedChance)) {
-            applyBleeding(statusEffect, damage, target, targetStats);
+            applyBleeding(statusEffect, damage, target);
         }
         ////////////
         // debuff //
@@ -631,7 +631,7 @@
         target.actionTimer = target.currentSpeed;
     }
 
-    function applyBleeding(statusEffect, damage, target, targetStats) {
+    function applyBleeding(statusEffect, damage, target) {
         //apply new bleed
         target.isBleeding = true;
         target.bleedMaxCount = statusEffect.bleedCount;
@@ -802,7 +802,7 @@
         }
         // Curse Tracking
         if (actor.isCursed) {
-            enemyCurseUpdate(target, actor, actorStats);
+            enemyCurseUpdate(target, targetStats, actor, actorStats);
         }
         // if target is into the mist, then increase its DR
         if (target.intoTheMist) {
@@ -810,7 +810,7 @@
         }
     }
 
-    function enemyCurseUpdate(player, enemy, enemyStats) {
+    function enemyCurseUpdate(player, playerStats, enemy, enemyStats) {
         // don't curse
         if (enemy.isAttacking) {
             return;
@@ -1257,18 +1257,7 @@
         enemy.magicEvasionBuff = 1;
         enemy.rangedEvasionBuff = 1;
         enemy.attackType = enemyStats.attackType;
-        if (enemy.curse === undefined) {
-            enemy.curse = {};
-        }
-        enemy.curse.type = '';
-        enemy.curse.accuracyDebuff = 1;
-        enemy.curse.maxHitDebuff = 1;
-        enemy.curse.damageMult = 1;
-        enemy.curse.magicEvasionDebuff = 1;
-        enemy.curse.meleeEvasionDebuff = 1;
-        enemy.curse.rangedEvasionDebuff = 1;
-        enemy.curse.confusionMult = 0;
-        enemy.curse.decayDamage = 0;
+        enemy.curse = {};
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
@@ -1463,7 +1452,7 @@
      * @param {Object} enemy
      */
     function setEvasionDebuffsEnemy(enemy, enemyStats) {
-        const isCursed = enemy.isCursed && (curse.type === 'Decay' || curse.type === 'Soul Split');
+        const isCursed = enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split');
         enemy.maxDefRoll = calculateEnemyEvasion(enemyStats.maxDefRoll, enemy.decreasedMeleeEvasion, enemy.meleeEvasionBuff, isCursed ? enemy.curse.meleeEvasionDebuff : 0);
         enemy.maxRngDefRoll = calculateEnemyEvasion(enemyStats.maxRngDefRoll, enemy.decreasedRangedEvasion, enemy.rangedEvasionBuff, isCursed ? enemy.curse.rangedEvasionDebuff : 0);
         enemy.maxMagDefRoll = calculateEnemyEvasion(enemyStats.maxMagDefRoll, enemy.decreasedMagicEvasion, enemy.magicEvasionBuff, isCursed ? enemy.curse.magicEvasionDebuff : 0);
