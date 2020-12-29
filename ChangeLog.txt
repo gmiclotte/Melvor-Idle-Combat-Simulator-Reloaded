@@ -1,3 +1,9 @@
+v1.2.1
+    Fixes:
+    - Fix throwable item double counted stats bug
+    - Fix player max attack rolls
+    - Fix "no damage" special attack bug
+
 v1.2.0
     - Refactor many things
     - Implement v0.18 changes
