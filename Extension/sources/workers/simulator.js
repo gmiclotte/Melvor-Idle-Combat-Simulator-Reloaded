@@ -1101,7 +1101,7 @@
             damage = Math.floor(Math.random() * setHPDamage + 10);
         } else if (currentSpecial.customDamageModifier !== undefined) {
             damage = Math.floor(targetStats.maxHit * (1 - currentSpecial.customDamageModifier / 100));
-        } else if (currentSpecial.setDamage) {
+        } else if (currentSpecial.setDamage !== null && currentSpecial.setDamage !== undefined) {
             damage = currentSpecial.setDamage * numberMultiplier;
         } else if (isSpecial && currentSpecial.maxHit) {
             damage = actorStats.maxHit;
