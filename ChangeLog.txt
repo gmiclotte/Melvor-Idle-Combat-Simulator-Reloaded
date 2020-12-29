@@ -1,7 +1,11 @@
+v1.2.2
+    Fixes:
+    - Fix curses bugs
+
 v1.2.1
     Fixes:
     - Fix throwable item double counted stats bug
-    - Fix player max attack rolls
+    - Fix player max defense rolls
     - Fix "no damage" special attack bug
 
 v1.2.0
