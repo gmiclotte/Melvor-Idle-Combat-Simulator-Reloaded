@@ -472,7 +472,7 @@
 
                     // passive stats
                     Object.getOwnPropertyNames(MICSR.passiveStatNames).forEach(stat => {
-                        if (stat === 'ammoPreservation' && equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                        if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
                             return;
                         }
                         equipmentStats[stat] += item[stat] || 0;
@@ -515,11 +515,9 @@
                                         console.error(`Runes provided by ${item.name} are not taken into account!`)
                                     }
                                     return;
-                                case 'rangedAttackBonus', 'rangedStrengthBonus', 'rangedDefenceBonus':
-                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
-                                        return;
-                                    }
-                                    break;
+                            }
+                            if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                                return;
                             }
                             // standard stats
                             equipmentStats[stat] += itemStat || 0;
