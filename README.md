@@ -116,3 +116,18 @@ In addition the calculation for hitpoints used per second assumes there is no ca
 ## Suggestions and Feedback
 Found a bug or want to request a feature?
 Feel free to message me on the [Melvor Idle Discord](https://discord.gg/TWDT7PM) or [create an issue](/../../issues) on this repository.
+
+## Maintenance Guidelines
+1. Item stats and special attack stats that have not been marked as implemented in `statNames.js` and `specialNames.js` are explicitly shown on load. Known bugged stats are also shown here.
+2. To update `unique_item_effects.txt`, the list of items with unique effects, run:
+```
+grep -v "rewards: " combat.js | # ignore dungeon reward lines, this can have multiple entries on a single line
+grep -v "slayerItem: " | # ignore slayer area required items
+sed "s#addItemToBank(CON##g" | # ignore addItemToBank arguments
+sed "s#equipItem(CON##g" | # ignore equipItem arguments
+grep -o "CONSTANTS.item.[a-zA-Z_]*" | # get all items that are mentioned by name
+sort | uniq | # sort and get rid of duplicates
+grep -o "[a-zA-Z_]*$" > UniqueItemEffects.txt # only keep item names and write to file
+```
+or an equivalent command. Changes in this file should be committed along with the required changes to the simulation, if any.
+3. Automated testing: TODO :-)
