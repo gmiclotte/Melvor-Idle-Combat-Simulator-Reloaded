@@ -269,6 +269,7 @@
                     /** @type {PlayerStats} */
                     playerStats: {
                         activeItems: {},
+                        equipmentSelected: [],
                     },
                     /** @type {EquipmentStats} */
                     equipmentStats: {},
@@ -842,7 +843,6 @@
                 // return the settings
                 return {
                     currentSim: this.currentSim,
-                    equipmentSelected: this.parent.equipmentSelected,
                     spellSelected: spellSelected,
                     prayerSelected: this.prayerSelected,
                     potionSelected: potionSelected,
@@ -883,6 +883,7 @@
                     startingGP: 50000000,
                     levels: Object.assign({}, this.playerLevels), // Shallow copy of player levels
                     activeItems: {...this.equipmentStats.activeItems},
+                    equipmentSelected: [...this.parent.equipmentSelected],
                     prayerPointsPerAttack: 0,
                     prayerPointsPerEnemy: 0,
                     prayerPointsPerHeal: 0,
@@ -1612,19 +1613,25 @@
                         enterSet.push(true);
                     }
                 }
-                for (let i = 0; i < slayerAreas.length; i++) {
+                // Check which slayer areas we can access with current stats and equipment
+                for (const area of slayerAreas) {
                     let canEnter = true;
-                    if (slayerAreas[i].slayerLevel !== undefined && this.playerLevels.Slayer < slayerAreas[i].slayerLevel) {
+                    // check level requirement
+                    if (area.slayerLevel !== undefined && this.playerLevels.Slayer < area.slayerLevel) {
                         canEnter = false;
                     }
-                    if (this.currentSim.playerStats.activeItems.slayerSkillcape) {
-                        canEnter = true;
-                    } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Mirror_Shield) {
-                        canEnter = this.currentSim.playerStats.activeItems.mirrorShield;
-                    } else if (slayerAreas[i].slayerItem === CONSTANTS.item.Magical_Ring) {
-                        canEnter = this.currentSim.playerStats.activeItems.magicalRing;
+                    // check clear requirement
+                    if (area.dungeonCompleted >= 0 && dungeonCompleteCount[area.dungeonCompleted] < 1) {
+                        canEnter = false
                     }
-                    for (let j = 0; j < slayerAreas[i].monsters.length; j++) {
+                    // check gear requirement
+                    if (area.slayerItem > 0
+                        && !this.currentSim.playerStats.activeItems.slayerSkillcape
+                        && !this.currentSim.playerStats.equipmentSelected.includes(area.slayerItem)) {
+                        canEnter = false;
+                    }
+                    // push `canEnter` for every monster in this zone
+                    for (let j = 0; j < area.monsters.length; j++) {
                         enterSet.push(canEnter);
                     }
                 }
