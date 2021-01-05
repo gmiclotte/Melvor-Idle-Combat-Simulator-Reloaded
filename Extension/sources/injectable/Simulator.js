@@ -398,7 +398,6 @@
                     hitpointRegenInterval: hitpointRegenInterval,
                     deadeyeAmulet: items[CONSTANTS.item.Deadeye_Amulet],
                     confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
-                    warlockAmulet: items[CONSTANTS.item.Warlock_Amulet],
                     CURSEIDS: CONSTANTS.curse,
                 });
             }

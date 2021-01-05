@@ -61,7 +61,6 @@
     let hitpointRegenInterval;
     let deadeyeAmulet;
     let confettiCrossbow;
-    let warlockAmulet;
     let CURSEIDS;
 
     class CombatSimulator {
@@ -104,7 +103,6 @@
             hitpointRegenInterval = data.hitpointRegenInterval;
             deadeyeAmulet = data.deadeyeAmulet;
             confettiCrossbow = data.confettiCrossbow;
-            warlockAmulet = data.warlockAmulet;
             CURSEIDS = data.CURSEIDS;
         }
 
