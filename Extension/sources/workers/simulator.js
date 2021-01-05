@@ -1070,6 +1070,9 @@
             } else if (gpMultiplier < confettiCrossbow.gpMultiplierMin) {
                 gpMultiplier = confettiCrossbow.gpMultiplierMin;
             }
+            if (playerStats.activeItems.aorpheatsSignetRing) {
+                gpMultiplier *= 2;
+            }
             stats.gpGainedFromDamage += Math.floor(attackResult.damageToEnemy * gpMultiplier);
         }
 
