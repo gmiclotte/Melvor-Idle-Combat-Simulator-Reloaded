@@ -5,6 +5,7 @@ Cape_of_Completion
 Cloudburst_Staff
 Confetti_Crossbow
 Deadeye_Amulet
+Elder_Crown
 Fighter_Amulet
 Gold_Emerald_Ring
 Gold_Ruby_Ring

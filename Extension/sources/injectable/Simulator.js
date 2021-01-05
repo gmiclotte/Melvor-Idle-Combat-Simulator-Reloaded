@@ -442,6 +442,7 @@
                         slayerCrossbow: this.parent.equipmentSelected.includes(CONSTANTS.item.Slayer_Crossbow),
                         bigRon: this.parent.equipmentSelected.includes(CONSTANTS.item.Big_Ron),
                         aorpheatsSignetRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Aorpheats_Signet_Ring),
+                        elderCrown: this.parent.equipmentSelected.includes(CONSTANTS.item.Elder_Crown),
                         // slayer gear
                         mirrorShield: this.parent.equipmentSelected.includes(CONSTANTS.item.Mirror_Shield),
                         magicalRing: this.parent.equipmentSelected.includes(CONSTANTS.item.Magical_Ring),

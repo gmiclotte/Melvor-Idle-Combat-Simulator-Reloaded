@@ -259,7 +259,7 @@
                     }
                     if (enemyAlive && player.isBleeding) {
                         if (player.bleedTimer <= 0) {
-                            actorBleed(player, playerStats);
+                            targetBleed(enemy, enemyStats, player, playerStats);
                         }
                     }
                     //enemy
@@ -297,7 +297,7 @@
                     }
                     if (enemyAlive && enemy.isBleeding) {
                         if (enemy.bleedTimer <= 0) {
-                            actorBleed(enemy, enemyStats);
+                            targetBleed(player, playerStats, enemy, enemyStats);
                             if (initialHP !== enemyStats.damageTaken) {
                                 enemyAlive = enemy.hitpoints > 0;
                                 initialHP = enemy.hitpoints;
@@ -417,17 +417,21 @@
         actor.burnCount++;
     }
 
-    function actorBleed(actor, actorStats) {
+    function targetBleed(actor, actorStats, target, targetStats) {
         // reset timer
-        actor.bleedTimer = actor.bleedInterval;
+        target.bleedTimer = target.bleedInterval;
         // Check if stopped bleeding
-        if (actor.bleedCount >= actor.bleedMaxCount) {
-            actor.isBleeding = false;
+        if (target.bleedCount >= target.bleedMaxCount) {
+            target.isBleeding = false;
             return;
         }
         // Apply bleed damage
-        dealDamage(actor, actorStats, actor.bleedDamage);
-        actor.bleedCount++;
+        dealDamage(target, targetStats, target.bleedDamage);
+        target.bleedCount++;
+        // Elder Crown life steals bleed damage
+        if (actor.isPlayer && actorStats.activeItems.elderCrown) {
+            actorStats.damageHealed += Math.floor(target.bleedDamage);
+        }
     }
 
     function enemyAction(stats, player, playerStats, enemy, enemyStats) {
