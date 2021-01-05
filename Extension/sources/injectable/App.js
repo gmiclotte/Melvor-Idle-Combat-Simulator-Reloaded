@@ -2329,7 +2329,7 @@
             updateCombatStats() {
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
-                        const attackSpeed = this.simulator.combatStats[key] - this.simulator.decreasedAttackSpeed();
+                        const attackSpeed = this.simulator.playerAttackSpeed();
                         document.getElementById(`MCS ${key} CS Output`).textContent = attackSpeed.toLocaleString();
                     } else {
                         document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();

@@ -637,6 +637,10 @@
                 }
                 // Calculate damage reduction
                 this.combatStats.damageReduction = this.equipmentStats.damageReduction + this.herbloreBonus.damageReduction + this.prayerBonus.damageReduction;
+                if (this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Passive] === CONSTANTS.item.Guardian_Amulet) {
+                    // Guardian Amulet gives +5% DR in passive slot
+                    this.combatStats.damageReduction += 5;
+                }
                 if (this.petOwned[14]) {
                     this.combatStats.damageReduction++;
                 }
@@ -799,6 +803,16 @@
                 this.herbloreBonus.diamondLuck = false; // 9
                 this.herbloreBonus.divine = 0; // 10
                 this.herbloreBonus.luckyHerb = 0; // 11
+            }
+
+            playerAttackSpeed() {
+                let attackSpeed = this.combatStats.attackSpeed;
+                if (this.parent.equipmentSelected.includes(CONSTANTS.item.Guardian_Amulet)) {
+                    // Guardian Amulet gives 20% increase in attack speed (40% if below 50% HP)
+                    attackSpeed *= 1.2;
+                }
+                attackSpeed -= this.decreasedAttackSpeed();
+                return attackSpeed;
             }
 
             decreasedAttackSpeed() {

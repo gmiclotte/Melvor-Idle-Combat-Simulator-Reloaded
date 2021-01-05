@@ -748,11 +748,6 @@
             if (enemy.isCursed && enemy.curse.type === 'Confusion') {
                 dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
             }
-            // guardian amulet
-            if (playerStats.activeItems.guardianAmulet && player.reductionBuff < 12) {
-                player.reductionBuff += 2;
-                player.damageReduction = Math.floor((playerStats.damageReduction + player.reductionBuff) * player.reductionModifier);
-            }
             // status effects
             if (isSpecial) {
                 applyStatus(currentSpecial, damage, player, playerStats)
@@ -762,14 +757,23 @@
     }
 
     function calculateSpeed(actor, actorStats) {
-        // slow
-        actor.currentSpeed = Math.floor(actorStats.attackSpeed * (1 + actor.attackSpeedDebuff / 100));
-        // increased attack speed buff
-        actor.currentSpeed = Math.floor(actorStats.attackSpeed * (1 + actor.increasedAttackSpeed / 100));
-        // take attack speed reduction into account
+        // base
+        let speed = actorStats.attackSpeed;
+        // guardian amulet
+        if (actor.isPlayer && actorStats.activeItems.guardianAmulet) {
+            // Guardian Amulet gives 20% increase in attack speed (TODO: 40% increase and +5% DR if below 50% HP)
+            speed = Math.floor(speed * 1.2);
+        }
+        // pet and gear reductions
         if (actorStats.decreasedAttackSpeed) {
             actor.currentSpeed -= actorStats.decreasedAttackSpeed
         }
+        // slow
+        speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
+        // increased attack speed buff
+        speed = Math.floor(speed * (1 + actor.increasedAttackSpeed / 100));
+        // update actor current speed
+        actor.currentSpeed = speed;
     }
 
     function postAttack(actor, actorStats, target, targetStats) {
@@ -1232,7 +1236,6 @@
         player.isPlayer = true;
         player.hitpoints = 0;
         player.maxHitpoints = playerStats.maxHitpoints;
-        player.reductionBuff = 0;
         player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
