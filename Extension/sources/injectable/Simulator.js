@@ -1342,14 +1342,17 @@
                     }
                     let rangedStrengthBonus = this.currentSim.equipmentStats.rangedStrengthBonus;
                     let rangedAttackBonus = this.currentSim.equipmentStats.rangedAttackBonus;
+                    // weapon specific bonuses
                     if (this.currentSim.playerStats.activeItems.stormsnap) {
                         rangedStrengthBonus += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
                         rangedAttackBonus += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
+                    } else if (this.currentSim.playerStats.activeItems.slayerCrossbow) {
+                        const slayerTaskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
+                        if (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID))) {
+                            rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
+                        }
                     }
-                    const slayerTaskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
-                    if (this.currentSim.playerStats.activeItems.slayerCrossbow && (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID)))) {
-                        rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
-                    }
+                    // general formulas
                     const effectiveAttackLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + 8 + attackStyleBonus);
                     this.currentSim.playerStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (rangedAttackBonus + 64) * (1 + (this.currentSim.prayerBonus.rangedAccuracy / 100)) * (1 + this.currentSim.herbloreBonus.rangedAccuracy / 100));
                     const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + attackStyleBonus);
