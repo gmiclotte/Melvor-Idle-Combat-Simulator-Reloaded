@@ -24,6 +24,14 @@
              * @param {string} urls.crossedOut URL for crossed out svg
              */
             constructor(urls) {
+                // slayer tasks
+                this.slayerTasks = [
+                    SLAYER.task.Easy,
+                    SLAYER.task.Normal,
+                    SLAYER.task.Hard,
+                    SLAYER.task.Elite,
+                    SLAYER.task.Master,
+                ];
                 // Plot Type Options
                 this.plotTypeDropdownOptions = [
                     'XP per ',
@@ -566,6 +574,7 @@
                 // Bar Chart Card
                 this.monsterToggleState = true;
                 this.dungeonToggleState = true;
+                this.slayerToggleState = true;
                 this.plotter = new MICSR.Plotter(this, urls.crossedOut);
                 // Setup plotter bar clicking
                 this.selectedBar = 0;
@@ -576,21 +585,26 @@
                 /** @type {number[]} */
                 this.barMonsterIDs = [];
                 /** @type {boolean[]} */
-                this.barIsDungeon = [];
+                this.barType = [];
+                this.barTypes = {
+                    monster: 0,
+                    dungeon: 1,
+                    task: 2,
+                }
 
                 combatAreas.forEach((area) => {
                     area.monsters.forEach((monster) => {
                         this.barMonsterIDs.push(monster);
-                        this.barIsDungeon.push(false);
+                        this.barType.push(this.barTypes.monster);
                     });
                 });
                 const bardID = 139;
                 this.barMonsterIDs.push(bardID);
-                this.barIsDungeon.push(false);
+                this.barType.push(this.barTypes.monster);
                 slayerAreas.forEach((area) => {
                     area.monsters.forEach((monster) => {
                         this.barMonsterIDs.push(monster);
-                        this.barIsDungeon.push(false);
+                        this.barType.push(this.barTypes.monster);
                     });
                 });
                 /** @type {number[]} */
@@ -598,7 +612,12 @@
                 for (let i = 0; i < DUNGEONS.length; i++) {
                     this.dungeonBarIDs.push(this.barMonsterIDs.length);
                     this.barMonsterIDs.push(i);
-                    this.barIsDungeon.push(true);
+                    this.barType.push(this.barTypes.dungeon);
+                }
+                for (let i = 0; i < this.slayerTasks.length; i++) {
+                    this.dungeonBarIDs.push(this.barMonsterIDs.length);
+                    this.barMonsterIDs.push(DUNGEONS.length + i);
+                    this.barType.push(this.barTypes.task);
                 }
                 // Dungeon View Variables
                 this.isViewingDungeon = false;
@@ -2036,12 +2055,24 @@
                 this.isExportDisplayed = !this.isExportDisplayed;
             }
 
+            barIsMonster(idx) {
+                return this.barType[idx] === this.barTypes.monster;
+            }
+
+            barIsDungeon(idx) {
+                return this.barType[idx] === this.barTypes.dungeon;
+            }
+
+            barIsTask(idx) {
+                return this.barType[idx] === this.barTypes.task;
+            }
+
             // Callback Functions for Bar inspection
             /**
              * The callback for when the inspect dungeon button is clicked
              */
             inspectDungeonOnClick() {
-                if (this.barSelected && this.barIsDungeon[this.selectedBar]) {
+                if (this.barSelected && !this.barIsMonster(this.selectedBar)) {
                     this.setPlotToDungeon(this.barMonsterIDs[this.selectedBar]);
                 } else {
                     MICSR.warn('How did you click this?');
@@ -2074,7 +2105,7 @@
                     this.selectedBar = barID;
                     this.setBarHighlight(barID);
                 }
-                if (this.barSelected && !this.isViewingDungeon && this.barIsDungeon[barID]) {
+                if (this.barSelected && !this.isViewingDungeon && !this.barIsMonster(barID)) {
                     this.plotter.inspectButton.style.display = '';
                 } else {
                     this.plotter.inspectButton.style.display = 'none';
@@ -2109,9 +2140,13 @@
             barImageOnClick(imageID) {
                 if (!this.isViewingDungeon) {
                     let newState;
-                    if (this.barIsDungeon[imageID]) {
+                    if (this.barIsDungeon(imageID)) {
                         this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]] = !this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]];
                         newState = this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]];
+                    } else if (this.barIsTask(imageID)) {
+                        const taskID = this.barMonsterIDs[imageID] - DUNGEONS.length;
+                        this.simulator.slayerSimFilter[taskID] = !this.simulator.slayerSimFilter[taskID];
+                        newState = this.simulator.slayerSimFilter[taskID];
                     } else {
                         this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]] = !this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]];
                         newState = this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]];
@@ -2133,13 +2168,26 @@
             }
 
             /**
-             * Cabllback to toggle the simulation of dungeons
+             * Callback to toggle the simulation of dungeons
              */
             toggleDungeonSims() {
                 const newState = !this.dungeonToggleState;
                 this.dungeonToggleState = newState;
                 for (let i = 0; i < DUNGEONS.length; i++) {
                     this.simulator.dungeonSimFilter[i] = newState;
+                }
+                this.updatePlotData();
+                this.plotter.crossImagesPerSetting();
+            }
+
+            /**
+             * Callback to toggle the simulation of dungeons
+             */
+            toggleSlayerSims() {
+                const newState = !this.slayerToggleState;
+                this.slayerToggleState = newState;
+                for (let i = 0; i < this.slayerTasks.length; i++) {
+                    this.simulator.slayerSimFilter[i] = newState;
                 }
                 this.updatePlotData();
                 this.plotter.crossImagesPerSetting();
@@ -2182,7 +2230,7 @@
                 if (this.barSelected) {
                     this.subInfoCard.container.style.display = '';
                     this.infoPlaceholder.style.display = 'none';
-                    if (!this.isViewingDungeon && this.barIsDungeon[this.selectedBar]) {
+                    if (!this.isViewingDungeon && this.barIsDungeon(this.selectedBar)) {
                         const dungeonID = this.barMonsterIDs[this.selectedBar];
                         document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
                         document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
@@ -2195,10 +2243,24 @@
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = ((updateInfo) ? MICSR.mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4) : 'N/A');
                         }
+                    } else if (!this.isViewingDungeon && this.barIsTask(this.selectedBar)) {
+                        const taskID = this.barMonsterIDs[this.selectedBar] - DUNGEONS.length;
+                        document.getElementById('MCS Zone Info Title').textContent = this.slayerTasks[taskID].display;
+                        document.getElementById('MCS Info Image').src = SKILLS[CONSTANTS.skill.Slayer].media;
+                        const updateInfo = this.simulator.slayerSimData[taskID].simSuccess;
+                        for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
+                            const dataKey = this.plotTypeDropdownValues[i];
+                            const outElem = document.getElementById(`MCS ${dataKey} Output`);
+                            let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
+                            if (dataMultiplier === -1) dataMultiplier = this.simulator.slayerSimData[taskID].killTimeS;
+                            if (dataKey === 'petChance') dataMultiplier = 1;
+                            outElem.textContent = ((updateInfo) ? MICSR.mcsFormatNum(this.simulator.slayerSimData[taskID][dataKey] * dataMultiplier, 4) : 'N/A');
+                        }
                     } else {
                         let monsterID;
                         if (this.isViewingDungeon) {
-                            monsterID = DUNGEONS[this.viewedDungeonID].monsters[this.selectedBar + DUNGEONS[this.viewedDungeonID].monsters.length - this.plotter.bars.length];
+                            const selection = this.getMonsterList(this.viewedDungeonID);
+                            monsterID = selection[this.selectedBar + selection.length - this.plotter.bars.length];
                         } else {
                             monsterID = this.barMonsterIDs[this.selectedBar];
                         }
@@ -2219,6 +2281,17 @@
                     this.subInfoCard.container.style.display = 'none';
                     this.infoPlaceholder.style.display = '';
                 }
+            }
+
+            /**
+             * get list of monsters for dungeon (or slayer task, where task IDs start at DUNGEONS.length)
+             */
+            getMonsterList(dungeonID) {
+                if (dungeonID < DUNGEONS.length) {
+                    return DUNGEONS[this.viewedDungeonID].monsters;
+                }
+                const taskID = dungeonID - DUNGEONS.length;
+                return this.simulator.slayerTaskMonsters[taskID];
             }
 
             // Functions that manipulate the UI

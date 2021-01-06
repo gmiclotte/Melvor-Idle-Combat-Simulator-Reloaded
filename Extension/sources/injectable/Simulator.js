@@ -192,12 +192,11 @@
                 this.monsterSimFilter = [];
                 /** @type {boolean[]} */
                 this.dungeonSimFilter = [];
+                this.slayerSimFilter = [];
                 // Simulation data;
                 /** @type {MonsterSimResult[]} */
-                this.monsterSimData = [];
-                for (let i = 0; i < MONSTERS.length; i++) {
-                    this.monsterSimData.push({
-                        inQueue: false,
+                const newSimData = (monster) => {
+                    const data = {
                         simSuccess: false,
                         xpPerSecond: 0,
                         xpPerHit: 0,
@@ -218,38 +217,32 @@
                         attacksTakenPerSecond: 0,
                         attacksMadePerSecond: 0,
                         simulationTime: 0,
-                        petRolls: {other: []},
                         petChance: 0,
-                    });
+                    };
+                    if (monster) {
+                        data.inQueue = false;
+                        data.petRolls = {other: []};
+                    }
+                    return data
+                }
+                this.monsterSimData = [];
+                for (let i = 0; i < MONSTERS.length; i++) {
+                    this.monsterSimData.push(newSimData(true));
                     this.monsterSimFilter.push(true);
                 }
                 /** @type {MonsterSimResult[]} */
                 this.dungeonSimData = [];
                 for (let i = 0; i < DUNGEONS.length; i++) {
-                    this.dungeonSimData.push({
-                        simSuccess: false,
-                        xpPerSecond: 0,
-                        xpPerHit: 0,
-                        hpXpPerSecond: 0,
-                        hpPerSecond: 0,
-                        dmgPerSecond: 0,
-                        avgKillTime: 0,
-                        avgHitDmg: 0,
-                        killTimeS: 0,
-                        killsPerSecond: 0,
-                        gpPerSecond: 0,
-                        prayerXpPerSecond: 0,
-                        slayerXpPerSecond: 0,
-                        ppConsumedPerSecond: 0,
-                        herbloreXPPerSecond: 0,
-                        signetChance: 0,
-                        gpFromDamagePerSecond: 0,
-                        attacksTakenPerSecond: 0,
-                        attacksMadePerSecond: 0,
-                        simulationTime: 0,
-                        petChance: 0,
-                    });
+                    this.dungeonSimData.push(newSimData(false));
                     this.dungeonSimFilter.push(true);
+                }
+                //
+                this.slayerTaskMonsters = [];
+                this.slayerSimData = [];
+                for (let i = 0; i < this.parent.slayerTasks.length; i++) {
+                    this.slayerTaskMonsters.push([]);
+                    this.slayerSimData.push(newSimData(false));
+                    this.slayerSimFilter.push(true);
                 }
                 // Pre Compute Monster Base Stats
                 /** @type {EnemyStats[]} */
@@ -1102,6 +1095,39 @@
                         }
                     }
                 }
+                // Queue simulation of monsters in slayer tasks
+                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                    const task = this.parent.slayerTasks[i];
+                    this.slayerTaskMonsters[i] = [];
+                    if (!this.slayerSimFilter[i]) {
+                        continue;
+                    }
+                    const minLevel = task.minLevel;
+                    const maxLevel = task.maxLevel === -1 ? 6969 : task.maxLevel;
+                    for (let monsterID = 0; monsterID < MONSTERS.length; monsterID++) {
+                        // check if it is a slayer monster
+                        if (!MONSTERS[monsterID].canSlayer) {
+                            continue;
+                        }
+                        // check if combat level fits the current task type
+                        const cbLevel = getMonsterCombatLevel(monsterID, true);
+                        if (cbLevel < minLevel || cbLevel > maxLevel) {
+                            continue;
+                        }
+                        // check if the area is accessible, this only works for auto slayer
+                        // without auto slayer you can get some tasks for which you don't wear/own the gear
+                        let area = findEnemyArea(monsterID, false);
+                        if (area[0] === 1 && !this.canAccessArea(slayerAreas[area[1]])) {
+                            continue;
+                        }
+                        // all checks passed
+                        if (!this.monsterSimData[monsterID].inQueue) {
+                            this.monsterSimData[monsterID].inQueue = true;
+                            this.simulationQueue.push({monsterID: monsterID});
+                        }
+                        this.slayerTaskMonsters[i].push(monsterID);
+                    }
+                }
                 // An attempt to sort jobs by relative complexity so they go from highest to lowest.
                 this.simulationQueue = this.simulationQueue.sort((jobA, jobB) => {
                     const jobAComplex = this.enemyStats[jobA.monsterID].hitpoints / this.calculateAccuracy(playerStats, this.enemyStats[jobA.monsterID]);
@@ -1207,65 +1233,74 @@
                 return enemyStats;
             }
 
+            computeAverageSimData(filter, data, monsterIDs) {
+                if (filter) {
+                    data.simSuccess = true;
+                    let totXp = 0;
+                    let totHpXp = 0;
+                    let totPrayXP = 0;
+                    let totHP = 0;
+                    let totEnemyHP = 0;
+                    let totPrayerPoints = 0;
+                    let totTime = 0;
+                    let totalGPFromDamage = 0;
+                    let totalAttacksMade = 0;
+                    let totalAttacksTaken = 0;
+                    let totalAmmoUsed = 0;
+                    let totalRunesUsed = 0;
+                    let totalSimTime = 0;
+                    for (const monsterId of monsterIDs) {
+                        if (!this.monsterSimData[monsterId].simSuccess || this.monsterSimData[monsterId].tooManyActions > 0) {
+                            data.simSuccess = false;
+                            return;
+                        }
+                        totXp += this.monsterSimData[monsterId].xpPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totHpXp += this.monsterSimData[monsterId].hpXpPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totPrayXP += this.monsterSimData[monsterId].prayerXpPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totHP += this.monsterSimData[monsterId].hpPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totEnemyHP += this.monsterSimData[monsterId].dmgPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totPrayerPoints += this.monsterSimData[monsterId].ppConsumedPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamagePerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totalAttacksMade += this.monsterSimData[monsterId].attacksMadePerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totalAttacksTaken += this.monsterSimData[monsterId].attacksTakenPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totalAmmoUsed += this.monsterSimData[monsterId].ammoUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totalRunesUsed += this.monsterSimData[monsterId].runesUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
+                        totTime += this.monsterSimData[monsterId].avgKillTime;
+                        totalSimTime += this.monsterSimData[monsterId].simulationTime;
+                    }
+                    const dungeonTime = totTime / 1000;
+                    data.xpPerSecond = totXp / dungeonTime;
+                    data.xpPerHit = totXp / totalAttacksMade;
+                    data.hpXpPerSecond = totHpXp / dungeonTime;
+                    data.prayerXpPerSecond = totPrayXP / dungeonTime;
+                    data.hpPerSecond = totHP / dungeonTime;
+                    data.dmgPerSecond = totEnemyHP / dungeonTime;
+                    data.avgKillTime = totTime;
+                    data.avgHitDmg = totEnemyHP / totalAttacksMade;
+                    data.killTimeS = dungeonTime;
+                    data.killsPerSecond = 1 / dungeonTime;
+                    data.ppConsumedPerSecond = totPrayerPoints / dungeonTime;
+                    data.gpFromDamagePerSecond = totalGPFromDamage / dungeonTime;
+                    data.attacksTakenPerSecond = totalAttacksTaken / dungeonTime;
+                    data.attacksMadePerSecond = totalAttacksMade / dungeonTime;
+                    data.ammoUsedPerSecond = totalAmmoUsed / dungeonTime;
+                    data.runesUsedPerSecond = totalRunesUsed / dungeonTime;
+                    data.simulationTime = totalSimTime;
+                } else {
+                    data.simSuccess = false;
+                }
+            }
+
             /** Performs all data analysis post queue completion */
             performPostSimAnalysis() {
                 // Perform calculation of dungeon stats
-                dungeon: for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
-                    if (this.dungeonSimFilter[dungeonId]) {
-                        this.dungeonSimData[dungeonId].simSuccess = true;
-                        let totXp = 0;
-                        let totHpXp = 0;
-                        let totPrayXP = 0;
-                        let totHP = 0;
-                        let totEnemyHP = 0;
-                        let totPrayerPoints = 0;
-                        let totTime = 0;
-                        let totalGPFromDamage = 0;
-                        let totalAttacksMade = 0;
-                        let totalAttacksTaken = 0;
-                        let totalAmmoUsed = 0;
-                        let totalRunesUsed = 0;
-                        let totalSimTime = 0;
-                        for (const monsterId of DUNGEONS[dungeonId].monsters) {
-                            if (!this.monsterSimData[monsterId].simSuccess || this.monsterSimData[monsterId].tooManyActions > 0) {
-                                this.dungeonSimData[dungeonId].simSuccess = false;
-                                continue dungeon;
-                            }
-                            totXp += this.monsterSimData[monsterId].xpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totHpXp += this.monsterSimData[monsterId].hpXpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totPrayXP += this.monsterSimData[monsterId].prayerXpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totHP += this.monsterSimData[monsterId].hpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totEnemyHP += this.monsterSimData[monsterId].dmgPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totPrayerPoints += this.monsterSimData[monsterId].ppConsumedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamagePerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totalAttacksMade += this.monsterSimData[monsterId].attacksMadePerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totalAttacksTaken += this.monsterSimData[monsterId].attacksTakenPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totalAmmoUsed += this.monsterSimData[monsterId].ammoUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totalRunesUsed += this.monsterSimData[monsterId].runesUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                            totTime += this.monsterSimData[monsterId].avgKillTime;
-                            totalSimTime += this.monsterSimData[monsterId].simulationTime;
-                        }
-                        const dungeonTime = totTime / 1000;
-                        this.dungeonSimData[dungeonId].xpPerSecond = totXp / dungeonTime;
-                        this.dungeonSimData[dungeonId].xpPerHit = totXp / totalAttacksMade;
-                        this.dungeonSimData[dungeonId].hpXpPerSecond = totHpXp / dungeonTime;
-                        this.dungeonSimData[dungeonId].prayerXpPerSecond = totPrayXP / dungeonTime;
-                        this.dungeonSimData[dungeonId].hpPerSecond = totHP / dungeonTime;
-                        this.dungeonSimData[dungeonId].dmgPerSecond = totEnemyHP / dungeonTime;
-                        this.dungeonSimData[dungeonId].avgKillTime = totTime;
-                        this.dungeonSimData[dungeonId].avgHitDmg = totEnemyHP / totalAttacksMade;
-                        this.dungeonSimData[dungeonId].killTimeS = dungeonTime;
-                        this.dungeonSimData[dungeonId].killsPerSecond = 1 / dungeonTime;
-                        this.dungeonSimData[dungeonId].ppConsumedPerSecond = totPrayerPoints / dungeonTime;
-                        this.dungeonSimData[dungeonId].gpFromDamagePerSecond = totalGPFromDamage / dungeonTime;
-                        this.dungeonSimData[dungeonId].attacksTakenPerSecond = totalAttacksTaken / dungeonTime;
-                        this.dungeonSimData[dungeonId].attacksMadePerSecond = totalAttacksMade / dungeonTime;
-                        this.dungeonSimData[dungeonId].ammoUsedPerSecond = totalAmmoUsed / dungeonTime;
-                        this.dungeonSimData[dungeonId].runesUsedPerSecond = totalRunesUsed / dungeonTime;
-                        this.dungeonSimData[dungeonId].simulationTime = totalSimTime;
-                    } else {
-                        this.dungeonSimData[dungeonId].simSuccess = false;
-                    }
+                for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
+                    this.computeAverageSimData(this.dungeonSimFilter[dungeonId], this.dungeonSimData[dungeonId], DUNGEONS[dungeonId].monsters);
+                }
+                for (let slayerTaskID = 0; slayerTaskID < this.slayerTaskMonsters.length; slayerTaskID++) {
+                    this.computeAverageSimData(this.slayerSimFilter[slayerTaskID], this.slayerSimData[slayerTaskID], this.slayerTaskMonsters[slayerTaskID]);
+                    // set average kill time for auto slayer
+                    this.slayerSimData[slayerTaskID].avgKillTime /= this.slayerTaskMonsters[slayerTaskID].length;
                 }
                 // Update other data
                 this.updateGPData();
@@ -1369,8 +1404,8 @@
                         rangedStrengthBonus += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
                         rangedAttackBonus += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
                     } else if (this.currentSim.playerStats.activeItems.slayerCrossbow) {
-                        const slayerTaskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
-                        if (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && slayerTaskMonsters.has(monsterID))) {
+                        const taskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
+                        if (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && taskMonsters.has(monsterID))) {
                             rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
                         }
                     }
@@ -1511,7 +1546,13 @@
                         if (isKillTime) dataMultiplier = this.dungeonSimData[i].killTimeS;
                         dataSet.push((this.dungeonSimFilter[i] && this.dungeonSimData[i].simSuccess) ? this.dungeonSimData[i][keyValue] * dataMultiplier : 0);
                     }
-                } else {
+                    // Perform simulation of monsters in slayer tasks
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        if (isKillTime) dataMultiplier = this.slayerSimData[i].killTimeS;
+                        dataSet.push((this.slayerSimFilter[i] && this.slayerSimData[i].simSuccess) ? this.slayerSimData[i][keyValue] * dataMultiplier : 0);
+                    }
+                } else if (this.parent.viewedDungeonID < DUNGEONS.length) {
+                    // dungeons
                     const dungeonID = this.parent.viewedDungeonID;
                     const isSignet = keyValue === 'signetChance';
                     DUNGEONS[dungeonID].monsters.forEach((monsterId) => {
@@ -1526,6 +1567,18 @@
                         const bossId = DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1];
                         dataSet[dataSet.length - 1] = (this.monsterSimData[bossId].simSuccess) ? this.monsterSimData[bossId][keyValue] * dataMultiplier : 0;
                     }
+                } else {
+                    // slayer tasks
+                    const taskID = this.parent.viewedDungeonID - DUNGEONS.length;
+                    const isSignet = keyValue === 'signetChance';
+                    this.slayerTaskMonsters[taskID].forEach(monsterId => {
+                        if (!isSignet) {
+                            if (isKillTime) dataMultiplier = this.monsterSimData[monsterId].killTimeS;
+                            dataSet.push((this.monsterSimData[monsterId].simSuccess) ? this.monsterSimData[monsterId][keyValue] * dataMultiplier : 0);
+                        } else {
+                            dataSet.push(0);
+                        }
+                    });
                 }
                 return dataSet;
             }
@@ -1595,6 +1648,7 @@
                         DUNGEONS[dungeonId].monsters.forEach(monsterId => exportEntity(monsterId, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
+                // TODO: export for auto slayer
                 exportString = exportString.slice(0, -rowLen);
                 return exportString;
             }
@@ -1615,31 +1669,40 @@
                 enterSet.push(true);
                 // Check which slayer areas we can access with current stats and equipment
                 for (const area of slayerAreas) {
-                    let canEnter = true;
-                    // check level requirement
-                    if (area.slayerLevel !== undefined && this.playerLevels.Slayer < area.slayerLevel) {
-                        canEnter = false;
-                    }
-                    // check clear requirement
-                    if (area.dungeonCompleted >= 0 && dungeonCompleteCount[area.dungeonCompleted] < 1) {
-                        canEnter = false
-                    }
-                    // check gear requirement
-                    if (area.slayerItem > 0
-                        && !this.currentSim.playerStats.activeItems.slayerSkillcape
-                        && !this.currentSim.playerStats.equipmentSelected.includes(area.slayerItem)) {
-                        canEnter = false;
-                    }
                     // push `canEnter` for every monster in this zone
                     for (let j = 0; j < area.monsters.length; j++) {
-                        enterSet.push(canEnter);
+                        enterSet.push(this.canAccessArea(area));
                     }
                 }
-                // Perform simulation of monsters in dungeons
+                // Perform simulation of monsters in dungeons and auto slayer
                 for (let i = 0; i < DUNGEONS.length; i++) {
                     enterSet.push(true);
                 }
+                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                    enterSet.push(true);
+                }
                 return enterSet;
+            }
+
+            /**
+             * Check if we can enter the slayer area `area` with current settings
+             */
+            canAccessArea(area) {
+                // check level requirement
+                if (area.slayerLevel !== undefined && this.playerLevels.Slayer < area.slayerLevel) {
+                    return false;
+                }
+                // check clear requirement
+                if (area.dungeonCompleted >= 0 && dungeonCompleteCount[area.dungeonCompleted] < 1) {
+                    return false
+                }
+                // check gear requirement
+                if (area.slayerItem > 0
+                    && !this.currentSim.playerStats.activeItems.slayerSkillcape
+                    && !this.currentSim.playerStats.equipmentSelected.includes(area.slayerItem)) {
+                    return false;
+                }
+                return true;
             }
 
             /**
@@ -2023,7 +2086,7 @@
              */
             updateGPData() {
                 // Set data for monsters in combat zones
-                if (this.parent.isViewingDungeon) {
+                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
                     DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
                         if (this.monsterSimData[monsterId].simSuccess && this.monsterSimData[monsterId].tooManyActions === 0) {
                             let gpPerKill = 0;
@@ -2067,6 +2130,16 @@
                             this.dungeonSimData[i].gpPerSecond += this.computeDungeonValue(i) / this.dungeonSimData[i].killTimeS;
                         }
                     }
+                    // slayer tasks
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        if (this.slayerSimData[i].simSuccess) {
+                            let sum = 0;
+                            for (const monsterID of this.slayerTaskMonsters[i]) {
+                                sum += this.monsterSimData[monsterID].gpPerSecond;
+                            }
+                            this.slayerSimData[i].gpPerSecond = sum / this.slayerTaskMonsters[i].length;
+                        }
+                    }
                 }
             }
 
@@ -2074,7 +2147,7 @@
              * Updates the potential herblore xp for all monsters
              */
             updateHerbloreXP() {
-                if (this.parent.isViewingDungeon) {
+                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
                     DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
                         this.monsterSimData[monsterId].herbloreXPPerSecond = 0;
                     });
@@ -2095,6 +2168,13 @@
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach((monsterID) => updateMonsterHerbloreXP(monsterID));
                     });
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        let sum = 0;
+                        for (const monsterID of this.slayerTaskMonsters[i]) {
+                            sum += this.monsterSimData[monsterID].herbloreXPPerSecond;
+                        }
+                        this.slayerSimData[i].herbloreXPPerSecond = sum / this.slayerTaskMonsters[i].length;
+                    }
                 }
             }
 
@@ -2102,7 +2182,7 @@
              * Updates the amount of slayer xp earned when killing monsters
              */
             updateSlayerXP() {
-                if (this.parent.isViewingDungeon) {
+                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
                     DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
                         this.monsterSimData[monsterId].slayerXpPerSecond = 0;
                     });
@@ -2128,6 +2208,13 @@
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
                     });
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        let sum = 0;
+                        for (const monsterID of this.slayerTaskMonsters[i]) {
+                            sum += this.monsterSimData[monsterID].slayerXpPerSecond;
+                        }
+                        this.slayerSimData[i].slayerXpPerSecond = sum / this.slayerTaskMonsters[i].length;
+                    }
                 }
             }
 
@@ -2135,7 +2222,7 @@
              * Updates the chance to receive signet when killing monsters
              */
             updateSignetChance() {
-                if (this.parent.isViewingDungeon) {
+                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
                     DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
                         this.monsterSimData[monsterId].signetChance = 0;
                     });
@@ -2159,6 +2246,10 @@
                     for (let i = 0; i < DUNGEONS.length; i++) {
                         const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
                         updateMonsterSignetChance(monsterID, this.dungeonSimData[i]);
+                    }
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        // TODO: signet rolls for auto slayer
+                        this.slayerSimData[i].signetChance = undefined;
                     }
                 }
             }
@@ -2249,11 +2340,15 @@
                         }, 1);
                         dungeonResult.petChance *= 100;
                     });
+                    // TODO: pet rolls for auto slayer
                 } else {
                     this.monsterSimData.forEach((simResult) => {
                         simResult.petChance = 0;
                     });
                     this.dungeonSimData.forEach((simResult) => {
+                        simResult.petChance = 0;
+                    });
+                    this.slayerSimData.forEach((simResult) => {
                         simResult.petChance = 0;
                     });
                 }

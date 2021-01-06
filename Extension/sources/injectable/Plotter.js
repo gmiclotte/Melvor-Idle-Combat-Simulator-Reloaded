@@ -65,6 +65,14 @@
                     this.barImageSrc.push(DUNGEONS[i].media);
                 }
 
+                this.barBottomNames.push('Slayer Tasks');
+                this.barBottomLength.push(this.parent.slayerTasks.length);
+                totBars += this.parent.slayerTasks.length;
+                for (const slayerTask of this.parent.slayerTasks) {
+                    this.barNames.push(slayerTask.display);
+                    this.barImageSrc.push(SKILLS[CONSTANTS.skill.Slayer].media);
+                }
+
                 this.plotContainer = document.createElement('div');
                 this.plotContainer.className = 'mcsPlotContainer mcsOuter block block-rounded border-top border-combat border-4x bg-combat-inner-dark';
                 this.plotContainer.id = 'MCS Plotter';
@@ -136,16 +144,23 @@
                 this.toggleMonsterButton.className = 'btn btn-primary m-1';
                 this.toggleMonsterButton.textContent = 'Toggle Monsters';
                 this.toggleMonsterButton.onclick = () => {
-                    this.parent.toggleMonsterSims(false);
+                    this.parent.toggleMonsterSims();
                 };
                 this.plotHeader.appendChild(this.toggleMonsterButton);
                 this.toggleDungeonButton = document.createElement('button');
                 this.toggleDungeonButton.className = 'btn btn-primary m-1';
                 this.toggleDungeonButton.textContent = 'Toggle Dungeons';
                 this.toggleDungeonButton.onclick = () => {
-                    this.parent.toggleDungeonSims(false);
+                    this.parent.toggleDungeonSims();
                 };
                 this.plotHeader.appendChild(this.toggleDungeonButton);
+                this.toggleSlayerButton = document.createElement('button');
+                this.toggleSlayerButton.className = 'btn btn-primary m-1';
+                this.toggleSlayerButton.textContent = 'Toggle Slayer Tasks';
+                this.toggleSlayerButton.onclick = () => {
+                    this.parent.toggleSlayerSims();
+                };
+                this.plotHeader.appendChild(this.toggleSlayerButton);
 
                 this.plotTopContainer = document.createElement('div');
                 this.plotTopContainer.className = 'mcsPlotTopContainer';
@@ -244,15 +259,6 @@
                 }
 
                 this.parent.botContent.appendChild(this.plotContainer);
-
-                // Data for displaying dungeons
-                this.dungeonDisplayData = DUNGEONS.map((dungeon) =>
-                    dungeon.monsters.map((monster) => ({
-                        monsterID: monster,
-                        imageSource: MONSTERS[monster].media,
-                        name: MONSTERS[monster].name,
-                    }))
-                );
             }
 
             /**
@@ -333,16 +339,19 @@
                     this.bars[barIndex].style.height = `${barData[dataIndex] / divMax * 100}%`;
 
                     let barName = '';
-                    if (!this.parent.isViewingDungeon && this.parent.barIsDungeon[barIndex]) {
-                        barName = DUNGEONS[this.parent.barMonsterIDs[barIndex]].name;
+                    if (this.parent.isViewingDungeon) {
+                        const selection = this.parent.getMonsterList(this.parent.viewedDungeonID);
+                        const monsterID = selection[barIndex + selection.length - this.bars.length];
+                        barName = MONSTERS[monsterID].name;
                     } else {
-                        if (this.parent.isViewingDungeon) {
-                            barName = MONSTERS[DUNGEONS[this.parent.viewedDungeonID].monsters[barIndex + DUNGEONS[this.parent.viewedDungeonID].monsters.length - this.bars.length]].name;
+                        if (this.parent.barIsDungeon(barIndex)) {
+                            barName = DUNGEONS[this.parent.barMonsterIDs[barIndex]].name;
+                        } else if(this.parent.barIsTask(barIndex)) {
+                            barName = this.parent.slayerTasks[this.parent.barMonsterIDs[barIndex] - DUNGEONS.length].display;
                         } else {
                             barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
                         }
                     }
-
                     this.bars[barIndex]._tippy.setContent(`<div class="text-center">${barName}<br><span class="text-info">${MICSR.mcsFormatNum(barData[dataIndex], 4)}</span></div>`);
                 }
                 for (let i = 0; i < 20; i++) {
@@ -393,8 +402,9 @@
                 this.showZoneLabels();
                 this.crossImagesPerSetting();
                 this.stopInspectButton.style.display = 'none';
-                this.toggleDungeonButton.style.display = '';
                 this.toggleMonsterButton.style.display = '';
+                this.toggleDungeonButton.style.display = '';
+                this.toggleSlayerButton.style.display = '';
             }
 
             /**
@@ -407,11 +417,12 @@
                 // Toggle Zone Labels
                 // Toggle display of bars
                 // Remove the white border stuff
+                const monsters = this.parent.getMonsterList(dungeonID);
                 for (let i = 0; i < this.bars.length; i++) {
-                    if (i < DUNGEONS[dungeonID].monsters.length) {
+                    if (i < monsters.length) {
                         // Change image source
                         this.xAxisContainers[i].style.display = '';
-                        this.xAxisImages[i].setAttribute('src', this.dungeonDisplayData[dungeonID][i].imageSource);
+                        this.xAxisImages[i].setAttribute('src', MONSTERS[monsters[i]].media);
                         this.bars[this.bars.length - i - 1].style.display = '';
                     } else {
                         // Disable Bar and images
@@ -423,8 +434,9 @@
                 this.unCrossAllImages();
                 this.inspectButton.style.display = 'none';
                 this.stopInspectButton.style.display = '';
-                this.toggleDungeonButton.style.display = 'none';
                 this.toggleMonsterButton.style.display = 'none';
+                this.toggleDungeonButton.style.display = 'none';
+                this.toggleSlayerButton.style.display = 'none';
             }
 
             /**
@@ -480,10 +492,12 @@
              * Toggles the crossout overlay on/off depending on whether it is simulated or not
              */
             crossImagesPerSetting() {
-                for (let i = 0; i < this.parent.barIsDungeon.length; i++) {
-                    if (this.parent.barIsDungeon[i] && !this.parent.simulator.dungeonSimFilter[this.parent.barMonsterIDs[i]]) {
+                for (let i = 0; i < this.parent.barType.length; i++) {
+                    if (this.parent.barIsMonster(i) && !this.parent.simulator.monsterSimFilter[this.parent.barMonsterIDs[i]]) {
                         this.xAxisCrosses[i].style.display = '';
-                    } else if (!this.parent.barIsDungeon[i] && !this.parent.simulator.monsterSimFilter[this.parent.barMonsterIDs[i]]) {
+                    } else if (this.parent.barIsDungeon(i) && !this.parent.simulator.dungeonSimFilter[this.parent.barMonsterIDs[i]]) {
+                        this.xAxisCrosses[i].style.display = '';
+                    } else if (this.parent.barIsTask(i) && !this.parent.simulator.slayerSimFilter[this.parent.barMonsterIDs[i] - DUNGEONS.length]) {
                         this.xAxisCrosses[i].style.display = '';
                     } else {
                         this.xAxisCrosses[i].style.display = 'none';
