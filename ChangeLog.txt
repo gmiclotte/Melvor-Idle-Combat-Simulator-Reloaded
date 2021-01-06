@@ -1,3 +1,17 @@
+v1.2.3
+    Updated for Melvor Idle v0.18.2
+
+    Changes:
+    - Add Auto Slayer simulation
+    - Add Wandering Bard
+    - Add Dark Waters area effect
+
+    Fixes:
+    - Fix Signet Ring effect on Confetti Crossbow
+    - Fix Slayer Area requirements
+    - PARTIALLY Fix Guardian Amulet passive effect -> Only the base effect is implemented, not the doubled effect
+    - Fix Elder Crown bleed life steal passive effect
+
 v1.2.2
     Fixes:
     - Fix curses bugs
