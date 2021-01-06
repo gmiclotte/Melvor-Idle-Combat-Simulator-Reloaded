@@ -584,6 +584,9 @@
                         this.barIsDungeon.push(false);
                     });
                 });
+                const bardID = 139;
+                this.barMonsterIDs.push(bardID);
+                this.barIsDungeon.push(false);
                 slayerAreas.forEach((area) => {
                     area.monsters.forEach((monster) => {
                         this.barMonsterIDs.push(monster);
@@ -2154,6 +2157,8 @@
                         this.simulator.monsterSimFilter[monsterID] = newState;
                     });
                 });
+                const bardID = 139;
+                this.simulator.monsterSimFilter[bardID] = newState;
                 slayerAreas.forEach((area) => {
                     area.monsters.forEach((monsterID) => {
                         this.simulator.monsterSimFilter[monsterID] = newState;

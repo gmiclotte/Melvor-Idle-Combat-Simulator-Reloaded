@@ -41,6 +41,12 @@
                         this.barImageSrc.push(MONSTERS[combatAreas[i].monsters[j]].media);
                     }
                 }
+                const bardID = 139;
+                totBars += 1;
+                this.barBottomNames.push('');
+                this.barBottomLength.push(1);
+                this.barNames.push(this.parent.getMonsterName(bardID));
+                this.barImageSrc.push(MONSTERS[bardID].media);
                 for (let i = 0; i < slayerAreas.length; i++) {
                     totBars += slayerAreas[i].monsters.length;
                     this.barBottomNames.push(slayerAreas[i].areaName);
