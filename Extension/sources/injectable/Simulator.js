@@ -1148,6 +1148,7 @@
                     for (const id of area.monsters) {
                         if (id === monsterID) {
                             enemyStats.slayerArea = slayerIdx;
+                            enemyStats.slayerAreaEffectValue = area.areaEffectValue;
                             break zone;
                         }
                     }

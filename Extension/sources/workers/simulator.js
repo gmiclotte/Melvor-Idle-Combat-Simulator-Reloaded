@@ -533,7 +533,7 @@
         return target.isStunned || target.isSleeping;
     }
 
-    function applyStatus(statusEffect, damage, target, targetStats) {
+    function applyStatus(statusEffect, damage, actorStats, target, targetStats) {
         ////////////
         // turned //
         ////////////
@@ -554,7 +554,7 @@
             target.isSlowed = true;
             target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
             target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
-            calculateSpeed(target, targetStats);
+            calculateSpeed(target, targetStats, actorStats);
         }
         ///////////
         // timed //
@@ -671,7 +671,7 @@
                 // set increased attack speed buff
                 if (currentSpecial.increasedAttackSpeed) {
                     enemy.increasedAttackSpeed = currentSpecial.increasedAttackSpeed;
-                    calculateSpeed(enemy, enemyStats);
+                    calculateSpeed(enemy, enemyStats, playerStats);
                 }
                 // Set evasion buffs
                 if (currentSpecial.increasedMeleeEvasion) {
@@ -752,13 +752,13 @@
             }
             // status effects
             if (isSpecial) {
-                applyStatus(currentSpecial, damage, player, playerStats)
+                applyStatus(currentSpecial, damage, enemyStats, player, playerStats)
             }
         }
         return currentSpecial;
     }
 
-    function calculateSpeed(actor, actorStats) {
+    function calculateSpeed(actor, actorStats, targetStats) {
         // base
         let speed = actorStats.attackSpeed;
         // guardian amulet
@@ -768,7 +768,11 @@
         }
         // pet and gear reductions
         if (actorStats.decreasedAttackSpeed) {
-            actor.currentSpeed -= actorStats.decreasedAttackSpeed
+            speed -= actorStats.decreasedAttackSpeed
+        }
+        // dark waters
+        if (actor.isPlayer && targetStats.slayerArea === 10) {
+            speed = Math.floor(speed * (1 - calculateAreaEffectValue(targetStats.slayerAreaEffectValue, actorStats) / 100));
         }
         // slow
         speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
@@ -786,7 +790,7 @@
                 actor.isBuffed = false;
                 // Undo buffs
                 actor.increasedAttackSpeed = 0;
-                calculateSpeed(actor, actorStats)
+                calculateSpeed(actor, actorStats, targetStats)
                 actor.meleeEvasionBuff = 1;
                 actor.rangedEvasionBuff = 1;
                 actor.magicEvasionBuff = 1;
@@ -803,7 +807,7 @@
             if (actor.attackSpeedDebuffTurns <= 0) {
                 actor.isSlowed = false;
                 actor.attackSpeedDebuff = 0;
-                calculateSpeed(actor, actorStats)
+                calculateSpeed(actor, actorStats, targetStats)
             }
         }
         // Curse Tracking
@@ -951,7 +955,7 @@
             }
         }
         if (attackResult.isSpecial) {
-            applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, enemy, enemyStats)
+            applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, playerStats, enemy, enemyStats)
         }
     }
 
@@ -1483,12 +1487,12 @@
     function setEvasionDebuffsPlayer(player, playerStats, enemyStats) {
         let areaEvasionDebuff = 0;
         if (enemyStats.slayerArea === 9 /*Perilous Peaks*/) {
-            areaEvasionDebuff = calculateAreaEffectValue(30, playerStats);
+            areaEvasionDebuff = calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats);
         }
         player.maxDefRoll = calculatePlayerEvasion(playerStats.maxDefRoll, player.meleeEvasionBuff, player.meleeEvasionDebuff + areaEvasionDebuff);
         player.maxRngDefRoll = calculatePlayerEvasion(playerStats.maxRngDefRoll, player.rangedEvasionBuff, player.rangedEvasionDebuff + areaEvasionDebuff);
         if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
-            areaEvasionDebuff = calculateAreaEffectValue(30, playerStats);
+            areaEvasionDebuff = calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats);
         }
         player.maxMagDefRoll = calculatePlayerEvasion(playerStats.maxMagDefRoll, player.magicEvasionBuff, player.magicEvasionDebuff + areaEvasionDebuff);
     }
@@ -1520,13 +1524,13 @@
         // 4: "Forest of Goo" - no area effect
         // 5: "Desolate Plains" - no area effect
         // 6: "Runic Ruins" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
-        // 7: "Arid Plains" - reduced food efficiency -> not relevant
+        // 7: "Arid Plains" - reduced food efficiency -> TODO: implement this when tracking player HP
         // 8: "Shrouded Badlands"
         if (enemyStats.slayerArea === 8 /*Shrouded Badlands*/) {
-            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(30, playerStats) / 100));
+            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats) / 100));
         }
         // 9: "Perilous Peaks" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
-        // 10: "Dark Waters" TODO: dark waters permanent Slow is not implemented in game
+        // 10: "Dark Waters" - reduced player attack speed -> implemented in calculateSpeed
     }
 
 })();
