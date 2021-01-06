@@ -181,6 +181,11 @@
                 // Set accuracy based on protection prayers or stats
                 setAccuracy(player, playerStats, enemy, enemyStats);
                 setAccuracy(enemy, enemyStats, player, playerStats);
+                // set action speed
+                calculateSpeed(player, playerStats, enemyStats);
+                player.actionTimer = player.currentSpeed;
+                calculateSpeed(enemy, enemyStats, playerStats);
+                enemy.actionTimer = enemy.currentSpeed;
 
                 // Simulate combat until enemy is dead or max actions has been reached
                 let enemyAlive = true;
@@ -772,12 +777,12 @@
         }
         // dark waters
         if (actor.isPlayer && targetStats.slayerArea === 10) {
-            speed = Math.floor(speed * (1 - calculateAreaEffectValue(targetStats.slayerAreaEffectValue, actorStats) / 100));
+            speed = Math.floor(speed * (1 + calculateAreaEffectValue(targetStats.slayerAreaEffectValue, actorStats) / 100));
         }
         // slow
         speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
         // increased attack speed buff
-        speed = Math.floor(speed * (1 + actor.increasedAttackSpeed / 100));
+        speed = Math.floor(speed * (1 - actor.increasedAttackSpeed / 100));
         // update actor current speed
         actor.currentSpeed = speed;
     }
@@ -1188,9 +1193,6 @@
         common.isActing = true;
         common.attackTimer = 0;
         common.isAttacking = false;
-        // action speed
-        common.actionTimer = attackSpeed;
-        common.currentSpeed = attackSpeed;
         // stun
         common.isStunned = false;
         common.stunTurns = 0;
@@ -1238,7 +1240,7 @@
     }
 
     function resetPlayer(player, playerStats) {
-        resetCommonStats(player, playerStats.attackSpeed - playerStats.decreasedAttackSpeed);
+        resetCommonStats(player);
         player.isPlayer = true;
         player.hitpoints = 0;
         player.maxHitpoints = playerStats.maxHitpoints;
@@ -1249,7 +1251,7 @@
 
 
     function resetEnemy(enemy, enemyStats) {
-        resetCommonStats(enemy, enemyStats.attackSpeed);
+        resetCommonStats(enemy);
         enemy.isPlayer = false;
         enemy.hitpoints = enemyStats.maxHitpoints;
         enemy.maxHitpoints = enemyStats.maxHitpoints;
