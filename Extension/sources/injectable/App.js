@@ -7,6 +7,7 @@
         'statNames',
         'Card',
         'Plotter',
+        'Loot',
         'Simulator',
     ];
 
@@ -284,6 +285,8 @@
                 };
                 // Simulation Object
                 this.simulator = new MICSR.Simulator(this, urls.simulationWorker);
+                // Loot Object
+                this.loot = new MICSR.Loot(this, this.simulator);
                 // Temporary GP/s settings variable
                 this.itemSubsetTemp = [];
 
@@ -543,8 +546,8 @@
                     labelCont.appendChild(lab2);
                     this.gpOptionsCard.container.appendChild(labelCont);
                     this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
-                    for (let i = 0; i < this.simulator.lootList.length; i++) {
-                        this.gpSearchResults.addRadio(this.simulator.lootList[i].name, 20, `${this.simulator.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
+                    for (let i = 0; i < this.loot.lootList.length; i++) {
+                        this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
                     }
                     this.gpSearchResults.container.style.width = '100%';
                     this.gpSearchResults.container.style.overflowY = 'scroll';
@@ -1832,7 +1835,7 @@
              * @param {boolean} newState The new value for the option
              */
             sellBonesRadioOnChange(event, newState) {
-                this.simulator.sellBones = newState;
+                this.loot.sellBones = newState;
                 this.updatePlotForGP();
             }
 
@@ -1842,7 +1845,7 @@
              * @param {boolean} newState The new value for the option
              */
             convertShardsRadioOnChange(event, newState) {
-                this.simulator.convertShards = newState;
+                this.loot.convertShards = newState;
                 this.updatePlotForGP();
             }
 
@@ -1914,8 +1917,8 @@
              * @param {Event} event The onchange event for a dropdown
              */
             sellLootDropdownOnChange(event) {
-                this.simulator.sellLoot = event.currentTarget.value;
-                if (this.simulator.sellLoot === 'Subset') {
+                this.loot.sellLoot = event.currentTarget.value;
+                if (this.loot.sellLoot === 'Subset') {
                     document.getElementById('MCS Edit Subset Button').style.display = 'block';
                 } else {
                     document.getElementById('MCS Edit Subset Button').style.display = 'none';
@@ -1927,7 +1930,7 @@
              * The callback for when the edit subset button is clicked
              */
             editSubsetButtonOnClick() {
-                this.simulator.setLootListToSaleList();
+                this.loot.setLootListToSaleList();
                 this.updateLootListRadios();
                 this.gpOptionsCard.container.style.display = 'flex';
                 this.gpOptionsCard.container.style.flexDirection = 'column';
@@ -1938,7 +1941,7 @@
              * The callback for when the set sale list to default button is clicked
              */
             setDefaultOnClick() {
-                this.simulator.setLootListToDefault();
+                this.loot.setLootListToDefault();
                 this.updateLootListRadios();
             }
 
@@ -1946,7 +1949,7 @@
              * The callback for when the set sale list to discovered button is clicked
              */
             setDiscoveredOnClick() {
-                this.simulator.setLootListToDiscovered();
+                this.loot.setLootListToDiscovered();
                 this.updateLootListRadios();
             }
 
@@ -1961,7 +1964,7 @@
              * The callback for when saving the changes to the sale list
              */
             saveSubsetOnClick() {
-                this.simulator.setSaleListToLootList();
+                this.loot.setSaleListToLootList();
                 this.updatePlotForGP();
                 this.gpOptionsCard.container.style.display = 'none';
             }
@@ -1981,7 +1984,7 @@
              * @param {boolean} newState The new value of the option
              */
             lootListRadioOnChange(event, llID, newState) {
-                this.simulator.lootList[llID].sell = newState;
+                this.loot.lootList[llID].sell = newState;
             }
 
             /**
@@ -1991,7 +1994,7 @@
             signetTimeInputOnChange(event) {
                 const newFarmTime = parseInt(event.currentTarget.value);
                 if (newFarmTime > 0 && newFarmTime <= 1000) {
-                    this.simulator.signetFarmTime = newFarmTime;
+                    this.loot.signetFarmTime = newFarmTime;
                 }
                 this.updatePlotForSignetChance();
             }
@@ -2441,7 +2444,7 @@
              * Updates the simulator display for when the signet time option is changed
              */
             updatePlotForSignetChance() {
-                this.simulator.updateSignetChance();
+                this.loot.updateSignetChance();
                 if (this.plotter.plotType === 'signetChance') {
                     this.updatePlotData();
                 }
@@ -2480,7 +2483,7 @@
             updateGPSubset(searchString) {
                 searchString = searchString.toLowerCase();
                 let lootname;
-                this.simulator.lootList.forEach((loot) => {
+                this.loot.lootList.forEach((loot) => {
                     lootname = loot.name.toLowerCase();
                     if (lootname.includes(searchString)) {
                         document.getElementById(`MCS ${loot.name} Radio Container`).style.display = 'flex';
@@ -2494,7 +2497,7 @@
              * Updates the display of sale list radios to match the internal state
              */
             updateLootListRadios() {
-                this.simulator.lootList.forEach((item) => {
+                this.loot.lootList.forEach((item) => {
                     if (item.sell) {
                         document.getElementById(`MCS ${item.name} Radio Yes`).checked = true;
                         document.getElementById(`MCS ${item.name} Radio No`).checked = false;

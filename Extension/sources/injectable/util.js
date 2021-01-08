@@ -83,6 +83,21 @@
         });
     }
 
+    /**
+     * Calculates the combat level of a monster
+     * @param {number} monsterID The index of MONSTERS
+     * @return {number}
+     */
+    MICSR.getMonsterCombatLevel = (monsterID) => {
+        const prayer = 1;
+        const base = 0.25 * (MONSTERS[monsterID].defenceLevel + MONSTERS[monsterID].hitpoints + Math.floor(prayer / 2));
+        const melee = 0.325 * (MONSTERS[monsterID].attackLevel + MONSTERS[monsterID].strengthLevel);
+        const range = 0.325 * (Math.floor(3 * MONSTERS[monsterID].rangedLevel / 2));
+        const magic = 0.325 * (Math.floor(3 * MONSTERS[monsterID].magicLevel / 2));
+        const levels = [melee, range, magic];
+        return Math.floor(base + Math.max(...levels));
+    }
+
     MICSR.loadedFiles.util = true;
 
 })();

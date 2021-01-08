@@ -61,6 +61,7 @@ const injectScripts = () => {
         'statNames',
         // class files
         'Card',
+        'Loot',
         'Plotter',
         'Simulator',
         // uses the other classes

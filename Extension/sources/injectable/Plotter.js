@@ -346,7 +346,7 @@
                     } else {
                         if (this.parent.barIsDungeon(barIndex)) {
                             barName = DUNGEONS[this.parent.barMonsterIDs[barIndex]].name;
-                        } else if(this.parent.barIsTask(barIndex)) {
+                        } else if (this.parent.barIsTask(barIndex)) {
                             barName = this.parent.slayerTasks[this.parent.barMonsterIDs[barIndex] - DUNGEONS.length].display;
                         } else {
                             barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
