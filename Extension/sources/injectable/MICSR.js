@@ -29,7 +29,9 @@ window.MICSR = {
                 continue;
             }
             // not defined yet: try again later
-            MICSR.log(id + ' is waiting for ' + req)
+            if (MICSR.loadCounters[id] === 1) {
+                MICSR.log(id + ' is waiting for ' + req)
+            }
             setTimeout(() => MICSR.waitLoadOrder(reqs, setup, id), 50);
             return;
         }
