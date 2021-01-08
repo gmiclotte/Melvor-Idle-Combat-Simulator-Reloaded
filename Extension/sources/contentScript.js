@@ -37,26 +37,40 @@ window.addEventListener('message', (event) => {
 }, false);
 
 // Perform script injection
-// Order of scripts shouldn't matter, `loadRequiredVariables` takes care of appropriate loading order
-const injectableNames = [
-    //
-    'MICSR',
-    // common
-    'util',
-    // independent definitions
-    'specialNames',
-    'statNames',
-    // class files
-    'Card',
-    'Plotter',
-    'Simulator',
-    // uses the other classes
-    'App',
-    // should be last
-    'main',
-];
-for (let i = 0; i < injectableNames.length; i++) {
-    injectScript(injectableNames[i]);
+// First inject the base MICSR object
+injectScript('MICSR');
+// Then try to inject the other scripts
+injectScripts();
+let counter = 0;
+
+const injectScripts = () => {
+    if (counter === 100) {
+        console.log('Could not load MICSR');
+    }
+    if (window.MICSR === undefined) {
+        counter++;
+        setTimeout(injectScripts, 50);
+        return;
+    }
+    // Order of scripts shouldn't matter, `loadRequiredVariables` takes care of appropriate loading order
+    const injectableNames = [
+        // common
+        'util',
+        // independent definitions
+        'specialNames',
+        'statNames',
+        // class files
+        'Card',
+        'Plotter',
+        'Simulator',
+        // uses the other classes
+        'App',
+        // should be last
+        'main',
+    ];
+    for (let i = 0; i < injectableNames.length; i++) {
+        injectScript(injectableNames[i]);
+    }
 }
 
 /**
