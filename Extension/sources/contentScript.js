@@ -37,21 +37,28 @@ window.addEventListener('message', (event) => {
 }, false);
 
 // Perform script injection
+/**
+ * Injects a script onto the page of the
+ * @param {string} scriptName
+ */
+function injectScript(scriptName) {
+    const scriptID = `mcs-${scriptName}`;
+    // Check if script already exists, if so delete it
+    if (document.getElementById(scriptID)) {
+        window.postMessage({type: 'MCS_FROM_CONTENT', action: 'UNLOAD'});
+        document.getElementById(scriptID).remove();
+    }
+    // Inject script
+    const scriptPath = chrome.runtime.getURL(`sources/injectable/${scriptName}.js`);
+    const newScript = document.createElement('script');
+    newScript.setAttribute('id', scriptID);
+    newScript.src = scriptPath;
+    document.body.appendChild(newScript);
+}
 // First inject the base MICSR object
 injectScript('MICSR');
 // Then try to inject the other scripts
-injectScripts();
-let counter = 0;
-
-const injectScripts = () => {
-    if (counter === 100) {
-        console.log('Could not load MICSR');
-    }
-    if (window.MICSR === undefined) {
-        counter++;
-        setTimeout(injectScripts, 50);
-        return;
-    }
+function injectScripts() {
     // Order of scripts shouldn't matter, `loadRequiredVariables` takes care of appropriate loading order
     const injectableNames = [
         // common
@@ -73,22 +80,5 @@ const injectScripts = () => {
         injectScript(injectableNames[i]);
     }
 }
-
-/**
- * Injects a script onto the page of the
- * @param {string} scriptName
- */
-function injectScript(scriptName) {
-    const scriptID = `mcs-${scriptName}`;
-    // Check if script already exists, if so delete it
-    if (document.getElementById(scriptID)) {
-        window.postMessage({type: 'MCS_FROM_CONTENT', action: 'UNLOAD'});
-        document.getElementById(scriptID).remove();
-    }
-    // Inject script
-    const scriptPath = chrome.runtime.getURL(`sources/injectable/${scriptName}.js`);
-    const newScript = document.createElement('script');
-    newScript.setAttribute('id', scriptID);
-    newScript.src = scriptPath;
-    document.body.appendChild(newScript);
-}
+// Delay this, so the MICSR object is first injected
+setTimeout(injectScripts());
