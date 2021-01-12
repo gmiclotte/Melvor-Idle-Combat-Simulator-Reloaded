@@ -1158,9 +1158,7 @@
         let cbTriangleAlreadyApplied = false;
         // check if any set damage cases apply
         if (currentSpecial.setHPDamage !== undefined) {
-            // TODO: crude estimate is based on auto eat 3 40%->80%
-            let currHP = actor.isPlayer ? actor.maxHitpoints * .6 : actor.hitpoints;
-            let setHPDamage = (currentSpecial.setHPDamage / 100) * currHP;
+            const setHPDamage = currentSpecial.setHPDamage / 100 * actor.hitpoints;
             damage = Math.floor(Math.random() * setHPDamage + 10);
         } else if (currentSpecial.customDamageModifier !== undefined) {
             damage = Math.floor(targetStats.maxHit * (1 - currentSpecial.customDamageModifier / 100));
