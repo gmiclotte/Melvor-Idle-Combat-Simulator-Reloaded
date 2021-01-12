@@ -189,6 +189,7 @@
                         xpPerHit: 0,
                         hpXpPerSecond: 0,
                         hpPerSecond: 0,
+                        atePerSecond: 0,
                         dmgPerSecond: 0,
                         avgKillTime: 0,
                         avgHitDmg: 0,
@@ -895,6 +896,13 @@
                     // area effects
                     slayerAreaEffectNegationPercent: this.equipmentStats.slayerAreaEffectNegationPercent,
                     slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
+                    // healing
+                    autoEat: {
+                        fixed: false,
+                        lb: 40,
+                        ub: 80,
+                        heal: 520,
+                    },
                 };
                 // MICSR.log({...playerStats});
 
@@ -1232,6 +1240,7 @@
                     let totalAttacksTaken = 0;
                     let totalAmmoUsed = 0;
                     let totalRunesUsed = 0;
+                    let totalAte = 0;
                     let totalSimTime = 0;
                     for (const monsterID of monsterIDs) {
                         if (!this.monsterSimData[monsterID].simSuccess || this.monsterSimData[monsterID].tooManyActions > 0) {
@@ -1250,6 +1259,7 @@
                         totalAmmoUsed += this.monsterSimData[monsterID].ammoUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totTime += this.monsterSimData[monsterID].avgKillTime;
+                        totalAte += this.monsterSimData[monsterID].atePerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalSimTime += this.monsterSimData[monsterID].simulationTime;
                     }
                     const dungeonTime = totTime / 1000;
@@ -1269,6 +1279,7 @@
                     data.attacksMadePerSecond = totalAttacksMade / dungeonTime;
                     data.ammoUsedPerSecond = totalAmmoUsed / dungeonTime;
                     data.runesUsedPerSecond = totalRunesUsed / dungeonTime;
+                    data.atePerSecond = totalAte / dungeonTime;
                     data.simulationTime = totalSimTime;
                 } else {
                     data.simSuccess = false;

@@ -115,9 +115,11 @@
          * @return {Promise<Object>}
          */
         async simulateMonster(enemyStats, playerStats, trials, maxActions, forceFullSim) {
+            // configure some additional default values for the `playerStats` and `enemyStats` objects
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
             playerStats.isPlayer = true;
+            playerStats.ate = 0;
             enemyStats.isPlayer = false;
 
             // Start Monte Carlo simulation
@@ -940,7 +942,33 @@
                 target.hitpoints = targetStats.maxHitpoints;
             }
         }
+        // Check for player eat
+        if (target.isPlayer) {
+            if (target.hitpoints > 0) {
+                eatFood(target, targetStats);
+            }
+        }
         checkAliveStatus(target, targetStats);
+    }
+
+    function eatFood(player, playerStats) {
+        eat(player, playerStats, playerStats.autoEat);
+    }
+
+    function eat(player, playerStats, settings) {
+        if (settings.lb === 0) {
+            return;
+        }
+        const lb = settings.fixed ? settings.lb : settings.lb / 100 * player.maxHitpoints;
+        if (player.hitpoints > lb) {
+            return;
+        }
+        const ub = settings.fixed ? settings.ub : settings.ub / 100 * player.maxHitpoints;
+        while(player.hitpoints < ub) {
+            playerStats.ate++;
+            player.hitpoints += settings.heal;
+        }
+        player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
     }
 
     function processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats) {
@@ -1315,6 +1343,7 @@
         // damage
         simResult.avgHitDmg = enemyStats.damageTaken / stats.playerAttackCalls;
         simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;
+        simResult.atePerSecond = playerStats.ate / totalTime * 1000;
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
 

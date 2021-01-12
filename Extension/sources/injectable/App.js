@@ -54,6 +54,7 @@
                     'Kills per ',
                     'Ammo per ',
                     'Runes per ',
+                    'Food Eaten per',
                     // 'Simulation Time',
                 ];
                 this.plotTypeIsTime = [
@@ -70,6 +71,7 @@
                     true,
                     true,
                     false,
+                    true,
                     true,
                     true,
                     true,
@@ -98,6 +100,7 @@
                     'killsPerSecond',
                     'ammoUsedPerSecond',
                     'runesUsedPerSecond',
+                    'atePerSecond',
                     // 'simulationTime',
                 ];
                 this.zoneInfoNames = [
@@ -120,6 +123,7 @@
                     'Kills/',
                     'Ammo/',
                     'Runes/',
+                    'Food/',
                     // 'Sim Time',
                 ];
                 // Time unit options
