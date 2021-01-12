@@ -2516,10 +2516,10 @@
             setPlotToDungeon(dungeonID) {
                 this.isViewingDungeon = true;
                 this.viewedDungeonID = dungeonID;
-                this.simulator.updateGPData();
-                this.simulator.updateSignetChance();
+                this.loot.updateGPData();
+                this.loot.updateSignetChance();
                 this.simulator.updateSlayerXP();
-                this.simulator.updateHerbloreXP();
+                this.loot.updateHerbloreXP();
                 this.updatePlotData();
                 // Undo bar selection if needed
                 if (this.barSelected) {
@@ -2535,10 +2535,10 @@
              */
             setPlotToGeneral() {
                 this.isViewingDungeon = false;
-                this.simulator.updateGPData();
-                this.simulator.updateSignetChance();
+                this.loot.updateGPData();
+                this.loot.updateSignetChance();
                 this.simulator.updateSlayerXP();
-                this.simulator.updateHerbloreXP();
+                this.loot.updateHerbloreXP();
 
                 if (this.barSelected) {
                     this.removeBarhighlight(this.selectedBar);
