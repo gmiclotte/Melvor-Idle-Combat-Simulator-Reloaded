@@ -29,7 +29,7 @@
                 break;
             case 'START_SIMULATION':
                 const startTime = performance.now();
-                combatSimulator.simulateMonster(event.data.monsterStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
+                combatSimulator.simulateMonster(event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
                     postMessage({
                         action: 'FINISHED_SIM',
@@ -141,16 +141,16 @@
 
             setAreaEffects(playerStats, enemyStats);
 
-            if (!playerStats.isMelee && enemyStats.monsterID === 147) {
+            if (!playerStats.isMelee && targetStats.passiveID.includes(2)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (!playerStats.isRanged && enemyStats.monsterID === 148) {
+            if (!playerStats.isRanged && targetStats.passiveID.includes(3)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (!playerStats.isMagic && enemyStats.monsterID === 149) {
+            if (!playerStats.isMagic && targetStats.passiveID.includes(4)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (enemyStats.monsterID === 147 || enemyStats.monsterID === 148) {
+            if (targetStats.passiveID.includes(2) || targetStats.passiveID.includes(3)) {
                 // can't curse these monsters
                 playerStats.canCurse = false;
             }
@@ -552,17 +552,15 @@
         ////////////
         // turned //
         ////////////
+        // Enemy Passive Effect "Purity" (passiveID 0) prevents stuns and sleep (same difference)
+        let stunImmunity = !target.isPlayer && target.passiveID.includes(0);
         // Apply Stun
-        if (canApplyStatus(statusEffect.canStun, target.isStunned, statusEffect.stunChance)) {
+        if (canApplyStatus(statusEffect.canStun, target.isStunned, statusEffect.stunChance, stunImmunity)) {
             applyStun(statusEffect, target);
         }
         // Apply Sleep
-        if (canApplyStatus(statusEffect.canSleep, target.isSleeping)) {
-            target.isSleeping = true;
-            target.sleepTurns = statusEffect.sleepTurns;
-            target.isAttacking = false;
-            target.isActing = true;
-            target.actionTimer = target.currentSpeed;
+        if (canApplyStatus(statusEffect.canSleep, target.isSleeping, undefined, stunImmunity)) {
+            applySleep(statusEffect, target);
         }
         // Apply Slow
         if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
@@ -628,8 +626,8 @@
         }
     }
 
-    function canApplyStatus(can, is, chance) {
-        if (!can || is) {
+    function canApplyStatus(can, is, chance, immunity = false) {
+        if (!can || is || immunity) {
             return false;
         }
         if (chance !== undefined) {
@@ -643,6 +641,15 @@
         // apply new stun
         target.isStunned = true;
         target.stunTurns = statusEffect.stunTurns;
+        target.isAttacking = false;
+        target.isActing = true;
+        target.actionTimer = target.currentSpeed;
+    }
+
+    function applySleep(statusEffect, target) {
+        // apply new sleep
+        target.isSleeping = true;
+        target.sleepTurns = statusEffect.sleepTurns;
         target.isAttacking = false;
         target.isActing = true;
         target.actionTimer = target.currentSpeed;
@@ -941,7 +948,8 @@
     function dealDamage(target, targetStats, damage) {
         target.hitpoints -= Math.floor(damage);
         targetStats.damageTaken += Math.floor(damage);
-        if (!target.isPlayer && targetStats.monsterID === 143 && target.hitpoints <= 0) {
+        // Check for Phoenix Rebirth
+        if (!target.isPlayer && targetStats.passiveID.includes(1) && target.hitpoints <= 0) {
             let random = Math.random() * 100;
             if (random < 40) {
                 target.hitpoints = targetStats.maxHitpoints;

@@ -1152,6 +1152,7 @@
                     specialAttackChances: [],
                     specialIDs: [],
                     specialLength: 0,
+                    passiveID: [],
                 };
                 // Determine slayer zone
                 let slayerIdx = 0;
@@ -1208,6 +1209,10 @@
                         enemyStats.specialIDs.push(MONSTERS[monsterID].specialAttackID[i]);
                     }
                     enemyStats.specialLength = enemyStats.specialAttackChances.length;
+                }
+                // add passive effects
+                if (MONSTERS[monsterID].passiveID) {
+                    enemyStats.passiveID = MONSTERS[monsterID].passiveID;
                 }
                 return enemyStats;
             }
@@ -1325,7 +1330,7 @@
                     this.simulationWorkers[workerID].worker.postMessage({
                         action: 'START_SIMULATION',
                         monsterID: monsterID,
-                        monsterStats: this.enemyStats[monsterID],
+                        enemyStats: this.enemyStats[monsterID],
                         playerStats: this.currentSim.playerStats,
                         simOptions: this.currentSim.options
                     });
