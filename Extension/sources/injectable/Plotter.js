@@ -156,7 +156,7 @@
                 this.plotHeader.appendChild(this.toggleDungeonButton);
                 this.toggleSlayerButton = document.createElement('button');
                 this.toggleSlayerButton.className = 'btn btn-primary m-1';
-                this.toggleSlayerButton.textContent = 'Toggle Slayer Tasks';
+                this.toggleSlayerButton.textContent = 'Toggle Auto Slayer';
                 this.toggleSlayerButton.onclick = () => {
                     this.parent.toggleSlayerSims();
                 };
