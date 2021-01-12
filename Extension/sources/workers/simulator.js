@@ -121,6 +121,8 @@
             playerStats.isPlayer = true;
             playerStats.deaths = 0;
             playerStats.ate = 0;
+            playerStats.highestDamageTaken = 0;
+            playerStats.lowestHitpoints = playerStats.maxHitpoints;
             enemyStats.isPlayer = false;
 
             // Start Monte Carlo simulation
@@ -950,6 +952,12 @@
             if (target.hitpoints > 0) {
                 eatFood(target, targetStats);
             }
+            if (damage > targetStats.highestDamageTaken) {
+                targetStats.highestDamageTaken = damage;
+            }
+            if (0 < target.hitpoints && target.hitpoints < targetStats.lowestHitpoints) {
+                targetStats.lowestHitpoints = target.hitpoints;
+            }
         }
         checkAliveStatus(target, targetStats);
     }
@@ -1348,6 +1356,8 @@
         simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;
         // deaths and extreme damage
         simResult.deathRate = playerStats.deaths / (trials - tooManyActions);
+        simResult.highestDamageTaken = playerStats.highestDamageTaken;
+        simResult.lowestHitpoints = playerStats.lowestHitpoints;
         simResult.atePerSecond = playerStats.ate / totalTime * 1000;
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;

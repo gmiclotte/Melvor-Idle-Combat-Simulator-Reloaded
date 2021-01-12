@@ -190,6 +190,8 @@
                         hpXpPerSecond: 0,
                         hpPerSecond: 0,
                         deathRate: 0,
+                        highestDamageTaken: 0,
+                        lowestHitpoints: Infinity,
                         atePerSecond: 0,
                         dmgPerSecond: 0,
                         avgKillTime: 0,
@@ -1261,6 +1263,8 @@
                         totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totTime += this.monsterSimData[monsterID].avgKillTime;
                         data.deathRate = 1 - (1 - data.deathRate) * (1 - this.monsterSimData[monsterID].deathRate);
+                        data.highestDamageTaken = Math.max(data.highestDamageTaken, this.monsterSimData[monsterID].highestDamageTaken);
+                        data.lowestHitpoints = Math.min(data.lowestHitpoints, this.monsterSimData[monsterID].lowestHitpoints);
                         totalAte += this.monsterSimData[monsterID].atePerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalSimTime += this.monsterSimData[monsterID].simulationTime;
                     }

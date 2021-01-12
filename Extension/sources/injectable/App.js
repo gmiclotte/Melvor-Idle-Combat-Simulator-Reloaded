@@ -55,6 +55,8 @@
                     'Ammo per ',
                     'Runes per ',
                     'deathRate',
+                    'highestDamageTaken',
+                    'lowestHitpoints',
                     'Food Eaten per',
                     // 'Simulation Time',
                 ];
@@ -78,6 +80,8 @@
                     true,
                     true,
                     true,
+                    false,
+                    false,
                     false,
                     true,
                     // false,
@@ -103,6 +107,8 @@
                     'ammoUsedPerSecond',
                     'runesUsedPerSecond',
                     'deathRate',
+                    'highestDamageTaken',
+                    'lowestHitpoints',
                     'atePerSecond',
                     // 'simulationTime',
                 ];
@@ -127,6 +133,8 @@
                     'Ammo/',
                     'Runes/',
                     'deathRate',
+                    'highestDamageTaken',
+                    'lowestHitpoints',
                     'Food/',
                     // 'Sim Time',
                 ];
