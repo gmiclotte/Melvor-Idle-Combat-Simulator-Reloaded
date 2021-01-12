@@ -1104,7 +1104,7 @@
         if (damage === undefined) {
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
-        return damage * damageModifiers(enemy, player, isSpecial, currentSpecial);
+        return applyDamageModifiers(damage, enemy, player, isSpecial, currentSpecial);
     }
 
     function setDamage(actor, actorStats, target, targetStats, isSpecial, currentSpecial) {
@@ -1139,20 +1139,19 @@
     }
 
     // stun, sleep and DR apply to fixed damage
-    function damageModifiers(actor, target, isSpecial, special) {
-        let modifier = 1;
+    function applyDamageModifiers(damage, actor, target, isSpecial, special) {
         if (isSpecial && !actor.isAttacking && target.isStunned) {
-            modifier *= special.stunDamageMultiplier;
+            damage *= special.stunDamageMultiplier;
         }
         if (isSpecial && !actor.isAttacking && target.isSleeping) {
-            modifier *= special.sleepDamageMultiplier;
+            damage *= special.sleepDamageMultiplier;
         }
         let damageReduction = target.damageReduction + target.increasedDamageReduction;
         if (target.markOfDeath) {
             damageReduction = Math.floor(damageReduction / 2);
         }
-        modifier *= (1 - (damageReduction / 100));
-        return modifier;
+        damage -= Math.floor((damageReduction / 100) * damage);
+        return damage;
     }
 
     function playerCalculateDamage(player, playerStats, enemy, enemyStats, isSpecial) {
@@ -1180,7 +1179,7 @@
             damage *= 1.05;
         }
         // common modifiers
-        damage *= damageModifiers(player, enemy, isSpecial, player.currentSpecial)
+        damage = applyDamageModifiers(damage, player, enemy, isSpecial, player.currentSpecial)
         // cap damage, no overkill
         if (enemy.hitpoints < damage) {
             damage = enemy.hitpoints;
