@@ -419,6 +419,8 @@
         // Elder Crown life steals bleed damage
         if (actor.isPlayer && actorStats.activeItems.elderCrown) {
             actorStats.damageHealed += Math.floor(target.bleedDamage);
+            actor.hitpoints += Math.floor(target.bleedDamage);
+            actor.hitpoints = Math.min(actor.hitpoints, actor.maxHitpoints);
         }
     }
 
@@ -1077,6 +1079,8 @@
         }
         if (lifeSteal > 0) {
             playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * lifeSteal / 100);
+            player.hitpoints += Math.floor(attackResult.damageToEnemy * lifeSteal / 100);
+            player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
         }
         // confetti crossbow
         if (playerStats.activeItems.confettiCrossbow) {
