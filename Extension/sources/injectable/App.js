@@ -1795,7 +1795,7 @@
              */
             petSkillDropdownOnChange(event) {
                 this.simulator.petSkill = event.currentTarget.value;
-                this.simulator.updatePetChance();
+                this.loot.updatePetChance();
                 if (this.plotter.plotType === 'petChance') {
                     this.updatePlotData();
                 }
@@ -2016,7 +2016,7 @@
                     if (newName) document.getElementById(`MCS ${name + this.timeShorthand[1]} Label`).textContent = newName;
                 });
                 // Update pet chance
-                this.simulator.updatePetChance();
+                this.loot.updatePetChance();
                 // Update Plot
                 this.updatePlotData();
                 // Update Info Card
@@ -2433,7 +2433,7 @@
              * Updates the simulator display for when the slayer task option is changed
              */
             updatePlotForSlayerXP() {
-                this.simulator.updateSlayerXP();
+                this.loot.updateSlayerXP();
                 if (this.plotter.plotType === 'slayerXpPerSecond') {
                     this.updatePlotData();
                 }
@@ -2518,7 +2518,7 @@
                 this.viewedDungeonID = dungeonID;
                 this.loot.updateGPData();
                 this.loot.updateSignetChance();
-                this.simulator.updateSlayerXP();
+                this.loot.updateSlayerXP();
                 this.loot.updateHerbloreXP();
                 this.updatePlotData();
                 // Undo bar selection if needed
@@ -2537,7 +2537,7 @@
                 this.isViewingDungeon = false;
                 this.loot.updateGPData();
                 this.loot.updateSignetChance();
-                this.simulator.updateSlayerXP();
+                this.loot.updateSlayerXP();
                 this.loot.updateHerbloreXP();
 
                 if (this.barSelected) {

@@ -435,6 +435,8 @@
                 this.updateGPData();
                 this.updateHerbloreXP();
                 this.updateSignetChance();
+                this.updateSlayerXP();
+                this.updatePetChance();
             }
 
             /**
@@ -495,6 +497,46 @@
                             }
                             this.slayerSimData[i].gpPerSecond = sum / this.slayerTaskMonsters[i].length;
                         }
+                    }
+                }
+            }
+
+            /**
+             * Updates the amount of slayer xp earned when killing monsters
+             */
+            updateSlayerXP() {
+                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
+                    DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterID) => {
+                        this.monsterSimData[monsterID].slayerXpPerSecond = 0;
+                    });
+                } else {
+                    const updateMonsterSlayerXP = (monsterID) => {
+                        if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
+                            let monsterXP = 0;
+                            monsterXP += Math.floor(((MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0) * (1 + this.currentSim.slayerBonusXP / 100));
+                            if (this.isSlayerTask) {
+                                monsterXP += Math.floor(MONSTERS[monsterID].hitpoints * (1 + this.currentSim.slayerBonusXP / 100));
+                            }
+                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * this.currentSim.playerStats.globalXPMult / this.monsterSimData[monsterID].killTimeS;
+                        } else {
+                            this.monsterSimData[monsterID].slayerXpPerSecond = 0;
+                        }
+                    };
+                    // Set data for monsters in combat zones
+                    combatAreas.forEach((area) => {
+                        area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
+                    });
+                    const bardID = 139;
+                    updateMonsterSlayerXP(bardID);
+                    slayerAreas.forEach((area) => {
+                        area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
+                    });
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        let sum = 0;
+                        for (const monsterID of this.slayerTaskMonsters[i]) {
+                            sum += this.monsterSimData[monsterID].slayerXpPerSecond;
+                        }
+                        this.slayerSimData[i].slayerXpPerSecond = sum / this.slayerTaskMonsters[i].length;
                     }
                 }
             }
@@ -579,6 +621,81 @@
                 return MICSR.getMonsterCombatLevel(monsterID) * this.computeLootChance(monsterID) / 500000;
             }
 
+            /** Updates the chance to get a pet for the given skill*/
+            updatePetChance() {
+                const petSkills = ['Hitpoints', 'Prayer'];
+                if (this.currentSim.isSlayerTask) {
+                    petSkills.push('Slayer');
+                }
+                const attackType = this.currentSim.playerStats.attackType;
+                switch (attackType) {
+                    case CONSTANTS.attackType.Melee:
+                        switch (this.currentSim.attackStyle.Melee) {
+                            case 0:
+                                petSkills.push('Attack');
+                                break;
+                            case 1:
+                                petSkills.push('Strength');
+                                break;
+                            case 2:
+                                petSkills.push('Defence');
+                                break;
+                        }
+                        break;
+                    case CONSTANTS.attackType.Ranged:
+                        petSkills.push('Ranged');
+                        if (this.currentSim.attackStyle.Ranged === 2) petSkills.push('Defence');
+                        break;
+                    case CONSTANTS.attackType.Magic:
+                        petSkills.push('Magic');
+                        if (this.currentSim.attackStyle.Magic === 1) petSkills.push('Defence');
+                        break;
+                }
+                if (petSkills.includes(this.petSkill)) {
+                    const petSkillLevel = this.currentSim.virtualLevels[this.petSkill] + 1;
+                    this.monsterSimData.forEach((simResult) => {
+                        if (!simResult.simSuccess) {
+                            simResult.petChance = 0;
+                            return;
+                        }
+                        const timePeriod = (this.timeMultiplier === -1) ? simResult.killTimeS : this.timeMultiplier;
+                        const petRolls = simResult.petRolls[this.petSkill] || simResult.petRolls.other;
+                        simResult.petChance = 1 - petRolls.reduce((chanceToNotGet, petRoll) => {
+                            return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * petRoll.rollsPerSecond);
+                        }, 1);
+                        simResult.petChance *= 100;
+                    });
+                    DUNGEONS.forEach((_, dungeonId) => {
+                        const dungeonResult = this.dungeonSimData[dungeonId];
+                        if (!dungeonResult.simSuccess || this.petSkill === 'Slayer') {
+                            dungeonResult.petChance = 0;
+                            return;
+                        }
+                        const timePeriod = (this.timeMultiplier === -1) ? dungeonResult.killTimeS : this.timeMultiplier;
+                        dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterID) => {
+                            const monsterResult = this.monsterSimData[monsterID];
+                            const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;
+                            const petRolls = monsterResult.petRolls[this.petSkill] || monsterResult.petRolls.other;
+                            const monsterChanceToNotGet = petRolls.reduce((chanceToNotGet, petRoll) => {
+                                return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * timeRatio * petRoll.rollsPerSecond);
+                            }, 1);
+                            return cumChanceToNotGet * monsterChanceToNotGet;
+                        }, 1);
+                        dungeonResult.petChance *= 100;
+                    });
+                    // TODO: pet rolls for auto slayer
+                } else {
+                    this.monsterSimData.forEach((simResult) => {
+                        simResult.petChance = 0;
+                    });
+                    this.dungeonSimData.forEach((simResult) => {
+                        simResult.petChance = 0;
+                    });
+                    this.slayerSimData.forEach((simResult) => {
+                        simResult.petChance = 0;
+                    });
+                }
+            }
         }
     }
 
