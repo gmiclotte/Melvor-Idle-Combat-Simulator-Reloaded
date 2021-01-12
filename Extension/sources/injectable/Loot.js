@@ -389,6 +389,7 @@
             computeDungeonValue(dungeonID) {
                 let dungeonValue = 0;
                 if (this.sellLoot !== 'None') {
+                    // TODO: should double everything that appears in the droptable of the boss monster, not just chests
                     DUNGEONS[dungeonID].rewards.forEach((reward) => {
                         if (items[reward].canOpen) {
                             dungeonValue += this.computeChestOpenValue(reward) * this.currentSim.lootBonus;
@@ -505,8 +506,8 @@
              * Updates the amount of slayer xp earned when killing monsters
              */
             updateSlayerXP() {
-                if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                     });
                 } else {

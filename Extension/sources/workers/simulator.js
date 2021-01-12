@@ -141,16 +141,16 @@
 
             setAreaEffects(playerStats, enemyStats);
 
-            if (!playerStats.isMelee && targetStats.passiveID.includes(2)) {
+            if (!playerStats.isMelee && enemyStats.passiveID.includes(2)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (!playerStats.isRanged && targetStats.passiveID.includes(3)) {
+            if (!playerStats.isRanged && enemyStats.passiveID.includes(3)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (!playerStats.isMagic && targetStats.passiveID.includes(4)) {
+            if (!playerStats.isMagic && enemyStats.passiveID.includes(4)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
-            if (targetStats.passiveID.includes(2) || targetStats.passiveID.includes(3)) {
+            if (enemyStats.passiveID.includes(2) || enemyStats.passiveID.includes(3)) {
                 // can't curse these monsters
                 playerStats.canCurse = false;
             }
@@ -553,7 +553,7 @@
         // turned //
         ////////////
         // Enemy Passive Effect "Purity" (passiveID 0) prevents stuns and sleep (same difference)
-        let stunImmunity = !target.isPlayer && target.passiveID.includes(0);
+        let stunImmunity = !target.isPlayer && targetStats.passiveID.includes(0);
         // Apply Stun
         if (canApplyStatus(statusEffect.canStun, target.isStunned, statusEffect.stunChance, stunImmunity)) {
             applyStun(statusEffect, target);
