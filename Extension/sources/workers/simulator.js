@@ -449,20 +449,30 @@
         // Check if doing special
         let isSpecial = false;
         enemy.specialID = -1;
-        enemy.doingSpecial = false;
         enemy.currentSpecial = {};
         if (enemyStats.hasSpecialAttack) {
-            const chanceForSpec = Math.floor(Math.random() * 100);
-            let specCount = 0;
+            const specialRoll = Math.floor(Math.random() * 100);
+            let specialChance = 0;
             for (let i = 0; i < enemyStats.specialLength; i++) {
-                if (chanceForSpec <= enemyStats.specialAttackChances[i] + specCount) {
+                specialChance += enemyStats.specialAttackChances[i];
+                if (specialRoll <= specialChance) {
                     enemy.specialID = enemyStats.specialIDs[i];
                     enemy.currentSpecial = enemySpecialAttacks[enemy.specialID];
-                    enemy.doingSpecial = true;
                     isSpecial = true;
                     break;
                 }
-                specCount += enemyStats.specialAttackChances[i];
+            }
+            // don't stack active buffs
+            if (enemy.activeBuffs && enemy.currentSpecial.activeBuffs) {
+                enemy.specialID = -1;
+                enemy.currentSpecial = {};
+                isSpecial = false;
+            }
+            // stop Ahrenia Phase 3 from using a normal attack
+            if (!isSpecial && enemyStats.monsterID === 149) {
+                enemy.specialID = 50;
+                enemy.currentSpecial = enemySpecialAttacks[50];
+                isSpecial = true;
             }
         }
         if (isSpecial) {
@@ -666,8 +676,8 @@
         if (isSpecial) {
             // Do Enemy Special
             // Activate Buffs
-            if (currentSpecial.activeBuffs && !enemy.isBuffed) {
-                enemy.isBuffed = true;
+            if (currentSpecial.activeBuffs && !enemy.activeBuffs) {
+                enemy.activeBuffs = true;
                 if (currentSpecial.activeBuffTurns !== null && currentSpecial.activeBuffTurns !== undefined) {
                     enemy.buffTurns = currentSpecial.activeBuffTurns;
                 } else {
@@ -789,10 +799,10 @@
 
     function postAttack(actor, actorStats, target, targetStats) {
         // Buff tracking
-        if (actor.isBuffed) {
+        if (actor.activeBuffs) {
             actor.buffTurns--;
             if (actor.buffTurns <= 0) {
-                actor.isBuffed = false;
+                actor.activeBuffs = false;
                 // Undo buffs
                 actor.increasedAttackSpeed = 0;
                 calculateSpeed(actor, actorStats, targetStats)
@@ -897,11 +907,11 @@
             player.currentSpecial = playerStats.specialData[0];
         } else if (playerStats.hasSpecialAttack) {
             const specialRoll = Math.floor(Math.random() * 100);
-            let chance = 0;
+            let specialChance = 0;
             for (const special of playerStats.specialData) {
                 // Roll for player special
-                chance += special.chance;
-                if (specialRoll <= chance) {
+                specialChance += special.chance;
+                if (specialRoll <= specialChance) {
                     isSpecial = true;
                     player.currentSpecial = special;
                     break;
@@ -1189,7 +1199,6 @@
     function resetCommonStats(common, attackSpeed) {
         common.currentSpecial = {};
         // action
-        common.doingSpecial = false;
         common.isActing = true;
         common.attackTimer = 0;
         common.isAttacking = false;
@@ -1219,7 +1228,7 @@
         common.attackSpeedDebuff = 0;
         common.increasedAttackSpeed = 0;
         // buff
-        common.isBuffed = false;
+        common.activeBuffs = false;
         common.buffTurns = 0;
         common.increasedDamageReduction = 0;
         // curse
