@@ -189,6 +189,7 @@
                         xpPerHit: 0,
                         hpXpPerSecond: 0,
                         hpPerSecond: 0,
+                        deathRate: 0,
                         atePerSecond: 0,
                         dmgPerSecond: 0,
                         avgKillTime: 0,
@@ -1259,6 +1260,7 @@
                         totalAmmoUsed += this.monsterSimData[monsterID].ammoUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totTime += this.monsterSimData[monsterID].avgKillTime;
+                        data.deathRate = 1 - (1 - data.deathRate) * (1 - this.monsterSimData[monsterID].deathRate);
                         totalAte += this.monsterSimData[monsterID].atePerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalSimTime += this.monsterSimData[monsterID].simulationTime;
                     }

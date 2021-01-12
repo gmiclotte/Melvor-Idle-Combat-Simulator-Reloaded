@@ -119,6 +119,7 @@
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
             playerStats.isPlayer = true;
+            playerStats.deaths = 0;
             playerStats.ate = 0;
             enemyStats.isPlayer = false;
 
@@ -299,7 +300,9 @@
                         enemy: {...enemy},
                     };
                 }
-                if (enemy.hitpoints > 0) {
+                if (player.hitpoints <= 0) {
+                    playerStats.deaths++;
+                } else if (enemy.hitpoints > 0) {
                     tooManyActions++;
                     if (!forceFullSim) {
                         return {
@@ -1343,6 +1346,8 @@
         // damage
         simResult.avgHitDmg = enemyStats.damageTaken / stats.playerAttackCalls;
         simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;
+        // deaths and extreme damage
+        simResult.deathRate = playerStats.deaths / (trials - tooManyActions);
         simResult.atePerSecond = playerStats.ate / totalTime * 1000;
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;

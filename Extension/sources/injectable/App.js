@@ -54,6 +54,7 @@
                     'Kills per ',
                     'Ammo per ',
                     'Runes per ',
+                    'deathRate',
                     'Food Eaten per',
                     // 'Simulation Time',
                 ];
@@ -77,6 +78,7 @@
                     true,
                     true,
                     true,
+                    false,
                     true,
                     // false,
                 ];
@@ -100,6 +102,7 @@
                     'killsPerSecond',
                     'ammoUsedPerSecond',
                     'runesUsedPerSecond',
+                    'deathRate',
                     'atePerSecond',
                     // 'simulationTime',
                 ];
@@ -123,6 +126,7 @@
                     'Kills/',
                     'Ammo/',
                     'Runes/',
+                    'deathRate',
                     'Food/',
                     // 'Sim Time',
                 ];
