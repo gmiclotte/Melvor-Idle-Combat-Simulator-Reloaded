@@ -1228,24 +1228,24 @@
                     let totalAmmoUsed = 0;
                     let totalRunesUsed = 0;
                     let totalSimTime = 0;
-                    for (const monsterId of monsterIDs) {
-                        if (!this.monsterSimData[monsterId].simSuccess || this.monsterSimData[monsterId].tooManyActions > 0) {
+                    for (const monsterID of monsterIDs) {
+                        if (!this.monsterSimData[monsterID].simSuccess || this.monsterSimData[monsterID].tooManyActions > 0) {
                             data.simSuccess = false;
                             return;
                         }
-                        totXp += this.monsterSimData[monsterId].xpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totHpXp += this.monsterSimData[monsterId].hpXpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totPrayXP += this.monsterSimData[monsterId].prayerXpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totHP += this.monsterSimData[monsterId].hpPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totEnemyHP += this.monsterSimData[monsterId].dmgPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totPrayerPoints += this.monsterSimData[monsterId].ppConsumedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totalGPFromDamage += this.monsterSimData[monsterId].gpFromDamagePerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totalAttacksMade += this.monsterSimData[monsterId].attacksMadePerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totalAttacksTaken += this.monsterSimData[monsterId].attacksTakenPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totalAmmoUsed += this.monsterSimData[monsterId].ammoUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totalRunesUsed += this.monsterSimData[monsterId].runesUsedPerSecond * this.monsterSimData[monsterId].killTimeS;
-                        totTime += this.monsterSimData[monsterId].avgKillTime;
-                        totalSimTime += this.monsterSimData[monsterId].simulationTime;
+                        totXp += this.monsterSimData[monsterID].xpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totHpXp += this.monsterSimData[monsterID].hpXpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totPrayXP += this.monsterSimData[monsterID].prayerXpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totHP += this.monsterSimData[monsterID].hpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totEnemyHP += this.monsterSimData[monsterID].dmgPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totPrayerPoints += this.monsterSimData[monsterID].ppConsumedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalGPFromDamage += this.monsterSimData[monsterID].gpFromDamagePerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalAttacksMade += this.monsterSimData[monsterID].attacksMadePerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalAttacksTaken += this.monsterSimData[monsterID].attacksTakenPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalAmmoUsed += this.monsterSimData[monsterID].ammoUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totTime += this.monsterSimData[monsterID].avgKillTime;
+                        totalSimTime += this.monsterSimData[monsterID].simulationTime;
                     }
                     const dungeonTime = totTime / 1000;
                     data.xpPerSecond = totXp / dungeonTime;
@@ -1538,10 +1538,10 @@
                     // dungeons
                     const dungeonID = this.parent.viewedDungeonID;
                     const isSignet = keyValue === 'signetChance';
-                    DUNGEONS[dungeonID].monsters.forEach((monsterId) => {
+                    DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
                         if (!isSignet) {
-                            if (isKillTime) dataMultiplier = this.monsterSimData[monsterId].killTimeS;
-                            dataSet.push((this.monsterSimData[monsterId].simSuccess) ? this.monsterSimData[monsterId][keyValue] * dataMultiplier : 0);
+                            if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
+                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
                         } else {
                             dataSet.push(0);
                         }
@@ -1554,10 +1554,10 @@
                     // slayer tasks
                     const taskID = this.parent.viewedDungeonID - DUNGEONS.length;
                     const isSignet = keyValue === 'signetChance';
-                    this.slayerTaskMonsters[taskID].forEach(monsterId => {
+                    this.slayerTaskMonsters[taskID].forEach(monsterID => {
                         if (!isSignet) {
-                            if (isKillTime) dataMultiplier = this.monsterSimData[monsterId].killTimeS;
-                            dataSet.push((this.monsterSimData[monsterId].simSuccess) ? this.monsterSimData[monsterId][keyValue] * dataMultiplier : 0);
+                            if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
+                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
                         } else {
                             dataSet.push(0);
                         }
@@ -1628,7 +1628,7 @@
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
                     if (this.exportDungeonMonsters) {
-                        DUNGEONS[dungeonId].monsters.forEach(monsterId => exportEntity(monsterId, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
+                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
                 // TODO: export for auto slayer
@@ -1693,8 +1693,8 @@
              */
             updateSlayerXP() {
                 if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterId) => {
-                        this.monsterSimData[monsterId].slayerXpPerSecond = 0;
+                    DUNGEONS[this.parent.viewedDungeonID].monsters.forEach((monsterID) => {
+                        this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                     });
                 } else {
                     const updateMonsterSlayerXP = (monsterID) => {
@@ -1779,8 +1779,8 @@
                             return;
                         }
                         const timePeriod = (this.timeMultiplier === -1) ? dungeonResult.killTimeS : this.timeMultiplier;
-                        dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterId) => {
-                            const monsterResult = this.monsterSimData[monsterId];
+                        dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterID) => {
+                            const monsterResult = this.monsterSimData[monsterID];
                             const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;
                             const petRolls = monsterResult.petRolls[this.petSkill] || monsterResult.petRolls.other;
                             const monsterChanceToNotGet = petRolls.reduce((chanceToNotGet, petRoll) => {
