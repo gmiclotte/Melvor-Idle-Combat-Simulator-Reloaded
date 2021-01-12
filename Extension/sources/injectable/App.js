@@ -2422,7 +2422,7 @@
              * Updates the simulator display for when a gp option is changed
              */
             updatePlotForGP() {
-                this.simulator.updateGPData();
+                this.loot.updateGPData();
                 if (this.plotter.plotType === 'gpPerSecond') {
                     this.updatePlotData();
                 }
