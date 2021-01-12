@@ -188,8 +188,9 @@
                 enemy.actionTimer = enemy.currentSpeed;
 
                 // Simulate combat until enemy is dead or max actions has been reached
-                let enemyAlive = true;
-                while (enemyAlive) {
+                enemy.alive = true;
+                player.alive = true;
+                while (enemy.alive && player.alive) {
                     innerCount++
                     // Check Cancellation every 100000th loop
                     if (innerCount % 100000 === 0 && await this.isCanceled()) {
@@ -229,91 +230,66 @@
                     processTimeStep(player, timeStep);
                     processTimeStep(enemy, timeStep);
 
-                    let initialHP = enemyStats.damageTaken;
-                    if (enemyAlive && player.isActing) {
+                    if (enemy.alive && player.isActing) {
                         if (player.actionTimer <= 0) {
                             playerAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                             // Multi attack once more when the monster died on the first hit
-                            if (!enemyAlive && player.isAttacking && player.attackCount < player.countMax) {
+                            if (!enemy.alive && player.isAttacking && player.attackCount < player.countMax) {
                                 stats.totalTime += player.attackInterval;
                             }
                         }
                     }
-                    if (enemyAlive && player.isAttacking) {
+                    if (enemy.alive && player.isAttacking) {
                         if (player.attackTimer <= 0) {
                             playerContinueAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                         }
                     }
-                    if (enemyAlive && player.isBurning) {
+                    if (enemy.alive && player.isBurning) {
                         if (player.burnTimer <= 0) {
                             actorBurn(player, playerStats);
                         }
                     }
-                    if (enemyAlive && player.isRecoiling) {
+                    if (enemy.alive && player.isRecoiling) {
                         if (player.recoilTimer <= 0) {
                             actorRecoilCD(player);
                         }
                     }
-                    if (enemyAlive && player.isBleeding) {
+                    if (enemy.alive && player.isBleeding) {
                         if (player.bleedTimer <= 0) {
                             targetBleed(enemy, enemyStats, player, playerStats);
                         }
                     }
                     //enemy
-                    if (enemyAlive && enemy.isActing) {
+                    if (enemy.alive && enemy.isActing) {
                         if (enemy.actionTimer <= 0) {
                             enemyAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                         }
                     }
-                    if (enemyAlive && enemy.isAttacking) {
+                    if (enemy.alive && enemy.isAttacking) {
                         if (enemy.attackTimer <= 0) {
                             enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                         }
                     }
-                    if (enemyAlive && enemy.isBurning) {
+                    if (enemy.alive && enemy.isBurning) {
                         if (enemy.burnTimer <= 0) {
                             actorBurn(enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                         }
                     }
-                    if (enemyAlive && enemy.isRecoiling) {
+                    if (enemy.alive && enemy.isRecoiling) {
                         if (enemy.recoilTimer <= 0) {
                             actorRecoilCD(enemy);
                         }
                     }
-                    if (enemyAlive && enemy.isBleeding) {
+                    if (enemy.alive && enemy.isBleeding) {
                         if (enemy.bleedTimer <= 0) {
                             targetBleed(player, playerStats, enemy, enemyStats);
-                            if (initialHP !== enemyStats.damageTaken) {
-                                enemyAlive = enemy.hitpoints > 0;
-                                initialHP = enemy.hitpoints;
-                            }
                         }
                     }
                 }
-                if (isNaN(enemy.hitpoints)) {
+                if (isNaN(player.hitpoints) || isNaN(enemy.hitpoints)) {
                     return {
                         simSuccess: false,
-                        reason: 'bogus enemy hp',
+                        reason: 'bogus player or enemy hp',
                         monsterID: enemyStats.monsterID,
                         playerStats: {...playerStats},
                         player: {...player},
@@ -363,6 +339,13 @@
 
         cancelSimulation() {
             this.cancelStatus = true;
+        }
+    }
+
+    function checkAliveStatus(target, targetStats) {
+        if (target.initialDamage !== targetStats.damageTaken) {
+            target.initialDamage = targetStats.damageTaken;
+            target.alive = target.hitpoints > 0;
         }
     }
 
@@ -955,6 +938,7 @@
                 target.hitpoints = targetStats.maxHitpoints;
             }
         }
+        checkAliveStatus(target, targetStats);
     }
 
     function processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats) {
@@ -1204,7 +1188,7 @@
         return damage;
     }
 
-    function resetCommonStats(common, attackSpeed) {
+    function resetCommonStats(common, stats) {
         common.currentSpecial = {};
         // action
         common.isActing = true;
@@ -1254,13 +1238,15 @@
         common.meleeEvasionDebuff = 0;
         common.rangedEvasionDebuff = 0;
         common.decreasedAccuracy = 0;
+        // hp
+        common.maxHitpoints = stats.maxHitpoints;
+        common.initialDamage = stats.damageTaken;
     }
 
     function resetPlayer(player, playerStats) {
-        resetCommonStats(player);
+        resetCommonStats(player, playerStats);
         player.isPlayer = true;
         player.hitpoints = 0;
-        player.maxHitpoints = playerStats.maxHitpoints;
         player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
@@ -1268,10 +1254,9 @@
 
 
     function resetEnemy(enemy, enemyStats) {
-        resetCommonStats(enemy);
+        resetCommonStats(enemy, enemyStats);
         enemy.isPlayer = false;
         enemy.hitpoints = enemyStats.maxHitpoints;
-        enemy.maxHitpoints = enemyStats.maxHitpoints;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
         enemy.reflectRanged = 0;
