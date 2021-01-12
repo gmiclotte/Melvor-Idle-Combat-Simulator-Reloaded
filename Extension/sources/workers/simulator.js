@@ -1341,7 +1341,7 @@
         // hp
         let damage = playerStats.damageTaken;
         damage -= playerStats.damageHealed;
-        damage -= playerStats.avgHPRegen * totalTime / hitpointRegenInterval;
+        damage -= playerStats.avgHPRegen * totalTime / hitpointRegenInterval; // TODO: implement regen in the simulation!
         simResult.hpPerSecond = Math.max(0, damage / totalTime * 1000);
         // attacks
         simResult.attacksTakenPerSecond = stats.enemyAttackCalls / totalTime * 1000;
