@@ -1288,7 +1288,9 @@
     function resetPlayer(player, playerStats) {
         resetCommonStats(player, playerStats);
         player.isPlayer = true;
-        player.hitpoints = 0;
+        if (!player.hitpoints || player.hitpoints <= 0) {
+            player.hitpoints = playerStats.maxHitpoints;
+        }
         player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
