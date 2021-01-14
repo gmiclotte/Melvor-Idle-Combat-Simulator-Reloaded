@@ -427,9 +427,7 @@
         target.bleedCount++;
         // Elder Crown life steals bleed damage
         if (actor.isPlayer && actorStats.activeItems.elderCrown) {
-            actorStats.damageHealed += Math.floor(target.bleedDamage);
-            actor.hitpoints += Math.floor(target.bleedDamage);
-            actor.hitpoints = Math.min(actor.hitpoints, actor.maxHitpoints);
+            healDamage(actor, actorStats, target.bleedDamage);
         }
     }
 
@@ -739,13 +737,12 @@
             //////////////////
             // life steal
             if (isSpecial && currentSpecial.lifesteal) {
-                enemy.hitpoints += Math.floor(damage * currentSpecial.lifestealMultiplier);
+                healDamage(enemy, enemyStats, damage * currentSpecial.lifestealMultiplier);
             }
             if (isSpecial && currentSpecial.setDOTHeal) {
                 enemy.intoTheMist = true;
-                enemy.hitpoints += Math.floor(currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
+                healDamage(enemy, enemyStats, currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
             }
-            enemy.hitpoints = Math.min(enemy.hitpoints, enemy.maxHitpoints);
             // player recoil
             if (player.canRecoil) {
                 let reflectDamage = 0;
@@ -939,6 +936,13 @@
         multiAttackTimer(player);
     }
 
+    function healDamage(target, targetStats, damage) {
+        const amt = Math.floor(Math.min(damage, target.maxHitpoints - target.hitpoints));
+        target.hitpoints += amt;
+        target.hitpoints = Math.min(target.hitpoints, target.maxHitpoints);
+        targetStats.damageHealed += amt;
+    }
+
     function dealDamage(target, targetStats, damage) {
         target.hitpoints -= Math.floor(damage);
         targetStats.damageTaken += Math.floor(damage);
@@ -1115,9 +1119,7 @@
             lifeSteal += playerStats.lifesteal;
         }
         if (lifeSteal > 0) {
-            playerStats.damageHealed += Math.floor(attackResult.damageToEnemy * lifeSteal / 100);
-            player.hitpoints += Math.floor(attackResult.damageToEnemy * lifeSteal / 100);
-            player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
+            healDamage(player, playerStats, attackResult.damageToEnemy * lifeSteal / 100)
         }
         // confetti crossbow
         if (playerStats.activeItems.confettiCrossbow) {
