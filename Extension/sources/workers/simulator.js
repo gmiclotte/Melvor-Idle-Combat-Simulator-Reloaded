@@ -972,7 +972,7 @@
         // Check for player eat
         if (target.isPlayer) {
             if (target.hitpoints > 0) {
-                eatFood(target, targetStats, targetStats.autoEat);
+                autoEat(target, targetStats);
             }
             if (damage > targetStats.highestDamageTaken) {
                 targetStats.highestDamageTaken = damage;
@@ -985,18 +985,18 @@
         target.alive = target.hitpoints > 0;
     }
 
-    function eatFood(player, playerStats, settings) {
-        if (settings.lb === 0) {
+    function autoEat(player, playerStats) {
+        if (playerStats.autoEat.eatAt <= 0 || playerStats.foodHeal <= 0) {
             return;
         }
-        const lb = settings.fixed ? settings.lb : settings.lb / 100 * player.maxHitpoints;
-        if (player.hitpoints > lb) {
+        const eatAt = playerStats.autoEat.eatAt / 100 * player.maxHitpoints;
+        if (player.hitpoints > eatAt) {
             return;
         }
-        const ub = settings.fixed ? settings.ub : settings.ub / 100 * player.maxHitpoints;
-        while(player.hitpoints < ub) {
+        const maxHP = playerStats.autoEat.maxHP / 100 * player.maxHitpoints;
+        while(player.hitpoints < maxHP) {
             playerStats.ate++;
-            player.hitpoints += settings.heal;
+            player.hitpoints += Math.floor(playerStats.foodHeal * playerStats.autoEat.efficiency / 100);
         }
         player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
     }

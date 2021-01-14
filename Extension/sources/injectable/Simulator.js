@@ -167,6 +167,8 @@
                     divine: 0, // 10
                     luckyHerb: 0, // 11
                 };
+                // Food
+                this.autoEatTier = -1;
 
                 // Simulation settings
                 /** Max number of player actions to attempt before timeout */
@@ -901,13 +903,22 @@
                     slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
                     // healing
                     autoEat: {
-                        fixed: false,
-                        lb: 40,
-                        ub: 80,
-                        heal: 520,
+                        cost: 0,
+                        eatAt: 0,
+                        maxHP: 0,
+                        efficiency: 0,
                     },
+                    foodHeal: 0, // TODO: add food selection and add cooking mastery checkboxes
                 };
                 // MICSR.log({...playerStats});
+
+                // set auto eat
+                if (this.autoEatTier >= 0) {
+                    playerStats.autoEat = autoEatData[this.autoEatTier];
+                }
+                if (this.parent.foodSelected > 0) {
+                    playerStats.foodHeal = items[this.parent.foodSelected].healsFor * numberMultiplier;
+                }
 
                 // Magic curses and auroras
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic || this.equipmentStats.canUseMagic) {
