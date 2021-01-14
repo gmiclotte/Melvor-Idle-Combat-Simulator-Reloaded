@@ -65,7 +65,7 @@
                     this.barImageSrc.push(DUNGEONS[i].media);
                 }
 
-                this.barBottomNames.push('Slayer Tasks');
+                this.barBottomNames.push('Auto Slayer');
                 this.barBottomLength.push(this.parent.slayerTasks.length);
                 totBars += this.parent.slayerTasks.length;
                 for (const slayerTask of this.parent.slayerTasks) {

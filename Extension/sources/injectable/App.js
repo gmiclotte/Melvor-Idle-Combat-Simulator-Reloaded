@@ -2260,7 +2260,9 @@
                             let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = ((updateInfo) ? MICSR.mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4) : 'N/A');
+                            outElem.textContent = updateInfo && !isNaN(this.simulator.dungeonSimData[dungeonID][dataKey])
+                                ? MICSR.mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4)
+                                : 'N/A';
                         }
                     } else if (!this.isViewingDungeon && this.barIsTask(this.selectedBar)) {
                         const taskID = this.barMonsterIDs[this.selectedBar] - DUNGEONS.length;
@@ -2273,7 +2275,9 @@
                             let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.slayerSimData[taskID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = ((updateInfo) ? MICSR.mcsFormatNum(this.simulator.slayerSimData[taskID][dataKey] * dataMultiplier, 4) : 'N/A');
+                            outElem.textContent = updateInfo && !isNaN(this.simulator.slayerSimData[taskID][dataKey])
+                                ? MICSR.mcsFormatNum(this.simulator.slayerSimData[taskID][dataKey] * dataMultiplier, 4)
+                                : 'N/A';
                         }
                     } else {
                         let monsterID;
@@ -2292,7 +2296,9 @@
                             let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = ((updateInfo) ? MICSR.mcsFormatNum(this.simulator.monsterSimData[monsterID][dataKey] * dataMultiplier, 4) : 'N/A');
+                            outElem.textContent = updateInfo && !isNaN(this.simulator.monsterSimData[monsterID][dataKey])
+                                ? MICSR.mcsFormatNum(this.simulator.monsterSimData[monsterID][dataKey] * dataMultiplier, 4)
+                                : 'N/A';
                         }
                     }
                 } else {
