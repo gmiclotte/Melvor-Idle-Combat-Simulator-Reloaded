@@ -1608,7 +1608,7 @@
             prayerButtonOnClick(event, prayerID) {
                 // Escape if prayer level is not reached
                 const prayer = PRAYER[prayerID];
-                if (this.simulator.playerLevels.Prayer < prayer.prayerLevel) {
+                if (!this.simulator.prayerSelected[prayerID] && this.simulator.playerLevels.Prayer < prayer.prayerLevel) {
                     notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(prayerID)} requires level ${prayer.prayerLevel} Prayer.`, 'danger');
                     return;
                 }
@@ -2398,8 +2398,7 @@
                     if (prayer.prayerLevel > prayerLevel) {
                         document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
                         if (this.simulator.prayerSelected[i]) {
-                            this.simulator.prayerSelected[i] = false;
-                            this.unselectButton(document.getElementById(`MCS ${this.getPrayerName(i)} Button`));
+                            this.prayerButtonOnClick({currentTarget: document.getElementById(`MCS ${this.getPrayerName(i)} Button`)}, i);
                             notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(i)} has been de-selected. It requires level ${prayer.prayerLevel} Prayer.`, 'danger');
                         }
                     } else {
