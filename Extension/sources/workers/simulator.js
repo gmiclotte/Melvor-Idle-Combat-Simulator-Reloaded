@@ -116,14 +116,16 @@
          */
         async simulateMonster(enemyStats, playerStats, trials, maxActions, forceFullSim) {
             // configure some additional default values for the `playerStats` and `enemyStats` objects
+            playerStats.isPlayer = true;
             playerStats.damageTaken = 0;
             playerStats.damageHealed = 0;
-            playerStats.isPlayer = true;
             playerStats.deaths = 0;
             playerStats.ate = 0;
             playerStats.highestDamageTaken = 0;
             playerStats.lowestHitpoints = playerStats.maxHitpoints;
             enemyStats.isPlayer = false;
+            enemyStats.damageTaken = 0;
+            enemyStats.damageHealed = 0;
 
             // Start Monte Carlo simulation
             let enemyKills = 0;
@@ -950,7 +952,7 @@
         // Check for player eat
         if (target.isPlayer) {
             if (target.hitpoints > 0) {
-                eatFood(target, targetStats);
+                eatFood(target, targetStats, targetStats.autoEat);
             }
             if (damage > targetStats.highestDamageTaken) {
                 targetStats.highestDamageTaken = damage;
@@ -962,11 +964,7 @@
         checkAliveStatus(target, targetStats);
     }
 
-    function eatFood(player, playerStats) {
-        eat(player, playerStats, playerStats.autoEat);
-    }
-
-    function eat(player, playerStats, settings) {
+    function eatFood(player, playerStats, settings) {
         if (settings.lb === 0) {
             return;
         }
