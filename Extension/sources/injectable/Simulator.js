@@ -954,15 +954,21 @@
 
                 // Regen Calculation
                 if (!this.isHardcore) {
+                    // Base
                     playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / numberMultiplier);
+                    // Shaman Ring
                     playerStats.avgHPRegen += this.equipmentStats.increasedHPRegen;
+                    // Hitpoints Skillcape
                     if (playerStats.activeItems.hitpointsSkillcape) {
                         playerStats.avgHPRegen += 1 * numberMultiplier;
                     }
+                    // Rapid Heal Prayer
                     if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) {
                         playerStats.avgHPRegen *= 2;
                     }
-                    playerStats.avgHPRegen *= (1 + this.herbloreBonus.hpRegen / 100);
+                    // Regeneration Potion
+                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen *  (1 + this.herbloreBonus.hpRegen / 100));
+                    // Gold Ruby Ring
                     playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.equipmentStats.hpRegenBonus / 100));
                 }
 
