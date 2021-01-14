@@ -34,110 +34,45 @@
                     SLAYER.task.Master,
                 ];
                 // Plot Type Options
-                this.plotTypeDropdownOptions = [
-                    'XP per ',
-                    'HP XP per ',
-                    'Prayer XP per ',
-                    'Slayer XP per ',
-                    'XP per Attack',
-                    'HP Loss per ',
-                    'Prayer Points per ',
-                    'Damage per ',
-                    'Average Kill Time (s)',
-                    'Damage per Attack',
-                    'GP per ',
-                    'Potential Herblore XP per ',
-                    'Chance for Signet Part B(%)',
-                    'Attacks Made per ',
-                    'Attacks Taken per ',
-                    'Pet Chance per ',
-                    'Kills per ',
-                    'Ammo per ',
-                    'Runes per ',
-                    'deathRate',
-                    'highestDamageTaken',
-                    'lowestHitpoints',
-                    'Food Eaten per',
-                    // 'Simulation Time',
-                ];
-                this.plotTypeIsTime = [
-                    true,
-                    true,
-                    true,
-                    true,
-                    false,
-                    true,
-                    true,
-                    true,
-                    false,
-                    false,
-                    true,
-                    true,
-                    false,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    false,
-                    false,
-                    false,
-                    true,
-                    // false,
-                ];
-                this.plotTypeDropdownValues = [
-                    'xpPerSecond',
-                    'hpXpPerSecond',
-                    'prayerXpPerSecond',
-                    'slayerXpPerSecond',
-                    'xpPerHit',
-                    'hpPerSecond',
-                    'ppConsumedPerSecond',
-                    'dmgPerSecond',
-                    'killTimeS',
-                    'avgHitDmg',
-                    'gpPerSecond',
-                    'herbloreXPPerSecond',
-                    'signetChance',
-                    'attacksMadePerSecond',
-                    'attacksTakenPerSecond',
-                    'petChance',
-                    'killsPerSecond',
-                    'ammoUsedPerSecond',
-                    'runesUsedPerSecond',
-                    'deathRate',
-                    'highestDamageTaken',
-                    'lowestHitpoints',
-                    'atePerSecond',
-                    // 'simulationTime',
-                ];
-                this.zoneInfoNames = [
-                    'XP/',
-                    'HP XP/',
-                    'Prayer XP/',
-                    'Slayer XP/',
-                    'XP/attack',
-                    'HP Lost/',
-                    'Prayer Points/',
-                    'Damage/',
-                    'Kill Time(s)',
-                    'Damage/attack',
-                    'GP/',
-                    'Herb XP/',
-                    'Signet Chance (%)',
-                    'Attacks Made/',
-                    'Attacks Taken/',
-                    ' Pet Chance/',
-                    'Kills/',
-                    'Ammo/',
-                    'Runes/',
-                    'deathRate',
-                    'highestDamageTaken',
-                    'lowestHitpoints',
-                    'Food/',
-                    // 'Sim Time',
-                ];
+                this.plotTypes = [];
+                const addPlotOption = (option, isTime, value, info) => {
+                    this.plotTypes.push({
+                        option: option,
+                        isTime: isTime,
+                        value: value,
+                        info: info,
+                    });
+                }
+                // xp gains
+                addPlotOption('XP per ', true, 'xpPerSecond', 'XP/');
+                addPlotOption('HP XP per ', true, 'hpXpPerSecond', 'HP XP/');
+                addPlotOption('Prayer XP per ', true, 'prayerXpPerSecond', 'Prayer XP/');
+                addPlotOption('Slayer XP per ', true, 'slayerXpPerSecond', 'Slayer XP/');
+                // resource loss
+                addPlotOption('Prayer Points per ', true, 'ppConsumedPerSecond', 'Prayer Points/');
+                addPlotOption('Ammo per ', true, 'ammoUsedPerSecond', 'Ammo/');
+                addPlotOption('Runes per ', true, 'runesUsedPerSecond', 'Runes/');
+                addPlotOption('Food per', true, 'atePerSecond', 'Food/');
+                addPlotOption('HP Loss per ', true, 'hpPerSecond', 'HP Lost/');
+                // survivability
+                addPlotOption('Chance of Death', false, 'deathRate', 'Chance of Death');
+                addPlotOption('Highest Hit Taken', false, 'highestDamageTaken', 'Highest Hit Taken');
+                addPlotOption('Lowest Hitpoints', false, 'lowestHitpoints', 'Lowest Hitpoints');
+                // kill time
+                addPlotOption('Average Kill Time (s)', false, 'killTimeS', 'Kill Time(s)');
+                addPlotOption('Kills per ', true, 'killsPerSecond', 'Kills/');
+                // loot gains
+                addPlotOption('GP per ', true, 'gpPerSecond', 'GP/');
+                addPlotOption('Chance for Signet Part B(%)', false, 'signetChance', 'Signet Chance (%)');
+                addPlotOption('Pet Chance per ', true, 'petChance', ' Pet Chance/');
+                addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
+                // unsorted
+                addPlotOption('XP per Attack', false, 'xpPerHit', 'XP/attack');
+                addPlotOption('Damage per ', true, 'dmgPerSecond', 'Damage/');
+                addPlotOption('Damage per Attack', false, 'avgHitDmg', 'Damage/attack');
+                addPlotOption('Attacks Made per ', true, 'attacksMadePerSecond', 'Attacks Made/');
+                addPlotOption('Attacks Taken per ', true, 'attacksTakenPerSecond', 'Attacks Taken/');
+                // addPlotOption('Simulation Time', false, 'simulationTime', 'Sim Time');
                 // Time unit options
                 this.timeOptions = ['Kill', 'Second', 'Minute', 'Hour', 'Day'];
                 this.timeShorthand = ['kill', 's', 'm', 'h', 'd'];
@@ -246,6 +181,8 @@
                     ranged: 'assets/media/skills/ranged/ranged.svg',
                     magic: 'assets/media/skills/magic/magic.svg',
                     defence: 'assets/media/skills/defence/defence.svg',
+                    hitpoints: 'assets/media/skills/hitpoints/hitpoints.svg',
+                    emptyFood: 'assets/media/skills/combat/food_empty.svg',
                 };
 
                 // Forced equipment sorting
@@ -315,6 +252,9 @@
                 this.botContent.style.flexWrap = 'nowrap';
                 this.botContent.style.minHeight = '452px';
 
+                // Plotter Object
+                this.plotter = new MICSR.Plotter(this, urls.crossedOut);
+
                 this.mcsModal = document.createElement('div');
                 this.mcsModal.id = 'mcsModal';
                 this.mcsModal.className = 'modal';
@@ -379,8 +319,8 @@
                 {
                     this.selectedMainTab = 0;
                     this.mainTabCard = new MICSR.Card(this.topContent, '', '150px', true);
-                    const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'Sim. Options', 'GP Options'];
-                    const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.settings, this.media.gp];
+                    const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'GP Options', 'Equipment Stats', 'Sim. Options'];
+                    const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.gp, this.emptyItems.Helmet.media, this.media.settings];
                     const mainTabCallbacks = mainTabNames.map((_, i) => () => this.mainTabOnClick(i));
                     this.mainTabIDs = mainTabNames.map((name) => MICSR.toId(`${name}-tab`));
                     this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
@@ -395,9 +335,54 @@
                 this.createPotionSelectCard();
                 this.createPetSelectCard();
 
+                // Gp Options card
+                {
+                    this.gpSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
+                    this.mainTabCards.push(this.gpSelectCard);
+                    this.gpSelectCard.addSectionTitle('GP/s Options');
+                    this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
+                    this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
+                    this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
+                    this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
+                    // GP/s options card
+                    {
+                        this.gpOptionsCard = new MICSR.Card(this.gpSelectCard.container, '', '200px');
+                        this.gpOptionsCard.addSectionTitle('Item Subset Selection');
+                        this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
+                        this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
+                        this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
+                        // Top labels
+                        const labelCont = document.createElement('div');
+                        labelCont.className = 'mcsMultiButtonContainer';
+                        labelCont.style.borderBottom = 'solid thin';
+                        const lab1 = document.createElement('div');
+                        lab1.className = 'mcsMultiHeader';
+                        lab1.style.borderRight = 'solid thin';
+                        lab1.textContent = 'Item';
+                        lab1.style.width = '218px';
+                        labelCont.appendChild(lab1);
+                        const lab2 = document.createElement('div');
+                        lab2.className = 'mcsMultiHeader';
+                        lab2.textContent = 'Sell';
+                        lab2.style.width = '124px';
+                        labelCont.appendChild(lab2);
+                        this.gpOptionsCard.container.appendChild(labelCont);
+                        this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
+                        for (let i = 0; i < this.loot.lootList.length; i++) {
+                            this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
+                        }
+                        this.gpSearchResults.container.style.width = '100%';
+                        this.gpSearchResults.container.style.overflowY = 'scroll';
+                        this.gpSearchResults.container.style.overflowX = 'hidden';
+                        this.gpSearchResults.container.style.marginRight = '0px';
+                        this.gpSearchResults.container.style.marginBottom = '5px';
+                    }
+                }
+
                 // Equipment Stat Display Card
                 {
-                    this.equipStatCard = new MICSR.Card(this.topContent, '', '50px', true);
+                    this.equipStatCard = new MICSR.Card(this.mainTabContainer, '', '50px');
+                    this.mainTabCards.push(this.equipStatCard);
                     this.equipStatCard.addSectionTitle('Equipment Stats');
                     this.equipKeys = [
                         'attackSpeed',
@@ -428,21 +413,51 @@
                         }
                         this.equipStatCard.addNumberOutput(stat.name, 0, 20, this.media[stat.icon], `MCS ${this.equipKeys[i]} ES Output`);
                     }
+                    // level requirements
+                    this.equipStatCard.addSectionTitle('Level Requirements');
+                    this.requiredKeys = Object.getOwnPropertyNames(MICSR.requiredStatNames);
+                    for (const key of this.requiredKeys) {
+                        const stat = MICSR.requiredStatNames[key];
+                        this.equipStatCard.addNumberOutput('Level Required', 1, 20, this.media[stat.icon], `MCS ${key} ES Output`);
+                    }
                 }
-                // Level requirement display card
+                // Simulation/Plot Options / Export Card
                 {
-                    this.requiredStatCard = new MICSR.Card(this.topContent, '', '50px', true);
-                    this.requiredStatCard.addSectionTitle('Level Requirements');
-                    this.requiredKeys = [
-                        'attackLevelRequired',
-                        'defenceLevelRequired',
-                        'rangedLevelRequired',
-                        'magicLevelRequired',
-                        'slayerLevelRequired',
-                    ];
-                    for (let i = 0; i < this.requiredKeys.length; i++) {
-                        const stat = MICSR.requiredStatNames[this.requiredKeys[i]];
-                        this.requiredStatCard.addNumberOutput(stat.name, 0, 20, this.media[stat.icon], `MCS ${this.requiredKeys[i]} ES Output`);
+                    this.simOptionsCard = new MICSR.Card(this.mainTabContainer, '', '150px');
+                    this.mainTabCards.push(this.simOptionsCard);
+                    this.simOptionsCard.addSectionTitle('Simulation Options');
+                    this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
+                    this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
+                    this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
+                    this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
+                    const dropDownOptionNames = [];
+                    for (let i = 0; i < this.plotTypes.length; i++) {
+                        if (this.plotTypes[i].isTime) {
+                            dropDownOptionNames.push(this.plotTypes[i].option + this.timeOptions[1]);
+                        } else {
+                            dropDownOptionNames.push(this.plotTypes[i].option);
+                        }
+                    }
+                    this.simOptionsCard.addSectionTitle('Export');
+                    this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());
+                    this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
+                    this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
+                }
+                // Export Options Card
+                {
+                    this.isExportDisplayed = false;
+                    this.exportOptionsCard = new MICSR.Card(this.topContent, '', '100px', true);
+                    this.exportOptionsCard.addSectionTitle('Export Options');
+                    this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
+                    this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
+                    this.exportOptionsCard.addSectionTitle('Data to Export');
+                    this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
+                    for (let i = 0; i < this.plotTypes.length; i++) {
+                        let timeText = '';
+                        if (this.plotTypes[i].isTime) {
+                            timeText = 'X';
+                        }
+                        this.exportOptionsCard.addRadio(`${this.plotTypes[i].info}${timeText}`, 25, `${this.plotTypes[i].value}ExportRadio`, ['Yes', 'No'], [(e) => this.exportDataTypeRadioOnChange(e, true, i), (e) => this.exportDataTypeRadioOnChange(e, false, i)], 0);
                     }
                 }
                 // Combat Stat Display Card
@@ -485,116 +500,34 @@
                     for (let i = 0; i < combatStatNames.length; i++) {
                         this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? combatStatIcons[i] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
                     }
-                    this.combatStatCard.addSectionTitle('Simulate/Export');
+                    this.combatStatCard.addSectionTitle('Plot Options');
+                    this.plotter.addToggles(this.combatStatCard);
+                    this.combatStatCard.addSectionTitle('');
                     this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
-                    this.combatStatCard.addButton('Export Data', () => this.exportDataOnClick());
-                    this.combatStatCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
-                    this.combatStatCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
-                }
-                // Export Options Card
-                {
-                    this.isExportDisplayed = false;
-                    this.exportOptionsCard = new MICSR.Card(this.topContent, '', '100px', true);
-                    this.exportOptionsCard.addSectionTitle('Export Options');
-                    this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
-                    this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
-                    this.exportOptionsCard.addSectionTitle('Data to Export');
-                    this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
-                    for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
-                        let timeText = '';
-                        if (this.plotTypeIsTime[i]) {
-                            timeText = 'X';
-                        }
-                        this.exportOptionsCard.addRadio(`${this.zoneInfoNames[i]}${timeText}`, 25, `${this.plotTypeDropdownValues[i]}ExportRadio`, ['Yes', 'No'], [(e) => this.exportDataTypeRadioOnChange(e, true, i), (e) => this.exportDataTypeRadioOnChange(e, false, i)], 0);
-                    }
-                }
-                // Simulation/Plot Options Card
-                {
-                    this.simOptionsCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                    this.mainTabCards.push(this.simOptionsCard);
-                    this.simOptionsCard.addSectionTitle('Simulation Options');
-                    this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
-                    this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
-                    this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
-                    this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
-                    const dropDownOptionNames = [];
-                    for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
-                        if (this.plotTypeIsTime[i]) {
-                            dropDownOptionNames.push(this.plotTypeDropdownOptions[i] + this.timeOptions[1]);
-                        } else {
-                            dropDownOptionNames.push(this.plotTypeDropdownOptions[i]);
-                        }
-                    }
-                    this.simOptionsCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
-                    this.simOptionsCard.addRadio('Hardcore Mode', 25, 'hardcore', ['Yes', 'No'], [() => this.hardcoreRadioOnChange(true), () => this.hardcoreRadioOnChange(false)], 1);
-                }
-                // Gp Options card
-                {
-                    this.gpSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                    this.mainTabCards.push(this.gpSelectCard);
-                    this.gpSelectCard.addSectionTitle('GP/s Options');
-                    this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
-                    this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
-                    this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
-                    this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
-                }
-                // GP/s options card
-                {
-                    this.gpOptionsCard = new MICSR.Card(this.gpSelectCard.container, '', '200px');
-                    this.gpOptionsCard.addSectionTitle('Item Subset Selection');
-                    this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
-                    this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
-                    this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
-                    // Top labels
-                    const labelCont = document.createElement('div');
-                    labelCont.className = 'mcsMultiButtonContainer';
-                    labelCont.style.borderBottom = 'solid thin';
-                    const lab1 = document.createElement('div');
-                    lab1.className = 'mcsMultiHeader';
-                    lab1.style.borderRight = 'solid thin';
-                    lab1.textContent = 'Item';
-                    lab1.style.width = '218px';
-                    labelCont.appendChild(lab1);
-                    const lab2 = document.createElement('div');
-                    lab2.className = 'mcsMultiHeader';
-                    lab2.textContent = 'Sell';
-                    lab2.style.width = '124px';
-                    labelCont.appendChild(lab2);
-                    this.gpOptionsCard.container.appendChild(labelCont);
-                    this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
-                    for (let i = 0; i < this.loot.lootList.length; i++) {
-                        this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
-                    }
-                    this.gpSearchResults.container.style.width = '100%';
-                    this.gpSearchResults.container.style.overflowY = 'scroll';
-                    this.gpSearchResults.container.style.overflowX = 'hidden';
-                    this.gpSearchResults.container.style.marginRight = '0px';
-                    this.gpSearchResults.container.style.marginBottom = '5px';
                 }
                 // Individual info card
                 {
-                    this.zoneInfoCard = new MICSR.Card(this.botContent, '', '100px', true);
+                    this.zoneInfoCard = new MICSR.Card(this.topContent, '', '100px', true);
                     this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
                     this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
                     this.subInfoCard = new MICSR.Card(this.zoneInfoCard.container, '', '80px');
                     this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
                     const zoneInfoLabelNames = [];
-                    for (let i = 0; i < this.zoneInfoNames.length; i++) {
-                        if (this.plotTypeIsTime[i]) {
-                            zoneInfoLabelNames.push(this.zoneInfoNames[i] + this.timeShorthand[1]);
+                    for (let i = 0; i < this.plotTypes.length; i++) {
+                        if (this.plotTypes[i].isTime) {
+                            zoneInfoLabelNames.push(this.plotTypes[i].info + this.timeShorthand[1]);
                         } else {
-                            zoneInfoLabelNames.push(this.zoneInfoNames[i]);
+                            zoneInfoLabelNames.push(this.plotTypes[i].info);
                         }
                     }
-                    for (let i = 0; i < this.plotTypeDropdownOptions.length; i++) {
-                        this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypeDropdownValues[i]} Output`, true);
+                    for (let i = 0; i < this.plotTypes.length; i++) {
+                        this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypes[i].value} Output`, true);
                     }
                 }
                 // Bar Chart Card
                 this.monsterToggleState = true;
                 this.dungeonToggleState = true;
                 this.slayerToggleState = true;
-                this.plotter = new MICSR.Plotter(this, urls.crossedOut);
                 // Setup plotter bar clicking
                 this.selectedBar = 0;
                 this.barSelected = false;
@@ -706,10 +639,6 @@
                     });
                     this.equipmentSelectCard.addMultiPopupMenu(rowSources, rowIDs, rowPopups, tooltips);
                 });
-                const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
-                importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
-                this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], importSetCCContainer);
-                this.equipmentSelectCard.container.appendChild(importSetCCContainer);
                 // Style dropdown (Specially Coded)
                 const combatStyleCCContainer = this.equipmentSelectCard.createCCContainer();
                 const combatStyleLabel = this.equipmentSelectCard.createLabel('Combat Style', '');
@@ -1791,7 +1720,7 @@
             plottypeDropdownOnChange(event) {
                 this.plotter.plotType = event.currentTarget.value;
                 this.plotter.plotID = event.currentTarget.selectedIndex;
-                this.simulator.selectedPlotIsTime = this.plotTypeIsTime[event.currentTarget.selectedIndex];
+                this.simulator.selectedPlotIsTime = this.plotTypes[event.currentTarget.selectedIndex].isTime;
                 if (this.simulator.selectedPlotIsTime) {
                     this.plotter.timeDropdown.style.display = '';
                 } else {
@@ -2021,16 +1950,22 @@
              */
             timeUnitDropdownOnChange(event) {
                 this.simulator.timeMultiplier = this.timeMultipliers[event.currentTarget.selectedIndex];
-                this.simulator.selectedPlotIsTime = this.plotTypeIsTime[this.plotter.plotID];
+                this.simulator.selectedPlotIsTime = this.plotTypes[this.plotter.plotID].isTime;
                 this.selectedTimeUnit = this.timeOptions[event.currentTarget.selectedIndex];
                 this.selectedTimeShorthand = this.timeShorthand[event.currentTarget.selectedIndex];
                 // Update zone info card time units
-                this.zoneInfoNames.forEach((name, index) => {
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    const name = this.plotTypes[i].info;
                     let newName = '';
-                    if (name === ' Pet Chance/') newName = this.skillShorthand[this.simulator.petSkill] + name + this.selectedTimeShorthand;
-                    else if (this.plotTypeIsTime[index]) newName = name + this.selectedTimeShorthand;
-                    if (newName) document.getElementById(`MCS ${name + this.timeShorthand[1]} Label`).textContent = newName;
-                });
+                    if (name === ' Pet Chance/') {
+                        newName = this.skillShorthand[this.simulator.petSkill] + name + this.selectedTimeShorthand;
+                    } else if (this.plotTypes[i].isTime) {
+                        newName = name + this.selectedTimeShorthand;
+                    }
+                    if (newName) {
+                        document.getElementById(`MCS ${name + this.timeShorthand[1]} Label`).textContent = newName;
+                    }
+                }
                 // Update pet chance
                 this.loot.updatePetChance();
                 // Update Plot
@@ -2254,10 +2189,10 @@
                         document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
                         document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
                         const updateInfo = this.simulator.dungeonSimData[dungeonID].simSuccess;
-                        for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
-                            const dataKey = this.plotTypeDropdownValues[i];
+                        for (let i = 0; i < this.plotTypes.length; i++) {
+                            const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.dungeonSimData[dungeonID][dataKey])
@@ -2269,10 +2204,10 @@
                         document.getElementById('MCS Zone Info Title').textContent = this.slayerTasks[taskID].display;
                         document.getElementById('MCS Info Image').src = SKILLS[CONSTANTS.skill.Slayer].media;
                         const updateInfo = this.simulator.slayerSimData[taskID].simSuccess;
-                        for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
-                            const dataKey = this.plotTypeDropdownValues[i];
+                        for (let i = 0; i < this.plotTypes.length; i++) {
+                            const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.slayerSimData[taskID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.slayerSimData[taskID][dataKey])
@@ -2290,10 +2225,10 @@
                         document.getElementById('MCS Zone Info Title').textContent = this.getMonsterName(monsterID);
                         document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
                         const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
-                        for (let i = 0; i < this.plotTypeDropdownValues.length; i++) {
-                            const dataKey = this.plotTypeDropdownValues[i];
+                        for (let i = 0; i < this.plotTypes.length; i++) {
+                            const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypeIsTime[i]) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.monsterSimData[monsterID][dataKey])

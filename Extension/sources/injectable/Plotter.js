@@ -101,10 +101,10 @@
 
                 const plotTypeSelect = document.createElement('select');
                 plotTypeSelect.className = 'form-control';
-                this.parent.plotTypeDropdownOptions.forEach((value, index) => {
+                this.parent.plotTypes.forEach(plotType => {
                     const newOption = document.createElement('option');
-                    newOption.textContent = value;
-                    newOption.value = this.parent.plotTypeDropdownValues[index];
+                    newOption.textContent = plotType.option;
+                    newOption.value = plotType.value;
                     plotTypeSelect.appendChild(newOption);
                 });
                 plotTypeSelect.onchange = (event) => this.parent.plottypeDropdownOnChange(event);
@@ -120,47 +120,6 @@
                 });
                 this.timeDropdown.onchange = (event) => this.parent.timeUnitDropdownOnChange(event);
                 plotHeaderSelects.appendChild(this.timeDropdown);
-
-                // Add inspection buttons
-                this.inspectButton = document.createElement('button');
-                this.inspectButton.className = 'btn btn-primary m-1';
-                this.inspectButton.textContent = 'Inspect Dungeon';
-                this.inspectButton.style.display = 'none';
-                this.inspectButton.onclick = () => {
-                    this.parent.inspectDungeonOnClick();
-                };
-                this.plotHeader.appendChild(this.inspectButton);
-                this.stopInspectButton = document.createElement('button');
-                this.stopInspectButton.className = 'btn btn-primary m-1';
-                this.stopInspectButton.textContent = 'Stop Inspecting';
-                this.stopInspectButton.style.display = 'none';
-                this.stopInspectButton.onclick = () => {
-                    this.parent.stopInspectOnClick();
-                };
-                this.plotHeader.appendChild(this.stopInspectButton);
-
-                // Add toggle buttons
-                this.toggleMonsterButton = document.createElement('button');
-                this.toggleMonsterButton.className = 'btn btn-primary m-1';
-                this.toggleMonsterButton.textContent = 'Toggle Monsters';
-                this.toggleMonsterButton.onclick = () => {
-                    this.parent.toggleMonsterSims();
-                };
-                this.plotHeader.appendChild(this.toggleMonsterButton);
-                this.toggleDungeonButton = document.createElement('button');
-                this.toggleDungeonButton.className = 'btn btn-primary m-1';
-                this.toggleDungeonButton.textContent = 'Toggle Dungeons';
-                this.toggleDungeonButton.onclick = () => {
-                    this.parent.toggleDungeonSims();
-                };
-                this.plotHeader.appendChild(this.toggleDungeonButton);
-                this.toggleSlayerButton = document.createElement('button');
-                this.toggleSlayerButton.className = 'btn btn-primary m-1';
-                this.toggleSlayerButton.textContent = 'Toggle Auto Slayer';
-                this.toggleSlayerButton.onclick = () => {
-                    this.parent.toggleSlayerSims();
-                };
-                this.plotHeader.appendChild(this.toggleSlayerButton);
 
                 this.plotTopContainer = document.createElement('div');
                 this.plotTopContainer.className = 'mcsPlotTopContainer';
@@ -259,6 +218,29 @@
                 }
 
                 this.parent.botContent.appendChild(this.plotContainer);
+            }
+
+            // Add plot buttons
+            addToggles(card) {
+                // Add inspection buttons
+                this.inspectButton = card.addButton('Inspect Dungeon', () => {
+                    this.parent.inspectDungeonOnClick();
+                });
+                this.inspectButton.style.display = 'none';
+                this.stopInspectButton = card.addButton('Stop Inspecting', () => {
+                    this.parent.stopInspectOnClick();
+                });
+                this.stopInspectButton.style.display = 'none';
+                // Add toggle buttons
+                this.toggleMonsterButton = card.addButton('Toggle Monsters', () => {
+                    this.parent.toggleMonsterSims();
+                });
+                this.toggleDungeonButton = card.addButton('Toggle Dungeons', () => {
+                    this.parent.toggleDungeonSims();
+                });
+                this.toggleSlayerButton = card.addButton('Toggle Auto Slayer', () => {
+                    this.parent.toggleSlayerSims();
+                });
             }
 
             /**

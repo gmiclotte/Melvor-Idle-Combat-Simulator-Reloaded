@@ -170,29 +170,24 @@
             // level requirements
             attackLevelRequired: {
                 implemented: true,
-                name: 'Level Required',
                 icon: 'attack',
             },
             defenceLevelRequired: {
                 implemented: true,
-                name: 'Level Required',
                 icon: 'defence',
             },
             magicLevelRequired: {
                 implemented: true,
-                name: 'Level Required',
                 icon: 'magic',
             },
             rangedLevelRequired: {
                 implemented: true,
-                name: 'Level Required',
                 icon: 'ranged',
             },
 
             // other requirements
             slayerLevelRequired: {
                 implemented: true,
-                name: 'Level Required',
                 icon: 'slayer',
             },
         };

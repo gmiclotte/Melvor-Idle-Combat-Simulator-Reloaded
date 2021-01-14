@@ -273,7 +273,7 @@
                 this.exportName = true;
                 this.exportDungeonMonsters = true;
                 this.exportNonSimmed = true;
-                for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
+                for (let i = 0; i < this.parent.plotTypes.length; i++) {
                     this.exportDataType.push(true);
                 }
                 // Pet Settings
@@ -1603,27 +1603,33 @@
              */
             exportData() {
                 const exportEntity = (entityID, filter, data, name, isDungeonMonster = false) => {
-                    if (this.exportNonSimmed || filter[entityID]) {
-                        if (this.exportName) exportString += name + colDel;
-                        for (let i = 0; i < this.parent.plotTypeDropdownValues.length; i++) {
-                            if (this.exportDataType[i]) {
-                                if (isDungeonMonster && this.parent.plotTypeDropdownValues[i] === 'signetChance') {
-                                    exportString += '0';
-                                } else if (isDungeonMonster) {
-                                    let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
-                                    if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
-                                    exportString += (data[entityID].simSuccess) ? data[entityID][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
-                                } else {
-                                    let dataMultiplier = this.parent.plotTypeIsTime[i] ? this.timeMultiplier : 1;
-                                    if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
-                                    exportString += (filter[entityID] && data[entityID].simSuccess) ? data[entityID][this.parent.plotTypeDropdownValues[i]] * dataMultiplier : 0;
-                                }
-                                exportString += colDel;
-                            }
-                        }
-                        exportString = exportString.slice(0, -colLen);
-                        exportString += rowDel;
+                    if (!this.exportNonSimmed && !filter[entityID]) {
+                        return;
                     }
+                    if (this.exportName) {
+                        exportString += name + colDel;
+                    }
+                    for (let i = 0; i < this.parent.plotTypes.length; i++) {
+                        if (!this.exportDataType[i]) {
+                            continue;
+                        }
+                        if (isDungeonMonster) {
+                            if (this.parent.plotTypes[i].value === 'signetChance') {
+                                exportString += '0';
+                            } else {
+                                let dataMultiplier = this.parent.plotTypes[i].isTime ? this.timeMultiplier : 1;
+                                if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
+                                exportString += (data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
+                            }
+                        } else {
+                            let dataMultiplier = this.parent.plotTypes[i].isTime ? this.timeMultiplier : 1;
+                            if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
+                            exportString += (filter[entityID] && data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
+                        }
+                        exportString += colDel;
+                    }
+                    exportString = exportString.slice(0, -colLen);
+                    exportString += rowDel;
                 }
                 let exportString = '';
                 const colDel = '\t';
@@ -1633,12 +1639,12 @@
                 if (this.exportName) {
                     exportString += 'Monster/Dungeon Name' + colDel;
                 }
-                for (let i = 0; i < this.parent.plotTypeDropdownOptions.length; i++) {
+                for (let i = 0; i < this.parent.plotTypes.length; i++) {
                     if (this.exportDataType[i]) {
-                        if (this.parent.plotTypeIsTime[i]) {
-                            exportString += this.parent.plotTypeDropdownOptions[i] + this.parent.selectedTimeUnit + colDel;
+                        if (this.parent.plotTypes[i].isTime) {
+                            exportString += this.parent.plotTypes[i].option + this.parent.selectedTimeUnit + colDel;
                         } else {
-                            exportString += this.parent.plotTypeDropdownOptions[i] + colDel;
+                            exportString += this.parent.plotTypes[i].option + colDel;
                         }
                     }
                 }
@@ -1659,7 +1665,7 @@
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
                     if (this.exportDungeonMonsters) {
-                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
+                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, () => this.dungeonSimFilter[dungeonId], this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
                 // TODO: export for auto slayer

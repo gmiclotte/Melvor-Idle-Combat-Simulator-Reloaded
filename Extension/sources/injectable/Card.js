@@ -52,6 +52,7 @@
                 buttonContainer.className = 'd-flex';
                 buttonContainer.appendChild(newButton);
                 this.container.appendChild(buttonContainer);
+                return newButton;
             }
 
             /**
