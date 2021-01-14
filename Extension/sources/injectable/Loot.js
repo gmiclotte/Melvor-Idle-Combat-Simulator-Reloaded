@@ -20,6 +20,7 @@
                 this.monsterSimData = {};
                 this.dungeonSimData = {};
                 this.slayerSimData = {};
+                this.slayerTaskMonsters = [];
 
                 // Options for GP/s calculations
                 this.sellBones = false; // True or false
@@ -405,8 +406,8 @@
                     if (godDungeonID.includes(dungeonID)) {
                         let shardCount = 0;
                         const shardID = MONSTERS[DUNGEONS[dungeonID].monsters[0]].bones;
-                        DUNGEONS[dungeonID].monsters.forEach((monsterId) => {
-                            shardCount += MONSTERS[monsterId].boneQty || 1;
+                        DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
+                            shardCount += MONSTERS[monsterID].boneQty || 1;
                         });
                         shardCount *= this.currentSim.lootBonus;
                         if (this.convertShards) {
@@ -446,12 +447,15 @@
             updateGPData() {
                 // Set data for monsters in combat zones
                 if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterId) => {
-                        if (this.monsterSimData[monsterId].simSuccess && this.monsterSimData[monsterId].tooManyActions === 0) {
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
+                        if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].tooManyActions === 0) {
                             let gpPerKill = 0;
                             if (godDungeonID.includes(this.app.viewedDungeonID)) {
-                                const boneQty = MONSTERS[monsterId].boneQty || 1;
-                                const shardID = MONSTERS[monsterId].bones;
+                                const boneQty = MONSTERS[monsterID].boneQty || 1;
+                                const shardID = MONSTERS[monsterID].bones;
                                 if (this.convertShards) {
                                     const chestID = items[shardID].trimmedItemID;
                                     gpPerKill += boneQty * this.currentSim.lootBonus / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
@@ -459,13 +463,16 @@
                                     gpPerKill += boneQty * this.currentSim.lootBonus * items[shardID].sellsFor;
                                 }
                             }
-                            this.monsterSimData[monsterId].gpPerSecond = this.monsterSimData[monsterId].gpFromDamagePerSecond + gpPerKill / this.monsterSimData[monsterId].killTimeS;
+                            this.monsterSimData[monsterID].gpPerSecond = this.monsterSimData[monsterID].gpFromDamagePerSecond + gpPerKill / this.monsterSimData[monsterID].killTimeS;
                         } else {
-                            this.monsterSimData[monsterId].gpPerSecond = 0;
+                            this.monsterSimData[monsterID].gpPerSecond = 0;
                         }
                     });
                 } else {
                     const updateMonsterGP = (monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
                         this.monsterSimData[monsterID].gpPerSecond = this.monsterSimData[monsterID].gpFromDamagePerSecond;
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].tooManyActions === 0) {
                             this.monsterSimData[monsterID].gpPerSecond += this.computeMonsterValue(monsterID) / this.monsterSimData[monsterID].killTimeS;
@@ -484,6 +491,9 @@
                     });
                     // Dungeons
                     for (let i = 0; i < DUNGEONS.length; i++) {
+                        if (!this.dungeonSimData[i]) {
+                            return;
+                        }
                         if (this.dungeonSimData[i].simSuccess) {
                             this.dungeonSimData[i].gpPerSecond = this.dungeonSimData[i].gpFromDamagePerSecond;
                             this.dungeonSimData[i].gpPerSecond += this.computeDungeonValue(i) / this.dungeonSimData[i].killTimeS;
@@ -508,10 +518,16 @@
             updateSlayerXP() {
                 if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
                     DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
                         this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                     });
                 } else {
                     const updateMonsterSlayerXP = (monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
                             let monsterXP = 0;
                             monsterXP += Math.floor(((MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0) * (1 + this.currentSim.slayerBonusXP / 100));
@@ -547,11 +563,17 @@
              */
             updateHerbloreXP() {
                 if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterId) => {
-                        this.monsterSimData[monsterId].herbloreXPPerSecond = 0;
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
+                        this.monsterSimData[monsterID].herbloreXPPerSecond = 0;
                     });
                 } else {
                     const updateMonsterHerbloreXP = (monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].tooManyActions === 0) {
                             this.monsterSimData[monsterID].herbloreXPPerSecond = this.computeMonsterHerbXP(monsterID, this.currentSim.herbConvertChance) / this.monsterSimData[monsterID].killTimeS;
                         } else {
@@ -582,11 +604,17 @@
              */
             updateSignetChance() {
                 if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterId) => {
-                        this.monsterSimData[monsterId].signetChance = 0;
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
+                        this.monsterSimData[monsterID].signetChance = 0;
                     });
                 } else {
                     const updateMonsterSignetChance = (monsterID, data) => {
+                        if (!data) {
+                            return;
+                        }
                         if (this.currentSim.canTopazDrop && data.simSuccess) {
                             data.signetChance = (1 - Math.pow(1 - this.getSignetDropRate(monsterID), Math.floor(this.signetFarmTime * 3600 / data.killTimeS))) * 100;
                         } else {
