@@ -1252,6 +1252,8 @@
                     let totalAttacksTaken = 0;
                     let totalAmmoUsed = 0;
                     let totalRunesUsed = 0;
+                    data.deathRate = 0;
+                    data.lowestHitpoints = Infinity;
                     let totalAte = 0;
                     let totalSimTime = 0;
                     for (const monsterID of monsterIDs) {
