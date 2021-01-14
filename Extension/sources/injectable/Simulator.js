@@ -1264,6 +1264,7 @@
                     let totalAmmoUsed = 0;
                     let totalRunesUsed = 0;
                     data.deathRate = 0;
+                    data.highestDamageTaken = 0;
                     data.lowestHitpoints = Infinity;
                     let totalAte = 0;
                     let totalSimTime = 0;
