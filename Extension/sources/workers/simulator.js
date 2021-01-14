@@ -165,6 +165,8 @@
             // Start simulation for each trial
             this.cancelStatus = false;
             const player = {};
+            // set initial regen interval
+            player.regenTimer = Math.floor(Math.random() * hitpointRegenInterval);
             // Set Combat Triangle
             if (playerStats.hardcore) {
                 player.reductionModifier = combatTriangle.hardcore.reductionModifier[playerStats.attackType][enemyStats.attackType];
@@ -181,6 +183,11 @@
             while (enemyKills < trials) {
                 // Reset Timers and statuses
                 resetPlayer(player, playerStats);
+                // regen timer is not reset ! add respawn time to regen, and regen if required
+                player.regenTimer -= enemySpawnTimer;
+                if (player.regenTimer <= 0) {
+                    regen(player, playerStats);
+                }
                 resetEnemy(enemy, enemyStats);
                 if (playerStats.canCurse) {
                     setEnemyCurseValues(enemy, playerStats.curseID, playerStats.curseData.effectValue);
@@ -236,6 +243,10 @@
 
                     processTimeStep(player, timeStep);
                     processTimeStep(enemy, timeStep);
+
+                    if (player.regenTimer <= 0) {
+                        regen(player, playerStats);
+                    }
 
                     if (enemy.alive && player.isActing) {
                         if (player.actionTimer <= 0) {
@@ -351,13 +362,6 @@
         }
     }
 
-    function checkAliveStatus(target, targetStats) {
-        if (target.initialDamage !== targetStats.damageTaken) {
-            target.initialDamage = targetStats.damageTaken;
-            target.alive = target.hitpoints > 0;
-        }
-    }
-
     function determineTimeStep(actor, timeStep) {
         if (actor.isActing) {
             timeStep = Math.min(timeStep, actor.actionTimer);
@@ -373,6 +377,10 @@
         }
         if (actor.isBleeding) {
             timeStep = Math.min(timeStep, actor.bleedTimer);
+        }
+        // only the player has regen
+        if (actor.isPlayer) {
+            timeStep = Math.min(timeStep, actor.regenTimer);
         }
         return timeStep;
     }
@@ -393,7 +401,15 @@
         if (actor.isBleeding) {
             actor.bleedTimer -= timeStep;
         }
+        if (actor.isPlayer) {
+            actor.regenTimer -= timeStep;
+        }
         return timeStep;
+    }
+
+    function regen(player, playerStats) {
+        healDamage(player, playerStats, playerStats.avgHPRegen);
+        player.regenTimer += hitpointRegenInterval;
     }
 
     function actorRecoilCD(actor) {
@@ -944,8 +960,8 @@
     }
 
     function dealDamage(target, targetStats, damage) {
-        target.hitpoints -= Math.floor(damage);
         targetStats.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
+        target.hitpoints -= Math.floor(damage);
         // Check for Phoenix Rebirth
         if (!target.isPlayer && targetStats.passiveID.includes(1) && target.hitpoints <= 0) {
             let random = Math.random() * 100;
@@ -965,7 +981,8 @@
                 targetStats.lowestHitpoints = target.hitpoints;
             }
         }
-        checkAliveStatus(target, targetStats);
+        // update alive status
+        target.alive = target.hitpoints > 0;
     }
 
     function eatFood(player, playerStats, settings) {
@@ -1280,7 +1297,6 @@
         common.decreasedAccuracy = 0;
         // hp
         common.maxHitpoints = stats.maxHitpoints;
-        common.initialDamage = stats.damageTaken;
     }
 
     function resetPlayer(player, playerStats) {
@@ -1341,7 +1357,6 @@
         // hp
         let damage = playerStats.damageTaken;
         damage -= playerStats.damageHealed;
-        damage -= playerStats.avgHPRegen * totalTime / hitpointRegenInterval; // TODO: implement regen in the simulation!
         simResult.hpPerSecond = Math.max(0, damage / totalTime * 1000);
         // attacks
         simResult.attacksTakenPerSecond = stats.enemyAttackCalls / totalTime * 1000;
