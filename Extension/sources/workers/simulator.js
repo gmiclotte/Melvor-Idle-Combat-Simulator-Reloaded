@@ -945,7 +945,7 @@
 
     function dealDamage(target, targetStats, damage) {
         target.hitpoints -= Math.floor(damage);
-        targetStats.damageTaken += Math.floor(damage);
+        targetStats.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
         // Check for Phoenix Rebirth
         if (!target.isPlayer && targetStats.passiveID.includes(1) && target.hitpoints <= 0) {
             let random = Math.random() * 100;
