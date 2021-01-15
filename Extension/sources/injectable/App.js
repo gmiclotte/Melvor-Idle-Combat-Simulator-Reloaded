@@ -1598,6 +1598,27 @@
                     }
                     if (petID === 4 && owned) document.getElementById('MCS Rock').style.display = '';
                 });
+                // Import Food Settings
+                this.simulator.autoEatTier = currentAutoEat - 1;
+                document.getElementById('MCS Auto Eat Tier Dropdown').selectedIndex = currentAutoEat;
+                this.equipFood(items[equippedFood[currentCombatFood].itemID]);
+                if (getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95) {
+                    this.simulator.cookingPool = true;
+                    document.getElementById('MCS 95% Pool: +10% Radio Yes').checked = true;
+                } else {
+                    this.simulator.cookingPool = false;
+                    document.getElementById('MCS 95% Pool: +10% Radio No').checked = true;
+                }
+                const foodMastery = items[this.simulator.foodSelected].masteryID;
+                if (this.simulator.foodSelected && foodMastery
+                    && foodMastery[0] === CONSTANTS.skill.Cooking
+                    && exp.xp_to_level(MASTERY[CONSTANTS.skill.Cooking].xp[foodMastery[1]]) > 99) {
+                    this.simulator.cookingMastery = true;
+                    document.getElementById('MCS 99 Mastery: +20% Radio Yes').checked = true;
+                } else {
+                    this.simulator.cookingMastery = false;
+                    document.getElementById('MCS 99 Mastery: +20% Radio No').checked = true;
+                }
                 // Update hardcore mode
                 if (currentGamemode === 1) {
                     this.simulator.isHardcore = true;
