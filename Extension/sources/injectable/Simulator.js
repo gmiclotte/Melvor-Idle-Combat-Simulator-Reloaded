@@ -1698,7 +1698,7 @@
                 // Dungeons
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
-                    if (this.exportDungeonMonsters) {
+                    if (this.exportDungeonMonsters && (this.exportNonSimmed || this.dungeonSimFilter[dungeonId])) {
                         DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, () => this.dungeonSimFilter[dungeonId], this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
