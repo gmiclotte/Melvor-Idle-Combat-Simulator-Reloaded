@@ -79,88 +79,29 @@
                 this.selectedTimeUnit = this.timeOptions[1];
                 this.selectedTimeShorthand = this.timeShorthand[1];
                 this.timeMultipliers = [-1, 1, 60, 3600, 3600 * 24];
-                this.emptyItems = {
-                    Helmet: {
+                const makeEmptyItem = (img) => {
+                    return {
                         name: 'None',
                         itemID: 0,
-                        media: 'assets/media/bank/armour_helmet.svg',
+                        media: img,
                         defenceLevelRequired: 0,
                         magicLevelRequired: 0,
                         rangedLevelRequired: 0,
-                    },
-                    Platebody: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_platebody.svg',
-                        defenceLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Platelegs: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_platelegs.svg',
-                        defenceLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Boots: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_boots.svg',
-                        defenceLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Weapon: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/weapon_sword.svg',
-                        attackLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Shield: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_shield.svg',
-                        defenceLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Amulet: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/misc_amulet.svg',
-                    },
-                    Ring: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/misc_ring.svg',
-                    },
-                    Gloves: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_gloves.svg',
-                        defenceLevelRequired: 0,
-                        magicLevelRequired: 0,
-                        rangedLevelRequired: 0,
-                    },
-                    Quiver: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/weapon_quiver.svg',
-                    },
-                    Cape: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/armour_cape.svg',
-                    },
-                    Passive: {
-                        name: 'None',
-                        itemID: 0,
-                        media: 'assets/media/bank/passive_slot.svg'
                     }
+                };
+                this.emptyItems = {
+                    Helmet: makeEmptyItem('assets/media/bank/armour_helmet.svg'),
+                    Platebody: makeEmptyItem('assets/media/bank/armour_platebody.svg'),
+                    Platelegs: makeEmptyItem('assets/media/bank/armour_platelegs.svg'),
+                    Boots: makeEmptyItem('assets/media/bank/armour_boots.svg'),
+                    Weapon: makeEmptyItem('assets/media/bank/weapon_sword.svg'),
+                    Shield: makeEmptyItem('assets/media/bank/armour_shield.svg'),
+                    Amulet: makeEmptyItem('assets/media/bank/misc_amulet.svg'),
+                    Ring: makeEmptyItem('assets/media/bank/misc_ring.svg'),
+                    Gloves: makeEmptyItem('assets/media/bank/armour_gloves.svg'),
+                    Quiver: makeEmptyItem('assets/media/bank/weapon_quiver.svg'),
+                    Cape: makeEmptyItem('assets/media/bank/armour_cape.svg'),
+                    Passive: makeEmptyItem('assets/media/bank/passive_slot.svg'),
                 };
 
                 // Useful assets
