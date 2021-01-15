@@ -1325,6 +1325,10 @@
                     this.computeAverageSimData(this.slayerSimFilter[slayerTaskID], this.slayerSimData[slayerTaskID], this.slayerTaskMonsters[slayerTaskID]);
                     // set average kill time for auto slayer
                     this.slayerSimData[slayerTaskID].avgKillTime /= this.slayerTaskMonsters[slayerTaskID].length;
+                    // log monster IDs
+                    if (this.slayerTaskMonsters[slayerTaskID].length) {
+                        console.log(`Tier ${slayerTaskID} auto slayer task list`, this.slayerTaskMonsters[slayerTaskID]);
+                    }
                 }
                 // Update other data
                 this.parent.loot.update(
