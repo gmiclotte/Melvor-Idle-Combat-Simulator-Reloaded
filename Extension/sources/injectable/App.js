@@ -254,217 +254,24 @@
                     }
                 });
 
+                // Add Equipment and Food selection card
                 this.createEquipmentSelectCard();
-
                 // Add tab card
-                {
-                    this.selectedMainTab = 0;
-                    this.mainTabCard = new MICSR.Card(this.topContent, '', '150px', true);
-                    const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'GP Options', 'Equipment Stats', 'Sim. Options'];
-                    const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.gp, this.emptyItems.Helmet.media, this.media.settings];
-                    const mainTabCallbacks = mainTabNames.map((_, i) => () => this.mainTabOnClick(i));
-                    this.mainTabIDs = mainTabNames.map((name) => MICSR.toId(`${name}-tab`));
-                    this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
-                    /** @type {Card[]} */
-                    this.mainTabCards = [];
-                }
-
+                this.createMainTabCard();
                 // Add Cards to the tab card
                 this.createLevelSelectCard();
                 this.createSpellSelectCards();
                 this.createPrayerSelectCard();
                 this.createPotionSelectCard();
                 this.createPetSelectCard();
+                this.createGPOptionsCard();
+                this.createEquipmentStatCard();
+                this.createSimulationAndExportCard();
+                // Add Combat Stat Display Card
+                this.createCombatStatDisplayCard();
+                // Individual simulation info card
+                this.createIndividualInfoCard();
 
-                // Gp Options card
-                {
-                    this.gpSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                    this.mainTabCards.push(this.gpSelectCard);
-                    this.gpSelectCard.addSectionTitle('GP/s Options');
-                    this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
-                    this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
-                    this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
-                    this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
-                    // GP/s options card
-                    {
-                        this.gpOptionsCard = new MICSR.Card(this.gpSelectCard.container, '', '200px');
-                        this.gpOptionsCard.addSectionTitle('Item Subset Selection');
-                        this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
-                        this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
-                        this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
-                        // Top labels
-                        const labelCont = document.createElement('div');
-                        labelCont.className = 'mcsMultiButtonContainer';
-                        labelCont.style.borderBottom = 'solid thin';
-                        const lab1 = document.createElement('div');
-                        lab1.className = 'mcsMultiHeader';
-                        lab1.style.borderRight = 'solid thin';
-                        lab1.textContent = 'Item';
-                        lab1.style.width = '218px';
-                        labelCont.appendChild(lab1);
-                        const lab2 = document.createElement('div');
-                        lab2.className = 'mcsMultiHeader';
-                        lab2.textContent = 'Sell';
-                        lab2.style.width = '124px';
-                        labelCont.appendChild(lab2);
-                        this.gpOptionsCard.container.appendChild(labelCont);
-                        this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
-                        for (let i = 0; i < this.loot.lootList.length; i++) {
-                            this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
-                        }
-                        this.gpSearchResults.container.style.width = '100%';
-                        this.gpSearchResults.container.style.overflowY = 'scroll';
-                        this.gpSearchResults.container.style.overflowX = 'hidden';
-                        this.gpSearchResults.container.style.marginRight = '0px';
-                        this.gpSearchResults.container.style.marginBottom = '5px';
-                    }
-                }
-
-                // Equipment Stat Display Card
-                {
-                    this.equipStatCard = new MICSR.Card(this.mainTabContainer, '', '50px');
-                    this.mainTabCards.push(this.equipStatCard);
-                    this.equipStatCard.addSectionTitle('Equipment Stats');
-                    this.equipKeys = [
-                        'attackSpeed',
-                        // melee
-                        ['attackBonus', 0],
-                        ['attackBonus', 1],
-                        ['attackBonus', 2],
-                        'strengthBonus',
-                        // ranged
-                        'rangedAttackBonus',
-                        'rangedStrengthBonus',
-                        // magic
-                        'magicAttackBonus',
-                        'magicDamageBonus',
-                        // defence
-                        'damageReduction',
-                        'defenceBonus',
-                        'rangedDefenceBonus',
-                        'magicDefenceBonus',
-                    ];
-                    for (let i = 0; i < this.equipKeys.length; i++) {
-                        const key = this.equipKeys[i];
-                        let stat;
-                        if (Array.isArray(key)) {
-                            stat = MICSR.equipmentStatNames[key[0]][key[1]];
-                        } else {
-                            stat = MICSR.equipmentStatNames[key];
-                        }
-                        this.equipStatCard.addNumberOutput(stat.name, 0, 20, this.media[stat.icon], `MCS ${this.equipKeys[i]} ES Output`);
-                    }
-                    // level requirements
-                    this.equipStatCard.addSectionTitle('Level Requirements');
-                    this.requiredKeys = Object.getOwnPropertyNames(MICSR.requiredStatNames);
-                    for (const key of this.requiredKeys) {
-                        const stat = MICSR.requiredStatNames[key];
-                        this.equipStatCard.addNumberOutput('Level Required', 1, 20, this.media[stat.icon], `MCS ${key} ES Output`);
-                    }
-                }
-                // Simulation/Plot Options / Export Card
-                {
-                    this.simOptionsCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                    this.mainTabCards.push(this.simOptionsCard);
-                    this.simOptionsCard.addSectionTitle('Simulation Options');
-                    this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
-                    this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
-                    this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
-                    this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
-                    const dropDownOptionNames = [];
-                    for (let i = 0; i < this.plotTypes.length; i++) {
-                        if (this.plotTypes[i].isTime) {
-                            dropDownOptionNames.push(this.plotTypes[i].option + this.timeOptions[1]);
-                        } else {
-                            dropDownOptionNames.push(this.plotTypes[i].option);
-                        }
-                    }
-                    this.simOptionsCard.addSectionTitle('Export');
-                    this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());
-                    this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
-                    this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
-                }
-                // Export Options Card
-                {
-                    this.isExportDisplayed = false;
-                    this.exportOptionsCard = new MICSR.Card(this.topContent, '', '100px', true);
-                    this.exportOptionsCard.addSectionTitle('Export Options');
-                    this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
-                    this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
-                    this.exportOptionsCard.addSectionTitle('Data to Export');
-                    this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
-                    for (let i = 0; i < this.plotTypes.length; i++) {
-                        let timeText = '';
-                        if (this.plotTypes[i].isTime) {
-                            timeText = 'X';
-                        }
-                        this.exportOptionsCard.addRadio(`${this.plotTypes[i].info}${timeText}`, 25, `${this.plotTypes[i].value}ExportRadio`, ['Yes', 'No'], [(e) => this.exportDataTypeRadioOnChange(e, true, i), (e) => this.exportDataTypeRadioOnChange(e, false, i)], 0);
-                    }
-                }
-                // Combat Stat Display Card
-                {
-                    this.combatStatCard = new MICSR.Card(this.topContent, '', '60px', true);
-                    this.combatStatCard.addSectionTitle('Combat Stats');
-                    const combatStatNames = [
-                        'Attack Speed',
-                        'Min Hit',
-                        'Max Hit',
-                        'Accuracy Rating',
-                        'Evasion Rating',
-                        'Evasion Rating',
-                        'Evasion Rating',
-                        'Max Hitpoints',
-                        'Damage Reduction',
-                    ];
-                    const combatStatIcons = [
-                        '',
-                        '',
-                        '',
-                        '',
-                        this.media.attack,
-                        this.media.ranged,
-                        this.media.magic,
-                        '',
-                        '',
-                    ];
-                    this.combatStatKeys = [
-                        'attackSpeed',
-                        'minHit',
-                        'maxHit',
-                        'maxAttackRoll',
-                        'maxDefRoll',
-                        'maxRngDefRoll',
-                        'maxMagDefRoll',
-                        'maxHitpoints',
-                        'damageReduction',
-                    ];
-                    for (let i = 0; i < combatStatNames.length; i++) {
-                        this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? combatStatIcons[i] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
-                    }
-                    this.combatStatCard.addSectionTitle('Plot Options');
-                    this.plotter.addToggles(this.combatStatCard);
-                    this.combatStatCard.addSectionTitle('');
-                    this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
-                }
-                // Individual info card
-                {
-                    this.zoneInfoCard = new MICSR.Card(this.topContent, '', '100px', true);
-                    this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
-                    this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
-                    this.subInfoCard = new MICSR.Card(this.zoneInfoCard.container, '', '80px');
-                    this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
-                    const zoneInfoLabelNames = [];
-                    for (let i = 0; i < this.plotTypes.length; i++) {
-                        if (this.plotTypes[i].isTime) {
-                            zoneInfoLabelNames.push(this.plotTypes[i].info + this.timeShorthand[1]);
-                        } else {
-                            zoneInfoLabelNames.push(this.plotTypes[i].info);
-                        }
-                    }
-                    for (let i = 0; i < this.plotTypes.length; i++) {
-                        this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypes[i].value} Output`, true);
-                    }
-                }
                 // Bar Chart Card
                 this.monsterToggleState = true;
                 this.dungeonToggleState = true;
@@ -683,6 +490,82 @@
                 return tooltip;
             }
 
+            createCombatStatDisplayCard() {
+                this.combatStatCard = new MICSR.Card(this.topContent, '', '60px', true);
+                this.combatStatCard.addSectionTitle('Combat Stats');
+                const combatStatNames = [
+                    'Attack Speed',
+                    'Min Hit',
+                    'Max Hit',
+                    'Accuracy Rating',
+                    'Evasion Rating',
+                    'Evasion Rating',
+                    'Evasion Rating',
+                    'Max Hitpoints',
+                    'Damage Reduction',
+                ];
+                const combatStatIcons = [
+                    '',
+                    '',
+                    '',
+                    '',
+                    this.media.attack,
+                    this.media.ranged,
+                    this.media.magic,
+                    '',
+                    '',
+                ];
+                this.combatStatKeys = [
+                    'attackSpeed',
+                    'minHit',
+                    'maxHit',
+                    'maxAttackRoll',
+                    'maxDefRoll',
+                    'maxRngDefRoll',
+                    'maxMagDefRoll',
+                    'maxHitpoints',
+                    'damageReduction',
+                ];
+                for (let i = 0; i < combatStatNames.length; i++) {
+                    this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? combatStatIcons[i] : '', `MCS ${this.combatStatKeys[i]} CS Output`);
+                }
+                this.combatStatCard.addSectionTitle('Plot Options');
+                this.plotter.addToggles(this.combatStatCard);
+                this.combatStatCard.addSectionTitle('');
+                this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
+            }
+
+            createIndividualInfoCard() {
+                this.zoneInfoCard = new MICSR.Card(this.topContent, '', '100px', true);
+                this.zoneInfoCard.addSectionTitle('Monster/Dungeon Info.', 'MCS Zone Info Title');
+                this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
+                this.subInfoCard = new MICSR.Card(this.zoneInfoCard.container, '', '80px');
+                this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
+                const zoneInfoLabelNames = [];
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    if (this.plotTypes[i].isTime) {
+                        zoneInfoLabelNames.push(this.plotTypes[i].info + this.timeShorthand[1]);
+                    } else {
+                        zoneInfoLabelNames.push(this.plotTypes[i].info);
+                    }
+                }
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    this.subInfoCard.addNumberOutput(zoneInfoLabelNames[i], 'N/A', 20, '', `MCS ${this.plotTypes[i].value} Output`, true);
+                }
+            }
+
+            createMainTabCard() {
+                this.selectedMainTab = 0;
+                this.mainTabCard = new MICSR.Card(this.topContent, '', '150px', true);
+                const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'GP Options', 'Equipment Stats', 'Sim. Options'];
+                const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.gp, this.emptyItems.Helmet.media, this.media.settings];
+                const mainTabCallbacks = mainTabNames.map((_, i) => () => this.mainTabOnClick(i));
+                this.mainTabIDs = mainTabNames.map((name) => MICSR.toId(`${name}-tab`));
+                this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
+                /** @type {Card[]} */
+                this.mainTabCards = [];
+            }
+
             createLevelSelectCard() {
                 this.levelSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
                 this.mainTabCards.push(this.levelSelectCard);
@@ -862,6 +745,132 @@
                 const tooltips = combatPets.map((pet) => `<div class="text-center">${pet.name}<br><small class='text-info'>${pet.description.replace(/\.$/, '')}</small></div>`);
                 this.petSelectCard.addImageButtons(petImageSources, petNames, 'Medium', petButtonCallbacks, tooltips);
                 this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
+            }
+
+            createGPOptionsCard() {
+                this.gpSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
+                this.mainTabCards.push(this.gpSelectCard);
+                this.gpSelectCard.addSectionTitle('GP/s Options');
+                this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
+                this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
+                this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
+                this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
+                // GP/s options card
+                {
+                    this.gpOptionsCard = new MICSR.Card(this.gpSelectCard.container, '', '200px');
+                    this.gpOptionsCard.addSectionTitle('Item Subset Selection');
+                    this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
+                    this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
+                    this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
+                    // Top labels
+                    const labelCont = document.createElement('div');
+                    labelCont.className = 'mcsMultiButtonContainer';
+                    labelCont.style.borderBottom = 'solid thin';
+                    const lab1 = document.createElement('div');
+                    lab1.className = 'mcsMultiHeader';
+                    lab1.style.borderRight = 'solid thin';
+                    lab1.textContent = 'Item';
+                    lab1.style.width = '218px';
+                    labelCont.appendChild(lab1);
+                    const lab2 = document.createElement('div');
+                    lab2.className = 'mcsMultiHeader';
+                    lab2.textContent = 'Sell';
+                    lab2.style.width = '124px';
+                    labelCont.appendChild(lab2);
+                    this.gpOptionsCard.container.appendChild(labelCont);
+                    this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
+                    for (let i = 0; i < this.loot.lootList.length; i++) {
+                        this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
+                    }
+                    this.gpSearchResults.container.style.width = '100%';
+                    this.gpSearchResults.container.style.overflowY = 'scroll';
+                    this.gpSearchResults.container.style.overflowX = 'hidden';
+                    this.gpSearchResults.container.style.marginRight = '0px';
+                    this.gpSearchResults.container.style.marginBottom = '5px';
+                }
+            }
+
+            createEquipmentStatCard() {
+                this.equipStatCard = new MICSR.Card(this.mainTabContainer, '', '50px');
+                this.mainTabCards.push(this.equipStatCard);
+                this.equipStatCard.addSectionTitle('Equipment Stats');
+                this.equipKeys = [
+                    'attackSpeed',
+                    // melee
+                    ['attackBonus', 0],
+                    ['attackBonus', 1],
+                    ['attackBonus', 2],
+                    'strengthBonus',
+                    // ranged
+                    'rangedAttackBonus',
+                    'rangedStrengthBonus',
+                    // magic
+                    'magicAttackBonus',
+                    'magicDamageBonus',
+                    // defence
+                    'damageReduction',
+                    'defenceBonus',
+                    'rangedDefenceBonus',
+                    'magicDefenceBonus',
+                ];
+                for (let i = 0; i < this.equipKeys.length; i++) {
+                    const key = this.equipKeys[i];
+                    let stat;
+                    if (Array.isArray(key)) {
+                        stat = MICSR.equipmentStatNames[key[0]][key[1]];
+                    } else {
+                        stat = MICSR.equipmentStatNames[key];
+                    }
+                    this.equipStatCard.addNumberOutput(stat.name, 0, 20, this.media[stat.icon], `MCS ${this.equipKeys[i]} ES Output`);
+                }
+                // level requirements
+                this.equipStatCard.addSectionTitle('Level Requirements');
+                this.requiredKeys = Object.getOwnPropertyNames(MICSR.requiredStatNames);
+                for (const key of this.requiredKeys) {
+                    const stat = MICSR.requiredStatNames[key];
+                    this.equipStatCard.addNumberOutput('Level Required', 1, 20, this.media[stat.icon], `MCS ${key} ES Output`);
+                }
+            }
+
+            createSimulationAndExportCard() {
+                this.simOptionsCard = new MICSR.Card(this.mainTabContainer, '', '150px');
+                this.mainTabCards.push(this.simOptionsCard);
+                this.simOptionsCard.addSectionTitle('Simulation Options');
+                this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
+                this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
+                this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
+                this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
+                const dropDownOptionNames = [];
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    if (this.plotTypes[i].isTime) {
+                        dropDownOptionNames.push(this.plotTypes[i].option + this.timeOptions[1]);
+                    } else {
+                        dropDownOptionNames.push(this.plotTypes[i].option);
+                    }
+                }
+                this.simOptionsCard.addSectionTitle('Export');
+                this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());
+                this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
+                this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
+                // Export Options Card
+                this.createExportOptionsCard();
+            }
+
+            createExportOptionsCard() {
+                this.isExportDisplayed = false;
+                this.exportOptionsCard = new MICSR.Card(this.topContent, '', '100px', true);
+                this.exportOptionsCard.addSectionTitle('Export Options');
+                this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
+                this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
+                this.exportOptionsCard.addSectionTitle('Data to Export');
+                this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    let timeText = '';
+                    if (this.plotTypes[i].isTime) {
+                        timeText = 'X';
+                    }
+                    this.exportOptionsCard.addRadio(`${this.plotTypes[i].info}${timeText}`, 25, `${this.plotTypes[i].value}ExportRadio`, ['Yes', 'No'], [(e) => this.exportDataTypeRadioOnChange(e, true, i), (e) => this.exportDataTypeRadioOnChange(e, false, i)], 0);
+                }
             }
 
             /** Adds a multi-button with equipment to the equipment select popup
