@@ -236,8 +236,6 @@
                     Prayer: 'Pra.',
                     Slayer: 'Sla.',
                 };
-                // Food
-                this.foodSelected = 0;
                 // Simulation Object
                 this.simulator = new MICSR.Simulator(this, urls.simulationWorker);
                 // Loot Object
@@ -655,10 +653,9 @@
                 combatStyleCCContainer.appendChild(rangedStyleDropdown);
                 combatStyleCCContainer.appendChild(magicStyleDropdown);
                 this.equipmentSelectCard.container.appendChild(combatStyleCCContainer);
-                // food
-
-                // food card
+                // food container
                 const foodCCContainer = this.equipmentSelectCard.createCCContainer();
+                // food card
                 const containerDiv = document.createElement('div');
                 containerDiv.style.position = 'relative';
                 containerDiv.style.cursor = 'pointer';
@@ -699,11 +696,14 @@
                     autoEatTierNames.push(autoEatData[i].title);
                     autoEatTierValues.push(i);
                 }
-                const autoEatTierDropdown = this.equipmentSelectCard.createDropdown(autoEatTierNames, autoEatTierValues, 'Auto Eat Tier', (event) => {
+                const autoEatTierDropdown = this.equipmentSelectCard.createDropdown(autoEatTierNames, autoEatTierValues, 'MCS Auto Eat Tier Dropdown', (event) => {
                     this.simulator.autoEatTier = parseInt(event.currentTarget.selectedOptions[0].value);
                 });
                 foodCCContainer.appendChild(autoEatTierDropdown);
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
+                // cooking mastery
+                this.equipmentSelectCard.addRadio('95% Pool: +10%', 25, 'cookingPool', ['Yes', 'No'], [(e) => this.cookingPoolRadioOnChange(e, true), (e) => this.cookingPoolRadioOnChange(e, false)], 1);
+                this.equipmentSelectCard.addRadio('99 Mastery: +20%', 25, 'cookingMastery', ['Yes', 'No'], [(e) => this.cookingMasteryRadioOnChange(e, true), (e) => this.cookingMasteryRadioOnChange(e, false)], 1);
                 // Slayer task and hardcore mode
                 this.equipmentSelectCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
                 this.equipmentSelectCard.addRadio('Hardcore Mode', 25, 'hardcore', ['Yes', 'No'], [() => this.hardcoreRadioOnChange(true), () => this.hardcoreRadioOnChange(false)], 1);
@@ -715,7 +715,7 @@
             }
 
             equipFood(item) {
-                this.foodSelected = item.itemID;
+                this.simulator.foodSelected = item.itemID;
                 const img = document.getElementById('MCS Food Image');
                 if (item.itemID === 0) {
                     img.src = 'assets/media/skills/combat/food_empty.svg';
@@ -735,7 +735,8 @@
                     tooltip += `<span class='text-info'>${item.description.replace(/<br>\(/, ' (')}</span><br>`;
                 }
                 if (item.healsFor) {
-                    tooltip += `<h5 class="font-w400 font-size-sm text-left text-combat-smoke m-1 mb-2">Heals for: <img class="skill-icon-xs mr-1" src="${this.media.hitpoints}"><span class="text-bank-desc">+${item.healsFor * numberMultiplier} HP</span></h5>`;
+                    const amt = item.healsFor * numberMultiplier;
+                    tooltip += `<h5 class="font-w400 font-size-sm text-left text-combat-smoke m-1 mb-2">Heals for: <img class="skill-icon-xs mr-1" src="${this.media.hitpoints}"><span class="text-bank-desc">+${amt} HP</span></h5>`;
                 }
                 tooltip += '</small></div>';
                 return tooltip;
@@ -1878,6 +1879,14 @@
             convertShardsRadioOnChange(event, newState) {
                 this.loot.convertShards = newState;
                 this.updatePlotForGP();
+            }
+
+            cookingPoolRadioOnChange(event, newState) {
+                this.simulator.cookingPool = newState;
+            }
+
+            cookingMasteryRadioOnChange(event, newState) {
+                this.simulator.cookingMastery = newState;
             }
 
             /**

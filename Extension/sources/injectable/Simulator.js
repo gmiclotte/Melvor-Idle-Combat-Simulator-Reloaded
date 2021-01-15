@@ -169,6 +169,10 @@
                 };
                 // Food
                 this.autoEatTier = -1;
+                this.foodSelected = 0;
+                this.cookingPool = false;
+                this.cookingMastery = false;
+
 
                 // Simulation settings
                 /** Max number of player actions to attempt before timeout */
@@ -842,6 +846,20 @@
                 };
             }
 
+            getFoodHealAmt() {
+                let amt = items[this.foodSelected].healsFor;
+                amt *= numberMultiplier;
+                let multiplier = 1;
+                if (this.cookingPool) {
+                    multiplier += .1;
+                }
+                if (this.cookingMastery && items[this.foodSelected].masteryID[0] === CONSTANTS.skill.Cooking) {
+                    multiplier += .2;
+                }
+                amt *= multiplier;
+                return amt;
+            }
+
             /**
              * Setup currentsim variables
              */
@@ -916,8 +934,8 @@
                 if (this.autoEatTier >= 0) {
                     playerStats.autoEat = autoEatData[this.autoEatTier];
                 }
-                if (this.parent.foodSelected > 0) {
-                    playerStats.foodHeal = items[this.parent.foodSelected].healsFor * numberMultiplier;
+                if (this.foodSelected > 0) {
+                    playerStats.foodHeal = this.getFoodHealAmt();
                 }
 
                 // Magic curses and auroras
