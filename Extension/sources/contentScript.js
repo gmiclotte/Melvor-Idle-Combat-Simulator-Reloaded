@@ -81,4 +81,4 @@ function injectScripts() {
     }
 }
 // Delay this, so the MICSR object is first injected
-setTimeout(injectScripts());
+setTimeout(injectScripts(), 2000);
