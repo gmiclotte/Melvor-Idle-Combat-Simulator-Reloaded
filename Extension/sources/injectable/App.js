@@ -2695,6 +2695,9 @@
             getItemName(itemID) {
                 if (itemID === 0) {
                     return 'None';
+                } else if (!items[itemID]) {
+                    MICSR.warn(`Invalid itemID ${itemID} in getItemName`);
+                    return 'None';
                 } else {
                     return this.replaceApostrophe(items[itemID].name);
                 }
