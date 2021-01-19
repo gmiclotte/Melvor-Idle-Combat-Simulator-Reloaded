@@ -155,6 +155,10 @@
             increasedMaxHitpoints: {implemented: true},
             lifesteal: {implemented: true},
 
+            // auto eat
+            decreasedAutoEatEfficiency: {implemented: true},
+            increasedAutoEat: {implemented: true},
+
             // prayer
             prayerCostReduction: {implemented: true},
 
@@ -194,10 +198,6 @@
 
         // stats that do not apply to combat
         MICSR.irrelevantStatNames = {
-
-            // auto eat - TODO: handle this and tie it to food cost? -  more general: all resource costs
-            decreasedAutoEatEfficiency: {implemented: false},
-            increasedAutoEat: {implemented: false},
 
             // this does nothing
             prayerBonus: {implemented: false},

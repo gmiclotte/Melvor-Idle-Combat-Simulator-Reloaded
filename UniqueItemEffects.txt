@@ -25,3 +25,4 @@ Slayer_Skillcape
 Stormsnap
 Thief_Gloves
 Warlock_Amulet
+Wasteful_Ring

@@ -933,7 +933,9 @@
 
                 // set auto eat
                 if (this.autoEatTier >= 0) {
-                    playerStats.autoEat = autoEatData[this.autoEatTier];
+                    playerStats.autoEat = {...autoEatData[this.autoEatTier]};
+                    playerStats.autoEat.eatAt += this.equipmentStats.increasedAutoEat | 0;
+                    playerStats.autoEat.efficiency -= this.equipmentStats.decreasedAutoEatEfficiency | 0;
                 } else {
                     playerStats.autoEat.manual = true;
                 }
