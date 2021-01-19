@@ -1,4 +1,4 @@
-v1.2.4-1
+v1.2.4-2
     This update adds player hitpoints simulation. This includes damage taken, and healing (auto eat, gear effects).
     The simulation stops when the player dies, as such in v1.2.4-0 you can not simulate fights where you die and this is not ready for release, yet.
     
