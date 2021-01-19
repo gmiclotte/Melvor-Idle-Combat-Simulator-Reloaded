@@ -11,6 +11,7 @@ Gold_Emerald_Ring
 Gold_Ruby_Ring
 Gold_Sapphire_Ring
 Gold_Topaz_Ring
+Guardian_Amulet
 Hitpoints_Skillcape
 Magic_Skillcape
 Max_Skillcape

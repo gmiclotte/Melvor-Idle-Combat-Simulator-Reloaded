@@ -796,7 +796,11 @@
         // guardian amulet
         if (actor.isPlayer && actorStats.activeItems.guardianAmulet) {
             // Guardian Amulet gives 20% increase in attack speed (TODO: 40% increase and +5% DR if below 50% HP)
-            speed = Math.floor(speed * 1.2);
+            if (actor.hitpoints < actor.maxHitpoints / 2) {
+                speed = Math.floor(speed * 1.4);
+            } else {
+                speed = Math.floor(speed * 1.2);
+            }
         }
         // pet and gear reductions
         if (actorStats.decreasedAttackSpeed) {
@@ -960,6 +964,9 @@
         target.hitpoints += amt;
         target.hitpoints = Math.min(target.hitpoints, target.maxHitpoints);
         targetStats.damageHealed += amt;
+        if (target.isPlayer && targetStats.activeItems.guardianAmulet) {
+            updateGuardianAmuletEffect(target, targetStats);
+        }
     }
 
     function dealDamage(target, targetStats, damage) {
@@ -985,11 +992,25 @@
                 if (target.hitpoints < targetStats.lowestHitpoints) {
                     targetStats.lowestHitpoints = target.hitpoints;
                 }
+                if (targetStats.activeItems.guardianAmulet) {
+                    updateGuardianAmuletEffect(target, targetStats);
+                }
             }
             if (damage > targetStats.highestDamageTaken) {
                 targetStats.highestDamageTaken = damage;
             }
         }
+    }
+
+    function updateGuardianAmuletEffect(player, playerStats) {
+        if (player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow) {
+            player.increasedDamageReduction += 5;
+            player.guardianAmuletBelow = true;
+        } else if (player.hitpoints >= player.maxHitpoints / 2  && player.guardianAmuletBelow) {
+            player.increasedDamageReduction -= 5;
+            player.guardianAmuletBelow = false;
+        }
+        calculateSpeed(player, playerStats);
     }
 
     function autoEat(player, playerStats) {
