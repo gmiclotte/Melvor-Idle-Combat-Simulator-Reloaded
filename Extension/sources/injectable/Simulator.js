@@ -1698,8 +1698,9 @@
                 // Dungeons
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
-                    if (this.exportDungeonMonsters && (this.exportNonSimmed || this.dungeonSimFilter[dungeonId])) {
-                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, () => this.dungeonSimFilter[dungeonId], this.monsterSimData, this.parent.getMonsterName(monsterID), true));
+                    if (this.exportDungeonMonsters) {
+                        let dungeonMonsterFilter = Object.fromEntries(DUNGEONS[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
+                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, dungeonMonsterFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
                 // TODO: export for auto slayer
