@@ -728,7 +728,7 @@
                 }
                 // set increased DR buff
                 if (currentSpecial.increasedDamageReduction) {
-                    enemy.damageReduction = currentSpecial.increasedDamageReduction;
+                    enemy.increasedDamageReduction = currentSpecial.increasedDamageReduction;
                 }
                 // update player accuracy
                 setAccuracy(player, playerStats, enemy, enemyStats);
@@ -1236,6 +1236,9 @@
         if (target.markOfDeath) {
             damageReduction = Math.floor(damageReduction / 2);
         }
+        if (target.isPlayer) {
+            damageReduction = Math.floor(damageReduction * target.reductionModifier);
+        }
         damage -= Math.floor((damageReduction / 100) * damage);
         return damage;
     }
@@ -1333,7 +1336,8 @@
         if (!player.hitpoints || player.hitpoints <= 0) {
             player.hitpoints = playerStats.maxHitpoints;
         }
-        player.damageReduction = Math.floor(playerStats.damageReduction * player.reductionModifier);
+        player.damageReduction = playerStats.damageReduction;
+        player.guardianAmuletBelow = false;
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
