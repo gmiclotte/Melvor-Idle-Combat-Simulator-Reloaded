@@ -531,7 +531,7 @@
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
                             let monsterXP = 0;
                             monsterXP += Math.floor(((MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0) * (1 + this.currentSim.slayerBonusXP / 100));
-                            if (this.isSlayerTask) {
+                            if (this.currentSim.isSlayerTask) {
                                 monsterXP += Math.floor(MONSTERS[monsterID].hitpoints * (1 + this.currentSim.slayerBonusXP / 100));
                             }
                             this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * this.currentSim.playerStats.globalXPMult / this.monsterSimData[monsterID].killTimeS;
