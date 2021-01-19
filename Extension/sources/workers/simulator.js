@@ -969,20 +969,24 @@
                 target.hitpoints = targetStats.maxHitpoints;
             }
         }
+        // update alive status
+        target.alive = target.hitpoints > 0;
         // Check for player eat
         if (target.isPlayer) {
-            if (target.hitpoints > 0) {
+            if (target.alive) {
                 autoEat(target, targetStats);
+                if (targetStats.autoEat.manual) {
+                    // TODO: use a more detailed manual eating simulation?
+                    target.hitpoints = target.maxHitpoints;
+                }
+                if (target.hitpoints < targetStats.lowestHitpoints) {
+                    targetStats.lowestHitpoints = target.hitpoints;
+                }
             }
             if (damage > targetStats.highestDamageTaken) {
                 targetStats.highestDamageTaken = damage;
             }
-            if (0 < target.hitpoints && target.hitpoints < targetStats.lowestHitpoints) {
-                targetStats.lowestHitpoints = target.hitpoints;
-            }
         }
-        // update alive status
-        target.alive = target.hitpoints > 0;
     }
 
     function autoEat(player, playerStats) {
@@ -1373,7 +1377,12 @@
         simResult.deathRate = playerStats.deaths / (trials - tooManyActions);
         simResult.highestDamageTaken = playerStats.highestDamageTaken;
         simResult.lowestHitpoints = playerStats.lowestHitpoints;
-        simResult.atePerSecond = playerStats.ate / totalTime * 1000;
+        if (playerStats.autoEat.manual) {
+            // TODO: use a more detailed manual eating simulation?
+            simResult.atePerSecond = Math.max(0, damage / playerStats.foodHeal / totalTime * 1000);
+        } else {
+            simResult.atePerSecond = playerStats.ate / totalTime * 1000;
+        }
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
 

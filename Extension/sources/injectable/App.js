@@ -436,7 +436,7 @@
                 foodPopup.style.display = 'none';
                 this.equipmentSelectCard.registerPopupMenu(containerDiv, foodPopup);
                 // auto eat dropdown
-                let autoEatTierNames = ['No Auto Eat'];
+                let autoEatTierNames = ['Manual Eating'];
                 let autoEatTierValues = [-1];
                 for (let i = 0; i < autoEatData.length; i++) {
                     autoEatTierNames.push(autoEatData[i].title);

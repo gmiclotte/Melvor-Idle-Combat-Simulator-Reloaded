@@ -925,6 +925,7 @@
                         eatAt: 0,
                         maxHP: 0,
                         efficiency: 0,
+                        manual: false,
                     },
                     foodHeal: 0, // TODO: add food selection and add cooking mastery checkboxes
                 };
@@ -933,6 +934,8 @@
                 // set auto eat
                 if (this.autoEatTier >= 0) {
                     playerStats.autoEat = autoEatData[this.autoEatTier];
+                } else {
+                    playerStats.autoEat.manual = true;
                 }
                 if (this.foodSelected > 0) {
                     playerStats.foodHeal = this.getFoodHealAmt();
