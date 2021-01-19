@@ -42,3 +42,9 @@ window.MICSR = {
         MICSR.loadedFiles[id] = true;
     }
 }
+
+
+// set itemID for each item
+items.forEach((x, i) => {
+    items[i].itemID = i;
+});

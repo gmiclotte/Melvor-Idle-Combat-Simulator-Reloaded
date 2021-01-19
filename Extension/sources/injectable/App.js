@@ -144,7 +144,6 @@
                         }
                         if (items[i].equipmentSlot === CONSTANTS.equipmentSlot[this.equipmentSlotKeys[equipmentSlot]]) {
                             this.equipmentSubsets[equipmentSlot].push(items[i]);
-                            this.equipmentSubsets[equipmentSlot][this.equipmentSubsets[equipmentSlot].length - 1].itemID = i;
                         }
                     }
                 }
@@ -153,7 +152,6 @@
                 for (let i = 0; i < items.length; i++) {
                     if (items[i].equipmentSlot === CONSTANTS.equipmentSlot.Quiver && (items[i].ammoType === 2 || items[i].ammoType === 3)) {
                         this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon].push(items[i]);
-                        this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon][this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon].length - 1].itemID = i;
                     }
                 }
                 // Sort equipment subsets
@@ -468,7 +466,6 @@
                 if (item.itemID === 0) {
                     img.src = 'assets/media/skills/combat/food_empty.svg';
                 } else {
-                    item = items[item.itemID];
                     img.src = item.media;
                 }
                 img._tippy.setContent(this.getFoodTooltip(item));
@@ -1421,10 +1418,9 @@
              * @param {number} setID Index of equipmentSets from 0-2 to import
              */
             importButtonOnClick(setID) {
-                let itemID;
                 const setToImport = equipmentSets[setID].equipment;
                 for (let i = 0; i < this.equipmentSlotKeys.length; i++) {
-                    itemID = setToImport[CONSTANTS.equipmentSlot[this.equipmentSlotKeys[i]]];
+                    const itemID = setToImport[CONSTANTS.equipmentSlot[this.equipmentSlotKeys[i]]];
                     this.equipmentSelected[i] = itemID;
                     this.setEquipmentImage(i, itemID);
                 }
