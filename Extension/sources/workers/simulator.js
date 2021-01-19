@@ -126,6 +126,9 @@
             enemyStats.isPlayer = false;
             enemyStats.damageTaken = 0;
             enemyStats.damageHealed = 0;
+            // copy slayer area values to player stats
+            playerStats.slayerArea = enemyStats.slayerArea;
+            playerStats.slayerAreaEffectValue = enemyStats.slayerAreaEffectValue;
 
             // Start Monte Carlo simulation
             let enemyKills = 0;
@@ -146,7 +149,7 @@
                 runesUsed: 0,
             };
 
-            setAreaEffects(playerStats, enemyStats);
+            setAreaEffects(playerStats);
 
             if (!playerStats.isMelee && enemyStats.passiveID.includes(2)) {
                 return {simSuccess: false, reason: 'wrong style'};
@@ -196,9 +199,9 @@
                 setAccuracy(player, playerStats, enemy, enemyStats);
                 setAccuracy(enemy, enemyStats, player, playerStats);
                 // set action speed
-                calculateSpeed(player, playerStats, enemyStats);
+                calculateSpeed(player, playerStats);
                 player.actionTimer = player.currentSpeed;
-                calculateSpeed(enemy, enemyStats, playerStats);
+                calculateSpeed(enemy, enemyStats);
                 enemy.actionTimer = enemy.currentSpeed;
 
                 // Simulate combat until enemy is dead or max actions has been reached
@@ -575,7 +578,7 @@
             target.isSlowed = true;
             target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
             target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
-            calculateSpeed(target, targetStats, actorStats);
+            calculateSpeed(target, targetStats);
         }
         ///////////
         // timed //
@@ -701,7 +704,7 @@
                 // set increased attack speed buff
                 if (currentSpecial.increasedAttackSpeed) {
                     enemy.increasedAttackSpeed = currentSpecial.increasedAttackSpeed;
-                    calculateSpeed(enemy, enemyStats, playerStats);
+                    calculateSpeed(enemy, enemyStats);
                 }
                 // Set evasion buffs
                 if (currentSpecial.increasedMeleeEvasion) {
@@ -787,7 +790,7 @@
         return currentSpecial;
     }
 
-    function calculateSpeed(actor, actorStats, targetStats) {
+    function calculateSpeed(actor, actorStats) {
         // base
         let speed = actorStats.attackSpeed;
         // guardian amulet
@@ -800,8 +803,8 @@
             speed -= actorStats.decreasedAttackSpeed
         }
         // dark waters
-        if (actor.isPlayer && targetStats.slayerArea === 10) {
-            speed = Math.floor(speed * (1 + calculateAreaEffectValue(targetStats.slayerAreaEffectValue, actorStats) / 100));
+        if (actor.isPlayer && actorStats.slayerArea === 10) {
+            speed = Math.floor(speed * (1 + calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats) / 100));
         }
         // slow
         speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
@@ -819,7 +822,7 @@
                 actor.activeBuffs = false;
                 // Undo buffs
                 actor.increasedAttackSpeed = 0;
-                calculateSpeed(actor, actorStats, targetStats)
+                calculateSpeed(actor, actorStats)
                 actor.meleeEvasionBuff = 1;
                 actor.rangedEvasionBuff = 1;
                 actor.magicEvasionBuff = 1;
@@ -836,7 +839,7 @@
             if (actor.attackSpeedDebuffTurns <= 0) {
                 actor.isSlowed = false;
                 actor.attackSpeedDebuff = 0;
-                calculateSpeed(actor, actorStats, targetStats)
+                calculateSpeed(actor, actorStats)
             }
         }
         // Curse Tracking
@@ -1437,7 +1440,7 @@
         }
         // handle player and enemy cases
         if (target.isPlayer) {
-            setEvasionDebuffsPlayer(target, targetStats, actorStats);
+            setEvasionDebuffsPlayer(target, targetStats);
         } else {
             // Adjust ancient magick forcehit
             if (actorStats.usingAncient && (actorStats.specialData[0].forceHit || actorStats.specialData[0].checkForceHit)) {
@@ -1559,15 +1562,15 @@
         return maxRoll
     }
 
-    function setEvasionDebuffsPlayer(player, playerStats, enemyStats) {
+    function setEvasionDebuffsPlayer(player, playerStats) {
         let areaEvasionDebuff = 0;
-        if (enemyStats.slayerArea === 9 /*Perilous Peaks*/) {
-            areaEvasionDebuff = calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats);
+        if (playerStats.slayerArea === 9 /*Perilous Peaks*/) {
+            areaEvasionDebuff = calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats);
         }
         player.maxDefRoll = calculatePlayerEvasion(playerStats.maxDefRoll, player.meleeEvasionBuff, player.meleeEvasionDebuff + areaEvasionDebuff);
         player.maxRngDefRoll = calculatePlayerEvasion(playerStats.maxRngDefRoll, player.rangedEvasionBuff, player.rangedEvasionDebuff + areaEvasionDebuff);
-        if (enemyStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
-            areaEvasionDebuff = calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats);
+        if (playerStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
+            areaEvasionDebuff = calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats);
         }
         player.maxMagDefRoll = calculatePlayerEvasion(playerStats.maxMagDefRoll, player.magicEvasionBuff, player.magicEvasionDebuff + areaEvasionDebuff);
     }
@@ -1591,7 +1594,7 @@
         return value;
     }
 
-    function setAreaEffects(playerStats, enemyStats) {
+    function setAreaEffects(playerStats) {
         // 0: "Penumbra" - no area effect
         // 1: "Strange Cave" - no area effect
         // 2: "High Lands" - no area effect
@@ -1601,8 +1604,8 @@
         // 6: "Runic Ruins" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
         // 7: "Arid Plains" - reduced food efficiency -> TODO: implement this when tracking player HP
         // 8: "Shrouded Badlands"
-        if (enemyStats.slayerArea === 8 /*Shrouded Badlands*/) {
-            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(enemyStats.slayerAreaEffectValue, playerStats) / 100));
+        if (playerStats.slayerArea === 8 /*Shrouded Badlands*/) {
+            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats) / 100));
         }
         // 9: "Perilous Peaks" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
         // 10: "Dark Waters" - reduced player attack speed -> implemented in calculateSpeed
