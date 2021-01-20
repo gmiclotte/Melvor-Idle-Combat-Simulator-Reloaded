@@ -1418,9 +1418,9 @@
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
 
         // stats depending on kills
-        if (tooManyActions === 0) {
+        const successes = trials - playerStats.deaths;
+        if (tooManyActions === 0 && successes) {
             // kill time
-            const successes = trials - playerStats.deaths;
             simResult.avgKillTime = totalTime / successes;
             simResult.killTimeS = simResult.avgKillTime / 1000;
             simResult.killsPerSecond = 1 / simResult.killTimeS;
