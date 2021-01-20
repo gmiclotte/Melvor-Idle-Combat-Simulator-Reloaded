@@ -1703,7 +1703,8 @@
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
                     if (this.exportDungeonMonsters) {
-                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, () => this.dungeonSimFilter[dungeonId], this.monsterSimData, this.parent.getMonsterName(monsterID), true));
+                        const dungeonMonsterFilter = Object.fromEntries(DUNGEONS[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
+                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, dungeonMonsterFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
                 }
                 // TODO: export for auto slayer
