@@ -1,6 +1,7 @@
 v1.2.5
     Fixes:
     - Fix enemy DR not resetting
+    - Fix kill times in case of player deaths
     - Fix pet chance
     - Fix dungeon monster export filter
 
