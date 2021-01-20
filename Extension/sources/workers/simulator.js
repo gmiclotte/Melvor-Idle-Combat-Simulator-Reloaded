@@ -1411,6 +1411,9 @@
         } else {
             simResult.atePerSecond = playerStats.ate / totalTime * 1000;
         }
+        if (!isFinite(simResult.atePerSecond)) {
+            simResult.atePerSecond = NaN;
+        }
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
 

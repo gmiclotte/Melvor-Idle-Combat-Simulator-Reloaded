@@ -271,6 +271,9 @@
                     if (!enterSet[i]) {
                         this.bars[i].classList.add('mcsBarCantEnter');
                     }
+                    if (isNaN(barData[i]) || !isFinite(barData[i])) {
+                        continue;
+                    }
                     if (i < barData.length && barData[i] > barMax) {
                         barMax = barData[i];
                     }
@@ -318,7 +321,11 @@
                 for (let i = 0; i < numData; i++) {
                     const dataIndex = numData - i - 1;
                     const barIndex = numBars - i - 1;
-                    this.bars[barIndex].style.height = `${barData[dataIndex] / divMax * 100}%`;
+                    if (isNaN(barData[dataIndex]) || !isFinite(barData[dataIndex])) {
+                        this.bars[barIndex].style.height = `0%`;
+                    } else {
+                        this.bars[barIndex].style.height = `${barData[dataIndex] / divMax * 100}%`;
+                    }
 
                     let barName = '';
                     if (this.parent.isViewingDungeon) {
