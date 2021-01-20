@@ -1,3 +1,9 @@
+v1.2.5
+    Fixes:
+    - Fix enemy DR not resetting
+    - Fix pet chance
+    - Fix dungeon monster export filter
+
 v1.2.4
     This update adds player hitpoints simulation. This includes damage taken, and healing (auto eat, gear effects).
     The simulation stops when the player dies. The "Manual eating" setting simply heals you back to full after every hit.
