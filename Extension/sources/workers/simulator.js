@@ -833,7 +833,7 @@
                 actor.reflectMelee = 0;
                 actor.reflectRanged = 0;
                 actor.reflectMagic = 0;
-                actor.damageReduction = 0;
+                actor.increasedDamageReduction = 0;
                 setAccuracy(target, targetStats, actor, actorStats);
             }
         }
