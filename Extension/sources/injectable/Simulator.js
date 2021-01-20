@@ -282,8 +282,6 @@
                 for (let i = 0; i < this.parent.plotTypes.length; i++) {
                     this.exportDataType.push(true);
                 }
-                // Pet Settings
-                this.petSkill = 'Attack';
                 // Test Settings
                 this.isTestMode = false;
                 this.testMax = 10;
@@ -1360,6 +1358,7 @@
                     this.dungeonSimData,
                     this.slayerSimData,
                     this.slayerTaskMonsters,
+                    this.timeMultiplier,
                 );
                 MICSR.log(`Elapsed Simulation Time: ${performance.now() - this.simStartTime}ms`);
             }

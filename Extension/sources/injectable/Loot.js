@@ -21,7 +21,10 @@
                 this.dungeonSimData = {};
                 this.slayerSimData = {};
                 this.slayerTaskMonsters = [];
+                this.timeMultiplier = 1;
 
+                // Pet Settings
+                this.petSkill = 'Attack';
                 // Options for GP/s calculations
                 this.sellBones = false; // True or false
                 this.sellLoot = 'All'; // Options 'All','Subset','None'
@@ -428,12 +431,13 @@
             /**
              * Update all loot related statistics
              */
-            update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters) {
+            update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters, timeMultiplier) {
                 this.currentSim = currentSim;
                 this.monsterSimData = monsterSimData;
                 this.dungeonSimData = dungeonSimData;
                 this.slayerSimData = slayerSimData;
                 this.slayerTaskMonsters = slayerTaskMonsters;
+                this.timeMultiplier = timeMultiplier;
                 this.updateGPData();
                 this.updateHerbloreXP();
                 this.updateSignetChance();

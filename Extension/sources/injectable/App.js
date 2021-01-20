@@ -346,7 +346,7 @@
                 this.setTabIDToSelected(this.spellTabIDs[0]);
                 this.setTabIDToSelected(this.mainTabIDs[0]);
                 this.plotter.petSkillDropdown.style.display = 'none';
-                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
+                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
                 this.updateSpellOptions(1);
                 this.updatePrayerOptions(1);
                 // Set up spells
@@ -1793,12 +1793,12 @@
              * @param {Event} event The change event for a dropdown
              */
             petSkillDropdownOnChange(event) {
-                this.simulator.petSkill = event.currentTarget.value;
+                this.loot.petSkill = event.currentTarget.value;
                 this.loot.updatePetChance();
                 if (this.plotter.plotType === 'petChance') {
                     this.updatePlotData();
                 }
-                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.simulator.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
+                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
                 this.updateZoneInfoCard();
             }
 
@@ -2020,7 +2020,7 @@
                     const name = this.plotTypes[i].info;
                     let newName = '';
                     if (name === ' Pet Chance/') {
-                        newName = this.skillShorthand[this.simulator.petSkill] + name + this.selectedTimeShorthand;
+                        newName = this.skillShorthand[this.loot.petSkill] + name + this.selectedTimeShorthand;
                     } else if (this.plotTypes[i].isTime) {
                         newName = name + this.selectedTimeShorthand;
                     }
