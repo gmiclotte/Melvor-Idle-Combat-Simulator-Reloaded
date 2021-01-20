@@ -21,7 +21,6 @@
                 this.dungeonSimData = {};
                 this.slayerSimData = {};
                 this.slayerTaskMonsters = [];
-                this.timeMultiplier = 1;
 
                 // Pet Settings
                 this.petSkill = 'Attack';
@@ -431,13 +430,12 @@
             /**
              * Update all loot related statistics
              */
-            update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters, timeMultiplier) {
+            update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters) {
                 this.currentSim = currentSim;
                 this.monsterSimData = monsterSimData;
                 this.dungeonSimData = dungeonSimData;
                 this.slayerSimData = slayerSimData;
                 this.slayerTaskMonsters = slayerTaskMonsters;
-                this.timeMultiplier = timeMultiplier;
                 this.updateGPData();
                 this.updateHerbloreXP();
                 this.updateSignetChance();
@@ -691,7 +689,7 @@
                             simResult.petChance = 0;
                             return;
                         }
-                        const timePeriod = (this.timeMultiplier === -1) ? simResult.killTimeS : this.timeMultiplier;
+                        const timePeriod = (this.app.timeMultiplier === -1) ? simResult.killTimeS : this.app.timeMultiplier;
                         const petRolls = simResult.petRolls[this.petSkill] || simResult.petRolls.other;
                         simResult.petChance = 1 - petRolls.reduce((chanceToNotGet, petRoll) => {
                             return chanceToNotGet * Math.pow((1 - petRoll.speed * petSkillLevel / 25000000000), timePeriod * petRoll.rollsPerSecond);
@@ -704,7 +702,7 @@
                             dungeonResult.petChance = 0;
                             return;
                         }
-                        const timePeriod = (this.timeMultiplier === -1) ? dungeonResult.killTimeS : this.timeMultiplier;
+                        const timePeriod = (this.app.timeMultiplier === -1) ? dungeonResult.killTimeS : this.app.timeMultiplier;
                         dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterID) => {
                             const monsterResult = this.monsterSimData[monsterID];
                             const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;

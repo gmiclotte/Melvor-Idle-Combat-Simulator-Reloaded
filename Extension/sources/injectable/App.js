@@ -78,6 +78,7 @@
                 this.timeShorthand = ['kill', 's', 'm', 'h', 'd'];
                 this.selectedTimeUnit = this.timeOptions[1];
                 this.selectedTimeShorthand = this.timeShorthand[1];
+                this.timeMultiplier = 1;
                 this.timeMultipliers = [-1, 1, 60, 3600, 3600 * 24];
                 const makeEmptyItem = (img) => {
                     return {
@@ -2011,7 +2012,7 @@
              * @param {Event} event The change event for a dropdown
              */
             timeUnitDropdownOnChange(event) {
-                this.simulator.timeMultiplier = this.timeMultipliers[event.currentTarget.selectedIndex];
+                this.timeMultiplier = this.timeMultipliers[event.currentTarget.selectedIndex];
                 this.simulator.selectedPlotIsTime = this.plotTypes[this.plotter.plotID].isTime;
                 this.selectedTimeUnit = this.timeOptions[event.currentTarget.selectedIndex];
                 this.selectedTimeShorthand = this.timeShorthand[event.currentTarget.selectedIndex];
@@ -2254,7 +2255,7 @@
                         for (let i = 0; i < this.plotTypes.length; i++) {
                             const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.dungeonSimData[dungeonID][dataKey])
@@ -2269,7 +2270,7 @@
                         for (let i = 0; i < this.plotTypes.length; i++) {
                             const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.slayerSimData[taskID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.slayerSimData[taskID][dataKey])
@@ -2290,7 +2291,7 @@
                         for (let i = 0; i < this.plotTypes.length; i++) {
                             const dataKey = this.plotTypes[i].value;
                             const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.simulator.timeMultiplier : 1;
+                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
                             if (dataKey === 'petChance') dataMultiplier = 1;
                             outElem.textContent = updateInfo && !isNaN(this.simulator.monsterSimData[monsterID][dataKey])

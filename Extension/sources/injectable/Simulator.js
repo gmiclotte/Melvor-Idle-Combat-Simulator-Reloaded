@@ -272,7 +272,6 @@
                     virtualLevels: {},
                 };
                 // Options for time multiplier
-                this.timeMultiplier = 1;
                 this.selectedPlotIsTime = true;
                 // Data Export Settings
                 this.exportDataType = [];
@@ -1358,7 +1357,6 @@
                     this.dungeonSimData,
                     this.slayerSimData,
                     this.slayerTaskMonsters,
-                    this.timeMultiplier,
                 );
                 MICSR.log(`Elapsed Simulation Time: ${performance.now() - this.simStartTime}ms`);
             }
@@ -1566,9 +1564,9 @@
             getDataSet(keyValue) {
                 let dataMultiplier = 1;
                 if (this.selectedPlotIsTime) {
-                    dataMultiplier = this.timeMultiplier;
+                    dataMultiplier = this.parent.timeMultiplier;
                 }
-                let isKillTime = (this.timeMultiplier === -1 && this.selectedPlotIsTime);
+                let isKillTime = (this.parent.timeMultiplier === -1 && this.selectedPlotIsTime);
                 if (keyValue === 'petChance') {
                     isKillTime = false;
                     dataMultiplier = 1;
@@ -1655,12 +1653,12 @@
                             if (this.parent.plotTypes[i].value === 'signetChance') {
                                 exportString += '0';
                             } else {
-                                let dataMultiplier = this.parent.plotTypes[i].isTime ? this.timeMultiplier : 1;
+                                let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultiplier : 1;
                                 if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
                                 exportString += (data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
                             }
                         } else {
-                            let dataMultiplier = this.parent.plotTypes[i].isTime ? this.timeMultiplier : 1;
+                            let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultiplier : 1;
                             if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
                             exportString += (filter[entityID] && data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
                         }
