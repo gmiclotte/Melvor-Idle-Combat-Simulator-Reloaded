@@ -658,6 +658,10 @@
                 if (this.currentSim.isSlayerTask) {
                     petSkills.push('Slayer');
                 }
+                if (!this.currentSim.playerStats) {
+                    return;
+                }
+
                 const attackType = this.currentSim.playerStats.attackType;
                 switch (attackType) {
                     case CONSTANTS.attackType.Melee:
