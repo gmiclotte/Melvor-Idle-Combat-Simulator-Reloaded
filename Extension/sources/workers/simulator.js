@@ -1417,7 +1417,8 @@
         // stats depending on kills
         if (tooManyActions === 0) {
             // kill time
-            simResult.avgKillTime = totalTime / trials;
+            const successes = trials - playerStats.deaths;
+            simResult.avgKillTime = totalTime / successes;
             simResult.killTimeS = simResult.avgKillTime / 1000;
             simResult.killsPerSecond = 1 / simResult.killTimeS;
         } else {
