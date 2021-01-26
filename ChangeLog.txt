@@ -1,3 +1,9 @@
+v1.2.6
+    Fixes:
+    - Fix guardian amulet incorrectly resetting between kills
+    - Fix manual eating with no food equipped
+    - Fix stun and sleep damage multipliers not applying to multi-attacks
+
 v1.2.5
     Fixes:
     - Fix enemy DR not resetting
