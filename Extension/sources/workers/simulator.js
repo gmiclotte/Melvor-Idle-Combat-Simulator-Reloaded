@@ -1226,10 +1226,10 @@
 
     // stun, sleep and DR apply to fixed damage
     function applyDamageModifiers(damage, actor, target, isSpecial, special) {
-        if (isSpecial && !actor.isAttacking && target.isStunned) {
+        if (isSpecial && target.isStunned) {
             damage *= special.stunDamageMultiplier;
         }
-        if (isSpecial && !actor.isAttacking && target.isSleeping) {
+        if (isSpecial && target.isSleeping) {
             damage *= special.sleepDamageMultiplier;
         }
         let damageReduction = target.damageReduction + target.increasedDamageReduction;
