@@ -985,7 +985,7 @@
         if (target.isPlayer) {
             if (target.alive) {
                 autoEat(target, targetStats);
-                if (targetStats.autoEat.manual) {
+                if (targetStats.autoEat.manual && targetStats.foodHeal > 0) {
                     // TODO: use a more detailed manual eating simulation?
                     target.hitpoints = target.maxHitpoints;
                 }
