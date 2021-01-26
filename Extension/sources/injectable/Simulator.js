@@ -998,7 +998,7 @@
                         playerStats.avgHPRegen *= 2;
                     }
                     // Regeneration Potion
-                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen *  (1 + this.herbloreBonus.hpRegen / 100));
+                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.herbloreBonus.hpRegen / 100));
                     // Gold Ruby Ring
                     playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.equipmentStats.hpRegenBonus / 100));
                 }
