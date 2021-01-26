@@ -1337,7 +1337,10 @@
             player.hitpoints = playerStats.maxHitpoints;
         }
         player.damageReduction = playerStats.damageReduction;
-        player.guardianAmuletBelow = false;
+        if (playerStats.activeItems.guardianAmulet) {
+            player.guardianAmuletBelow = false;
+            updateGuardianAmuletEffect(player, playerStats);
+        }
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
