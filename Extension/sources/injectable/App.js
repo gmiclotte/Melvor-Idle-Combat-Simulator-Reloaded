@@ -56,7 +56,7 @@
                 addPlotOption('Food per', true, 'atePerSecond', 'Food/');
                 addPlotOption('HP Loss per ', true, 'hpPerSecond', 'HP Lost/');
                 // survivability
-                addPlotOption('Estimated Death Rate', false, 'deathRate', 'Estimated Death Rate');
+                addPlotOption('Estimated Death Rate', false, 'deathRate', 'Est. Death Rate');
                 addPlotOption('Highest Hit Taken', false, 'highestDamageTaken', 'Highest Hit Taken');
                 addPlotOption('Lowest Hitpoints', false, 'lowestHitpoints', 'Lowest Hitpoints');
                 // kill time
