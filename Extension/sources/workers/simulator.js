@@ -779,7 +779,7 @@
                 }
             }
             // confusion curse
-            if (enemy.isCursed && enemy.curse.type === 'Confusion') {
+            if (enemy.isCursed && enemy.curse.type === 'Confusion' && !enemy.isAttacking) {
                 dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
             }
             // status effects
