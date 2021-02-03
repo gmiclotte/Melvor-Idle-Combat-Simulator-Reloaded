@@ -28,9 +28,6 @@
 
     const setup = () => {
 
-        /** @type {MICSR.App} */
-        let melvorCombatSim;
-
         // Define the message listeners from the content script
         function onMessage(event) {
             // We only accept messages from ourselves
@@ -50,7 +47,7 @@
                         }
                         if (tryLoad) {
                             try {
-                                melvorCombatSim = new MICSR.App(event.data.urls);
+                                MICSR.melvorCombatSim = new MICSR.App(event.data.urls);
                                 if (wrongVersion) {
                                     MICSR.log(`Melvor Combat Sim ${MICSR.version} Loaded, but simulation results may be inaccurate.`);
                                 } else {
@@ -66,9 +63,9 @@
                         break;
                     case 'UNLOAD':
                         window.removeEventListener('message', onMessage);
-                        if (melvorCombatSim) {
-                            melvorCombatSim.destroy();
-                            melvorCombatSim = undefined;
+                        if (MICSR.melvorCombatSim) {
+                            MICSR.melvorCombatSim.destroy();
+                            MICSR.melvorCombatSim = undefined;
                         }
                         break;
                 }
