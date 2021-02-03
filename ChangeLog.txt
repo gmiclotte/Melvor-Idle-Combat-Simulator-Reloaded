@@ -1,3 +1,20 @@
+v1.2.7
+    Changes:
+    - Optimize healing simulation
+    - Improve death rate display
+    - Show N/A results if sim failed or disabled
+    - Add simulation export / import
+    - Add combination rune usage
+    - Add no-food highlight
+    - Add potion usage
+
+    Fixes:
+    - Fix confusion curse multi attack bug
+    - Fix Marahute ammo preservation
+    - Fix slayer task inspect bug
+    - Fix undefined mastery bug for non-cooking food
+
+
 v1.2.6
     Fixes:
     - Fix guardian amulet incorrectly resetting between kills
