@@ -412,6 +412,7 @@
                 containerDiv.style.cursor = 'pointer';
                 const newImage = document.createElement('img');
                 newImage.id = 'MCS Food Image';
+                newImage.style.border = '1px solid red';
                 newImage.src = this.media.emptyFood;
                 newImage.className = 'combat-food';
                 newImage.dataset.tippyContent = 'No Food';
@@ -470,8 +471,10 @@
                 const img = document.getElementById('MCS Food Image');
                 if (itemID === 0) {
                     img.src = 'assets/media/skills/combat/food_empty.svg';
+                    img.style.border = '1px solid red';
                 } else {
                     img.src = items[itemID].media;
+                    img.style.border = '';
                 }
                 img._tippy.setContent(this.getFoodTooltip(items[itemID]));
             }
@@ -1894,11 +1897,11 @@
                 navigator.clipboard.writeText(data).then(() => {
                 }, (error) => {
                     Swal.fire({
-                        title: "Clipboard API error!",
+                        title: 'Clipboard API error!',
                         html: `<h5 class="font-w600 text-combat-smoke mb-1">Manually copy the data below, e.g. with ctrl-A ctrl-C.</h5><textarea class="mcsLabel mb-1">${data}</textarea>`,
                         showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Bye",
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Bye',
                     });
                 });
             }
@@ -2108,9 +2111,9 @@
                         : 'N/A';
                 }
                 if (data.deathRate > 0) {
-                    document.getElementById("MCS deathRate Output").style.color = 'red';
+                    document.getElementById('MCS deathRate Output').style.color = 'red';
                 } else {
-                    document.getElementById("MCS deathRate Output").style.color = '';
+                    document.getElementById('MCS deathRate Output').style.color = '';
                 }
             }
 
