@@ -73,6 +73,7 @@
                     cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
                     cookingMastery: cookingMastery,
                     isHardcore: currentGamemode === 1,
+                    useCombinationRunes: useCombinationRunes,
                 }
 
                 // import settings
@@ -102,6 +103,7 @@
                     cookingPool: this.simulator.cookingPool,
                     cookingMastery: this.simulator.cookingMastery,
                     isHardcore: this.simulator.isHardcore,
+                    useCombinationRunes: this.simulator.useCombinationRunes,
                 }
             }
 
@@ -116,6 +118,7 @@
                 this.importPets(settings.petOwned);
                 this.importAutoEat(settings.autoEatTier, settings.foodSelected, settings.cookingPool, settings.cookingMastery);
                 this.importHardCore(settings.isHardcore);
+                this.importUseCombinationRunes(settings.useCombinationRunes);
             }
 
             update() {
@@ -285,6 +288,17 @@
                 } else {
                     this.simulator.isHardcore = false;
                     document.getElementById('MCS Hardcore Mode Radio No').checked = true;
+                }
+            }
+
+            importUseCombinationRunes(useCombinationRunes) {
+                // Update hardcore mode
+                if (useCombinationRunes) {
+                    this.simulator.useCombinationRunes = true;
+                    document.getElementById('MCS Use Combination Runes Radio Yes').checked = true;
+                } else {
+                    this.simulator.useCombinationRunes = false;
+                    document.getElementById('MCS Use Combination Runes Radio No').checked = true;
                 }
             }
         }

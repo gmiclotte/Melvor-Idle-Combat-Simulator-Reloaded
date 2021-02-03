@@ -607,7 +607,7 @@
                         card.container.style.display = 'none';
                     }
                 });
-                this.spellSelectCard.addRadio('Combination Runes', 25, 'combinationRunes', ['Yes', 'No'], [() => this.combinationRadioOnChange(true), () => this.combinationRadioOnChange(false)], 1);
+                this.spellSelectCard.addRadio('Use Combination Runes', 25, 'combinationRunes', ['Yes', 'No'], [() => this.combinationRadioOnChange(true), () => this.combinationRadioOnChange(false)], 1);
             }
 
             /**
@@ -1728,7 +1728,7 @@
              * @param {boolean} newState The new value for the option
              */
             combinationRadioOnChange(newState) {
-                this.simulator.combinationRunes = newState;
+                this.simulator.useCombinationRunes = newState;
             }
 
             /**

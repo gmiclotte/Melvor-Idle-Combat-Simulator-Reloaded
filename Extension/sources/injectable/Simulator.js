@@ -148,7 +148,7 @@
                 // Hardcore
                 this.isHardcore = false;
                 // combination runes
-                this.combinationRunes = false;
+                this.useCombinationRunes = false;
                 // Herblore Bonuses
                 this.potionSelected = false;
                 this.potionTier = 0;
@@ -1146,7 +1146,7 @@
              * @returns {array} The amount of runes it costs to use the spell
              */
             getRuneCostForSpell(spell, isAurora = false) {
-                const runesRequired = this.combinationRunes && spell.runesRequiredAlt ? spell.runesRequiredAlt : spell.runesRequired;
+                const runesRequired = this.useCombinationRunes && spell.runesRequiredAlt ? spell.runesRequiredAlt : spell.runesRequired;
                 return runesRequired.map(req => {
                     let qty = req.qty;
                     qty -= this.equipmentStats.runesProvidedByWeapon[req.id] || 0;
