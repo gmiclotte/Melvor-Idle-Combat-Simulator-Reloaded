@@ -2083,6 +2083,22 @@
                 this.plotter.updateBarData(this.simulator.getDataSet(this.plotter.plotType));
             }
 
+            setZoneInfoCard(title, media, data) {
+                document.getElementById('MCS Zone Info Title').textContent = title;
+                document.getElementById('MCS Info Image').src = media;
+                const updateInfo = data.simSuccess;
+                for (let i = 0; i < this.plotTypes.length; i++) {
+                    const dataKey = this.plotTypes[i].value;
+                    const outElem = document.getElementById(`MCS ${dataKey} Output`);
+                    let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
+                    if (dataMultiplier === -1) dataMultiplier = data.killTimeS;
+                    if (dataKey === 'petChance') dataMultiplier = 1;
+                    outElem.textContent = updateInfo && !isNaN(data[dataKey])
+                        ? MICSR.mcsFormatNum(data[dataKey] * dataMultiplier, 4)
+                        : 'N/A';
+                }
+            }
+
             /**
              * Updates the zone info card text fields
              */
@@ -2092,34 +2108,18 @@
                     this.infoPlaceholder.style.display = 'none';
                     if (!this.isViewingDungeon && this.barIsDungeon(this.selectedBar)) {
                         const dungeonID = this.barMonsterIDs[this.selectedBar];
-                        document.getElementById('MCS Zone Info Title').textContent = this.getDungeonName(dungeonID);
-                        document.getElementById('MCS Info Image').src = DUNGEONS[dungeonID].media;
-                        const updateInfo = this.simulator.dungeonSimData[dungeonID].simSuccess;
-                        for (let i = 0; i < this.plotTypes.length; i++) {
-                            const dataKey = this.plotTypes[i].value;
-                            const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
-                            if (dataMultiplier === -1) dataMultiplier = this.simulator.dungeonSimData[dungeonID].killTimeS;
-                            if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = updateInfo && !isNaN(this.simulator.dungeonSimData[dungeonID][dataKey])
-                                ? MICSR.mcsFormatNum(this.simulator.dungeonSimData[dungeonID][dataKey] * dataMultiplier, 4)
-                                : 'N/A';
-                        }
+                        this.setZoneInfoCard(
+                            this.getDungeonName(dungeonID),
+                            DUNGEONS[dungeonID].media,
+                            this.simulator.dungeonSimData[dungeonID],
+                        );
                     } else if (!this.isViewingDungeon && this.barIsTask(this.selectedBar)) {
                         const taskID = this.barMonsterIDs[this.selectedBar] - DUNGEONS.length;
-                        document.getElementById('MCS Zone Info Title').textContent = this.slayerTasks[taskID].display;
-                        document.getElementById('MCS Info Image').src = SKILLS[CONSTANTS.skill.Slayer].media;
-                        const updateInfo = this.simulator.slayerSimData[taskID].simSuccess;
-                        for (let i = 0; i < this.plotTypes.length; i++) {
-                            const dataKey = this.plotTypes[i].value;
-                            const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
-                            if (dataMultiplier === -1) dataMultiplier = this.simulator.slayerSimData[taskID].killTimeS;
-                            if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = updateInfo && !isNaN(this.simulator.slayerSimData[taskID][dataKey])
-                                ? MICSR.mcsFormatNum(this.simulator.slayerSimData[taskID][dataKey] * dataMultiplier, 4)
-                                : 'N/A';
-                        }
+                        this.setZoneInfoCard(
+                            this.slayerTasks[taskID].display,
+                            SKILLS[CONSTANTS.skill.Slayer].media,
+                            this.simulator.slayerSimData[taskID],
+                        );
                     } else {
                         let monsterID;
                         if (this.isViewingDungeon) {
@@ -2128,19 +2128,11 @@
                         } else {
                             monsterID = this.barMonsterIDs[this.selectedBar];
                         }
-                        document.getElementById('MCS Zone Info Title').textContent = this.getMonsterName(monsterID);
-                        document.getElementById('MCS Info Image').src = MONSTERS[monsterID].media;
-                        const updateInfo = this.simulator.monsterSimData[monsterID].simSuccess;
-                        for (let i = 0; i < this.plotTypes.length; i++) {
-                            const dataKey = this.plotTypes[i].value;
-                            const outElem = document.getElementById(`MCS ${dataKey} Output`);
-                            let dataMultiplier = (this.plotTypes[i].isTime) ? this.timeMultiplier : 1;
-                            if (dataMultiplier === -1) dataMultiplier = this.simulator.monsterSimData[monsterID].killTimeS;
-                            if (dataKey === 'petChance') dataMultiplier = 1;
-                            outElem.textContent = updateInfo && !isNaN(this.simulator.monsterSimData[monsterID][dataKey])
-                                ? MICSR.mcsFormatNum(this.simulator.monsterSimData[monsterID][dataKey] * dataMultiplier, 4)
-                                : 'N/A';
-                        }
+                        this.setZoneInfoCard(
+                            this.getMonsterName(monsterID),
+                            SMONSTERS[monsterID].media,
+                            this.simulator.monsterSimData[monsterID],
+                        );
                     }
                 } else {
                     document.getElementById('MCS Zone Info Title').textContent = 'Monster/Dungeon Info.';
