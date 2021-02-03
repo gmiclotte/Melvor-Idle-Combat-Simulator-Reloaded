@@ -103,6 +103,9 @@
             providesRune: {implemented: true},
             providesRuneQty: {implemented: true},
 
+            // slayer
+            slayerBonusXP: {implemented: true},
+
             ////////////////////
             // weapon effects //
             ////////////////////
@@ -165,7 +168,6 @@
             // slayer
             slayerAreaEffectNegationFlat: {implemented: true},
             slayerAreaEffectNegationPercent: {implemented: true},
-            slayerBonusXP: {implemented: true},
         };
 
         // requirements to wear gear
