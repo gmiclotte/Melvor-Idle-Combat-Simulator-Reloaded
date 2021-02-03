@@ -52,19 +52,77 @@
                 const cookingMastery = this.simulator.foodSelected && foodMastery && foodMastery[0] === CONSTANTS.skill.Cooking
                     && exp.xp_to_level(MASTERY[CONSTANTS.skill.Cooking].xp[foodMastery[1]]) > 99;
 
-                // import settings
-                this.importEquipment(equipmentSets[setID].equipment);
-                this.importLevels(levels);
-                this.importStyle(selectedAttackStyle[0], selectedAttackStyle[1] - 3, selectedAttackStyle[2] - 6);
-                this.importSpells(isSpellAncient, selectedAncient, selectedSpell, selectedCurse, activeAurora, skillLevel[CONSTANTS.skill.Magic]);
-                this.importPrayers(activePrayer);
-                this.importPotion(potionID, potionTier);
-                this.importPets(petUnlocked);
-                this.importAutoEat(currentAutoEat - 1, items[equippedFood[currentCombatFood].itemID], getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95, cookingMastery);
-                this.importHardCore(currentGamemode === 1);
+                // create settings object
+                const settings = {
+                    equipment: equipmentSets[setID].equipment,
+                    levels: levels,
+                    meleeStyle: selectedAttackStyle[0],
+                    rangedStyle: selectedAttackStyle[1] - 3,
+                    magicStyle: selectedAttackStyle[2] - 6,
+                    isAncient: isSpellAncient,
+                    ancient: selectedAncient,
+                    spell: selectedSpell,
+                    curse: selectedCurse,
+                    aurora: activeAurora,
+                    prayerSelected: activePrayer,
+                    potionID: potionID,
+                    potionTier: potionTier,
+                    petOwned: petUnlocked,
+                    autoEatTier: currentAutoEat - 1,
+                    foodSelected: equippedFood[currentCombatFood].itemID,
+                    cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
+                    cookingMastery: cookingMastery,
+                    isHardcore: currentGamemode === 1,
+                }
 
+                // import settings
+                this.importSettings(settings);
+                // update app and simulator objects
+                this.update();
+            }
+
+            exportSettings() {
+                return {
+                    equipment: this.app.equipmentSelected,
+                    levels: this.simulator.virtualLevels,
+                    meleeStyle: this.simulator.attackStyle.Melee,
+                    rangedStyle: this.simulator.attackStyle.Ranged,
+                    magicStyle: this.simulator.attackStyle.Magic,
+                    isAncient: this.simulator.spells.ancient.isSelected,
+                    ancient: this.simulator.spells.ancient.selectedID,
+                    spell: this.simulator.spells.standard.selectedID,
+                    curse: this.simulator.spells.curse.selectedID,
+                    aurora: this.simulator.spells.aurora.selectedID,
+                    prayerSelected: this.simulator.prayerSelected,
+                    potionID: this.simulator.potionID,
+                    potionTier: this.simulator.potionTier,
+                    petOwned: this.simulator.petOwned,
+                    autoEatTier: this.simulator.autoEatTier,
+                    foodSelected: this.simulator.foodSelected,
+                    cookingPool: this.simulator.cookingPool,
+                    cookingMastery: this.simulator.cookingMastery,
+                    isHardcore: this.simulator.isHardcore,
+                }
+            }
+
+            importSettings(settings) {
+                // import settings
+                this.importEquipment(settings.equipment);
+                this.importLevels(settings.levels);
+                this.importStyle(settings.meleeStyle, settings.rangedStyle, settings.magicStyle);
+                this.importSpells(settings.isAncient, settings.ancient, settings.spell, settings.curse, settings.aurora);
+                this.importPrayers(settings.prayerSelected);
+                this.importPotion(settings.potionID, settings.potionTier);
+                this.importPets(settings.petOwned);
+                this.importAutoEat(settings.autoEatTier, settings.foodSelected, settings.cookingPool, settings.cookingMastery);
+                this.importHardCore(settings.isHardcore);
+            }
+
+            update() {
                 // update and compute values
-                this.app.updatePrayerOptions(skillLevel[CONSTANTS.skill.Prayer]);
+                this.app.updateSpellOptions();
+                this.app.checkForElisAss();
+                this.app.updatePrayerOptions();
                 this.simulator.updateEquipmentStats();
                 this.app.updateEquipmentStats();
                 this.simulator.computePotionBonus();
@@ -75,7 +133,7 @@
 
             importEquipment(equipment) {
                 this.app.equipmentSlotKeys.forEach((key, i) => {
-                    const itemID = equipment[CONSTANTS.equipmentSlot[key]];
+                    const itemID = equipment[i];
                     this.app.equipmentSelected[i] = itemID;
                     this.app.setEquipmentImage(i, itemID);
                 });
@@ -100,7 +158,7 @@
                 document.getElementById('MCS Magic Style Dropdown').selectedIndex = magicStyle;
             }
 
-            importSpells(isAncient, ancient, spell, curse, aurora, magicLevel) {
+            importSpells(isAncient, ancient, spell, curse, aurora) {
                 // Set all active spell UI to be disabled
                 Object.keys(this.simulator.spells).forEach((spellType) => {
                     const spellOpts = this.simulator.spells[spellType];
@@ -113,20 +171,20 @@
                     this.simulator.spells.ancient.isSelected = true;
                     this.simulator.spells.ancient.selectedID = ancient;
                     this.simulator.spells.standard.isSelected = false;
-                    this.simulator.spells.standard.selectedID = -1;
+                    this.simulator.spells.standard.selectedID = null;
                     this.simulator.spells.curse.isSelected = false;
-                    this.simulator.spells.curse.selectedID = -1;
+                    this.simulator.spells.curse.selectedID = null;
                 } else {
                     this.simulator.spells.standard.isSelected = true;
                     this.simulator.spells.standard.selectedID = spell;
                     this.simulator.spells.ancient.isSelected = false;
-                    this.simulator.spells.ancient.selectedID = -1;
+                    this.simulator.spells.ancient.selectedID = null;
                     if (curse !== null) {
                         this.simulator.spells.curse.isSelected = true;
                         this.simulator.spells.curse.selectedID = curse;
                     } else {
                         this.simulator.spells.curse.isSelected = false;
-                        this.simulator.spells.curse.selectedID = -1;
+                        this.simulator.spells.curse.selectedID = null;
                     }
                 }
                 if (aurora !== null) {
@@ -134,7 +192,7 @@
                     this.simulator.spells.aurora.selectedID = aurora;
                 } else {
                     this.simulator.spells.aurora.isSelected = false;
-                    this.simulator.spells.aurora.selectedID = -1;
+                    this.simulator.spells.aurora.selectedID = null;
                 }
                 // Update spell UI
                 Object.values(this.simulator.spells).forEach((spellOpts, i) => {
@@ -143,8 +201,6 @@
                         this.app.spellTabOnClick(i);
                     }
                 });
-                this.app.updateSpellOptions(magicLevel);
-                this.app.checkForElisAss();
             }
 
             importPrayers(prayerSelected) {

@@ -54,17 +54,17 @@
                     curse: {
                         array: CURSES,
                         isSelected: false,
-                        selectedID: -1,
+                        selectedID: null,
                     },
                     aurora: {
                         array: AURORAS,
                         isSelected: false,
-                        selectedID: -1,
+                        selectedID: null,
                     },
                     ancient: {
                         array: ANCIENT,
                         isSelected: false,
-                        selectedID: -1,
+                        selectedID: null,
                     },
                 };
                 // Pet Selection
@@ -811,36 +811,6 @@
                 // Start simulation workers
                 document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
                 this.initializeSimulationJobs();
-            }
-
-            /*
-             * Export currentsim variables
-             */
-            exportCurrentSim() {
-                // configure current sim object
-                this.setupCurrentSim();
-                // configure spellSelected object
-                const spellSelected = {};
-                Object.getOwnPropertyNames(this.spells).forEach(x => {
-                    spellSelected[x] = {
-                        isSelected: this.spells[x].isSelected,
-                        selectedID: this.spells[x].selectedID,
-                    }
-                });
-                // configure the potionSelected object
-                const potionSelected = {
-                    potionSelected: this.potionSelected,
-                    potionID: this.potionID,
-                    potionTier: this.potionTier,
-                };
-                // return the settings
-                return {
-                    currentSim: this.currentSim,
-                    spellSelected: spellSelected,
-                    prayerSelected: this.prayerSelected,
-                    potionSelected: potionSelected,
-                    petSelected: this.petOwned,
-                };
             }
 
             getFoodHealAmt() {

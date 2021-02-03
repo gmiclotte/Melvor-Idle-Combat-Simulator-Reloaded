@@ -351,8 +351,8 @@
                 this.setTabIDToSelected(this.mainTabIDs[0]);
                 this.plotter.petSkillDropdown.style.display = 'none';
                 document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
-                this.updateSpellOptions(1);
-                this.updatePrayerOptions(1);
+                this.updateSpellOptions();
+                this.updatePrayerOptions();
                 // Set up spells
                 const standardOpts = this.simulator.spells.standard;
                 this.selectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
@@ -430,7 +430,7 @@
                         return item.media;
                     });
                     const buttonIds = menuItems.map((item) => this.getItemName(item.itemID));
-                    const buttonCallbacks = menuItems.map((item) => () => this.equipFood(item));
+                    const buttonCallbacks = menuItems.map((item) => () => this.equipFood(item.itemID));
                     const tooltips = menuItems.map((item) => this.getFoodTooltip(item));
                     equipmentSelectCard.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, '100%');
                     return foodSelectPopup;
@@ -464,15 +464,15 @@
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
             }
 
-            equipFood(item) {
-                this.simulator.foodSelected = item.itemID;
+            equipFood(itemID) {
+                this.simulator.foodSelected = itemID;
                 const img = document.getElementById('MCS Food Image');
-                if (item.itemID === 0) {
+                if (itemID === 0) {
                     img.src = 'assets/media/skills/combat/food_empty.svg';
                 } else {
-                    img.src = item.media;
+                    img.src = items[itemID].media;
                 }
-                img._tippy.setContent(this.getFoodTooltip(item));
+                img._tippy.setContent(this.getFoodTooltip(items[itemID]));
             }
 
             getFoodTooltip(item) {
@@ -852,6 +852,15 @@
                 this.simOptionsCard.addSectionTitle('Export');
                 this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());
                 this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
+                this.simOptionsCard.addTextInput('Settings JSON:', '', (event) => this.importedSettings = JSON.parse(event.currentTarget.value));
+                this.simOptionsCard.addButton('Import Settings', () => {
+                    if(!this.importedSettings) {
+                        MICSR.log('No settings to import.');
+                        return;
+                    }
+                    this.import.importSettings(this.importedSettings);
+                    this.import.update();
+                });
                 this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
                 // Export Options Card
                 this.createExportOptionsCard();
@@ -1394,11 +1403,11 @@
                     this.simulator.virtualLevels[skillName] = newLevel;
                     // Update Spell and Prayer Button UIS, and deselect things if they become invalid
                     if (skillName === 'Magic') {
-                        this.updateSpellOptions(newLevel);
+                        this.updateSpellOptions();
                         this.checkForElisAss();
                     }
                     if (skillName === 'Prayer') {
-                        this.updatePrayerOptions(newLevel);
+                        this.updatePrayerOptions();
                     }
                 }
                 this.simulator.updateCombatStats();
@@ -1658,8 +1667,8 @@
             }
 
             exportSettingButtonOnClick() {
-                const currentSim = this.simulator.exportCurrentSim();
-                const data = JSON.stringify(currentSim, null, 1);
+                const settings = this.import.exportSettings();
+                const data = JSON.stringify(settings, null, 1);
                 this.popExport(data);
             }
 
@@ -2172,7 +2181,8 @@
              * Updates the list of options in the spell menus, based on if the player can use it
              * @param {number} magicLevel The magic level the player has
              */
-            updateSpellOptions(magicLevel) {
+            updateSpellOptions() {
+                const magicLevel = this.simulator.virtualLevels.Magic || 1;
                 const setSpellsPerLevel = (spell, index, type) => {
                     const spellOption = this.simulator.spells[type];
                     if (spell.magicLevelRequired > magicLevel) {
@@ -2223,9 +2233,9 @@
 
             /**
              * Updates the prayers that display in the prayer selection card, based on if the player can use it
-             * @param {number} prayerLevel The prayer level the player has
              */
-            updatePrayerOptions(prayerLevel) {
+            updatePrayerOptions() {
+                const prayerLevel = this.simulator.virtualLevels.Prayer || 1;
                 PRAYER.forEach((prayer, i) => {
                     if (prayer.prayerLevel > prayerLevel) {
                         document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
