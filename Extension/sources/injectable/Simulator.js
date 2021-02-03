@@ -1267,6 +1267,8 @@
                     let totalAttacksTaken = 0;
                     let totalAmmoUsed = 0;
                     let totalRunesUsed = 0;
+                    let totalCombinationRunesUsed = 0;
+                    let totalPotionsUsed = 0;
                     data.deathRate = 0;
                     data.highestDamageTaken = 0;
                     data.lowestHitpoints = Infinity;
@@ -1288,6 +1290,8 @@
                         totalAttacksTaken += this.monsterSimData[monsterID].attacksTakenPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalAmmoUsed += this.monsterSimData[monsterID].ammoUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalCombinationRunesUsed += this.monsterSimData[monsterID].combinationRunesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalPotionsUsed += this.monsterSimData[monsterID].potionsUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totTime += this.monsterSimData[monsterID].avgKillTime;
                         data.deathRate = 1 - (1 - data.deathRate) * (1 - this.monsterSimData[monsterID].deathRate);
                         data.highestDamageTaken = Math.max(data.highestDamageTaken, this.monsterSimData[monsterID].highestDamageTaken);
@@ -1312,6 +1316,8 @@
                     data.attacksMadePerSecond = totalAttacksMade / dungeonTime;
                     data.ammoUsedPerSecond = totalAmmoUsed / dungeonTime;
                     data.runesUsedPerSecond = totalRunesUsed / dungeonTime;
+                    data.combinationRunesUsedPerSecond = totalCombinationRunesUsed / dungeonTime;
+                    data.potionsUsedPerSecond = totalPotionsUsed / dungeonTime;
                     data.atePerSecond = totalAte / dungeonTime;
                     data.simulationTime = totalSimTime;
                 } else {
@@ -1331,8 +1337,7 @@
                 });
             }
 
-            /** Performs all data analysis post queue completion */
-            performPostSimAnalysis() {
+            computeAllRuneUsage() {
                 // compute rune usage
                 const runeCosts = this.currentSim.playerStats.runeCosts;
                 const preservation = this.currentSim.playerStats.runePreservation;
@@ -1345,6 +1350,36 @@
                     data.runesUsedPerSecond = Object.values(runes).reduce((a, b) => a + b);
                     data.combinationRunesUsedPerSecond = Object.values(combinationRunes).reduce((a, b) => a + b, 0);
                 }
+            }
+
+            computePotionUsage() {
+                for (let data of this.monsterSimData) {
+                    data.potionsUsedPerSecond = 0;
+                }
+                if (!this.potionSelected) {
+                    return;
+                }
+                const potionCharges = items[herbloreItemData[this.potionID].itemID[this.potionTier]].potionCharges;
+                for (let data of this.monsterSimData) {
+                    if (this.potionID === 5) {
+                        // regen potion
+                        data.potionsUsedPerSecond = 0.1 / potionCharges;
+                    } else if (this.potionID === 6) {
+                        // damage reduction potion
+                        data.potionsUsedPerSecond = data.attacksTakenPerSecond / potionCharges;
+                    } else if (this.potionID === 23) {
+                        // lucky herb potion
+                        data.potionsUsedPerSecond = data.killsPerSecond / potionCharges;
+                    } else {
+                        data.potionsUsedPerSecond = data.attacksTakenPerSecond / potionCharges;
+                    }
+                }
+            }
+
+            /** Performs all data analysis post queue completion */
+            performPostSimAnalysis() {
+                this.computeAllRuneUsage();
+                this.computePotionUsage();
                 // Perform calculation of dungeon stats
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     this.computeAverageSimData(this.dungeonSimFilter[dungeonId], this.dungeonSimData[dungeonId], DUNGEONS[dungeonId].monsters);
