@@ -2107,6 +2107,11 @@
                         ? MICSR.mcsFormatNum(data[dataKey] * dataMultiplier, 4)
                         : 'N/A';
                 }
+                if (data.deathRate > 0) {
+                    document.getElementById("MCS deathRate Output").style.color = 'red';
+                } else {
+                    document.getElementById("MCS deathRate Output").style.color = '';
+                }
             }
 
             /**
