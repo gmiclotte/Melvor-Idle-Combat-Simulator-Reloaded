@@ -984,6 +984,10 @@
                     playerStats.globalXPMult += 0.01;
                 }
 
+                // ammo preservation
+                if (this.petOwned[16]) {
+                    playerStats.ammoPreservation += 5;
+                }
                 // Other Bonuses
                 if (playerStats.activeItems.goldEmeraldRing) {
                     playerStats.xpBonus = 0.07;
