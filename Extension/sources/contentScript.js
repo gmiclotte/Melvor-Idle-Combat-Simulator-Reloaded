@@ -70,6 +70,7 @@ function injectScripts() {
         'statNames',
         // class files
         'Card',
+        'Import',
         'Loot',
         'Plotter',
         'Simulator',

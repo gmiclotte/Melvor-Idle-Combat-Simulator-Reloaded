@@ -6,6 +6,7 @@
         'util',
         'statNames',
         'Card',
+        'Import',
         'Plotter',
         'Loot',
         'Simulator',
@@ -178,6 +179,8 @@
                 };
                 // Simulation Object
                 this.simulator = new MICSR.Simulator(this, urls.simulationWorker);
+                // Import Object
+                this.import = new MICSR.Import(this, this.simulator);
                 // Loot Object
                 this.loot = new MICSR.Loot(this, this.simulator);
                 // Temporary GP/s settings variable
@@ -457,7 +460,7 @@
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
-                this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], importSetCCContainer);
+                this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.import.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], importSetCCContainer);
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
             }
 
@@ -1410,175 +1413,6 @@
             styleDropdownOnChange(event, combatType) {
                 const styleID = parseInt(event.currentTarget.selectedOptions[0].value);
                 this.simulator.attackStyle[combatType] = styleID;
-                this.simulator.updateCombatStats();
-                this.updateCombatStats();
-            }
-
-            /**
-             * Callback for when the import button is clicked
-             * @param {number} setID Index of equipmentSets from 0-2 to import
-             */
-            importButtonOnClick(setID) {
-                const setToImport = equipmentSets[setID].equipment;
-                for (let i = 0; i < this.equipmentSlotKeys.length; i++) {
-                    const itemID = setToImport[CONSTANTS.equipmentSlot[this.equipmentSlotKeys[i]]];
-                    this.equipmentSelected[i] = itemID;
-                    this.setEquipmentImage(i, itemID);
-                }
-                this.updateStyleDropdowns();
-                // Update levels from in game levels
-                this.skillKeys.forEach((key) => {
-                    const skillId = CONSTANTS.skill[key];
-                    const virtualLevel = Math.max(skillLevel[skillId], exp.xp_to_level(skillXP[skillId]) - 1);
-                    document.getElementById(`MCS ${key} Input`).value = virtualLevel;
-                    this.simulator.playerLevels[key] = Math.min(virtualLevel, 99);
-                    this.simulator.virtualLevels[key] = virtualLevel;
-                });
-                // Set attack styles for each combat type:
-                const meleeStyle = selectedAttackStyle[0];
-                this.simulator.attackStyle.Melee = meleeStyle;
-                document.getElementById('MCS Melee Style Dropdown').selectedIndex = meleeStyle;
-                const rangedStyle = selectedAttackStyle[1];
-                this.simulator.attackStyle.Ranged = rangedStyle - 3;
-                document.getElementById('MCS Ranged Style Dropdown').selectedIndex = rangedStyle - 3;
-                const magicStyle = selectedAttackStyle[2];
-                this.simulator.attackStyle.Magic = magicStyle - 6;
-                document.getElementById('MCS Magic Style Dropdown').selectedIndex = magicStyle - 6;
-                // Update spells
-                // Set all active spell UI to be disabled
-                Object.keys(this.simulator.spells).forEach((spellType) => {
-                    const spellOpts = this.simulator.spells[spellType];
-                    if (spellOpts.isSelected) {
-                        this.unselectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
-                    }
-                });
-                if (isSpellAncient) {
-                    this.simulator.spells.ancient.isSelected = true;
-                    this.simulator.spells.ancient.selectedID = selectedAncient;
-                    this.simulator.spells.standard.isSelected = false;
-                    this.simulator.spells.standard.selectedID = -1;
-                    this.simulator.spells.curse.isSelected = false;
-                    this.simulator.spells.curse.selectedID = -1;
-                } else {
-                    this.simulator.spells.standard.isSelected = true;
-                    this.simulator.spells.standard.selectedID = selectedSpell;
-                    this.simulator.spells.ancient.isSelected = false;
-                    this.simulator.spells.ancient.selectedID = -1;
-                    if (selectedCurse !== null) {
-                        this.simulator.spells.curse.isSelected = true;
-                        this.simulator.spells.curse.selectedID = selectedCurse;
-                    } else {
-                        this.simulator.spells.curse.isSelected = false;
-                        this.simulator.spells.curse.selectedID = -1;
-                    }
-                }
-                if (activeAurora !== null) {
-                    this.simulator.spells.aurora.isSelected = true;
-                    this.simulator.spells.aurora.selectedID = activeAurora;
-                } else {
-                    this.simulator.spells.aurora.isSelected = false;
-                    this.simulator.spells.aurora.selectedID = -1;
-                }
-                // Update spell UI
-                Object.values(this.simulator.spells).forEach((spellOpts, i) => {
-                    if (spellOpts.isSelected) {
-                        this.selectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
-                        this.spellTabOnClick(i);
-                    }
-                });
-                this.updateSpellOptions(skillLevel[CONSTANTS.skill.Magic]);
-                this.checkForElisAss();
-                // Update prayers
-                this.simulator.activePrayers = 0;
-                for (let i = 0; i < PRAYER.length; i++) {
-                    const prayButton = document.getElementById(`MCS ${this.getPrayerName(i)} Button`);
-                    if (activePrayer[i]) {
-                        this.selectButton(prayButton);
-                        this.simulator.prayerSelected[i] = true;
-                        this.simulator.activePrayers++;
-                    } else {
-                        this.unselectButton(prayButton);
-                        this.simulator.prayerSelected[i] = false;
-                    }
-                }
-                // Import Potion
-                let potionID = -1;
-                let potionTier = -1;
-                if (herbloreBonuses[13].itemID !== 0) {
-                    const itemID = herbloreBonuses[13].itemID;
-                    // Get tier and potionID
-                    for (let i = 0; i < herbloreItemData.length; i++) {
-                        if (herbloreItemData[i].category === 0) {
-                            for (let j = 0; j < herbloreItemData[i].itemID.length; j++) {
-                                if (herbloreItemData[i].itemID[j] === itemID) {
-                                    potionID = i;
-                                    potionTier = j;
-                                }
-                            }
-                        }
-                    }
-                }
-                // Deselect potion if selected
-                if (this.simulator.potionSelected) {
-                    this.unselectButton(document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`));
-                    this.simulator.potionSelected = false;
-                    this.simulator.potionID = -1;
-                }
-                // Select new potion if applicable
-                if (potionID !== -1) {
-                    this.simulator.potionSelected = true;
-                    this.simulator.potionID = potionID;
-                    this.selectButton(document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`));
-                }
-                // Set potion tier if applicable
-                if (potionTier !== -1) {
-                    this.simulator.potionTier = potionTier;
-                    this.updatePotionTier(potionTier);
-                    // Set dropdown to correct option
-                    document.getElementById('MCS Potion Tier Dropdown').selectedIndex = potionTier;
-                }
-                // Import PETS
-                petUnlocked.forEach((owned, petID) => {
-                    this.simulator.petOwned[petID] = owned;
-                    if (owned && this.combatPetsIds.includes(petID)) {
-                        this.selectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
-                    }
-                    if (petID === 4 && owned) document.getElementById('MCS Rock').style.display = '';
-                });
-                // Import Food Settings
-                this.simulator.autoEatTier = currentAutoEat - 1;
-                document.getElementById('MCS Auto Eat Tier Dropdown').selectedIndex = currentAutoEat;
-                this.equipFood(items[equippedFood[currentCombatFood].itemID]);
-                if (getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95) {
-                    this.simulator.cookingPool = true;
-                    document.getElementById('MCS 95% Pool: +10% Radio Yes').checked = true;
-                } else {
-                    this.simulator.cookingPool = false;
-                    document.getElementById('MCS 95% Pool: +10% Radio No').checked = true;
-                }
-                const foodMastery = items[this.simulator.foodSelected].masteryID;
-                if (this.simulator.foodSelected && foodMastery
-                    && foodMastery[0] === CONSTANTS.skill.Cooking
-                    && exp.xp_to_level(MASTERY[CONSTANTS.skill.Cooking].xp[foodMastery[1]]) > 99) {
-                    this.simulator.cookingMastery = true;
-                    document.getElementById('MCS 99 Mastery: +20% Radio Yes').checked = true;
-                } else {
-                    this.simulator.cookingMastery = false;
-                    document.getElementById('MCS 99 Mastery: +20% Radio No').checked = true;
-                }
-                // Update hardcore mode
-                if (currentGamemode === 1) {
-                    this.simulator.isHardcore = true;
-                    document.getElementById('MCS Hardcore Mode Radio Yes').checked = true;
-                } else {
-                    this.simulator.isHardcore = false;
-                    document.getElementById('MCS Hardcore Mode Radio No').checked = true;
-                }
-                this.updatePrayerOptions(skillLevel[CONSTANTS.skill.Prayer]);
-                this.simulator.updateEquipmentStats();
-                this.updateEquipmentStats();
-                this.simulator.computePotionBonus();
-                this.simulator.computePrayerBonus();
                 this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
