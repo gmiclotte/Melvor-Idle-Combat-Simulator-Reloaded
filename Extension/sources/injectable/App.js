@@ -2130,7 +2130,7 @@
                         }
                         this.setZoneInfoCard(
                             this.getMonsterName(monsterID),
-                            SMONSTERS[monsterID].media,
+                            MONSTERS[monsterID].media,
                             this.simulator.monsterSimData[monsterID],
                         );
                     }
