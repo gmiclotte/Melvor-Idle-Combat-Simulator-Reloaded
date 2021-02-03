@@ -321,8 +321,10 @@
                 for (let i = 0; i < numData; i++) {
                     const dataIndex = numData - i - 1;
                     const barIndex = numBars - i - 1;
+                    let tooltipText = MICSR.mcsFormatNum(barData[dataIndex], 4);
                     if (isNaN(barData[dataIndex]) || !isFinite(barData[dataIndex])) {
                         this.bars[barIndex].style.height = `0%`;
+                        tooltipText = 'N/A';
                     } else {
                         this.bars[barIndex].style.height = `${barData[dataIndex] / divMax * 100}%`;
                     }
@@ -341,7 +343,7 @@
                             barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
                         }
                     }
-                    this.bars[barIndex]._tippy.setContent(`<div class="text-center">${barName}<br><span class="text-info">${MICSR.mcsFormatNum(barData[dataIndex], 4)}</span></div>`);
+                    this.bars[barIndex]._tippy.setContent(`<div class="text-center">${barName}<br><span class="text-info">${tooltipText}</span></div>`);
                 }
                 for (let i = 0; i < 20; i++) {
                     if (i < (Ndivs - 1)) {

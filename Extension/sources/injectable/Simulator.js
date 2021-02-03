@@ -1551,29 +1551,29 @@
                     combatAreas.forEach((area) => {
                         area.monsters.forEach((monsterID) => {
                             if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
-                            dataSet.push((this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
+                            dataSet.push((this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : NaN);
                         });
                     });
                     // Wandering Bard
                     const bardID = 139;
                     if (isKillTime) dataMultiplier = this.monsterSimData[bardID].killTimeS;
-                    dataSet.push((this.monsterSimFilter[bardID] && this.monsterSimData[bardID].simSuccess) ? this.monsterSimData[bardID][keyValue] * dataMultiplier : 0);
+                    dataSet.push((this.monsterSimFilter[bardID] && this.monsterSimData[bardID].simSuccess) ? this.monsterSimData[bardID][keyValue] * dataMultiplier : NaN);
                     // Compile data from monsters in slayer zones
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach((monsterID) => {
                             if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
-                            dataSet.push((this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
+                            dataSet.push((this.monsterSimFilter[monsterID] && this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : NaN);
                         });
                     });
                     // Perform simulation of monsters in dungeons
                     for (let i = 0; i < DUNGEONS.length; i++) {
                         if (isKillTime) dataMultiplier = this.dungeonSimData[i].killTimeS;
-                        dataSet.push((this.dungeonSimFilter[i] && this.dungeonSimData[i].simSuccess) ? this.dungeonSimData[i][keyValue] * dataMultiplier : 0);
+                        dataSet.push((this.dungeonSimFilter[i] && this.dungeonSimData[i].simSuccess) ? this.dungeonSimData[i][keyValue] * dataMultiplier : NaN);
                     }
                     // Perform simulation of monsters in slayer tasks
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
                         if (isKillTime) dataMultiplier = this.slayerSimData[i].killTimeS;
-                        dataSet.push((this.slayerSimFilter[i] && this.slayerSimData[i].simSuccess) ? this.slayerSimData[i][keyValue] * dataMultiplier : 0);
+                        dataSet.push((this.slayerSimFilter[i] && this.slayerSimData[i].simSuccess) ? this.slayerSimData[i][keyValue] * dataMultiplier : NaN);
                     }
                 } else if (this.parent.viewedDungeonID < DUNGEONS.length) {
                     // dungeons
@@ -1582,14 +1582,14 @@
                     DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
                         if (!isSignet) {
                             if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
-                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
+                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : NaN);
                         } else {
                             dataSet.push(0);
                         }
                     });
                     if (isSignet) {
                         const bossId = DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1];
-                        dataSet[dataSet.length - 1] = (this.monsterSimData[bossId].simSuccess) ? this.monsterSimData[bossId][keyValue] * dataMultiplier : 0;
+                        dataSet[dataSet.length - 1] = (this.monsterSimData[bossId].simSuccess) ? this.monsterSimData[bossId][keyValue] * dataMultiplier : NaN;
                     }
                 } else {
                     // slayer tasks
@@ -1598,7 +1598,7 @@
                     this.slayerTaskMonsters[taskID].forEach(monsterID => {
                         if (!isSignet) {
                             if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
-                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : 0);
+                            dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : NaN);
                         } else {
                             dataSet.push(0);
                         }
