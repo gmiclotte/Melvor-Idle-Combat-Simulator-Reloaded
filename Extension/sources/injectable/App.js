@@ -854,7 +854,7 @@
                 this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
                 this.simOptionsCard.addTextInput('Settings JSON:', '', (event) => this.importedSettings = JSON.parse(event.currentTarget.value));
                 this.simOptionsCard.addButton('Import Settings', () => {
-                    if(!this.importedSettings) {
+                    if (!this.importedSettings) {
                         MICSR.log('No settings to import.');
                         return;
                     }

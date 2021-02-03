@@ -1006,7 +1006,7 @@
         if (player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow) {
             player.increasedDamageReduction += 5;
             player.guardianAmuletBelow = true;
-        } else if (player.hitpoints >= player.maxHitpoints / 2  && player.guardianAmuletBelow) {
+        } else if (player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow) {
             player.increasedDamageReduction -= 5;
             player.guardianAmuletBelow = false;
         }
