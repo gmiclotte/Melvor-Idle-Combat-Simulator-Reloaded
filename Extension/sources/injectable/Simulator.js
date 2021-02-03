@@ -1347,7 +1347,7 @@
                     this.computeRuneUsage(runes, combinationRunes, runeCosts.spell, data.spellCastsPerSecond, preservation);
                     this.computeRuneUsage(runes, combinationRunes, runeCosts.aurora, data.spellCastsPerSecond, preservation);
                     this.computeRuneUsage(runes, combinationRunes, runeCosts.curse, data.curseCastsPerSecond, preservation);
-                    data.runesUsedPerSecond = Object.values(runes).reduce((a, b) => a + b);
+                    data.runesUsedPerSecond = Object.values(runes).reduce((a, b) => a + b, 0);
                     data.combinationRunesUsedPerSecond = Object.values(combinationRunes).reduce((a, b) => a + b, 0);
                 }
             }
