@@ -147,6 +147,8 @@
                 this.isSlayerTask = false;
                 // Hardcore
                 this.isHardcore = false;
+                // combination runes
+                this.combinationRunes = false;
                 // Herblore Bonuses
                 this.potionSelected = false;
                 this.potionTier = 0;
@@ -879,9 +881,9 @@
                     curseID: -1,
                     curseData: {},
                     runeCosts: {
-                        spell: 0,
-                        curse: 0,
-                        aurora: 0,
+                        spell: [],
+                        curse: [],
+                        aurora: [],
                     },
                     // area effects
                     slayerAreaEffectNegationPercent: this.equipmentStats.slayerAreaEffectNegationPercent,
@@ -1141,11 +1143,19 @@
              * Returns the combined amount of runes it costs to use a spell after discounts from equipment
              * @param {Spell} spell The spell to get the rune cost for
              * @param {boolean} [isAurora=false] If the spell is an aurora
-             * @returns {number} The amount of runes it costs to use the spell
+             * @returns {array} The amount of runes it costs to use the spell
              */
             getRuneCostForSpell(spell, isAurora = false) {
-                return spell.runesRequired.map((req) => Math.max(req.qty - (this.equipmentStats.runesProvidedByWeapon[req.id] || 0) - (isAurora ? (this.equipmentStats.runesProvidedByShield[req.id] || 0) : 0), 0))
-                    .reduce((a, b) => a + b, 0);
+                const runesRequired = this.combinationRunes && spell.runesRequiredAlt ? spell.runesRequiredAlt : spell.runesRequired;
+                return runesRequired.map(req => {
+                    let qty = req.qty;
+                    qty -= this.equipmentStats.runesProvidedByWeapon[req.id] || 0;
+                    qty -= isAurora ? (this.equipmentStats.runesProvidedByShield[req.id] || 0) : 0;
+                    return {
+                        id: req.id,
+                        qty: Math.max(qty, 0),
+                    };
+                });
             }
 
             /**
@@ -1309,8 +1319,32 @@
                 }
             }
 
+            computeRuneUsage(runes, combinationRunes, runeCosts, castsPerSecond, preservation) {
+                runeCosts.forEach(x => {
+                    const runeID = x.id;
+                    const qty = x.qty * castsPerSecond * (1 - preservation);
+                    if (items[runeID].providesRune && items[runeID].providesRune.length > 1) {
+                        combinationRunes[runeID] = qty + (combinationRunes[runeID] || 0);
+                    } else {
+                        runes[runeID] = qty + (runes[runeID] || 0);
+                    }
+                });
+            }
+
             /** Performs all data analysis post queue completion */
             performPostSimAnalysis() {
+                // compute rune usage
+                const runeCosts = this.currentSim.playerStats.runeCosts;
+                const preservation = this.currentSim.playerStats.runePreservation;
+                for (let data of this.monsterSimData) {
+                    let runes = {};
+                    let combinationRunes = {};
+                    this.computeRuneUsage(runes, combinationRunes, runeCosts.spell, data.spellCastsPerSecond, preservation);
+                    this.computeRuneUsage(runes, combinationRunes, runeCosts.aurora, data.spellCastsPerSecond, preservation);
+                    this.computeRuneUsage(runes, combinationRunes, runeCosts.curse, data.curseCastsPerSecond, preservation);
+                    data.runesUsedPerSecond = Object.values(runes).reduce((a, b) => a + b);
+                    data.combinationRunesUsedPerSecond = Object.values(combinationRunes).reduce((a, b) => a + b, 0);
+                }
                 // Perform calculation of dungeon stats
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     this.computeAverageSimData(this.dungeonSimFilter[dungeonId], this.dungeonSimData[dungeonId], DUNGEONS[dungeonId].monsters);

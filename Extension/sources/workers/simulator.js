@@ -146,7 +146,8 @@
                 enemyActions: 0,
                 /** @type {PetRolls} */
                 petRolls: {Prayer: {}, other: {}},
-                runesUsed: 0,
+                spellCasts: 0,
+                curseCasts: 0,
             };
 
             setAreaEffects(playerStats);
@@ -918,7 +919,7 @@
         player.actionsTaken++;
         // track rune usage
         if (playerStats.usingMagic) {
-            stats.runesUsed += playerStats.runeCosts.spell * (1 - playerStats.runePreservation) + playerStats.runeCosts.aurora;
+            stats.spellCasts++;
         }
         // determine special or normal attack
         let isSpecial = false;
@@ -1077,7 +1078,7 @@
         if (!playerStats.canCurse || enemy.isCursed) {
             return;
         }
-        stats.runesUsed += playerStats.runeCosts.curse;
+        stats.curseCasts++;
         enemy.isCursed = true;
         enemy.curseTurns = 3;
         // Update the curses that change stats
@@ -1400,7 +1401,8 @@
         simResult.ammoUsedPerSecond = playerStats.isRanged ? simResult.attacksMadePerSecond : 0;
         simResult.ammoUsedPerSecond *= 1 - playerStats.ammoPreservation / 100;
         // runes
-        simResult.runesUsedPerSecond = stats.runesUsed / totalTime * 1000;
+        simResult.spellCastsPerSecond = stats.spellCasts / totalTime * 1000;
+        simResult.curseCastsPerSecond = stats.curseCasts / totalTime * 1000;
         // damage
         simResult.avgHitDmg = enemyStats.damageTaken / stats.playerAttackCalls;
         simResult.dmgPerSecond = enemyStats.damageTaken / totalTime * 1000;

@@ -53,6 +53,7 @@
                 addPlotOption('Prayer Points per ', true, 'ppConsumedPerSecond', 'Prayer Points/');
                 addPlotOption('Ammo per ', true, 'ammoUsedPerSecond', 'Ammo/');
                 addPlotOption('Runes per ', true, 'runesUsedPerSecond', 'Runes/');
+                addPlotOption('Combination Runes per ', true, 'combinationRunesUsedPerSecond', 'Comb. Runes/');
                 addPlotOption('Food per', true, 'atePerSecond', 'Food/');
                 addPlotOption('HP Loss per ', true, 'hpPerSecond', 'HP Lost/');
                 // survivability
@@ -603,6 +604,7 @@
                         card.container.style.display = 'none';
                     }
                 });
+                this.spellSelectCard.addRadio('Combination Runes', 25, 'combinationRunes', ['Yes', 'No'], [() => this.combinationRadioOnChange(true), () => this.combinationRadioOnChange(false)], 1);
             }
 
             /**
@@ -1716,6 +1718,14 @@
              */
             hardcoreRadioOnChange(newState) {
                 this.simulator.isHardcore = newState;
+            }
+
+            /**
+             * Callback for when the hardcore option is changed
+             * @param {boolean} newState The new value for the option
+             */
+            combinationRadioOnChange(newState) {
+                this.simulator.combinationRunes = newState;
             }
 
             /**
