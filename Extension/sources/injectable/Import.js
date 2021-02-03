@@ -189,8 +189,12 @@
                 // Import PETS
                 petOwned.forEach((owned, petID) => {
                     this.simulator.petOwned[petID] = owned;
-                    if (owned && this.app.combatPetsIds.includes(petID)) {
-                        this.app.selectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
+                    if (this.app.combatPetsIds.includes(petID)) {
+                        if (owned) {
+                            this.app.selectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
+                        } else {
+                            this.app.unselectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
+                        }
                     }
                     if (petID === 4 && owned) document.getElementById('MCS Rock').style.display = '';
                 });
