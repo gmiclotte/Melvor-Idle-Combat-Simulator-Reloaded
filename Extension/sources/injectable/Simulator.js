@@ -820,7 +820,7 @@
                 if (this.cookingPool) {
                     multiplier += .1;
                 }
-                if (this.cookingMastery && items[this.foodSelected].masteryID[0] === CONSTANTS.skill.Cooking) {
+                if (this.cookingMastery && items[this.foodSelected].masteryID && items[this.foodSelected].masteryID[0] === CONSTANTS.skill.Cooking) {
                     multiplier += .2;
                 }
                 amt *= multiplier;
