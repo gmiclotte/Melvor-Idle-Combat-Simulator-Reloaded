@@ -2558,6 +2558,10 @@
             updateDisplayPostSim() {
                 this.updatePlotData();
                 this.updateZoneInfoCard();
+                if (this.isViewingDungeon) {
+                    this.setPlotToGeneral();
+                    this.setPlotToDungeon(this.barMonsterIDs[this.selectedBar]);
+                }
                 document.getElementById('MCS Simulate Button').disabled = false;
                 document.getElementById('MCS Simulate Button').textContent = 'Simulate';
             }
