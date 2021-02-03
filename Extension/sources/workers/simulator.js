@@ -1022,10 +1022,10 @@
             return;
         }
         const maxHP = playerStats.autoEat.maxHP / 100 * player.maxHitpoints;
-        while(player.hitpoints < maxHP) {
-            playerStats.ate++;
-            player.hitpoints += Math.floor(playerStats.foodHeal * playerStats.autoEat.efficiency / 100);
-        }
+        const healAmt = Math.floor(playerStats.foodHeal * playerStats.autoEat.efficiency / 100);
+        const heals = Math.ceil((maxHP - player.hitpoints) / healAmt);
+        playerStats.ate += heals;
+        player.hitpoints += heals * healAmt;
         player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
     }
 
