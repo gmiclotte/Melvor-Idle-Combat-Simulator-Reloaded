@@ -9,6 +9,7 @@
         'Import',
         'Plotter',
         'Loot',
+        'Menu',
         'Simulator',
     ];
 
@@ -200,64 +201,6 @@
                 // Plotter Object
                 this.plotter = new MICSR.Plotter(this, urls.crossedOut);
 
-                this.mcsModal = document.createElement('div');
-                this.mcsModal.id = 'mcsModal';
-                this.mcsModal.className = 'modal';
-
-                const modalDialog = document.createElement('div');
-                modalDialog.className = 'modal-dialog';
-                this.mcsModal.appendChild(modalDialog);
-
-                const modalContent = document.createElement('div');
-                modalContent.className = 'modal-content';
-                modalDialog.appendChild(modalContent);
-
-                const modalHeader = $(`<div class="block block-themed block-transparent mb-0"><div class="block-header bg-primary-dark">
-        <h3 class="block-title">Combat Simulator Reloaded ${MICSR.version}</h3>
-        <div class="block-options"><button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
-        <i class="fa fa-fw fa-times"></i></button></div></div></div>`);
-                $(modalContent).append(modalHeader);
-                modalContent.appendChild(this.topContent);
-                modalContent.appendChild(this.botContent);
-
-                // Insert Tools menu and MCS tab into the sidebar
-                this.newHeading = document.createElement('li');
-                this.newHeading.id = 'mcsToolsMenu';
-                this.newHeading.className = 'nav-main-heading mcsNoSelect';
-                this.newHeading.textContent = 'Tools';
-                this.headingEye = document.createElement('i');
-                this.headingEye.className = 'far fa-eye text-muted ml-1';
-                this.headingEye.onclick = (e) => this.headingEyeOnClick(e);
-                this.headingEye.style.cursor = 'pointer';
-                this.newHeading.appendChild(this.headingEye);
-                this.eyeHidden = false;
-
-                this.tabDiv = document.createElement('li');
-                this.tabDiv.id = 'mcsButton';
-                this.tabDiv.style.cursor = 'pointer';
-                this.tabDiv.className = 'nav-main-item mcsNoSelect';
-
-                const menuButton = document.createElement('div');
-                menuButton.className = 'nav-main-link nav-compact';
-                menuButton.dataset.toggle = 'modal';
-                menuButton.dataset.target = '#mcsModal';
-                this.tabDiv.appendChild(menuButton);
-                const icon = document.createElement('img');
-                icon.className = 'nav-img';
-                icon.src = this.media.combat;
-                menuButton.appendChild(icon);
-                const menuText = document.createElement('span');
-                menuText.className = 'nav-main-link-name';
-                menuText.textContent = 'Combat Simulator';
-                menuButton.appendChild(menuText);
-
-                document.getElementsByClassName('nav-main-heading').forEach((heading) => {
-                    if (heading.textContent === 'Minigame') {
-                        heading.parentElement.insertBefore(this.newHeading, heading);
-                        heading.parentElement.insertBefore(this.tabDiv, heading);
-                    }
-                });
-
                 // Add Equipment and Food selection card
                 this.createEquipmentSelectCard();
                 // Add tab card
@@ -327,8 +270,12 @@
                 this.isViewingDungeon = false;
                 this.viewedDungeonID = -1;
 
-                // Now that everything is done we add it to the document
-                document.getElementById('page-container').appendChild(this.mcsModal);
+                // Now that everything is done we add the menu and modal to the document
+
+                this.modalID = 'mcsModal';
+                MICSR.addModal(`Combat Simulator Reloaded ${MICSR.version}`, this.modalID, [this.topContent, this.botContent]);
+                this.menuItemId = 'mcsButton';
+                MICSR.addMenuItem('Combat Simulator', this.media.combat, this.menuItemId, this.modalID);
 
                 // Finalize tooltips
                 const tippyOptions = {allowHTML: true, animation: false, hideOnClick: false};
@@ -1161,21 +1108,6 @@
              */
             setTabIDToUnSelected(tabID) {
                 document.getElementById(tabID).className = 'mcsTabButton';
-            }
-
-            /**
-             * Callback for when sidebar eye is clicked
-             */
-            headingEyeOnClick() {
-                if (this.eyeHidden) {
-                    this.headingEye.className = 'far fa-eye text-muted ml-1';
-                    this.tabDiv.style.display = '';
-                    this.eyeHidden = false;
-                } else {
-                    this.headingEye.className = 'far fa-eye-slash text-muted ml-1';
-                    this.tabDiv.style.display = 'none';
-                    this.eyeHidden = true;
-                }
             }
 
             // Callback Functions for equipment select card
@@ -2586,14 +2518,23 @@
             }
 
             destroy() {
+                // terminate any workers
                 this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
-                this.newHeading.remove();
-                this.tabDiv.remove();
+                // remove the MICSR tab access point
+                document.getElementById(this.menuItemId).remove();
+                // remove the tools menu if it is empty
+                const toolsMenu = document.getElementById("mcsToolsMenu");
+                if (toolsMenu.length === 0) {
+                    toolsMenu.remove();
+                }
+                // remove all tool tips
                 this.tippySingleton.destroy();
                 this.tippyInstances.forEach(instance => instance.destroy());
-                $(this.mcsModal).modal('hide');
-                $(this.mcsModal).modal('dispose');
-                this.mcsModal.remove();
+                // hide and remove the modal
+                const mcsModal = document.getElementById(this.modalID);
+                $(mcsModal).modal('hide');
+                $(mcsModal).modal('dispose');
+                mcsModal.remove();
             }
         }
     }

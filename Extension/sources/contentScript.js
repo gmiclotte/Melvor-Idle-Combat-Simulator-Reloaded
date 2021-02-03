@@ -73,6 +73,7 @@ function injectScripts() {
         'Import',
         'Loot',
         'Plotter',
+        'Menu',
         'Simulator',
         // uses the other classes
         'App',
