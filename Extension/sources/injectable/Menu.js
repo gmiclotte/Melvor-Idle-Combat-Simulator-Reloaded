@@ -58,7 +58,7 @@
             headingEye.onclick = () => MICSR.headingEyeOnClick(eyeID);
             headingEye.style.cursor = 'pointer';
             menu.appendChild(headingEye);
-            MICSR.eyeHidden = false;
+            window.MICSR_eyeHidden = false;
 
             // insert menu before Minigames
             document.getElementsByClassName('nav-main-heading').forEach(heading => {
@@ -73,25 +73,25 @@
          */
         MICSR.headingEyeOnClick = (eyeID) => {
             const headingEye = document.getElementById(eyeID);
-            if (MICSR.eyeHidden) {
+            if (window.MICSR_eyeHidden) {
                 headingEye.className = 'far fa-eye text-muted ml-1';
-                MICSR.menuTabs.forEach(tab => tab.style.display = '');
-                MICSR.eyeHidden = false;
+                window.MICSR_menuTabs.forEach(tab => tab.style.display = '');
+                window.MICSR_eyeHidden = false;
             } else {
                 headingEye.className = 'far fa-eye-slash text-muted ml-1';
-                MICSR.menuTabs.forEach(tab => tab.style.display = 'none');
-                MICSR.eyeHidden = true;
+                window.MICSR_menuTabs.forEach(tab => tab.style.display = 'none');
+                window.MICSR_eyeHidden = true;
             }
         }
 
         MICSR.addMenuItem = (itemTitle, iconSrc, accessID, modalID, menuTitle = 'Tools', menuID = 'mcsToolsMenu', eyeID = 'mcsHeadingEye') => {
             MICSR.createMenu(menuTitle, menuID, eyeID);
-            if (MICSR.menuTabs === undefined) {
-                MICSR.menuTabs = [];
+            if (window.MICSR_menuTabs === undefined) {
+                window.MICSR_menuTabs = [];
             }
 
             const tabDiv = document.createElement('li');
-            MICSR.menuTabs.push(tabDiv);
+            window.MICSR_menuTabs.push(tabDiv);
             tabDiv.id = accessID;
             tabDiv.style.cursor = 'pointer';
             tabDiv.className = 'nav-main-item mcsNoSelect';
@@ -116,6 +116,27 @@
 
             // return access point
             return tabDiv;
+        }
+
+        MICSR.destroyMenu = (menuItemId, modalID, menuID = 'mcsToolsMenu') => {
+            // remove the MICSR tab access point
+            const tab = document.getElementById(menuItemId);
+            if (tab !== null) {
+                window.MICSR_menuTabs = window.MICSR_menuTabs.filter(x => x !== tab);
+                tab.remove();
+            }
+            // remove the tools menu if it is empty
+            const menu = document.getElementById(menuID);
+            if (menu !== null && menu.length === 0) {
+                menu.remove();
+            }
+            // hide and remove the modal
+            const modal = document.getElementById(modalID);
+            if (modal !== null) {
+                $(modal).modal('hide');
+                $(modal).modal('dispose');
+                modal.remove();
+            }
         }
     }
 

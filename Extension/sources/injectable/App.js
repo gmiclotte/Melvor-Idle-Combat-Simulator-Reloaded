@@ -2501,21 +2501,11 @@
             destroy() {
                 // terminate any workers
                 this.simulator.simulationWorkers.forEach((worker) => worker.worker.terminate());
-                // remove the MICSR tab access point
-                document.getElementById(this.menuItemId).remove();
-                // remove the tools menu if it is empty
-                const toolsMenu = document.getElementById("mcsToolsMenu");
-                if (toolsMenu.length === 0) {
-                    toolsMenu.remove();
-                }
                 // remove all tool tips
                 this.tippySingleton.destroy();
                 this.tippyInstances.forEach(instance => instance.destroy());
-                // hide and remove the modal
-                const mcsModal = document.getElementById(this.modalID);
-                $(mcsModal).modal('hide');
-                $(mcsModal).modal('dispose');
-                mcsModal.remove();
+                // remove the interface
+                MICSR.destroyMenu(this.menuItemId, this.modalID);
             }
         }
     }
