@@ -402,11 +402,27 @@
                 foodCCContainer.appendChild(autoEatTierDropdown);
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
                 // cooking mastery
-                this.equipmentSelectCard.addRadio('95% Pool: +10%', 25, 'cookingPool', ['Yes', 'No'], [(e) => this.cookingPoolRadioOnChange(e, true), (e) => this.cookingPoolRadioOnChange(e, false)], 1);
-                this.equipmentSelectCard.addRadio('99 Mastery: +20%', 25, 'cookingMastery', ['Yes', 'No'], [(e) => this.cookingMasteryRadioOnChange(e, true), (e) => this.cookingMasteryRadioOnChange(e, false)], 1);
+                this.equipmentSelectCard.addToggleRadio(
+                    '95% Pool: +10%',
+                    'cookingPool',
+                    this.simulator,
+                    'cookingPool',
+                );
+                this.equipmentSelectCard.addToggleRadio(
+                    '99 Mastery: +20%',
+                    'cookingMastery',
+                    this.simulator,
+                    'cookingMastery',
+                );
                 // Slayer task and hardcore mode
                 this.equipmentSelectCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
-                this.equipmentSelectCard.addRadio('Hardcore Mode', 25, 'hardcore', ['Yes', 'No'], [() => this.hardcoreRadioOnChange(true), () => this.hardcoreRadioOnChange(false)], 1);
+                'Slayer Task',
+                    this.equipmentSelectCard.addToggleRadio(
+                        'Hardcore Mode',
+                        'hardcore',
+                        this.simulator,
+                        'isHardcore',
+                    );
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
@@ -555,7 +571,12 @@
                         card.container.style.display = 'none';
                     }
                 });
-                this.spellSelectCard.addRadio('Use Combination Runes', 25, 'combinationRunes', ['Yes', 'No'], [() => this.combinationRadioOnChange(true), () => this.combinationRadioOnChange(false)], 1);
+                this.spellSelectCard.addToggleRadio(
+                    'Use Combination Runes',
+                    'combinationRunes',
+                    this.simulator,
+                    'useCombinationRunes',
+                );
             }
 
             /**
@@ -792,7 +813,12 @@
                 this.simOptionsCard.addSectionTitle('Simulation Options');
                 this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
                 this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
-                this.simOptionsCard.addRadio('Force full sim', 25, 'forceFullSim', ['Yes', 'No'], [() => this.fullSimRadioOnChange(true), () => this.fullSimRadioOnChange(false)], 1);
+                this.simOptionsCard.addToggleRadio(
+                    'Force full sim',
+                    'forceFullSim',
+                    this.simulator,
+                    'forceFullSim',
+                );
                 this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
                 const dropDownOptionNames = [];
                 for (let i = 0; i < this.plotTypes.length; i++) {
@@ -823,16 +849,40 @@
                 this.isExportDisplayed = false;
                 this.exportOptionsCard = new MICSR.Card(this.topContent, '', '100px', true);
                 this.exportOptionsCard.addSectionTitle('Export Options');
-                this.exportOptionsCard.addRadio('Dungeon Monsters', 25, `DungeonMonsterExportRadio`, ['Yes', 'No'], [(e) => this.exportDungeonMonsterRadioOnChange(e, true), (e) => this.exportDungeonMonsterRadioOnChange(e, false)], 0);
-                this.exportOptionsCard.addRadio('Non-Simulated', 25, `NonSimmedExportRadio`, ['Yes', 'No'], [(e) => this.exportNonSimmedRadioOnChange(e, true), (e) => this.exportNonSimmedRadioOnChange(e, false)], 0);
+                this.exportOptionsCard.addToggleRadio(
+                    'Dungeon Monsters',
+                    `DungeonMonsterExportRadio`,
+                    this.simulator.exportOptions,
+                    'dungeonMonsters',
+                    true,
+                );
+                this.exportOptionsCard.addToggleRadio(
+                    'Non-Simulated',
+                    `NonSimmedExportRadio`,
+                    this.simulator.exportOptions,
+                    'nonSimmed',
+                    true,
+                );
                 this.exportOptionsCard.addSectionTitle('Data to Export');
-                this.exportOptionsCard.addRadio('Name', 25, `NameExportRadio`, ['Yes', 'No'], [(e) => this.exportNameRadioOnChange(e, true), (e) => this.exportNameRadioOnChange(e, false)], 0);
+                this.exportOptionsCard.addToggleRadio(
+                    'Name',
+                    `NameExportRadio`,
+                    this.simulator.exportOptions,
+                    'name',
+                    true,
+                );
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     let timeText = '';
                     if (this.plotTypes[i].isTime) {
                         timeText = 'X';
                     }
-                    this.exportOptionsCard.addRadio(`${this.plotTypes[i].info}${timeText}`, 25, `${this.plotTypes[i].value}ExportRadio`, ['Yes', 'No'], [(e) => this.exportDataTypeRadioOnChange(e, true, i), (e) => this.exportDataTypeRadioOnChange(e, false, i)], 0);
+                    this.exportOptionsCard.addToggleRadio(
+                        `${this.plotTypes[i].info}${timeText}`,
+                        `${this.plotTypes[i].value}ExportRadio`,
+                        this.simulator.exportOptions.dataTypes,
+                        i,
+                        true,
+                    );
                 }
             }
 
@@ -1630,14 +1680,6 @@
                 this.updatePlotForGP();
             }
 
-            cookingPoolRadioOnChange(event, newState) {
-                this.simulator.cookingPool = newState;
-            }
-
-            cookingMasteryRadioOnChange(event, newState) {
-                this.simulator.cookingMastery = newState;
-            }
-
             /**
              * Callback for when the slayer task option is changed
              * @param {Event} event The change event for a radio
@@ -1646,67 +1688,6 @@
             slayerTaskRadioOnChange(event, newState) {
                 this.simulator.isSlayerTask = newState;
                 this.updatePlotForSlayerXP();
-            }
-
-            /**
-             * Callback for when the hardcore option is changed
-             * @param {boolean} newState The new value for the option
-             */
-            hardcoreRadioOnChange(newState) {
-                this.simulator.isHardcore = newState;
-            }
-
-            /**
-             * Callback for when the hardcore option is changed
-             * @param {boolean} newState The new value for the option
-             */
-            combinationRadioOnChange(newState) {
-                this.simulator.useCombinationRunes = newState;
-            }
-
-            /**
-             * Callback for when the hardcore option is changed
-             * @param {boolean} newState The new value for the option
-             */
-            fullSimRadioOnChange(newState) {
-                this.simulator.forceFullSim = newState;
-            }
-
-            /**
-             * Callback for when an export data type option is changed
-             * @param {Event} event The event for a radio
-             * @param {boolean} newState The new value for the option
-             * @param {number} exportIndex The index of the data type
-             */
-            exportDataTypeRadioOnChange(event, newState, exportIndex) {
-                this.simulator.exportDataType[exportIndex] = newState;
-            }
-
-            /**
-             * Callback for when the export name option is changed
-             * @param {Event} event The event for a radio
-             * @param {boolean} newState The new value for the option
-             */
-            exportNameRadioOnChange(event, newState) {
-                this.simulator.exportName = newState;
-            }
-
-            /**
-             * Callback for when the export dungeon monsters option is changed
-             * @param {Event} event The event for a radio
-             * @param {boolean} newState The new value for the option
-             */
-            exportDungeonMonsterRadioOnChange(event, newState) {
-                this.simulator.exportDungeonMonsters = newState;
-            }
-
-            /**
-             * Callback for when the export non simmed option is changed
-             * @param {Event} event The event for a radio
-             * @param {boolean} newState The new value for the option
-             */
-            exportNonSimmedRadioOnChange(event, newState) {
-                this.simulator.exportNonSimmed = newState;
             }
 
             /**

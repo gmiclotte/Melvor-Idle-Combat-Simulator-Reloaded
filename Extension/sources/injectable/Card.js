@@ -390,6 +390,13 @@
                 container.appendChild(newCCContainer);
             }
 
+            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25) {
+                const yesToggle = () => object[flag] = true;
+                const noToggle = () => object[flag] = false;
+                const initialRadio = initialYes ? 0 : 1;
+                this.addRadio(labelText, height, radioName, ['Yes', 'No'], [yesToggle, noToggle], initialRadio);
+            }
+
             /**
              * Adds a radio option to the card
              * @param {string} labelText The text for the option's label
@@ -397,10 +404,10 @@
              * @param {string} radioName The name of the radio
              * @param {string[]} radioLabels The labels for the individual radio buttons
              * @param {Function[]} radioCallbacks The callbacks for the individual radio buttons
-             * @param {number} initialRadio The intial radio that is on
+             * @param {number} initialRadio The initial radio that is on
              * @param {string} imageSrc An optional string to specify the source of a label image, if '' an image is not added
              */
-            addRadio(labelText, height, radioName, radioLabels, radioCallbacks, initialRadio, imageSrc) {
+            addRadio(labelText, height, radioName, radioLabels, radioCallbacks, initialRadio, imageSrc = '') {
                 const newCCContainer = this.createCCContainer();
                 if (imageSrc && imageSrc !== '') {
                     newCCContainer.appendChild(this.createImage(imageSrc, height));

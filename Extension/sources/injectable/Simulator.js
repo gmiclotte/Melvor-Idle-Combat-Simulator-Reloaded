@@ -276,12 +276,15 @@
                 // Options for time multiplier
                 this.selectedPlotIsTime = true;
                 // Data Export Settings
-                this.exportDataType = [];
-                this.exportName = true;
-                this.exportDungeonMonsters = true;
-                this.exportNonSimmed = true;
+                this.exportOptions = {
+                    dataTypes: [],
+                    name: true,
+                    dungeonMonsters: true,
+                    nonSimmed: true,
+                    
+                }
                 for (let i = 0; i < this.parent.plotTypes.length; i++) {
-                    this.exportDataType.push(true);
+                    this.exportOptions.dataTypes.push(true);
                 }
                 // Test Settings
                 this.isTestMode = false;
@@ -1681,15 +1684,16 @@
              * @return {string}
              */
             exportData() {
+                const exportOptions = this.exportOptions;
                 const exportEntity = (entityID, filter, data, name, isDungeonMonster = false) => {
-                    if (!this.exportNonSimmed && !filter[entityID]) {
+                    if (!exportOptions.nonSimmed && !filter[entityID]) {
                         return;
                     }
-                    if (this.exportName) {
+                    if (exportOptions.name) {
                         exportString += name + colDel;
                     }
                     for (let i = 0; i < this.parent.plotTypes.length; i++) {
-                        if (!this.exportDataType[i]) {
+                        if (!exportOptions.dataTypes[i]) {
                             continue;
                         }
                         if (isDungeonMonster) {
@@ -1715,11 +1719,11 @@
                 const colLen = colDel.length;
                 const rowDel = '\n';
                 const rowLen = rowDel.length;
-                if (this.exportName) {
+                if (exportOptions.name) {
                     exportString += 'Monster/Dungeon Name' + colDel;
                 }
                 for (let i = 0; i < this.parent.plotTypes.length; i++) {
-                    if (this.exportDataType[i]) {
+                    if (exportOptions.dataTypes[i]) {
                         if (this.parent.plotTypes[i].isTime) {
                             exportString += this.parent.plotTypes[i].option + this.parent.selectedTimeUnit + colDel;
                         } else {
@@ -1743,7 +1747,7 @@
                 // Dungeons
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
                     exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
-                    if (this.exportDungeonMonsters) {
+                    if (exportOptions.dungeonMonsters) {
                         const dungeonMonsterFilter = Object.fromEntries(DUNGEONS[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
                         DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, dungeonMonsterFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
                     }
