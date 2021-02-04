@@ -1,3 +1,6 @@
+v1.2.8
+    Fix set 2 and 3 import
+
 v1.2.7
     Changes:
     - Optimize healing simulation
