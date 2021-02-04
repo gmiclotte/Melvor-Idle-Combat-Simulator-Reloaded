@@ -281,7 +281,6 @@
                     name: true,
                     dungeonMonsters: true,
                     nonSimmed: true,
-                    
                 }
                 for (let i = 0; i < this.parent.plotTypes.length; i++) {
                     this.exportOptions.dataTypes.push(true);
@@ -1363,6 +1362,20 @@
                     return;
                 }
                 const potionCharges = items[herbloreItemData[this.potionID].itemID[this.potionTier]].potionCharges;
+                // check prayers for divine potion
+                let perPlayer = false;
+                let perEnemy = false;
+                let perRegen = false;
+                if (this.potionID === 22) {
+                    for (let i = 0; i < PRAYER.length; i++) {
+                        if (this.prayerSelected[i]) {
+                            perPlayer ||= PRAYER[i].pointsPerPlayer > 0;
+                            perEnemy ||= PRAYER[i].pointsPerEnemy > 0;
+                            perRegen ||= PRAYER[i].pointsPerRegen > 0;
+                        }
+                    }
+                }
+                // set potion usage for each monster
                 for (let data of this.monsterSimData) {
                     if (this.potionID === 5) {
                         // regen potion
@@ -1373,8 +1386,19 @@
                     } else if (this.potionID === 23) {
                         // lucky herb potion
                         data.potionsUsedPerSecond = data.killsPerSecond / potionCharges;
+                    } else if (this.potionID === 22) {
+                        // divine potion
+                        if (perPlayer) {
+                            data.potionsUsedPerSecond += data.attacksMadePerSecond / potionCharges;
+                        }
+                        if (perEnemy) {
+                            data.potionsUsedPerSecond += data.attacksTakenPerSecond / potionCharges;
+                        }
+                        if (perRegen) {
+                            data.potionsUsedPerSecond += 0.1 / potionCharges;
+                        }
                     } else {
-                        data.potionsUsedPerSecond = data.attacksTakenPerSecond / potionCharges;
+                        data.potionsUsedPerSecond = data.attacksMadePerSecond / potionCharges;
                     }
                 }
             }
