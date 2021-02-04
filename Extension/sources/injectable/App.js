@@ -463,7 +463,7 @@
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
-                this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.import.importButtonOnClick(0), () => this.importButtonOnClick(1), () => this.importButtonOnClick(2)], importSetCCContainer);
+                this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.import.importButtonOnClick(0), () => this.import.importButtonOnClick(1), () => this.import.importButtonOnClick(2)], importSetCCContainer);
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
             }
 
