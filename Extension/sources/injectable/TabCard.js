@@ -26,11 +26,11 @@
                 }
             }
 
-            addPremadeTab = (name, img, card) => {
+            addPremadeTab(name, img, card) {
                 return this.addTab(name, img, null, null, card);
             }
 
-            addTab = (title, img, height, inputWidth, card = null) => {
+            addTab(title, img, height, inputWidth, card = null) {
                 // update tab count
                 const index = this.tabCount;
                 this.tabCount++;
@@ -51,7 +51,7 @@
                 return card;
             }
 
-            onTabClick = (tabID) => {
+            onTabClick(tabID) {
                 if (this.selectedTab === tabID) {
                     return;
                 }
