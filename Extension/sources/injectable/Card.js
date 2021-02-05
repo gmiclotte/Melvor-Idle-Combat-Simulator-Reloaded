@@ -101,37 +101,6 @@
             }
 
             /**
-             * Adds a tab menu to the card, the tab elements will have their display toggled on and off when the tab is clicked
-             * @param {string[]} tabNames
-             * @param {string[]} tabImages
-             * @param {Function[]} tabCallbacks
-             * @return {HTMLDivElement}
-             */
-            addTabMenu(tabNames, tabImages, tabCallbacks) {
-                const newCCContainer = document.createElement('div');
-                newCCContainer.className = 'mcsTabButtonContainer';
-                tabNames.forEach((name, index) => {
-                    const newTab = document.createElement('button');
-                    newTab.type = 'button';
-                    newTab.id = MICSR.toId(`${name}-tab`);
-                    newTab.className = 'mcsTabButton';
-                    newTab.dataset.tippyContent = name;
-                    newTab.onclick = tabCallbacks[index];
-                    const newImage = document.createElement('img');
-                    newImage.className = 'mcsButtonImage';
-                    newImage.id = MICSR.toId(`${name}-tab-image`);
-                    newImage.src = tabImages[index];
-                    newTab.appendChild(newImage);
-                    newCCContainer.appendChild(newTab);
-                });
-                this.container.appendChild(newCCContainer);
-                const tabContainer = document.createElement('div');
-                tabContainer.className = 'mcsTabContainer';
-                this.container.appendChild(tabContainer);
-                return tabContainer;
-            }
-
-            /**
              * Creates multiple image buttons in a single container
              * @param {string[]} sources The image source paths
              * @param {string[]} idtexts The ids for the buttons
@@ -282,7 +251,7 @@
             /**
              * Adds an input to the card for text
              * @param {string} labelText The text for the input's label
-             * @param {string} startValue The iniial text in the input
+             * @param {string} startValue The initial text in the input
              * @param {Function} onInputCallback The callback for when the input changes
              */
             addTextInput(labelText, startValue, onInputCallback) {

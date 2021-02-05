@@ -11,6 +11,7 @@
         'Loot',
         'Menu',
         'Simulator',
+        'TabCard',
     ];
 
     const setup = () => {
@@ -204,7 +205,8 @@
                 // Add Equipment and Food selection card
                 this.createEquipmentSelectCard();
                 // Add tab card
-                this.createMainTabCard();
+                this.mainTabCard = new MICSR.TabCard('mcsMainTab', true, this.topContent, '', '150px', true);
+
                 // Add Cards to the tab card
                 this.createLevelSelectCard();
                 this.createSpellSelectCards();
@@ -287,17 +289,10 @@
 
                 // Setup the default state of the UI
                 this.gpOptionsCard.container.style.display = 'none';
-                this.mainTabCards.forEach((card, cardID) => {
-                    if (cardID !== 0) {
-                        card.container.style.display = 'none';
-                    }
-                });
                 this.exportOptionsCard.outerContainer.style.display = 'none';
                 this.plotter.timeDropdown.selectedIndex = 1;
                 document.getElementById('MCS Edit Subset Button').style.display = 'none';
                 this.subInfoCard.container.style.display = 'none';
-                this.setTabIDToSelected(this.spellTabIDs[0]);
-                this.setTabIDToSelected(this.mainTabIDs[0]);
                 this.plotter.petSkillDropdown.style.display = 'none';
                 document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
                 this.updateSpellOptions();
@@ -523,21 +518,8 @@
                 }
             }
 
-            createMainTabCard() {
-                this.selectedMainTab = 0;
-                this.mainTabCard = new MICSR.Card(this.topContent, '', '150px', true);
-                const mainTabNames = ['Levels', 'Spells', 'Prayers', 'Potions', 'Pets', 'GP Options', 'Equipment Stats', 'Sim. Options'];
-                const mainTabImages = [this.media.combat, this.media.spellbook, this.media.prayer, this.media.emptyPotion, this.media.pet, this.media.gp, this.emptyItems.Helmet.media, this.media.settings];
-                const mainTabCallbacks = mainTabNames.map((_, i) => () => this.mainTabOnClick(i));
-                this.mainTabIDs = mainTabNames.map((name) => MICSR.toId(`${name}-tab`));
-                this.mainTabContainer = this.mainTabCard.addTabMenu(mainTabNames, mainTabImages, mainTabCallbacks);
-                /** @type {Card[]} */
-                this.mainTabCards = [];
-            }
-
             createLevelSelectCard() {
-                this.levelSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                this.mainTabCards.push(this.levelSelectCard);
+                this.levelSelectCard = this.mainTabCard.addTab('Levels', this.media.combat, '', '150px');
                 this.levelSelectCard.addSectionTitle('Player Levels');
                 this.skillKeys.forEach((skillName) => {
                     let minLevel = 1;
@@ -549,28 +531,39 @@
             }
 
             createSpellSelectCards() {
-                this.spellSelectCard = new MICSR.Card(this.mainTabContainer, '100%', '150px');
-                this.mainTabCards.push(this.spellSelectCard);
+                this.spellSelectCard = this.mainTabCard.addPremadeTab(
+                    'Spells',
+                    this.media.spellbook,
+                    new MICSR.TabCard('', false, this.mainTabCard.container, '100%', '150px'),
+                );
+                // add title for spellbook tab
                 this.spellSelectCard.addSectionTitle('Spells');
-                this.selectedSpellTab = 0;
-                const spellTypeNames = ['Standard', 'Curses', 'Auroras', 'Ancient Magicks'];
-                const spellTypeImages = [this.media.spellbook, this.media.curse, this.media.aurora, this.media.ancient];
-                const spellTabCallbacks = spellTypeNames.map((_name, index) => {
-                    return () => this.spellTabOnClick(index);
-                });
-                this.spellTabIDs = spellTypeNames.map((name) => MICSR.toId(`${name}-tab`));
-                this.spellTabContainer = this.spellSelectCard.addTabMenu(spellTypeNames, spellTypeImages, spellTabCallbacks);
-                /** @type {Card[]} */
-                this.spellTabCards = [];
-                this.spellTabCards.push(this.createSpellSelectCard('Standard Magic', 'standard'));
-                this.spellTabCards.push(this.createSpellSelectCard('Curses', 'curse'));
-                this.spellTabCards.push(this.createSpellSelectCard('Auroras', 'aurora'));
-                this.spellTabCards.push(this.createSpellSelectCard('Ancient Magicks', 'ancient'));
-                this.spellTabCards.forEach((card, cardID) => {
-                    if (cardID !== 0) {
-                        card.container.style.display = 'none';
-                    }
-                });
+                // add tab menu, it was not yet created in the constructor
+                this.spellSelectCard.addTabMenu();
+
+                // add spell books
+                this.spellSelectCard.addPremadeTab(
+                    'Standard',
+                    this.media.spellbook,
+                    this.createSpellSelectCard('Standard Magic', 'standard'),
+                );
+                this.spellSelectCard.addPremadeTab(
+                    'Curses',
+                    this.media.curse,
+                    this.createSpellSelectCard('Curses', 'curse'),
+                );
+                this.spellSelectCard.addPremadeTab(
+                    'Auroras',
+                    this.media.aurora,
+                    this.createSpellSelectCard('Auroras', 'aurora'),
+                );
+                this.spellSelectCard.addPremadeTab(
+                    'Ancient Magicks',
+                    this.media.ancient,
+                    this.createSpellSelectCard('Ancient Magicks', 'ancient'),
+                );
+
+                // add combination rune toggle
                 this.spellSelectCard.addToggleRadio(
                     'Use Combination Runes',
                     'combinationRunes',
@@ -586,7 +579,7 @@
              * @return {Card} The created spell select card
              */
             createSpellSelectCard(title, spellType) {
-                const newCard = new MICSR.Card(this.spellTabContainer, '', '100px');
+                const newCard = new MICSR.Card(this.spellSelectCard.container, '', '100px');
                 newCard.addSectionTitle(title);
                 const spells = this.simulator.spells[spellType].array;
                 const spellImages = spells.map((spell) => spell.media);
@@ -613,8 +606,7 @@
             }
 
             createPrayerSelectCard() {
-                this.prayerSelectCard = new MICSR.Card(this.mainTabContainer, '', '100px');
-                this.mainTabCards.push(this.prayerSelectCard);
+                this.prayerSelectCard = this.mainTabCard.addTab('Prayers', this.media.prayer, '', '100px');
                 this.prayerSelectCard.addSectionTitle('Prayers');
                 const prayerSources = [];
                 const prayerNames = [];
@@ -683,8 +675,7 @@
             }
 
             createPotionSelectCard() {
-                this.potionSelectCard = new MICSR.Card(this.mainTabContainer, '', '100px');
-                this.mainTabCards.push(this.potionSelectCard);
+                this.potionSelectCard = this.mainTabCard.addTab('Potions', this.media.emptyPotion, '', '100px');
                 this.potionSelectCard.addSectionTitle('Potions');
                 this.potionSelectCard.addDropdown('Potion Tier', ['Tier 1', 'Tier 2', 'Tier 3', 'Tier 4'], [0, 1, 2, 3], (e) => this.potionTierDropDownOnChange(e));
                 const potionSources = [];
@@ -711,8 +702,7 @@
                 const combatPets = PETS.filter((_pet, petID) => {
                     return this.combatPetsIds.includes(petID);
                 });
-                this.petSelectCard = new MICSR.Card(this.mainTabContainer, '', '100px');
-                this.mainTabCards.push(this.petSelectCard);
+                this.petSelectCard = this.mainTabCard.addTab('Pets', this.media.pet, '', '100px');
                 this.petSelectCard.addSectionTitle('Pets');
                 const petImageSources = combatPets.map((pet) => pet.media);
                 const petNames = combatPets.map((pet) => pet.name);
@@ -723,8 +713,7 @@
             }
 
             createGPOptionsCard() {
-                this.gpSelectCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                this.mainTabCards.push(this.gpSelectCard);
+                this.gpSelectCard = this.mainTabCard.addTab('GP Options', this.media.gp, '', '150px');
                 this.gpSelectCard.addSectionTitle('GP/s Options');
                 this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
                 this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
@@ -766,8 +755,7 @@
             }
 
             createEquipmentStatCard() {
-                this.equipStatCard = new MICSR.Card(this.mainTabContainer, '', '50px');
-                this.mainTabCards.push(this.equipStatCard);
+                this.equipStatCard = this.mainTabCard.addTab('Equipment Stats', this.emptyItems.Helmet.media, '', '50px');
                 this.equipStatCard.addSectionTitle('Equipment Stats');
                 this.equipKeys = [
                     'attackSpeed',
@@ -808,8 +796,7 @@
             }
 
             createSimulationAndExportCard() {
-                this.simOptionsCard = new MICSR.Card(this.mainTabContainer, '', '150px');
-                this.mainTabCards.push(this.simOptionsCard);
+                this.simOptionsCard = this.mainTabCard.addTab('Sim. Options', this.media.settings, '', '150px');
                 this.simOptionsCard.addSectionTitle('Simulation Options');
                 this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
                 this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
@@ -1113,51 +1100,6 @@
                     throw Error(`Invalid equipmentSlot: ${equipmentSlot}`);
                 }
                 return equipmentSelectPopup;
-            }
-
-            // Tab Callbacks
-            /**
-             * Main tab menu tab on click callback
-             * @param {number} tabID
-             */
-            mainTabOnClick(tabID) {
-                if (this.selectedMainTab !== tabID) {
-                    this.mainTabCards[this.selectedMainTab].container.style.display = 'none';
-                    this.setTabIDToUnSelected(this.mainTabIDs[this.selectedMainTab]);
-                    this.mainTabCards[tabID].container.style.display = '';
-                    this.setTabIDToSelected(this.mainTabIDs[tabID]);
-                    this.selectedMainTab = tabID;
-                }
-            }
-
-            /**
-             * Spell tab menu tab on click callback
-             * @param {number} tabID
-             */
-            spellTabOnClick(tabID) {
-                if (this.selectedSpellTab !== tabID) {
-                    this.spellTabCards[this.selectedSpellTab].container.style.display = 'none';
-                    this.setTabIDToUnSelected(this.spellTabIDs[this.selectedSpellTab]);
-                    this.spellTabCards[tabID].container.style.display = '';
-                    this.setTabIDToSelected(this.spellTabIDs[tabID]);
-                    this.selectedSpellTab = tabID;
-                }
-            }
-
-            /**
-             * Sets a tab to the selected state
-             * @param {string} tabID
-             */
-            setTabIDToSelected(tabID) {
-                document.getElementById(tabID).className = 'mcsTabButton mcsTabButtonSelected';
-            }
-
-            /**
-             * Sets a tab to the default state
-             * @param {string} tabID
-             */
-            setTabIDToUnSelected(tabID) {
-                document.getElementById(tabID).className = 'mcsTabButton';
             }
 
             // Callback Functions for equipment select card

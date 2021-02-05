@@ -75,6 +75,7 @@ function injectScripts() {
         'Plotter',
         'Menu',
         'Simulator',
+        'TabCard',
         // uses the other classes
         'App',
         // should be last

@@ -201,7 +201,7 @@
                 Object.values(this.simulator.spells).forEach((spellOpts, i) => {
                     if (spellOpts.isSelected) {
                         this.app.selectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
-                        this.app.spellTabOnClick(i);
+                        this.app.spellSelectCard.onTabClick(i);
                     }
                 });
             }
