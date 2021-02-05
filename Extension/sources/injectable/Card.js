@@ -303,6 +303,49 @@
             }
 
             /**
+             * Adds and input for number arrays to the card
+             * @param labelText
+             * @param startValue
+             * @param object
+             * @param key
+             * @param defaultValue
+             */
+            addNumberArrayInput(labelText, startValue, object, key, defaultValue = undefined) {
+                let interval = undefined;
+                const onInputCallback = (event) => {
+                    const input = event.currentTarget.value;
+                    let result;
+                    try {
+                        // split input into numbers
+                        result = input.split(/\D/)
+                            // get rid of empty entries
+                            .filter(x => x.length)
+                            // parse
+                            .map(x => parseInt(x))
+                            // sort numerically
+                            .sort((a, b) => a - b)
+                            // remove duplicates
+                            .filter((e, i, a) => e !== a[i - 1]);
+                    } catch {
+                        result = defaultValue;
+                    }
+                    if (result.length === 0) {
+                        result = defaultValue;
+                    }
+                    if (input.toString() !== object[key].toString() + ' ') {
+                        if (interval) {
+                            clearInterval(interval);
+                        }
+                        interval = setTimeout(() => {
+                            object[key] = result;
+                            event.target.value = result.toString() + ' ';
+                        }, 500);
+                    }
+                }
+                this.addTextInput(labelText, startValue, onInputCallback);
+            }
+
+            /**
              * Adds info text
              * @param {string} textToDisplay
              * @return {HTMLDivElement}
