@@ -1369,9 +1369,9 @@
                 if (this.potionID === 22) {
                     for (let i = 0; i < PRAYER.length; i++) {
                         if (this.prayerSelected[i]) {
-                            perPlayer ||= PRAYER[i].pointsPerPlayer > 0;
-                            perEnemy ||= PRAYER[i].pointsPerEnemy > 0;
-                            perRegen ||= PRAYER[i].pointsPerRegen > 0;
+                            perPlayer = perPlayer || PRAYER[i].pointsPerPlayer > 0;
+                            perEnemy = perEnemy || PRAYER[i].pointsPerEnemy > 0;
+                            perRegen = perRegen || PRAYER[i].pointsPerRegen > 0;
                         }
                     }
                 }
