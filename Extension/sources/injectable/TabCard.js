@@ -12,7 +12,7 @@
         /**
          * Class for cards with tabs
          */
-        MICSR.TabCard = class  extends MICSR.Card {
+        MICSR.TabCard = class extends MICSR.Card {
 
             constructor(idPrefix, init, ...args) {
                 super(...args);
@@ -48,7 +48,6 @@
                 } else {
                     card.className = 'mcsTabButton mcsTabButtonSelected';
                 }
-                console.log(card)
                 return card;
             }
 

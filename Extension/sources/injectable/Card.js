@@ -254,8 +254,9 @@
              * @param {string} startValue The initial text in the input
              * @param {Function} onInputCallback The callback for when the input changes
              */
-            addTextInput(labelText, startValue, onInputCallback) {
-                const inputID = `MCS ${labelText} TextInput`;
+            addTextInput(labelText, startValue, onInputCallback, id = null) {
+                id = id === null ? labelText : id;
+                const inputID = `MCS ${id} TextInput`;
                 const newCCContainer = this.createCCContainer();
                 const label = this.createLabel(labelText, inputID);
                 label.classList.add('mb-1');
@@ -271,18 +272,27 @@
                 this.container.appendChild(newCCContainer);
             }
 
+            numberArrayToInputString(array) {
+                if (array === undefined || array === null) {
+                    return '';
+                }
+                if (!isNaN(array)) {
+                    array = [array];
+                }
+                return array.toString() + ' ';
+            }
+
             /**
              * Adds and input for number arrays to the card
              * @param labelText
-             * @param startValue
              * @param object
              * @param key
              * @param defaultValue
              */
-            addNumberArrayInput(labelText, startValue, object, key, defaultValue = undefined) {
+            addNumberArrayInput(labelText, object, key, defaultValue = undefined) {
                 let interval = undefined;
                 const onInputCallback = (event) => {
-                    const input = event.currentTarget.value;
+                    let input = event.currentTarget.value;
                     let result;
                     try {
                         // split input into numbers
@@ -301,17 +311,20 @@
                     if (result.length === 0) {
                         result = defaultValue;
                     }
-                    if (input.toString() !== object[key].toString() + ' ') {
-                        if (interval) {
-                            clearInterval(interval);
-                        }
+                    if (input === 'undefined' || input === 'null') {
+                        input = '';
+                    }
+                    if (interval) {
+                        clearInterval(interval);
+                    }
+                    if (input !== this.numberArrayToInputString(object[key])) {
                         interval = setTimeout(() => {
                             object[key] = result;
-                            event.target.value = result.toString() + ' ';
+                            event.target.value = this.numberArrayToInputString(result);
                         }, 500);
                     }
                 }
-                this.addTextInput(labelText, startValue, onInputCallback);
+                this.addTextInput(labelText, this.numberArrayToInputString(object[key]), onInputCallback, labelText + key);
             }
 
             /**
