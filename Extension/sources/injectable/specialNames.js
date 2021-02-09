@@ -1,12 +1,12 @@
 (() => {
 
-    const MICSR = window.MICSR;
-
     const reqs = [
         'util',
     ];
 
     const setup = () => {
+
+        const MICSR = window.MICSR;
 
         MICSR.commonSpecialNames = {
             // general
@@ -121,6 +121,35 @@
         MICSR.checkImplemented(MICSR.enemySpecialNames, 'Enemy special');
     }
 
-    MICSR.waitLoadOrder(reqs, setup, 'playerSpecialNames')
+    let loadCounter = 0;
+    const waitLoadOrder = (reqs, setup, id) => {
+        loadCounter++;
+        if (loadCounter > 100) {
+            console.log('Failed to load ' + id);
+            return;
+        }
+        // check requirements
+        for (const req of reqs) {
+            if (window.MICSR === undefined) {
+                console.log(id + ' is waiting for the MICSR object');
+            } else {
+                if (window.MICSR.loadedFiles[req]) {
+                    continue;
+                }
+                // not defined yet: try again later
+                if (loadCounter === 1) {
+                    window.MICSR.log(id + ' is waiting for ' + req)
+                }
+            }
+            setTimeout(() => waitLoadOrder(reqs, setup, id), 50);
+            return;
+        }
+        // requirements met
+        window.MICSR.log('setting up ' + id)
+        setup();
+        // mark as loaded
+        window.MICSR.loadedFiles[id] = true;
+    }
+    waitLoadOrder(reqs, setup, 'playerSpecialNames')
 
 })();
