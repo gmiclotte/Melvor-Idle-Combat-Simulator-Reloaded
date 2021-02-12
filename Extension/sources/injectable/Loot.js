@@ -352,15 +352,20 @@
              */
             computeMonsterValue(monsterID) {
                 let monsterValue = 0;
-                monsterValue += this.computeAverageCoins(monsterID);
+
+                // loot and signet are affected by loot chance
                 monsterValue += this.computeDropTableValue(monsterID);
                 if (this.currentSim.canTopazDrop && this.shouldSell(CONSTANTS.item.Signet_Ring_Half_B)) {
                     monsterValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(monsterID) / 500000;
                 }
                 monsterValue *= this.computeLootChance(monsterID);
+
+                // coin and bones drops are not affected by loot chance
+                monsterValue += this.computeAverageCoins(monsterID);
                 if (this.sellBones && !this.currentSim.doBonesAutoBury && MONSTERS[monsterID].bones) {
                     monsterValue += items[MONSTERS[monsterID].bones].sellsFor * this.currentSim.lootBonus * ((MONSTERS[monsterID].boneQty) ? MONSTERS[monsterID].boneQty : 1);
                 }
+
                 return monsterValue;
             }
 
