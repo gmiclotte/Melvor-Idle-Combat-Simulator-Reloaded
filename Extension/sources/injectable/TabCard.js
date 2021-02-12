@@ -111,18 +111,23 @@
             return;
         }
         // check requirements
-        for (const req of reqs) {
-            if (window.MICSR === undefined) {
-                console.log(id + ' is waiting for the MICSR object');
-            } else {
+        let reqMet = true;
+        if (window.MICSR === undefined) {
+            reqMet = false;
+            console.log(id + ' is waiting for the MICSR object');
+        } else {
+            for (const req of reqs) {
                 if (window.MICSR.loadedFiles[req]) {
                     continue;
                 }
+                reqMet = false;
                 // not defined yet: try again later
                 if (loadCounter === 1) {
                     window.MICSR.log(id + ' is waiting for ' + req)
                 }
             }
+        }
+        if (!reqMet) {
             setTimeout(() => waitLoadOrder(reqs, setup, id), 50);
             return;
         }
