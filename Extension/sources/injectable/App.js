@@ -616,44 +616,11 @@
                     prayerCallbacks.push((e) => this.prayerButtonOnClick(e, i));
                 }
 
-                // Generate the tooltip contents
-                const prayerBonuses = {
-                    prayerBonusAttack: {description: 'Melee Accuracy', isNumeric: true},
-                    prayerBonusStrength: {description: 'Melee Strength', isNumeric: true},
-                    prayerBonusDefence: {description: 'Melee Evasion', isNumeric: true},
-                    prayerBonusAttackRanged: {description: 'Ranged Accuracy', isNumeric: true},
-                    prayerBonusStrengthRanged: {description: 'Ranged Strength', isNumeric: true},
-                    prayerBonusDefenceRanged: {description: 'Ranged Evasion', isNumeric: true},
-                    prayerBonusAttackMagic: {description: 'Magic Accuracy', isNumeric: true},
-                    prayerBonusDamageMagic: {description: 'Magic Damage', isNumeric: true},
-                    prayerBonusDefenceMagic: {description: 'Magic Evasion', isNumeric: true},
-                    prayerBonusProtectItem: {description: 'Keep item on death', isNumeric: false},
-                    prayerBonusHitpoints: {description: '2x Restore Rate for Hitpoints', isNumeric: false},
-                    prayerBonusProtectFromMelee: {
-                        description: `${protectFromValue}% chance to dodge Melee Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusProtectFromRanged: {
-                        description: `${protectFromValue}% chance to dodge Ranged Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusProtectFromMagic: {
-                        description: `${protectFromValue}% chance to dodge Magic Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusHitpointHeal: {description: 'Heal +20% HP when HP falls below 10%', isNumeric: false},
-                    prayerBonusDamageReduction: {description: 'Damage Reduction', isNumeric: true},
-                };
                 const tooltips = [];
                 PRAYER.forEach((prayer) => {
                     let tooltip = `<div class="text-center">${prayer.name}<br><small><span class='text-info'>`;
-                    prayer.vars.forEach((prayerBonus, i) => {
-                        if (prayerBonuses[prayerBonus].isNumeric) {
-                            tooltip += `+${prayer.values[i]}% `;
-                        }
-                        tooltip += `${prayerBonuses[prayerBonus].description}<br>`;
-                    });
-                    tooltip += '</span>';
+                    tooltip += prayer.description;
+                    tooltip += '<br></span>';
                     if (prayer.pointsPerPlayer > 0) {
                         tooltip += `<span class='text-success'>+${(2 / numberMultiplier * prayer.pointsPerPlayer).toFixed(2)} Prayer XP per damage dealt to enemy</span><br>`;
                     }

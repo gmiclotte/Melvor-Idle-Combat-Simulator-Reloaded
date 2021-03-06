@@ -95,44 +95,9 @@
                 for (let i = 0; i < PRAYER.length; i++) {
                     this.prayerSelected.push(false);
                 }
-                this.prayerKeyMap = {
-                    prayerBonusAttack: 'meleeAccuracy',
-                    prayerBonusStrength: 'meleeDamage',
-                    prayerBonusDefence: 'meleeEvasion',
-                    prayerBonusAttackRanged: 'rangedAccuracy',
-                    prayerBonusStrengthRanged: 'rangedDamage',
-                    prayerBonusDefenceRanged: 'rangedEvasion',
-                    prayerBonusAttackMagic: 'magicAccuracy',
-                    prayerBonusDamageMagic: 'magicDamage',
-                    prayerBonusDefenceMagic: 'magicEvasion',
-                    prayerBonusProtectItem: 'protectItem',
-                    prayerBonusHitpoints: 'hitpoints',
-                    prayerBonusProtectFromMelee: 'protectFromMelee',
-                    prayerBonusProtectFromRanged: 'protectFromRanged',
-                    prayerBonusProtectFromMagic: 'protectFromMagic',
-                    prayerBonusHitpointHeal: 'hitpointHeal',
-                    prayerBonusDamageReduction: 'damageReduction',
-                };
                 this.activePrayers = 0;
                 /** Computed Prayer Bonus From UI */
-                this.prayerBonus = {
-                    meleeAccuracy: 0,
-                    meleeDamage: 0,
-                    meleeEvasion: 0,
-                    rangedAccuracy: 0,
-                    rangedDamage: 0,
-                    rangedEvasion: 0,
-                    magicAccuracy: 0,
-                    magicDamage: 0,
-                    magicEvasion: 0,
-                    protectItem: 0,
-                    hitpoints: 1,
-                    protectFromMelee: 0,
-                    protectFromRanged: 0,
-                    protectFromMagic: 0,
-                    hitpointHeal: 0,
-                    damageReduction: 0,
-                };
+                this.resetPrayerBonus();
                 /** Aurora Bonuses */
                 this.auroraBonus = {
                     attackSpeedBuff: 0,
@@ -266,7 +231,7 @@
                     /** @type {EquipmentStats} */
                     equipmentStats: {},
                     options: {},
-                    prayerBonus: {},
+                    prayerBonus: {modifiers:{}, vars:{}},
                     herbloreBonus: {},
                     combatStats: {},
                     attackStyle: {},
@@ -642,8 +607,17 @@
                 this.resetPrayerBonus();
                 for (let i = 0; i < this.prayerSelected.length; i++) {
                     if (this.prayerSelected[i]) {
-                        for (let j = 0; j < PRAYER[i].vars.length; j++) {
-                            this.prayerBonus[this.prayerKeyMap[PRAYER[i].vars[j]]] += PRAYER[i].values[j];
+                        if (PRAYER[i].modifiers !== undefined) {
+                            for (const modifier in PRAYER[i].modifiers) {
+                                this.addModifiers(PRAYER[i].modifiers, this.prayerBonus.modifiers);
+                            }
+                        }
+                        if (PRAYER[i].vars !== undefined) {
+                            let j = 0;
+                            for (const v of PRAYER[i].vars) {
+                                this.prayerBonus[v] += PRAYER[i].values[j];
+                                j++;
+                            }
                         }
                     }
                 }
@@ -653,22 +627,45 @@
              * Resets prayer bonuses to none
              */
             resetPrayerBonus() {
-                this.prayerBonus.meleeAccuracy = 0;
-                this.prayerBonus.meleeDamage = 0;
-                this.prayerBonus.meleeEvasion = 0;
-                this.prayerBonus.rangedAccuracy = 0;
-                this.prayerBonus.rangedDamage = 0;
-                this.prayerBonus.rangedEvasion = 0;
-                this.prayerBonus.magicAccuracy = 0;
-                this.prayerBonus.magicDamage = 0;
-                this.prayerBonus.magicEvasion = 0;
-                this.prayerBonus.protectItem = 0;
-                this.prayerBonus.hitpoints = 1;
-                this.prayerBonus.protectFromMelee = 0;
-                this.prayerBonus.protectFromRanged = 0;
-                this.prayerBonus.protectFromMagic = 0;
-                this.prayerBonus.hitpointHeal = 0;
-                this.prayerBonus.damageReduction = 0;
+                const prayerVars = {};
+                PRAYER.map(x => x.vars)
+                    .filter(x => x !== undefined)
+                    .forEach(vars => vars.forEach(v => {
+                        if (prayerVars[v] === undefined) {
+                            prayerVars[v] = 0;
+                        }
+                    }));
+                this.prayerBonus = {
+                    modifiers: this.copyModifierTemplate(),
+                    vars: prayerVars,
+                };
+            }
+
+            /**
+             * Add modifiers in source to target
+             * @param source
+             * @param target
+             */
+            addModifiers(source, target) {
+                for (const modifier in source) {
+                    target[modifier] += source[modifier];
+                }
+            }
+
+            /**
+             * Create new modifiers object
+             * @returns {{}}
+             */
+            copyModifierTemplate() {
+                const modifiers = {}
+                for (const prop in playerModifiersTemplate) {
+                    if (playerModifiersTemplate[prop].length || !Number.isInteger(playerModifiersTemplate[prop])) {
+                        modifiers[prop] = [];
+                    } else {
+                        modifiers[prop] = 0;
+                    }
+                }
+                return modifiers;
             }
 
             /**
@@ -1501,13 +1498,13 @@
                 // Do check for protection prayer
                 switch (MONSTERS[monsterID].attackType) {
                     case CONSTANTS.attackType.Melee:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.protectFromMelee > 0;
+                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromMelee > 0;
                         break;
                     case CONSTANTS.attackType.Ranged:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.protectFromRanged > 0;
+                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromRanged > 0;
                         break;
                     case CONSTANTS.attackType.Magic:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.protectFromMagic > 0;
+                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromMagic > 0;
                         break;
                 }
                 // Do preprocessing of player stats for special weapons
