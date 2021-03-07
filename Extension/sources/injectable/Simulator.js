@@ -19,6 +19,8 @@
              */
             constructor(parent, workerURL) {
                 this.parent = parent;
+                // player modifiers
+                this.modifiers = this.copyModifierTemplate();
                 // Player combat stats
                 /** @type {Levels} */
                 this.playerLevels = {
@@ -666,6 +668,15 @@
                     }
                 }
                 return modifiers;
+            }
+
+            /**
+             * Update this.modifiers
+             */
+            updateModifiers() {
+                this.modifiers = this.copyModifierTemplate();
+                // TODO: implement this
+                this.addModifiers(this.prayerBonus.modifiers, this.modifiers);
             }
 
             /**
