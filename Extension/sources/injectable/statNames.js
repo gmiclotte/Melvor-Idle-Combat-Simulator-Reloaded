@@ -285,6 +285,26 @@
             increasedEarthFireSpellDmg: {},
         }
 
+        // report stats that no longer exist
+        const existing = {};
+        items.forEach(item => {
+            Object.getOwnPropertyNames(item).forEach(prop => {
+                existing[prop] = true;
+            });
+        });
+        [
+            MICSR.equipmentStatNames,
+            MICSR.passiveStatNames,
+            MICSR.requiredStatNames,
+            MICSR.irrelevantStatNames,
+        ].forEach(props => {
+            Object.getOwnPropertyNames(props).forEach(prop => {
+                if (!existing[prop]) {
+                    MICSR.log(`unknown item property ${prop}`);
+                }
+            });
+        });
+
         // report unknown stats
         const known = [MICSR.equipmentStatNames, MICSR.passiveStatNames, MICSR.requiredStatNames, MICSR.irrelevantStatNames];
         MICSR.checkUnknown(items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem), 'Item', 'items', known, MICSR.brokenStatNames);
