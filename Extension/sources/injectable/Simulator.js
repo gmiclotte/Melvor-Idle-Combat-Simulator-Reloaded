@@ -480,38 +480,151 @@
                 this.equipmentStats = equipmentStats;
             }
 
+            //TODO: implement this
+            getSkillHiddenLevels(skillID) {
+                return 0;
+            }
+
+            /**
+             * calculatePlayerAccuracyRating
+             */
+            calculatePlayerAccuracyRating(modifiers) {
+                switch (this.combatStats.attackType) {
+                    case CONSTANTS.attackType.Ranged:
+                        return this.maxRangedAttackRoll(modifiers);
+                    case CONSTANTS.attackType.Magic:
+                        return this.maxMagicAttackRoll(modifiers);
+                    case CONSTANTS.attackType.Melee:
+                        return this.maxMeleeAttackRoll(modifiers);
+                }
+            }
+
+            maxRangedAttackRoll(modifiers) {
+                // attack style bonus
+                let attackStyleBonusAccuracy = 0;
+                if (this.attackStyle.Ranged === 0) {
+                    attackStyleBonusAccuracy += 3;
+                    this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
+                }
+                // effective level
+                const effectiveAttackLevel = Math.floor(
+                    this.playerLevels.Ranged + 8 + attackStyleBonusAccuracy
+                    + this.getSkillHiddenLevels(CONSTANTS.skill.Ranged)
+                );
+                // max roll
+                let maxAttackRoll = Math.floor(
+                    effectiveAttackLevel
+                    * (this.equipmentStats.rangedAttackBonus + 64)
+                    * (1 + this.herbloreBonus.rangedAccuracy / 100)
+                );
+                maxAttackRoll = applyModifier(
+                    maxAttackRoll,
+                    modifiers.increasedRangedAccuracyBonus
+                    + modifiers.increasedGlobalAccuracy
+                    - modifiers.decreasedRangedAccuracyBonus
+                    - modifiers.decreasedGlobalAccuracy
+                    // TODO: is this a debuff? if so, add it to the acc calc in the simulation
+                    // - combatData.player.decreasedAccuracy
+                );
+                return maxAttackRoll;
+            }
+
+            maxMagicAttackRoll(modifiers) {
+                // attack style bonus
+                let attackStyleBonusAccuracy = 0;
+                // effective level
+                const effectiveAttackLevel = Math.floor(
+                    this.playerLevels.Magic + 8 + attackStyleBonusAccuracy +
+                    this.getSkillHiddenLevels(CONSTANTS.skill.Magic)
+                );
+                // max roll
+                let maxAttackRoll = Math.floor(
+                    effectiveAttackLevel
+                    * (this.equipmentStats.magicAttackBonus + 64)
+                    * (1 + this.herbloreBonus.magicAccuracy / 100)
+                );
+                maxAttackRoll = applyModifier(
+                    maxAttackRoll,
+                    modifiers.increasedMagicAccuracyBonus
+                    + modifiers.increasedGlobalAccuracy
+                    - modifiers.decreasedMagicAccuracyBonus
+                    - modifiers.decreasedGlobalAccuracy
+                    // TODO: is this a debuff? if so, add it to the acc calc in the simulation
+                    // - combatData.player.decreasedAccuracy
+                );
+                return maxAttackRoll;
+            }
+
+            maxMeleeAttackRoll(modifiers) {
+                // attack style bonus
+                let attackStyleBonusAccuracy = 0;
+                if (this.petOwned[12]) {
+                    attackStyleBonusAccuracy += 3;
+                }
+                // effective level
+                const effectiveAttackLevel = Math.floor(
+                    this.playerLevels.Attack + 8 + attackStyleBonusAccuracy +
+                    this.getSkillHiddenLevels(CONSTANTS.skill.Attack)
+                );
+                // max roll
+                let maxAttackRoll = Math.floor(
+                    effectiveAttackLevel
+                    * (this.equipmentStats.attackBonus[this.attackStyle.Melee] + 64)
+                    * (1 + this.herbloreBonus.meleeAccuracy / 100)
+                );
+                maxAttackRoll = applyModifier(
+                    maxAttackRoll,
+                    modifiers.increasedMeleeAccuracyBonus
+                    + modifiers.increasedGlobalAccuracy
+                    - modifiers.decreasedMeleeAccuracyBonus
+                    - modifiers.decreasedGlobalAccuracy
+                    // TODO: is this a debuff? if so, add it to the acc calc in the simulation
+                    // - combatData.player.decreasedAccuracy
+                );
+                return maxAttackRoll;
+            }
+
             /**
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
             updateCombatStats() {
+                // update modifiers
+                this.updateModifiers();
+                const modifiers = this.modifiers;
+                // attack speed
                 this.combatStats.attackSpeed = 4000;
+                // min hit
                 this.combatStats.minHit = 0;
+                // rune preservation
                 this.combatStats.runePreservation = 0;
                 let attackStyleBonus = 1;
                 let meleeDefenceBonus = 1;
+                // attack type
                 const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
                 if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
                     // Ranged
                     this.combatStats.attackType = CONSTANTS.attackType.Ranged;
-                    if (this.attackStyle.Ranged === 0) {
-                        attackStyleBonus += 3;
-                        this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
-                    } else if (this.attackStyle.Ranged === 1) {
+                } else if (items[weaponID].isMagic) {
+                    // Magic
+                    this.combatStats.attackType = CONSTANTS.attackType.Magic;
+                } else {
+                    // Melee
+                    this.combatStats.attackType = CONSTANTS.attackType.Melee;
+                }
+                // various
+                if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
+                    // Ranged
+                    if (this.attackStyle.Ranged === 1) {
                         this.combatStats.attackSpeed = this.equipmentStats.attackSpeed - 400;
-                    } else {
+                    }
+                    if (this.attackStyle.Ranged === 2) {
                         meleeDefenceBonus += 3;
                         this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                     }
-                    const effectiveAttackLevel = Math.floor(this.playerLevels.Ranged + 8 + attackStyleBonus);
-                    this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.rangedAttackBonus + 64) * (1 + (this.prayerBonus.rangedAccuracy / 100)) * (1 + this.herbloreBonus.rangedAccuracy / 100));
-
                     const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonus);
                     this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.rangedStrengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.rangedStrengthBonus / 640) * (1 + (this.prayerBonus.rangedDamage / 100)) * (1 + this.herbloreBonus.rangedStrength / 100)));
                 } else if (items[weaponID].isMagic) {
                     // Magic
-                    this.combatStats.attackType = CONSTANTS.attackType.Magic;
-                    const effectiveAttackLevel = Math.floor(this.playerLevels.Magic + 8 + attackStyleBonus);
-                    this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.magicAttackBonus + 64) * (1 + (this.prayerBonus.magicAccuracy / 100)) * (1 + this.herbloreBonus.magicAccuracy / 100));
                     if (this.spells.standard.isSelected) {
                         this.combatStats.maxHit = Math.floor(numberMultiplier * ((SPELLS[this.spells.standard.selectedID].maxHit + SPELLS[this.spells.standard.selectedID].maxHit * (this.equipmentStats.magicDamageBonus / 100)) * (1 + (this.playerLevels.Magic + 1) / 200) * (1 + this.prayerBonus.magicDamage / 100) * (1 + this.herbloreBonus.magicDamage / 100)));
                         this.combatStats.minHit = 0;
@@ -546,16 +659,17 @@
                     }
                 } else {
                     // Melee
-                    this.combatStats.attackType = CONSTANTS.attackType.Melee;
-                    if (this.petOwned[12]) attackStyleBonus += 3;
-                    const effectiveAttackLevel = Math.floor(this.playerLevels.Attack + 8 + attackStyleBonus);
-                    this.combatStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (this.equipmentStats.attackBonus[this.attackStyle.Melee] + 64) * (1 + (this.prayerBonus.meleeAccuracy / 100)) * (1 + this.herbloreBonus.meleeAccuracy / 100));
+                    // max hit
                     let strengthLevelBonus = 1;
                     if (this.petOwned[13]) strengthLevelBonus += 3;
                     const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + strengthLevelBonus);
                     this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.strengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.strengthBonus / 640) * (1 + (this.prayerBonus.meleeDamage / 100)) * (1 + this.herbloreBonus.meleeStrength / 100)));
+                    // attack speed
                     this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                 }
+                // max attack roll
+                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(modifiers);
+                // defence
                 const effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + meleeDefenceBonus);
                 this.combatStats.maxDefRoll = Math.floor(effectiveDefenceLevel * (this.equipmentStats.defenceBonus + 64) * (1 + (this.prayerBonus.meleeEvasion) / 100) * (1 + this.herbloreBonus.meleeEvasion / 100));
                 const effectiveRngDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1);
