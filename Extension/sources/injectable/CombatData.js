@@ -540,6 +540,71 @@
             }
 
             /**
+             * mimic calculatePlayerEvasionRating
+             */
+            calculatePlayerEvasionRating(player = {}) {
+                //Melee defence
+                let effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
+                if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 2) {
+                    // long range // TODO this is not implemented in the game #
+                    // effectiveDefenceLevel += 3;
+                }
+                const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
+                    effectiveDefenceLevel,
+                    this.baseStats.defenceBonus,
+                    this.herbloreBonus.meleeEvasion,
+                    this.modifiers.increasedMeleeEvasion,
+                    this.modifiers.decreasedMeleeEvasion,
+                    player.meleeEvasionBuff,
+                    player.meleeEvasionDebuff,
+                );
+                //Ranged Defence
+                const effectiveRangedDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
+                const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
+                    effectiveRangedDefenceLevel,
+                    this.baseStats.defenceBonusRanged,
+                    this.herbloreBonus.rangedEvasion,
+                    this.modifiers.increasedRangedEvasion,
+                    this.modifiers.decreasedRangedEvasion,
+                    player.rangedEvasionBuff,
+                    player.rangedEvasionDebuff,
+                );
+                //Magic Defence
+                const effectiveMagicDefenceLevel = Math.floor(
+                    (this.playerLevels.Magic + getSkillHiddenLevels(CONSTANTS.skill.Magic)) * 0.7
+                    + (this.playerLevels.Defence + getSkillHiddenLevels(CONSTANTS.skill.Defence)) * 0.3
+                    + 8 + 1
+                );
+                const maximumMagicDefenceRoll = this.calculateGenericPlayerEvasionRating(
+                    effectiveMagicDefenceLevel,
+                    this.baseStats.defenceBonusMagic,
+                    this.herbloreBonus.magicEvasion,
+                    this.modifiers.increasedMagicEvasion,
+                    this.modifiers.decreasedMagicEvasion,
+                    player.magicEvasionBuff,
+                    player.magicEvasionDebuff,
+                );
+                return {
+                    melee: maximumDefenceRoll,
+                    ranged: maximumRangedDefenceRoll,
+                    magic: maximumMagicDefenceRoll,
+                }
+            }
+
+            calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, herbloreBonus, increaseModifier, decreaseModifier, buff, debuff) {
+                let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64) * (1 + herbloreBonus / 100));
+                maxDefRoll = applyModifier(maxDefRoll, increaseModifier - decreaseModifier);
+                //apply player buffs first
+                if (buff) {
+                    maxDefRoll = Math.floor(maxDefRoll * (1 + buff / 100));
+                }
+                //then apply enemy debuffs
+                if (debuff) {
+                    maxDefRoll = Math.floor(maxDefRoll * (1 - debuff / 100));
+                }
+                return maxDefRoll;
+            }
+            /**
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
             updateCombatStats() {
