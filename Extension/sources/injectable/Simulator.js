@@ -759,7 +759,7 @@
                     || this.currentSim.playerStats.activeItems.slayerCrossbow
                     || this.currentSim.playerStats.activeItems.bigRon) {
                     // recompute base stats
-                    this.currentSim.combatData.updatePlayerBaseStats(this.currentSim.baseStats, monsterID);
+                    this.currentSim.combatData.updatePlayerBaseStats(monsterID);
                     // max attack roll
                     this.combatStats.maxAttackRoll = this.currentSim.combatData.calculatePlayerAccuracyRating(this.currentSim.baseStats, this.currentSim.modifiers);
                     // max hit roll

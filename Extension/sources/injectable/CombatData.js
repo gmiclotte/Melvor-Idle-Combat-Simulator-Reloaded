@@ -311,7 +311,6 @@
                 let attackStyleBonusAccuracy = 0;
                 if (this.attackStyle.Ranged === 0) {
                     attackStyleBonusAccuracy += 3;
-                    this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                 }
                 // effective level
                 const effectiveAttackLevel = Math.floor(
@@ -419,8 +418,8 @@
             /**
              * mimic updatePlayerBaseStats
              */
-            updatePlayerBaseStats(baseStats, monsterID = undefined) {
-                baseStats = this.resetPlayerBaseStats(baseStats);
+            updatePlayerBaseStats(monsterID = undefined) {
+                const baseStats = this.resetPlayerBaseStats();
                 for (let i = 0; i < 3; i++) {
                     baseStats.attackBonus[i] += this.equipmentStats.attackBonus[i];
                 }
@@ -434,8 +433,9 @@
                 baseStats.defenceBonusMagic += this.equipmentStats.magicDefenceBonus;
                 baseStats.damageBonusMagic += this.equipmentStats.magicDamageBonus;
                 if (monsterID === undefined) {
-                    return;
+                    return baseStats;
                 }
+                // changes for items that have different formulas in combat
                 if (this.equipmentStats.activeItems.stormsnap) {
                     baseStats.strengthBonusRanged = Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
                     baseStats.attackBonusRanged = Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
@@ -446,6 +446,7 @@
                 } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
                     baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
                 }
+                return baseStats;
             }
 
             /**
@@ -545,7 +546,7 @@
                 this.updateModifiers();
                 const modifiers = this.modifiers;
                 // set base stats
-                this.updatePlayerBaseStats(this.baseStats);
+                this.baseStats = this.updatePlayerBaseStats();
                 // attack type
                 this.setAttackType();
                 // attack speed
