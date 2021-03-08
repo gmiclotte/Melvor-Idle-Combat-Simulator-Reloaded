@@ -621,39 +621,65 @@
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
             updateCombatStats() {
+
+                /*
+                First, gather all bonuses TODO: extract this
+                 */
+
                 // update numberMultiplier
                 if (this.isAdventure) {
                     this.numberMultiplier = 100;
                 } else {
                     this.numberMultiplier = 10;
                 }
+
                 // update modifiers
                 this.updateModifiers();
                 const modifiers = this.modifiers;
+
+                // update aurora bonuses //TODO: are some of these modifiers?
+                this.computeAuroraBonus();
+
                 // set base stats
                 this.baseStats = this.updatePlayerBaseStats();
+
+                /*
+                Second, start computing and configuring TODO: extract this
+                 */
+
                 // attack type
                 this.setAttackType();
+
                 // attack speed
+                // TODO implement calculatePlayerAttackSpeed
                 this.combatStats.attackSpeed = 4000;
-                // min hit
-                this.combatStats.minHit = 0;
+                this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
+                if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 1) {
+                    this.combatStats.attackSpeed -= 400;
+                }
+
                 // rune preservation
                 this.combatStats.runePreservation = 0;
-                let attackStyleBonus = 1;
-                let meleeDefenceBonus = 1;
-                // various
-                if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
-                    // Ranged
-                    if (this.attackStyle.Ranged === 1) {
-                        this.combatStats.attackSpeed = this.equipmentStats.attackSpeed - 400;
+                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
+                    // Magic
+                    if (this.equipmentStats.activeItems.skullCape) {
+                        this.combatStats.runePreservation += 0.2;
                     }
-                    if (this.attackStyle.Ranged === 2) {
-                        meleeDefenceBonus += 3;
-                        this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
+                    if (this.petOwned[17]) {
+                        this.combatStats.runePreservation += 0.05;
                     }
-                    const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonus);
-                } else if (items[weaponID].isMagic) {
+                }
+
+                // max attack roll
+                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.baseStats, modifiers);
+
+                // max hit roll
+                this.combatStats.maxHit = this.calculatePlayerMaxHit(this.baseStats, modifiers);
+
+                // min hit roll
+                this.combatStats.minHit = 0;
+                // TODO: fix this
+                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
                     // Magic
                     if (this.spells.standard.isSelected) {
                         this.combatStats.minHit = 0;
@@ -673,62 +699,24 @@
                             default:
                         }
                     }
-                    this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
-                    if (this.equipmentStats.activeItems.skullCape) {
-                        this.combatStats.runePreservation += 0.2;
-                    }
-                    if (this.petOwned[17]) {
-                        this.combatStats.runePreservation += 0.05;
-                    }
-                } else {
-                    // Melee
-                    // max hit
-                    let strengthLevelBonus = 1;
-                    if (this.petOwned[13]) strengthLevelBonus += 3;
-                    const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + strengthLevelBonus);
-                    // attack speed
-                    this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
-                }
-                // max attack roll
-                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.baseStats, modifiers);
-                // max hit roll
-                this.combatStats.maxHit = this.calculatePlayerMaxHit(this.baseStats, modifiers);
-                // defence
-                const effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + meleeDefenceBonus);
-                this.combatStats.maxDefRoll = Math.floor(effectiveDefenceLevel * (this.equipmentStats.defenceBonus + 64) * (1 + (this.prayerBonus.meleeEvasion) / 100) * (1 + this.herbloreBonus.meleeEvasion / 100));
-                const effectiveRngDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1);
-                this.combatStats.maxRngDefRoll = Math.floor(effectiveRngDefenceLevel * (this.equipmentStats.rangedDefenceBonus + 64) * (1 + (this.prayerBonus.rangedEvasion) / 100) * (1 + this.herbloreBonus.rangedEvasion / 100));
-                const effectiveMagicDefenceLevel = Math.floor(this.playerLevels.Magic * 0.7 + this.playerLevels.Defence * 0.3 + 9);
-                this.combatStats.maxMagDefRoll = Math.floor(effectiveMagicDefenceLevel * (this.equipmentStats.magicDefenceBonus + 64) * (1 + (this.prayerBonus.magicEvasion / 100)) * (1 + this.herbloreBonus.magicEvasion / 100));
-                // Peri
-                if (this.petOwned[22]) {
-                    this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * 1.05);
-                    this.combatStats.maxRngDefRoll = Math.floor(this.combatStats.maxRngDefRoll * 1.05);
-                    this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * 1.05);
-                }
-                // Update aurora bonuses
-                this.computeAuroraBonus();
-                if (this.auroraBonus.meleeEvasionBuff !== 0) {
-                    this.combatStats.maxDefRoll = Math.floor(this.combatStats.maxDefRoll * (1 + this.auroraBonus.meleeEvasionBuff / 100));
-                }
-                if (this.auroraBonus.rangedEvasionBuff !== 0) {
-                    this.combatStats.maxRngDefRoll = Math.floor(this.combatStats.maxRngDefRoll * (1 + this.auroraBonus.rangedEvasionBuff / 100));
-                }
-                if (this.auroraBonus.magicEvasionBuff !== 0) {
-                    this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * (1 + this.auroraBonus.magicEvasionBuff / 100));
                 }
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
                     this.combatStats.minHit += this.auroraBonus.increasedMinHit;
                 }
+
+                // max defence roll
+                const evasionRatings = this.calculatePlayerEvasionRating({
+                    meleeEvasionBuff: this.auroraBonus.meleeEvasionBuff,
+                    rangedEvasionBuff: this.auroraBonus.rangedEvasionBuff,
+                    magicEvasionBuff: this.auroraBonus.magicEvasionBuff,
+                });
+                this.combatStats.maxDefRoll = evasionRatings.melee;
+                this.combatStats.maxRngDefRoll = evasionRatings.ranged;
+                this.combatStats.maxMagDefRoll = evasionRatings.magic;
+
                 // Calculate damage reduction
-                this.combatStats.damageReduction = this.equipmentStats.damageReduction + this.herbloreBonus.damageReduction + this.prayerBonus.damageReduction;
-                if (this.equipmentSelected[CONSTANTS.equipmentSlot.Passive] === CONSTANTS.item.Guardian_Amulet) {
-                    // Guardian Amulet gives +5% DR in passive slot
-                    this.combatStats.damageReduction += 5;
-                }
-                if (this.petOwned[14]) {
-                    this.combatStats.damageReduction++;
-                }
+                this.combatStats.damageReduction = this.calculatePlayerDamageReduction();
+
                 // Max Hitpoints
                 this.combatStats.maxHitpoints = this.playerLevels.Hitpoints + this.equipmentStats.increasedMaxHitpoints;
                 if (this.petOwned[15]) {
