@@ -112,8 +112,10 @@
                 };
                 // Slayer Variables
                 this.isSlayerTask = false;
-                // Hardcore
+                // Game Mode Settings
                 this.isHardcore = false;
+                this.isAdventure = false;
+                this.numberMultiplier = 10;
                 // combination runes
                 this.useCombinationRunes = false;
                 // Herblore Bonuses
@@ -588,6 +590,12 @@
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
             updateCombatStats() {
+                // update numberMultiplier
+                if (this.isAdventure) {
+                    this.numberMultiplier = 100;
+                } else {
+                    this.numberMultiplier = 10;
+                }
                 // update modifiers
                 this.updateModifiers();
                 const modifiers = this.modifiers;

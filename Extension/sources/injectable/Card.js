@@ -413,9 +413,16 @@
                 container.appendChild(newCCContainer);
             }
 
-            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25) {
-                const yesToggle = () => object[flag] = true;
-                const noToggle = () => object[flag] = false;
+            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25, callBack = () => {
+            }) {
+                const yesToggle = () => {
+                    object[flag] = true;
+                    callBack();
+                }
+                const noToggle = () => {
+                    object[flag] = false;
+                    callBack();
+                }
                 const initialRadio = initialYes ? 0 : 1;
                 this.addRadio(labelText, height, radioName, ['Yes', 'No'], [yesToggle, noToggle], initialRadio);
             }

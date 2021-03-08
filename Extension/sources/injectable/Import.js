@@ -72,6 +72,7 @@
                     cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
                     cookingMastery: cookingMastery,
                     isHardcore: currentGamemode === 1,
+                    isAdventure: currentGamemode === 2,
                     useCombinationRunes: useCombinationRunes,
                 }
 
@@ -102,6 +103,7 @@
                     cookingPool: this.simulator.cookingPool,
                     cookingMastery: this.simulator.cookingMastery,
                     isHardcore: this.simulator.isHardcore,
+                    isAdventure: this.simulator.isAdventure,
                     useCombinationRunes: this.simulator.useCombinationRunes,
                 }
             }
@@ -117,6 +119,7 @@
                 this.importPets(settings.petOwned);
                 this.importAutoEat(settings.autoEatTier, settings.foodSelected, settings.cookingPool, settings.cookingMastery);
                 this.importHardCore(settings.isHardcore);
+                this.importAdventure(settings.isAdventure);
                 this.importUseCombinationRunes(settings.useCombinationRunes);
             }
 
@@ -288,6 +291,18 @@
                     this.simulator.isHardcore = false;
                     document.getElementById('MCS Hardcore Mode Radio No').checked = true;
                 }
+            }
+
+            importAdventure(isAdventure) {
+                // Update adventure mode
+                if (isAdventure) {
+                    this.simulator.isAdventure = true;
+                    document.getElementById('MCS Adventure Mode Radio Yes').checked = true;
+                } else {
+                    this.simulator.isAdventure = false;
+                    document.getElementById('MCS Adventure Mode Radio No').checked = true;
+                }
+                this.simulator.updateCombatStats();
             }
 
             importUseCombinationRunes(useCombinationRunes) {

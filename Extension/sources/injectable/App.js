@@ -299,9 +299,7 @@
                 // Set up spells
                 const standardOpts = this.simulator.spells.standard;
                 this.selectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
                 this.updatePlotData();
                 // Export Options element
@@ -410,13 +408,21 @@
                 );
                 // Slayer task and hardcore mode
                 this.equipmentSelectCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
-                'Slayer Task',
-                    this.equipmentSelectCard.addToggleRadio(
-                        'Hardcore Mode',
-                        'hardcore',
-                        this.simulator,
-                        'isHardcore',
-                    );
+                this.equipmentSelectCard.addToggleRadio(
+                    'Hardcore Mode',
+                    'hardcore',
+                    this.simulator,
+                    'isHardcore',
+                );
+                this.equipmentSelectCard.addToggleRadio(
+                    'Adventure Mode',
+                    'adventure',
+                    this.simulator,
+                    'isAdventure',
+                    false, // default
+                    25, // default
+                    () => this.updateCombatStats(),
+                );
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
@@ -1114,9 +1120,7 @@
                     this.updateStyleDropdowns();
                 }
                 this.checkForElisAss();
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1306,7 +1310,6 @@
                         this.updatePrayerOptions();
                     }
                 }
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1318,7 +1321,6 @@
             styleDropdownOnChange(event, combatType) {
                 const styleID = parseInt(event.currentTarget.selectedOptions[0].value);
                 this.simulator.attackStyle[combatType] = styleID;
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1353,7 +1355,6 @@
                 }
                 if (prayerChanged) {
                     this.simulator.computePrayerBonus();
-                    this.simulator.updateCombatStats();
                     this.updateCombatStats();
                 }
             }
@@ -1366,7 +1367,6 @@
                 const potionTier = parseInt(event.currentTarget.selectedOptions[0].value);
                 this.simulator.potionTier = potionTier;
                 this.simulator.computePotionBonus();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
                 this.updatePotionTier(potionTier);
             }
@@ -1393,7 +1393,6 @@
                     this.selectButton(event.currentTarget);
                 }
                 this.simulator.computePotionBonus();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1462,7 +1461,6 @@
                     }
                 }
                 // Update combat stats for new spell
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1480,7 +1478,6 @@
                     this.simulator.petOwned[petID] = true;
                     this.selectButton(event.currentTarget);
                 }
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -2085,6 +2082,8 @@
              * Updates the text fields for the stats provided by equipment
              */
             updateEquipmentStats() {
+                // first update the values
+                this.simulator.updateEquipmentStats();
                 let newStatValue;
                 [this.equipKeys, this.requiredKeys].forEach(keys => {
                     for (let i = 0; i < keys.length; i++) {
@@ -2103,6 +2102,8 @@
              * Updates the text fields for the computed combat stats
              */
             updateCombatStats() {
+                // first update the values
+                this.simulator.updateCombatStats();
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
                         const attackSpeed = this.simulator.playerAttackSpeed();
@@ -2317,9 +2318,7 @@
                     }
                 }
                 // Update equipment stats and combat stats
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
