@@ -69,6 +69,7 @@ function injectScripts() {
         'statNames',
         // class files
         'Card',
+        'CombatData',
         'Import',
         'Loot',
         'Plotter',

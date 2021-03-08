@@ -12,9 +12,8 @@
          */
         MICSR.Import = class {
 
-            constructor(app, simulator) {
+            constructor(app) {
                 this.app = app;
-                this.simulator = simulator;
             }
 
             /**
@@ -47,8 +46,8 @@
                     }
                 }
                 // get cooking mastery for food
-                const foodMastery = items[this.simulator.foodSelected].masteryID;
-                const cookingMastery = this.simulator.foodSelected && foodMastery && foodMastery[0] === CONSTANTS.skill.Cooking
+                const foodMastery = items[this.app.combatData.foodSelected].masteryID;
+                const cookingMastery = this.app.combatData.foodSelected && foodMastery && foodMastery[0] === CONSTANTS.skill.Cooking
                     && exp.xp_to_level(MASTERY[CONSTANTS.skill.Cooking].xp[foodMastery[1]]) > 99;
 
                 // create settings object
@@ -84,27 +83,29 @@
 
             exportSettings() {
                 return {
+                    combatData: this.app.combatData,
+                    // TODO: all these should be in CombatData class?
                     equipment: this.app.equipmentSelected,
-                    levels: this.simulator.virtualLevels,
-                    meleeStyle: this.simulator.attackStyle.Melee,
-                    rangedStyle: this.simulator.attackStyle.Ranged,
-                    magicStyle: this.simulator.attackStyle.Magic,
-                    isAncient: this.simulator.spells.ancient.isSelected,
-                    ancient: this.simulator.spells.ancient.selectedID,
-                    spell: this.simulator.spells.standard.selectedID,
-                    curse: this.simulator.spells.curse.selectedID,
-                    aurora: this.simulator.spells.aurora.selectedID,
-                    prayerSelected: this.simulator.prayerSelected,
-                    potionID: this.simulator.potionID,
-                    potionTier: this.simulator.potionTier,
-                    petOwned: this.simulator.petOwned,
-                    autoEatTier: this.simulator.autoEatTier,
-                    foodSelected: this.simulator.foodSelected,
-                    cookingPool: this.simulator.cookingPool,
-                    cookingMastery: this.simulator.cookingMastery,
-                    isHardcore: this.simulator.isHardcore,
-                    isAdventure: this.simulator.isAdventure,
-                    useCombinationRunes: this.simulator.useCombinationRunes,
+                    levels: this.app.combatData.virtualLevels,
+                    meleeStyle: this.app.combatData.attackStyle.Melee,
+                    rangedStyle: this.app.combatData.attackStyle.Ranged,
+                    magicStyle: this.app.combatData.attackStyle.Magic,
+                    isAncient: this.app.combatData.spells.ancient.isSelected,
+                    ancient: this.app.combatData.spells.ancient.selectedID,
+                    spell: this.app.combatData.spells.standard.selectedID,
+                    curse: this.app.combatData.spells.curse.selectedID,
+                    aurora: this.app.combatData.spells.aurora.selectedID,
+                    prayerSelected: this.app.combatData.prayerSelected,
+                    potionID: this.app.combatData.potionID,
+                    potionTier: this.app.combatData.potionTier,
+                    petOwned: this.app.combatData.petOwned,
+                    autoEatTier: this.app.combatData.autoEatTier,
+                    foodSelected: this.app.combatData.foodSelected,
+                    cookingPool: this.app.combatData.cookingPool,
+                    cookingMastery: this.app.combatData.cookingMastery,
+                    isHardcore: this.app.combatData.isHardcore,
+                    isAdventure: this.app.combatData.isAdventure,
+                    useCombinationRunes: this.app.combatData.useCombinationRunes,
                 }
             }
 
@@ -128,11 +129,11 @@
                 this.app.updateSpellOptions();
                 this.app.checkForElisAss();
                 this.app.updatePrayerOptions();
-                this.simulator.updateEquipmentStats();
+                this.app.combatData.updateEquipmentStats();
                 this.app.updateEquipmentStats();
-                this.simulator.computePotionBonus();
-                this.simulator.computePrayerBonus();
-                this.simulator.updateCombatStats();
+                this.app.combatData.computePotionBonus();
+                this.app.combatData.computePrayerBonus();
+                this.app.combatData.updateCombatStats();
                 this.app.updateCombatStats();
             }
 
@@ -149,58 +150,58 @@
                 this.app.skillKeys.forEach(key => {
                     const virtualLevel = levels[key];
                     document.getElementById(`MCS ${key} Input`).value = virtualLevel;
-                    this.simulator.playerLevels[key] = Math.min(virtualLevel, 99);
-                    this.simulator.virtualLevels[key] = virtualLevel;
+                    this.app.combatData.playerLevels[key] = Math.min(virtualLevel, 99);
+                    this.app.combatData.virtualLevels[key] = virtualLevel;
                 });
             }
 
             importStyle(meleeStyle, rangedStyle, magicStyle) {
-                this.simulator.attackStyle.Melee = meleeStyle;
+                this.app.combatData.attackStyle.Melee = meleeStyle;
                 document.getElementById('MCS Melee Style Dropdown').selectedIndex = meleeStyle;
-                this.simulator.attackStyle.Ranged = rangedStyle;
+                this.app.combatData.attackStyle.Ranged = rangedStyle;
                 document.getElementById('MCS Ranged Style Dropdown').selectedIndex = rangedStyle;
-                this.simulator.attackStyle.Magic = magicStyle;
+                this.app.combatData.attackStyle.Magic = magicStyle;
                 document.getElementById('MCS Magic Style Dropdown').selectedIndex = magicStyle;
             }
 
             importSpells(isAncient, ancient, spell, curse, aurora) {
                 // Set all active spell UI to be disabled
-                Object.keys(this.simulator.spells).forEach((spellType) => {
-                    const spellOpts = this.simulator.spells[spellType];
+                Object.keys(this.app.combatData.spells).forEach((spellType) => {
+                    const spellOpts = this.app.combatData.spells[spellType];
                     if (spellOpts.isSelected) {
                         this.app.unselectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
                     }
                 });
                 // import spells
                 if (isAncient) {
-                    this.simulator.spells.ancient.isSelected = true;
-                    this.simulator.spells.ancient.selectedID = ancient;
-                    this.simulator.spells.standard.isSelected = false;
-                    this.simulator.spells.standard.selectedID = null;
-                    this.simulator.spells.curse.isSelected = false;
-                    this.simulator.spells.curse.selectedID = null;
+                    this.app.combatData.spells.ancient.isSelected = true;
+                    this.app.combatData.spells.ancient.selectedID = ancient;
+                    this.app.combatData.spells.standard.isSelected = false;
+                    this.app.combatData.spells.standard.selectedID = null;
+                    this.app.combatData.spells.curse.isSelected = false;
+                    this.app.combatData.spells.curse.selectedID = null;
                 } else {
-                    this.simulator.spells.standard.isSelected = true;
-                    this.simulator.spells.standard.selectedID = spell;
-                    this.simulator.spells.ancient.isSelected = false;
-                    this.simulator.spells.ancient.selectedID = null;
+                    this.app.combatData.spells.standard.isSelected = true;
+                    this.app.combatData.spells.standard.selectedID = spell;
+                    this.app.combatData.spells.ancient.isSelected = false;
+                    this.app.combatData.spells.ancient.selectedID = null;
                     if (curse !== null) {
-                        this.simulator.spells.curse.isSelected = true;
-                        this.simulator.spells.curse.selectedID = curse;
+                        this.app.combatData.spells.curse.isSelected = true;
+                        this.app.combatData.spells.curse.selectedID = curse;
                     } else {
-                        this.simulator.spells.curse.isSelected = false;
-                        this.simulator.spells.curse.selectedID = null;
+                        this.app.combatData.spells.curse.isSelected = false;
+                        this.app.combatData.spells.curse.selectedID = null;
                     }
                 }
                 if (aurora !== null) {
-                    this.simulator.spells.aurora.isSelected = true;
-                    this.simulator.spells.aurora.selectedID = aurora;
+                    this.app.combatData.spells.aurora.isSelected = true;
+                    this.app.combatData.spells.aurora.selectedID = aurora;
                 } else {
-                    this.simulator.spells.aurora.isSelected = false;
-                    this.simulator.spells.aurora.selectedID = null;
+                    this.app.combatData.spells.aurora.isSelected = false;
+                    this.app.combatData.spells.aurora.selectedID = null;
                 }
                 // Update spell UI
-                Object.values(this.simulator.spells).forEach((spellOpts, i) => {
+                Object.values(this.app.combatData.spells).forEach((spellOpts, i) => {
                     if (spellOpts.isSelected) {
                         this.app.selectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
                         this.app.spellSelectCard.onTabClick(i);
@@ -210,36 +211,36 @@
 
             importPrayers(prayerSelected) {
                 // Update prayers
-                this.simulator.activePrayers = 0;
+                this.app.combatData.activePrayers = 0;
                 for (let i = 0; i < PRAYER.length; i++) {
                     const prayButton = document.getElementById(`MCS ${this.app.getPrayerName(i)} Button`);
                     if (prayerSelected[i]) {
                         this.app.selectButton(prayButton);
-                        this.simulator.prayerSelected[i] = true;
-                        this.simulator.activePrayers++;
+                        this.app.combatData.prayerSelected[i] = true;
+                        this.app.combatData.activePrayers++;
                     } else {
                         this.app.unselectButton(prayButton);
-                        this.simulator.prayerSelected[i] = false;
+                        this.app.combatData.prayerSelected[i] = false;
                     }
                 }
             }
 
             importPotion(potionID, potionTier) {
                 // Deselect potion if selected
-                if (this.simulator.potionSelected) {
-                    this.app.unselectButton(document.getElementById(`MCS ${this.app.getPotionName(this.simulator.potionID)} Button`));
-                    this.simulator.potionSelected = false;
-                    this.simulator.potionID = -1;
+                if (this.app.combatData.potionSelected) {
+                    this.app.unselectButton(document.getElementById(`MCS ${this.app.getPotionName(this.app.combatData.potionID)} Button`));
+                    this.app.combatData.potionSelected = false;
+                    this.app.combatData.potionID = -1;
                 }
                 // Select new potion if applicable
                 if (potionID !== -1) {
-                    this.simulator.potionSelected = true;
-                    this.simulator.potionID = potionID;
-                    this.app.selectButton(document.getElementById(`MCS ${this.app.getPotionName(this.simulator.potionID)} Button`));
+                    this.app.combatData.potionSelected = true;
+                    this.app.combatData.potionID = potionID;
+                    this.app.selectButton(document.getElementById(`MCS ${this.app.getPotionName(this.app.combatData.potionID)} Button`));
                 }
                 // Set potion tier if applicable
                 if (potionTier !== -1) {
-                    this.simulator.potionTier = potionTier;
+                    this.app.combatData.potionTier = potionTier;
                     this.app.updatePotionTier(potionTier);
                     // Set dropdown to correct option
                     document.getElementById('MCS Potion Tier Dropdown').selectedIndex = potionTier;
@@ -249,7 +250,7 @@
             importPets(petOwned) {
                 // Import PETS
                 petOwned.forEach((owned, petID) => {
-                    this.simulator.petOwned[petID] = owned;
+                    this.app.combatData.petOwned[petID] = owned;
                     if (this.app.combatPetsIds.includes(petID)) {
                         if (owned) {
                             this.app.selectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
@@ -263,21 +264,21 @@
 
             importAutoEat(autoEatTier, foodSelected, cookingPool, cookingMastery) {
                 // Import Food Settings
-                this.simulator.autoEatTier = autoEatTier;
+                this.app.combatData.autoEatTier = autoEatTier;
                 document.getElementById('MCS Auto Eat Tier Dropdown').selectedIndex = autoEatTier + 1;
                 this.app.equipFood(foodSelected);
                 if (cookingPool) {
-                    this.simulator.cookingPool = true;
+                    this.app.combatData.cookingPool = true;
                     document.getElementById('MCS 95% Pool: +10% Radio Yes').checked = true;
                 } else {
-                    this.simulator.cookingPool = false;
+                    this.app.combatData.cookingPool = false;
                     document.getElementById('MCS 95% Pool: +10% Radio No').checked = true;
                 }
                 if (cookingMastery) {
-                    this.simulator.cookingMastery = true;
+                    this.app.combatData.cookingMastery = true;
                     document.getElementById('MCS 99 Mastery: +20% Radio Yes').checked = true;
                 } else {
-                    this.simulator.cookingMastery = false;
+                    this.app.combatData.cookingMastery = false;
                     document.getElementById('MCS 99 Mastery: +20% Radio No').checked = true;
                 }
             }
@@ -285,10 +286,10 @@
             importHardCore(isHardcore) {
                 // Update hardcore mode
                 if (isHardcore) {
-                    this.simulator.isHardcore = true;
+                    this.app.combatData.isHardcore = true;
                     document.getElementById('MCS Hardcore Mode Radio Yes').checked = true;
                 } else {
-                    this.simulator.isHardcore = false;
+                    this.app.combatData.isHardcore = false;
                     document.getElementById('MCS Hardcore Mode Radio No').checked = true;
                 }
             }
@@ -296,22 +297,22 @@
             importAdventure(isAdventure) {
                 // Update adventure mode
                 if (isAdventure) {
-                    this.simulator.isAdventure = true;
+                    this.app.combatData.isAdventure = true;
                     document.getElementById('MCS Adventure Mode Radio Yes').checked = true;
                 } else {
-                    this.simulator.isAdventure = false;
+                    this.app.combatData.isAdventure = false;
                     document.getElementById('MCS Adventure Mode Radio No').checked = true;
                 }
-                this.simulator.updateCombatStats();
+                this.app.combatData.updateCombatStats();
             }
 
             importUseCombinationRunes(useCombinationRunes) {
                 // Update hardcore mode
                 if (useCombinationRunes) {
-                    this.simulator.useCombinationRunes = true;
+                    this.app.combatData.useCombinationRunes = true;
                     document.getElementById('MCS Use Combination Runes Radio Yes').checked = true;
                 } else {
-                    this.simulator.useCombinationRunes = false;
+                    this.app.combatData.useCombinationRunes = false;
                     document.getElementById('MCS Use Combination Runes Radio No').checked = true;
                 }
             }
