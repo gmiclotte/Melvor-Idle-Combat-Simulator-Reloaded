@@ -604,6 +604,19 @@
                 }
                 return maxDefRoll;
             }
+
+            /**
+             * mimic calculatePlayerDamageReduction
+             */
+            calculatePlayerDamageReduction(player = {}) {
+                let damageReduction = this.baseStats.damageReduction + this.herbloreBonus.damageReduction + this.modifiers.increasedDamageReduction;
+                damageReduction -= this.modifiers.decreasedDamageReduction;
+                if (player.markOfDeath) {
+                    damageReduction = Math.floor(damageReduction / 2);
+                }
+                return damageReduction;
+            }
+
             /**
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
