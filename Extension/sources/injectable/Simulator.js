@@ -21,6 +21,8 @@
                 this.parent = parent;
                 // player modifiers
                 this.modifiers = this.copyModifierTemplate();
+                // base stats
+                this.baseStats = this.resetPlayerBaseStats();
                 // Player combat stats
                 /** @type {Levels} */
                 this.playerLevels = {
@@ -235,7 +237,7 @@
                     /** @type {EquipmentStats} */
                     equipmentStats: {},
                     options: {},
-                    prayerBonus: {modifiers:{}, vars:{}},
+                    prayerBonus: {modifiers: {}, vars: {}},
                     herbloreBonus: {},
                     combatStats: {},
                     attackStyle: {},
@@ -344,7 +346,7 @@
                 worker.postMessage({
                     action: 'RECEIVE_GAMEDATA',
                     protectFromValue: protectFromValue,
-                    numberMultiplier: numberMultiplier,
+                    numberMultiplier: this.numberMultiplier,
                     enemySpecialAttacks: enemySpecialAttacks,
                     enemySpawnTimer: enemySpawnTimer,
                     hitpointRegenInterval: hitpointRegenInterval,
@@ -488,20 +490,20 @@
             }
 
             /**
-             * calculatePlayerAccuracyRating
+             * mimic calculatePlayerAccuracyRating
              */
-            calculatePlayerAccuracyRating(modifiers) {
+            calculatePlayerAccuracyRating(baseStats, modifiers) {
                 switch (this.combatStats.attackType) {
                     case CONSTANTS.attackType.Ranged:
-                        return this.maxRangedAttackRoll(modifiers);
+                        return this.maxRangedAttackRoll(baseStats, modifiers);
                     case CONSTANTS.attackType.Magic:
-                        return this.maxMagicAttackRoll(modifiers);
+                        return this.maxMagicAttackRoll(baseStats, modifiers);
                     case CONSTANTS.attackType.Melee:
-                        return this.maxMeleeAttackRoll(modifiers);
+                        return this.maxMeleeAttackRoll(baseStats, modifiers);
                 }
             }
 
-            maxRangedAttackRoll(modifiers) {
+            maxRangedAttackRoll(baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 if (this.attackStyle.Ranged === 0) {
@@ -516,7 +518,7 @@
                 // max roll
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
-                    * (this.equipmentStats.rangedAttackBonus + 64)
+                    * (baseStats.attackBonusRanged + 64)
                     * (1 + this.herbloreBonus.rangedAccuracy / 100)
                 );
                 maxAttackRoll = applyModifier(
@@ -531,7 +533,7 @@
                 return maxAttackRoll;
             }
 
-            maxMagicAttackRoll(modifiers) {
+            maxMagicAttackRoll(baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 // effective level
@@ -542,7 +544,7 @@
                 // max roll
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
-                    * (this.equipmentStats.magicAttackBonus + 64)
+                    * (baseStats.attackBonusMagic + 64)
                     * (1 + this.herbloreBonus.magicAccuracy / 100)
                 );
                 maxAttackRoll = applyModifier(
@@ -557,7 +559,7 @@
                 return maxAttackRoll;
             }
 
-            maxMeleeAttackRoll(modifiers) {
+            maxMeleeAttackRoll(baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 if (this.petOwned[12]) {
@@ -571,7 +573,7 @@
                 // max roll
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
-                    * (this.equipmentStats.attackBonus[this.attackStyle.Melee] + 64)
+                    * (baseStats.attackBonus[this.attackStyle.Melee] + 64)
                     * (1 + this.herbloreBonus.meleeAccuracy / 100)
                 );
                 maxAttackRoll = applyModifier(
@@ -587,6 +589,146 @@
             }
 
             /**
+             * mimic getNumberMultiplierValue
+             */
+            getNumberMultiplierValue(value) {
+                return value * this.numberMultiplier;
+            }
+
+            /**
+             * mimic resetPlayerBaseStats
+             */
+            resetPlayerBaseStats() {
+                return {
+                    attackBonus: [0, 0, 0],
+                    defenceBonus: 0,
+                    strengthBonus: 0,
+                    damageReduction: 0,
+                    attackBonusRanged: 0,
+                    defenceBonusRanged: 0,
+                    strengthBonusRanged: 0,
+                    attackBonusMagic: 0,
+                    defenceBonusMagic: 0,
+                    damageBonusMagic: 0,
+                };
+            }
+
+            /**
+             * mimic updatePlayerBaseStats
+             */
+            updatePlayerBaseStats(baseStats, monsterID = undefined) {
+                baseStats = this.resetPlayerBaseStats(baseStats);
+                for (let i = 0; i < 3; i++) {
+                    baseStats.attackBonus[i] += this.equipmentStats.attackBonus[i];
+                }
+                baseStats.defenceBonus += this.equipmentStats.defenceBonus;
+                baseStats.strengthBonus += this.equipmentStats.strengthBonus;
+                baseStats.damageReduction += this.equipmentStats.damageReduction;
+                baseStats.attackBonusRanged += this.equipmentStats.rangedAttackBonus;
+                baseStats.defenceBonusRanged += this.equipmentStats.rangedDefenceBonus;
+                baseStats.strengthBonusRanged += this.equipmentStats.rangedStrengthBonus;
+                baseStats.attackBonusMagic += this.equipmentStats.magicAttackBonus;
+                baseStats.defenceBonusMagic += this.equipmentStats.magicDefenceBonus;
+                baseStats.damageBonusMagic += this.equipmentStats.magicDamageBonus;
+                if (monsterID === undefined) {
+                    return;
+                }
+                if (this.equipmentStats.activeItems.stormsnap) {
+                    baseStats.strengthBonusRanged = Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
+                    baseStats.attackBonusRanged = Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
+                } else if (this.equipmentStats.activeItems.slayerCrossbow
+                    // && !isDungeon // TODO: implement this check by duplicating certain sims? see issue #10
+                    && (MONSTERS[monsterID].slayerXP !== undefined || this.isSlayerTask)) {
+                    baseStats.strengthBonusRanged = Math.floor(baseStats.strengthBonusRanged * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
+                } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
+                    baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
+                }
+            }
+
+            /**
+             * calculatePlayerMaxHit
+             */
+            calculatePlayerMaxHit(baseStats, modifiers) {
+                let maxHit = 0;
+                switch (this.combatStats.attackType) {
+                    case CONSTANTS.attackType.Ranged:
+                        maxHit = this.maxRangedHit(baseStats, modifiers);
+                        break;
+                    case CONSTANTS.attackType.Magic:
+                        maxHit = this.maxMagicHit(baseStats, modifiers);
+                        break;
+                    case CONSTANTS.attackType.Melee:
+                        maxHit = this.maxMeleeHit(baseStats, modifiers);
+                        break;
+                }
+                // max hit modifiers apply to everything except for ancient magics
+                // TODO: not implemented in game yet
+                if (this.combatStats.attackType !== CONSTANTS.attackType.Magic || !this.spells.ancient.isSelected) {
+                    //maxHit += applyModifier(playerModifiers.increasedMaxHitPercent - playerModifiers.decreasedMaxHitPercent);
+                    //maxHit += getNumberMultiplierValue(playerModifiers.increasedMaxHitFlat - playerModifiers.decreasedMaxHitFlat);
+                }
+                return maxHit
+            }
+
+            maxRangedHit(baseStats, modifiers) {
+                let attackStyleBonusStrength = 0;
+                if (this.attackStyle.Ranged === 0) {
+                    attackStyleBonusStrength += 3;
+                }
+                const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonusStrength + this.getSkillHiddenLevels(CONSTANTS.skill.Ranged));
+                let baseMaxHit = Math.floor(this.numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640) * (1 + this.herbloreBonus.rangedStrength / 100)));
+                baseMaxHit = this.applyModifier(
+                    baseMaxHit,
+                    modifiers.increasedRangedStrengthBonus
+                    - modifiers.decreasedRangedStrengthBonus
+                );
+                return baseMaxHit;
+            }
+
+            maxMagicHit(baseStats, modifiers) {
+                let baseMaxHit;
+                let selectedSpell = this.spells.standard.selectedID;
+                if (!this.spells.ancient.isSelected) {
+                    baseMaxHit = Math.floor(this.numberMultiplier
+                        * (SPELLS[selectedSpell].maxHit + SPELLS[selectedSpell].maxHit * baseStats.damageBonusMagic / 100)
+                        * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200)
+                        * (1 + this.herbloreBonus.magicDamage / 100));
+                    baseMaxHit = applyModifier(
+                        baseMaxHit,
+                        modifiers.increasedMagicDamageBonus
+                        - modifiers.decreasedMagicDamageBonus
+                    );
+                } else {
+                    selectedSpell = this.spells.ancient.selectedID;
+                    baseMaxHit = ANCIENT[selectedSpell].maxHit;
+                }
+                // apply cloud burst effect to normal water spells
+                if (!this.spells.ancient.isSelected
+                    && this.parent.equipmentSelected.includes(CONSTANTS.item.Cloudburst_Staff)
+                    && SPELLS[selectedSpell].spellType === CONSTANTS.spellType.Water) {
+                    baseMaxHit += this.getNumberMultiplierValue(items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage);
+                }
+                // Apply Fury aurora
+                if (this.auroraBonus.increasedMaxHit !== undefined && !this.spells.ancient.isSelected) {
+                    if (this.auroraBonus.increasedMaxHit !== null) {
+                        baseMaxHit += this.auroraBonus.increasedMaxHit;
+                    }
+                }
+                return baseMaxHit;
+            }
+
+            maxMeleeHit(baseStats, modifiers) {
+                const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + this.getSkillHiddenLevels(CONSTANTS.skill.Strength));
+                let baseMaxHit = Math.floor(this.numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640) * (1 + this.herbloreBonus.meleeStrength / 100)));
+                baseMaxHit = applyModifier(
+                    baseMaxHit,
+                    modifiers.increasedMeleeStrengthBonus -
+                    modifiers.decreasedMeleeStrengthBonus
+                );
+                return baseMaxHit;
+            }
+
+            /**
              * Calculates the combat stats from equipment, combat style, spell selection and player levels and stores them in `this.combatStats`
              */
             updateCombatStats() {
@@ -599,14 +741,8 @@
                 // update modifiers
                 this.updateModifiers();
                 const modifiers = this.modifiers;
-                // attack speed
-                this.combatStats.attackSpeed = 4000;
-                // min hit
-                this.combatStats.minHit = 0;
-                // rune preservation
-                this.combatStats.runePreservation = 0;
-                let attackStyleBonus = 1;
-                let meleeDefenceBonus = 1;
+                // set base stats
+                this.updatePlayerBaseStats(this.baseStats);
                 // attack type
                 const weaponID = this.parent.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
                 if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
@@ -619,6 +755,14 @@
                     // Melee
                     this.combatStats.attackType = CONSTANTS.attackType.Melee;
                 }
+                // attack speed
+                this.combatStats.attackSpeed = 4000;
+                // min hit
+                this.combatStats.minHit = 0;
+                // rune preservation
+                this.combatStats.runePreservation = 0;
+                let attackStyleBonus = 1;
+                let meleeDefenceBonus = 1;
                 // various
                 if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
                     // Ranged
@@ -630,11 +774,9 @@
                         this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                     }
                     const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonus);
-                    this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.rangedStrengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.rangedStrengthBonus / 640) * (1 + (this.prayerBonus.rangedDamage / 100)) * (1 + this.herbloreBonus.rangedStrength / 100)));
                 } else if (items[weaponID].isMagic) {
                     // Magic
                     if (this.spells.standard.isSelected) {
-                        this.combatStats.maxHit = Math.floor(numberMultiplier * ((SPELLS[this.spells.standard.selectedID].maxHit + SPELLS[this.spells.standard.selectedID].maxHit * (this.equipmentStats.magicDamageBonus / 100)) * (1 + (this.playerLevels.Magic + 1) / 200) * (1 + this.prayerBonus.magicDamage / 100) * (1 + this.herbloreBonus.magicDamage / 100)));
                         this.combatStats.minHit = 0;
                         switch (SPELLS[this.spells.standard.selectedID].spellType) {
                             case CONSTANTS.spellType.Air:
@@ -651,12 +793,6 @@
                                 break;
                             default:
                         }
-                        // Cloudburst Water Spell Bonus
-                        if (this.parent.equipmentSelected.includes(CONSTANTS.item.Cloudburst_Staff) && SPELLS[this.spells.standard.selectedID].spellType === CONSTANTS.spellType.Water) {
-                            this.combatStats.maxHit += items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage * numberMultiplier;
-                        }
-                    } else {
-                        this.combatStats.maxHit = ANCIENT[this.spells.ancient.selectedID].maxHit * numberMultiplier;
                     }
                     this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                     if (this.equipmentStats.activeItems.skullCape) {
@@ -671,12 +807,13 @@
                     let strengthLevelBonus = 1;
                     if (this.petOwned[13]) strengthLevelBonus += 3;
                     const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + strengthLevelBonus);
-                    this.combatStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + this.equipmentStats.strengthBonus / 80 + effectiveStrengthLevel * this.equipmentStats.strengthBonus / 640) * (1 + (this.prayerBonus.meleeDamage / 100)) * (1 + this.herbloreBonus.meleeStrength / 100)));
                     // attack speed
                     this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                 }
                 // max attack roll
-                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(modifiers);
+                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.baseStats, modifiers);
+                // max hit roll
+                this.combatStats.maxHit = this.calculatePlayerMaxHit(this.baseStats, modifiers);
                 // defence
                 const effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + meleeDefenceBonus);
                 this.combatStats.maxDefRoll = Math.floor(effectiveDefenceLevel * (this.equipmentStats.defenceBonus + 64) * (1 + (this.prayerBonus.meleeEvasion) / 100) * (1 + this.herbloreBonus.meleeEvasion / 100));
@@ -701,9 +838,6 @@
                 if (this.auroraBonus.magicEvasionBuff !== 0) {
                     this.combatStats.maxMagDefRoll = Math.floor(this.combatStats.maxMagDefRoll * (1 + this.auroraBonus.magicEvasionBuff / 100));
                 }
-                if (this.auroraBonus.increasedMaxHit !== 0 && this.spells.standard.isSelected) {
-                    this.combatStats.maxHit += this.auroraBonus.increasedMaxHit;
-                }
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
                     this.combatStats.minHit += this.auroraBonus.increasedMinHit;
                 }
@@ -721,7 +855,7 @@
                 if (this.petOwned[15]) {
                     this.combatStats.maxHitpoints++;
                 }
-                this.combatStats.maxHitpoints *= numberMultiplier;
+                this.combatStats.maxHitpoints *= this.numberMultiplier;
             }
 
             /**
@@ -949,7 +1083,7 @@
 
             getFoodHealAmt() {
                 let amt = items[this.foodSelected].healsFor;
-                amt *= numberMultiplier;
+                amt *= this.numberMultiplier;
                 let multiplier = 1;
                 if (this.cookingPool) {
                     multiplier += .1;
@@ -1090,12 +1224,12 @@
                 // Regen Calculation
                 if (!this.isHardcore) {
                     // Base
-                    playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / numberMultiplier);
+                    playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / this.numberMultiplier);
                     // Shaman Ring
                     playerStats.avgHPRegen += this.equipmentStats.increasedHPRegen;
                     // Hitpoints Skillcape
                     if (playerStats.activeItems.hitpointsSkillcape) {
-                        playerStats.avgHPRegen += 1 * numberMultiplier;
+                        playerStats.avgHPRegen += 1 * this.numberMultiplier;
                     }
                     // Rapid Heal Prayer
                     if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) {
@@ -1172,7 +1306,7 @@
                         playerStats.prayerPointsPerHeal += adjustPP(PRAYER[i].pointsPerRegen);
                         // XP Gain
                         // TODO: this matches the bugged behaviour of 0.18?613 of Melvor Idle
-                        playerStats.prayerXpPerDamage += 2 * PRAYER[i].pointsPerPlayer / numberMultiplier;
+                        playerStats.prayerXpPerDamage += 2 * PRAYER[i].pointsPerPlayer / this.numberMultiplier;
                     }
                 }
 
@@ -1331,7 +1465,7 @@
                     slayerIdx++;
                 }
                 // Calculate Enemy Stats
-                enemyStats.maxHitpoints = MONSTERS[monsterID].hitpoints * numberMultiplier;
+                enemyStats.maxHitpoints = MONSTERS[monsterID].hitpoints * this.numberMultiplier;
                 enemyStats.attackSpeed = MONSTERS[monsterID].attackSpeed;
                 const effectiveDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
                 enemyStats.maxDefRoll = effectiveDefenceLevel * (MONSTERS[monsterID].defenceBonus + 64);
@@ -1349,19 +1483,19 @@
                     const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].attackLevel + 8 + 1);
                     enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonus + 64);
                     const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].strengthLevel + 8 + 1);
-                    enemyStats.maxHit = Math.floor(numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonus / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonus / 640)));
+                    enemyStats.maxHit = Math.floor(this.numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonus / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonus / 640)));
                 } else if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Ranged) {
                     const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
                     enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusRanged + 64);
                     const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
-                    enemyStats.maxHit = Math.floor(numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonusRanged / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonusRanged / 640)));
+                    enemyStats.maxHit = Math.floor(this.numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonusRanged / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonusRanged / 640)));
                 } else if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
                     const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].magicLevel + 8 + 1);
                     enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusMagic + 64);
                     if (MONSTERS[monsterID].selectedSpell === null || MONSTERS[monsterID].selectedSpell === undefined) {
-                        enemyStats.maxHit = Math.floor(numberMultiplier * MONSTERS[monsterID].setMaxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
+                        enemyStats.maxHit = Math.floor(this.numberMultiplier * MONSTERS[monsterID].setMaxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
                     } else {
-                        enemyStats.maxHit = Math.floor(numberMultiplier * SPELLS[MONSTERS[monsterID].selectedSpell].maxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
+                        enemyStats.maxHit = Math.floor(this.numberMultiplier * SPELLS[MONSTERS[monsterID].selectedSpell].maxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
                     }
                 }
                 // Calculate special attacks
@@ -1641,37 +1775,16 @@
                         break;
                 }
                 // Do preprocessing of player stats for special weapons
-                if (this.currentSim.playerStats.activeItems.stormsnap || this.currentSim.playerStats.activeItems.slayerCrossbow) {
-                    let attackStyleBonus = 1;
-                    // Ranged
-                    if (this.attackStyle.Ranged === 0) {
-                        attackStyleBonus += 3;
-                    }
-                    let rangedStrengthBonus = this.currentSim.equipmentStats.rangedStrengthBonus;
-                    let rangedAttackBonus = this.currentSim.equipmentStats.rangedAttackBonus;
-                    // weapon specific bonuses
-                    if (this.currentSim.playerStats.activeItems.stormsnap) {
-                        rangedStrengthBonus += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
-                        rangedAttackBonus += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
-                    } else if (this.currentSim.playerStats.activeItems.slayerCrossbow) {
-                        const taskMonsters = new Set(combatAreaDisplayOrder.flatMap(area => combatAreas[area].monsters).concat(slayerAreaDisplayOrder.flatMap(area => slayerAreas[area].monsters)));
-                        if (MONSTERS[monsterID].slayerXP !== undefined || (this.currentSim.isSlayerTask && taskMonsters.has(monsterID))) {
-                            rangedStrengthBonus = Math.floor(rangedStrengthBonus * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
-                        }
-                    }
-                    // general formulas
-                    const effectiveAttackLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + 8 + attackStyleBonus);
-                    this.currentSim.playerStats.maxAttackRoll = Math.floor(effectiveAttackLevel * (rangedAttackBonus + 64) * (1 + (this.currentSim.prayerBonus.rangedAccuracy / 100)) * (1 + this.currentSim.herbloreBonus.rangedAccuracy / 100));
-                    const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Ranged + attackStyleBonus);
-                    this.currentSim.playerStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + rangedStrengthBonus / 80 + effectiveStrengthLevel * rangedStrengthBonus / 640) * (1 + (this.currentSim.prayerBonus.rangedDamage / 100)) * (1 + this.currentSim.herbloreBonus.rangedStrength / 100)));
-                } else if (this.currentSim.playerStats.activeItems.bigRon) {
-                    // Melee
-                    let meleeStrengthBonus = this.currentSim.equipmentStats.strengthBonus;
-                    if (this.currentSim.playerStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
-                        meleeStrengthBonus = Math.floor(meleeStrengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
-                    }
-                    const effectiveStrengthLevel = Math.floor(this.currentSim.playerStats.levels.Strength + 8 + 1);
-                    this.currentSim.playerStats.maxHit = Math.floor(numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + meleeStrengthBonus / 80 + effectiveStrengthLevel * meleeStrengthBonus / 640) * (1 + (this.currentSim.prayerBonus.meleeDamage / 100)) * (1 + this.currentSim.herbloreBonus.meleeStrength / 100)));
+                // TODO: this still uses some variables from the global Simulator object, this is a bug !
+                if (this.currentSim.playerStats.activeItems.stormsnap
+                    || this.currentSim.playerStats.activeItems.slayerCrossbow
+                    || this.currentSim.playerStats.activeItems.bigRon) {
+                    // recompute base stats
+                    this.updatePlayerBaseStats(this.currentSim.baseStats, monsterID);
+                    // max attack roll
+                    this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.currentSim.baseStats, this.currentSim.modifiers);
+                    // max hit roll
+                    this.combatStats.maxHit = this.calculatePlayerMaxHit(this.currentSim.baseStats, this.currentSim.modifiers);
                 }
             }
 
