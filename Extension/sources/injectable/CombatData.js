@@ -157,15 +157,7 @@
              * Calculates the equipment's combined stats and stores them in `this.equipmentStats`
              */
             updateEquipmentStats() {
-                const weaponID = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
-                if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
-                    this.combatStats.attackType = CONSTANTS.attackType.Ranged;
-                } else if (items[weaponID].isMagic) {
-                    this.combatStats.attackType = CONSTANTS.attackType.Magic;
-                } else {
-                    this.combatStats.attackType = CONSTANTS.attackType.Melee;
-                }
-
+                this.setAttackType();
                 const maxCape = this.equipmentSelected.includes(CONSTANTS.item.Max_Skillcape) || this.equipmentSelected.includes(CONSTANTS.item.Cape_of_Completion);
                 /** @type {EquipmentStats} */
                 const equipmentStats = {
@@ -277,8 +269,21 @@
                         });
                     }
                 }
-
                 this.equipmentStats = equipmentStats;
+            }
+
+            setAttackType() {
+                const weaponID = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
+                if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
+                    // Ranged
+                    this.combatStats.attackType = CONSTANTS.attackType.Ranged;
+                } else if (items[weaponID].isMagic) {
+                    // Magic
+                    this.combatStats.attackType = CONSTANTS.attackType.Magic;
+                } else {
+                    // Melee
+                    this.combatStats.attackType = CONSTANTS.attackType.Melee;
+                }
             }
 
 
@@ -542,17 +547,7 @@
                 // set base stats
                 this.updatePlayerBaseStats(this.baseStats);
                 // attack type
-                const weaponID = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
-                if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
-                    // Ranged
-                    this.combatStats.attackType = CONSTANTS.attackType.Ranged;
-                } else if (items[weaponID].isMagic) {
-                    // Magic
-                    this.combatStats.attackType = CONSTANTS.attackType.Magic;
-                } else {
-                    // Melee
-                    this.combatStats.attackType = CONSTANTS.attackType.Melee;
-                }
+                this.setAttackType();
                 // attack speed
                 this.combatStats.attackSpeed = 4000;
                 // min hit
