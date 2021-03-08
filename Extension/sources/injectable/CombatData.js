@@ -286,10 +286,17 @@
                 }
             }
 
-
-            //TODO: implement this
-            getSkillHiddenLevels(skillID) {
-                return 0;
+            getSkillHiddenLevels(skill) {
+                let hiddenLevels = 0;
+                for (let i = 0; i < this.modifiers.increasedHiddenSkillLevel.length; i++) {
+                    if (this.modifiers.increasedHiddenSkillLevel[i].id === skill)
+                        hiddenLevels += this.modifiers.increasedHiddenSkillLevel[i].value;
+                }
+                for (let i = 0; i < this.modifiers.decreasedHiddenSkillLevel.length; i++) {
+                    if (this.modifiers.decreasedHiddenSkillLevel[i].id === skill)
+                        hiddenLevels -= this.modifiers.increasedHiddenSkillLevel[i].value;
+                }
+                return hiddenLevels;
             }
 
             /**
