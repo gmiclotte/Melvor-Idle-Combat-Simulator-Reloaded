@@ -657,6 +657,14 @@
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 1) {
                     this.combatStats.attackSpeed -= 400;
                 }
+                this.combatStats.attackSpeed -=
+                    modifiers.decreasedPlayerAttackSpeed
+                    + modifiers.increasedPlayerAttackSpeed;
+                this.combatStats.attackSpeed = applyModifier(
+                    this.combatStats.attackSpeed,
+                    modifiers.increasedPlayerAttackSpeedPercent
+                    - modifiers.decreasedPlayerAttackSpeedPercent
+                );
 
                 // rune preservation
                 this.combatStats.runePreservation = 0;
@@ -794,6 +802,7 @@
                     }
                 }
             }
+
             mergeModifiers(source, target) {
                 for (const modifier in source) {
                     if (source[modifier].length) {
@@ -996,12 +1005,7 @@
             }
 
             decreasedAttackSpeed() {
-                let decrease = this.auroraBonus.attackSpeedBuff + this.equipmentStats.decreasedAttackSpeed;
-                // Otto
-                if (this.petOwned[23]) {
-                    decrease += 100;
-                }
-                return decrease;
+                return this.auroraBonus.attackSpeedBuff;
             }
 
             getPlayerStats() {

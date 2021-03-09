@@ -794,27 +794,28 @@
     function calculateSpeed(actor, actorStats) {
         // base
         let speed = actorStats.attackSpeed;
-        // guardian amulet
-        if (actor.isPlayer && actorStats.activeItems.guardianAmulet) {
-            // Guardian Amulet gives 20% increase in attack speed (TODO: 40% increase and +5% DR if below 50% HP)
-            if (actor.hitpoints < actor.maxHitpoints / 2) {
-                speed = Math.floor(speed * 1.4);
-            } else {
-                speed = Math.floor(speed * 1.2);
+        if (actor.isPlayer) {
+            // TODO: guardian amulet double effect when below 50% HP ?
+
+            // TODO: dark waters is a modifier, so recompute modifiers?
+            //  - pass all modifiers
+            //  - add the methods for modifier combination
+            //  - recompute modifiers *a lot* -> this might be a tad slow?
+            /*
+            // dark waters
+            if (actor.isPlayer && actorStats.slayerArea === 10) {
+                speed = Math.floor(speed * (1 + calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats) / 100));
             }
+            */
+            // slow
+            speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
+            // increased attack speed buff (aurora)
+            speed -= actor.attackSpeedBuff;
+        } else {
+            speed = Math.floor(speed
+                * (1 - actor.increasedAttackSpeed / 100)
+                * (1 + actor.attackSpeedDebuff / 100));
         }
-        // pet and gear reductions
-        if (actorStats.decreasedAttackSpeed) {
-            speed -= actorStats.decreasedAttackSpeed
-        }
-        // dark waters
-        if (actor.isPlayer && actorStats.slayerArea === 10) {
-            speed = Math.floor(speed * (1 + calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats) / 100));
-        }
-        // slow
-        speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
-        // increased attack speed buff
-        speed = Math.floor(speed * (1 - actor.increasedAttackSpeed / 100));
         // update actor current speed
         actor.currentSpeed = speed;
     }
@@ -1342,6 +1343,7 @@
             player.guardianAmuletBelow = false;
             updateGuardianAmuletEffect(player, playerStats);
         }
+        player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
         player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
     }
