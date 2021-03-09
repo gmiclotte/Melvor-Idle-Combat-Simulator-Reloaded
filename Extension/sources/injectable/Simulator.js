@@ -242,9 +242,6 @@
             }
 
             setupCurrentSimCombatData(currentSim, combatData) {
-                currentSim.combatData = {
-                    numberMultiplier: combatData.numberMultiplier,
-                };
                 // Start by grabbing the player stats
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
@@ -364,15 +361,7 @@
 
                 // setup combat data for simulation
                 this.setupCurrentSimCombatData(this.currentSim, this.parent.combatData);
-
-                // detach and deep clone this.parent.combatData
-                this.parent.combatData.detach();
-                this.parent.import.importSettings(JSON.parse(JSON.stringify(this.parent.import.exportSettings(), null, 1)));
-                // reattach
-                this.parent.combatData.equipmentSelected = this.parent.equipmentSelected;
-                this.parent.combatData.equipmentSlotKeys = this.parent.equipmentSlotKeys;
-                // update view
-                this.parent.import.update();
+                this.currentSim.combatData = JSON.parse(JSON.stringify(this.parent.combatData, null, 1));
 
                 // add sim options
                 this.currentSim.options = {
