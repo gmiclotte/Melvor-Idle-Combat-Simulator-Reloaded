@@ -1247,9 +1247,9 @@
             calculateAccuracy(attacker, target) {
                 // determine relevant defence roll
                 let targetDefRoll;
-                if (attacker.attackType === 0) {
+                if (attacker.attackType === CONSTANTS.attackType.Melee) {
                     targetDefRoll = target.maxDefRoll;
-                } else if (attacker.attackType === 1) {
+                } else if (attacker.attackType === CONSTANTS.attackType.Ranged) {
                     targetDefRoll = target.maxRngDefRoll;
                 } else {
                     targetDefRoll = target.maxMagDefRoll;
