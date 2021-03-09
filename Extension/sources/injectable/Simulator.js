@@ -398,72 +398,33 @@
             getEnemyStats(monsterID) {
                 /** @type {enemyStats} */
                 const enemyStats = {
+                    isPlayer: false,
+                    // raw data
                     monsterID: monsterID,
-                    hitpoints: 0,
-                    maxHitpoints: 0,
-                    damageTaken: 0,
-                    attackSpeed: 0,
-                    attackType: 0,
-                    isMelee: false,
-                    isRanged: false,
-                    isMagic: false,
-                    maxAttackRoll: 0,
-                    maxHit: 0,
-                    maxDefRoll: 0,
-                    maxMagDefRoll: 0,
-                    maxRngDefRoll: 0,
+                    attackType: MONSTERS[monsterID].attackType,
+                    baseMaxHitpoints: MONSTERS[monsterID].hitpoints,
+                    attackSpeed: MONSTERS[monsterID].attackSpeed,
+                    isMelee: enemyStats.attackType === CONSTANTS.attackType.Melee,
+                    isRanged: enemyStats.attackType === CONSTANTS.attackType.Ranged,
+                    isMagic: enemyStats.attackType === CONSTANTS.attackType.Magic,
                     hasSpecialAttack: false,
                     specialAttackChances: [],
                     specialIDs: [],
                     specialLength: 0,
                     passiveID: [],
+                    slayerArea: undefined,
+                    slayerAreaEffectValue: undefined,
+                    // derivative data
+                    baseMaximumDefenceRoll: 0,
+                    baseMaximumRangedDefenceRoll: 0,
+                    baseMaximumMagicDefenceRoll: 0,
+                    baseMaximumAttackRoll: 0,
+                    baseMaximumStrengthRoll: 0,
+                    // results - TODO: this really should not be here
+                    damageTaken: 0,
+                    damageHealed: 0,
                 };
-                // Determine slayer zone
-                let slayerIdx = 0;
-                zone: for (const area of slayerAreas) {
-                    for (const id of area.monsters) {
-                        if (id === monsterID) {
-                            enemyStats.slayerArea = slayerIdx;
-                            enemyStats.slayerAreaEffectValue = area.areaEffectValue;
-                            break zone;
-                        }
-                    }
-                    slayerIdx++;
-                }
-                // Calculate Enemy Stats
-                enemyStats.maxHitpoints = MONSTERS[monsterID].hitpoints * this.parent.combatData.numberMultiplier;
-                enemyStats.attackSpeed = MONSTERS[monsterID].attackSpeed;
-                const effectiveDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
-                enemyStats.maxDefRoll = effectiveDefenceLevel * (MONSTERS[monsterID].defenceBonus + 64);
 
-                const effectiveRangedDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
-                enemyStats.maxRngDefRoll = effectiveRangedDefenceLevel * (MONSTERS[monsterID].defenceBonusRanged + 64);
-                const effectiveMagicDefenceLevel = Math.floor((Math.floor(MONSTERS[monsterID].magicLevel * 0.7) + Math.floor(MONSTERS[monsterID].defenceLevel * 0.3)) + 8 + 1);
-                enemyStats.maxMagDefRoll = effectiveMagicDefenceLevel * (MONSTERS[monsterID].defenceBonusMagic + 64);
-                enemyStats.attackType = MONSTERS[monsterID].attackType;
-                enemyStats.isMelee = enemyStats.attackType === CONSTANTS.attackType.Melee;
-                enemyStats.isRanged = enemyStats.attackType === CONSTANTS.attackType.Ranged;
-                enemyStats.isMagic = enemyStats.attackType === CONSTANTS.attackType.Magic;
-
-                if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Melee) {
-                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].attackLevel + 8 + 1);
-                    enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonus + 64);
-                    const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].strengthLevel + 8 + 1);
-                    enemyStats.maxHit = Math.floor(this.parent.combatData.numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonus / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonus / 640)));
-                } else if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Ranged) {
-                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
-                    enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusRanged + 64);
-                    const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
-                    enemyStats.maxHit = Math.floor(this.parent.combatData.numberMultiplier * (1.3 + (effectiveStrengthLevel / 10) + (MONSTERS[monsterID].strengthBonusRanged / 80) + (effectiveStrengthLevel * MONSTERS[monsterID].strengthBonusRanged / 640)));
-                } else if (MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
-                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].magicLevel + 8 + 1);
-                    enemyStats.maxAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusMagic + 64);
-                    if (MONSTERS[monsterID].selectedSpell === null || MONSTERS[monsterID].selectedSpell === undefined) {
-                        enemyStats.maxHit = Math.floor(this.parent.combatData.numberMultiplier * MONSTERS[monsterID].setMaxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
-                    } else {
-                        enemyStats.maxHit = Math.floor(this.parent.combatData.numberMultiplier * SPELLS[MONSTERS[monsterID].selectedSpell].maxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100));
-                    }
-                }
                 // Calculate special attacks
                 if (MONSTERS[monsterID].hasSpecialAttack) {
                     enemyStats.hasSpecialAttack = true;
@@ -477,10 +438,72 @@
                     }
                     enemyStats.specialLength = enemyStats.specialAttackChances.length;
                 }
+
                 // add passive effects
                 if (MONSTERS[monsterID].passiveID) {
                     enemyStats.passiveID = MONSTERS[monsterID].passiveID;
                 }
+
+                // TODO: refactor slayer zone assignment
+                // Determine slayer zone
+                let slayerIdx = 0;
+                zone: for (const area of slayerAreas) {
+                    for (const id of area.monsters) {
+                        if (id === monsterID) {
+                            enemyStats.slayerArea = slayerIdx;
+                            enemyStats.slayerAreaEffectValue = area.areaEffectValue;
+                            break zone;
+                        }
+                    }
+                    slayerIdx++;
+                }
+
+                // precompute base defence rolls
+                const effectiveDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
+                enemyStats.baseMaximumDefenceRoll = effectiveDefenceLevel * (MONSTERS[monsterID].defenceBonus + 64);
+                const effectiveRangedDefenceLevel = Math.floor(MONSTERS[monsterID].defenceLevel + 8 + 1);
+                enemyStats.baseMaximumRangedDefenceRoll = effectiveRangedDefenceLevel * (MONSTERS[monsterID].defenceBonusRanged + 64);
+                const effectiveMagicDefenceLevel = Math.floor((Math.floor(MONSTERS[monsterID].magicLevel * 0.7) + Math.floor(MONSTERS[monsterID].defenceLevel * 0.3)) + 8 + 1);
+                enemyStats.baseMaximumMagicDefenceRoll = effectiveMagicDefenceLevel * (MONSTERS[monsterID].defenceBonusMagic + 64);
+
+                // precompute base max accuracy roll
+                if (enemyStats.isMelee) {
+                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].attackLevel + 8 + 1);
+                    enemyStats.baseMaximumAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonus + 64);
+                } else if (enemyStats.isRanged) {
+                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
+                    enemyStats.baseMaximumAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusRanged + 64);
+                } else if (enemyStats.isMagic) {
+                    const effectiveAttackLevel = Math.floor(MONSTERS[monsterID].magicLevel + 8 + 1);
+                    enemyStats.baseMaximumAttackRoll = effectiveAttackLevel * (MONSTERS[monsterID].attackBonusMagic + 64);
+                }
+
+                // precompute base max hit roll
+                if (enemyStats.isMelee) {
+                    const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].strengthLevel + 8 + 1);
+                    enemyStats.baseMaximumStrengthRoll =
+                        1.3
+                        + effectiveStrengthLevel / 10
+                        + MONSTERS[monsterID].strengthBonus / 80
+                        + effectiveStrengthLevel * MONSTERS[monsterID].strengthBonus / 640;
+                } else if (enemyStats.isRanged) {
+                    const effectiveStrengthLevel = Math.floor(MONSTERS[monsterID].rangedLevel + 8 + 1);
+                    enemyStats.baseMaximumStrengthRoll =
+                        1.3
+                        + effectiveStrengthLevel / 10
+                        + MONSTERS[monsterID].strengthBonusRanged / 80
+                        + effectiveStrengthLevel * MONSTERS[monsterID].strengthBonusRanged / 640;
+                } else if (enemyStats.isMagic) {
+                    const spell = SPELLS[MONSTERS[monsterID].selectedSpell];
+                    let maxHit;
+                    if (spell) {
+                        maxHit = spell.maxHit;
+                    } else {
+                        maxHit = MONSTERS[monsterID].setMaxHit;
+                    }
+                    enemyStats.baseMaximumStrengthRoll = maxHit * (1 + MONSTERS[monsterID].damageBonusMagic / 100);
+                }
+
                 return enemyStats;
             }
 
