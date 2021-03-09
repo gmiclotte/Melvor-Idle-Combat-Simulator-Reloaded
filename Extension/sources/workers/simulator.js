@@ -882,7 +882,7 @@
                 setAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
-                enemy.maxHit = enemyStats.maxHit;
+                enemy.maxHit = enemyStats.baseMaximumStrengthRoll;
                 break;
         }
     }
@@ -1350,18 +1350,18 @@
     function resetEnemy(enemy, enemyStats) {
         resetCommonStats(enemy, enemyStats);
         enemy.isPlayer = false;
-        enemy.hitpoints = enemyStats.maxHitpoints;
+        enemy.hitpoints = enemyStats.baseMaxHitpoints * numberMultiplier;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
         enemy.reflectRanged = 0;
         enemy.reflectMagic = 0;
         enemy.specialID = null;
         enemy.attackInterval = 0;
-        enemy.maxAttackRoll = enemyStats.maxAttackRoll;
-        enemy.maxHit = enemyStats.maxHit;
-        enemy.maxDefRoll = enemyStats.maxDefRoll;
-        enemy.maxMagDefRoll = enemyStats.maxMagDefRoll;
-        enemy.maxRngDefRoll = enemyStats.maxRngDefRoll;
+        enemy.maxAttackRoll = enemyStats.baseMaximumAttackRoll;
+        enemy.maxHit = enemyStats.baseMaximumStrengthRoll;
+        enemy.maxDefRoll = enemyStats.baseMaximumDefenceRoll;
+        enemy.maxRngDefRoll = enemyStats.baseMaximumRangedDefenceRoll;
+        enemy.maxMagDefRoll = enemyStats.baseMaximumMagicDefenceRoll;
         enemy.decreasedRangedEvasion = 0;
         enemy.meleeEvasionBuff = 1;
         enemy.magicEvasionBuff = 1;
@@ -1577,9 +1577,9 @@
      */
     function setEvasionDebuffsEnemy(enemy, enemyStats) {
         const isCursed = enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split');
-        enemy.maxDefRoll = calculateEnemyEvasion(enemyStats.maxDefRoll, enemy.decreasedMeleeEvasion, enemy.meleeEvasionBuff, isCursed ? enemy.curse.meleeEvasionDebuff : 0);
-        enemy.maxRngDefRoll = calculateEnemyEvasion(enemyStats.maxRngDefRoll, enemy.decreasedRangedEvasion, enemy.rangedEvasionBuff, isCursed ? enemy.curse.rangedEvasionDebuff : 0);
-        enemy.maxMagDefRoll = calculateEnemyEvasion(enemyStats.maxMagDefRoll, enemy.decreasedMagicEvasion, enemy.magicEvasionBuff, isCursed ? enemy.curse.magicEvasionDebuff : 0);
+        enemy.maxDefRoll = calculateEnemyEvasion(enemyStats.baseMaximumDefenceRoll, enemy.decreasedMeleeEvasion, enemy.meleeEvasionBuff, isCursed ? enemy.curse.meleeEvasionDebuff : 0);
+        enemy.maxRngDefRoll = calculateEnemyEvasion(enemyStats.baseMaximumRangedDefenceRoll, enemy.decreasedRangedEvasion, enemy.rangedEvasionBuff, isCursed ? enemy.curse.rangedEvasionDebuff : 0);
+        enemy.maxMagDefRoll = calculateEnemyEvasion(enemyStats.baseMaximumMagicDefenceRoll, enemy.decreasedMagicEvasion, enemy.magicEvasionBuff, isCursed ? enemy.curse.magicEvasionDebuff : 0);
     }
 
     function calculateEnemyEvasion(initial, decreasedEvasion, evasionBuff, curseEvasionDebuff) {
