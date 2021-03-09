@@ -1424,7 +1424,7 @@
                     // Spell of type already selected
                     if (spellOpts.selectedID === spellID && spellType !== 'standard' && spellType !== 'ancient') {
                         spellOpts.isSelected = false;
-                        spellOpts.selectedID = -1;
+                        spellOpts.selectedID = null;
                         this.unselectButton(event.currentTarget);
                     } else {
                         this.unselectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
@@ -1437,12 +1437,12 @@
                             const standardOpts = this.combatData.spells.standard;
                             standardOpts.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
-                            standardOpts.selectedID = -1;
+                            standardOpts.selectedID = null;
                             if (this.combatData.spells.curse.isSelected) {
                                 const curseOpts = this.combatData.spells.curse;
                                 curseOpts.isSelected = false;
                                 this.unselectButton(document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`));
-                                curseOpts.selectedID = -1;
+                                curseOpts.selectedID = null;
                                 notifyPlayer(CONSTANTS.skill.Magic, 'Curse Deselected, they cannot be used with Ancient Magicks', 'danger');
                             }
                             break;
@@ -1450,7 +1450,7 @@
                             const ancientOpts = this.combatData.spells.ancient;
                             ancientOpts.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`));
-                            ancientOpts.selectedID = -1;
+                            ancientOpts.selectedID = null;
                             break;
                     }
                     // Spell of type not selected
@@ -2019,7 +2019,7 @@
                     if (spell.magicLevelRequired > magicLevel) {
                         document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
                         if (spellOption.selectedID === index) {
-                            spellOption.selectedID = -1;
+                            spellOption.selectedID = null;
                             spellOption.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${spell.name} Button`));
                             if (type === 'standard' || type === 'ancient') {
@@ -2052,7 +2052,7 @@
                         } else {
                             document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
                             if (spellOption.selectedID === index) {
-                                spellOption.selectedID = -1;
+                                spellOption.selectedID = null;
                                 spellOption.isSelected = false;
                                 this.unselectButton(document.getElementById(`MCS ${spell.name} Button`));
                                 notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires ${this.getItemName(spell.requiredItem)}.`, 'danger');
