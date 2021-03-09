@@ -242,6 +242,9 @@
             }
 
             setupCurrentSimCombatData(currentSim, combatData) {
+                currentSim.combatData = {
+                    numberMultiplier: combatData.numberMultiplier,
+                };
                 // Start by grabbing the player stats
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
