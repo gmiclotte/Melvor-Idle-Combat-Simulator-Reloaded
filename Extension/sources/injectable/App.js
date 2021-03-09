@@ -1357,7 +1357,6 @@
                     }
                 }
                 if (prayerChanged) {
-                    this.combatData.computePrayerBonus();
                     this.updateCombatStats();
                 }
             }
@@ -2107,6 +2106,7 @@
             updateCombatStats() {
                 // first update the values
                 this.combatData.updateCombatStats();
+                // second update the view
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
                         const attackSpeed = this.combatData.playerAttackSpeed();

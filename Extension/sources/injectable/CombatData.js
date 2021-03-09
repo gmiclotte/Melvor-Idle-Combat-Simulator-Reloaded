@@ -726,6 +726,17 @@
             }
 
             /**
+             * compute a modifier object from a list
+             */
+            computeModifiers(list) {
+                const modifiers = {};
+                for (const object of list) {
+                    this.addModifiers(object.modifiers, modifiers);
+                }
+                return modifiers;
+            }
+
+            /**
              * Computes the prayer bonuses for the selected prayers
              */
             computePrayerBonus() {
@@ -761,7 +772,7 @@
                         }
                     }));
                 this.prayerBonus = {
-                    modifiers: this.copyModifierTemplate(),
+                    modifiers: {},
                     vars: prayerVars,
                 };
             }
@@ -773,8 +784,34 @@
              */
             addModifiers(source, target) {
                 for (const modifier in source) {
-                    target[modifier] += source[modifier];
+                    if (source[modifier].length) {
+                        MICSR.log(source, modifier, source[modifier])
+                        for (const value of source[modifier]) {
+                            this.updateKeyValuePair(target, modifier, value);
+                        }
+                    } else {
+                        this.updateKeyValuePair(target, modifier, source[modifier]);
+                    }
                 }
+            }
+            mergeModifiers(source, target) {
+                for (const modifier in source) {
+                    if (source[modifier].length) {
+                        MICSR.log(source, modifier, source[modifier])
+                        for (const value of source[modifier]) {
+                            this.updateKeyValuePair(target, modifier, [value.id, value.value]);
+                        }
+                    } else {
+                        this.updateKeyValuePair(target, modifier, source[modifier]);
+                    }
+                }
+            }
+
+            updateKeyValuePair = (array, key, value, verbose) => {
+                if (this.verbose) {
+                    MICSR.log(array + " / " + key + " / " + value);
+                }
+                updateKeyValuePair(array, key, value);
             }
 
             /**
@@ -795,11 +832,40 @@
 
             /**
              * Update this.modifiers
+             * mimics updateAllPlayerModifiers
              */
-            updateModifiers() {
+            updateModifiers(selectedCombatArea = "") {
+                // reset
                 this.modifiers = this.copyModifierTemplate();
+
+                // mimic calculateEquippedItemModifiers // passives
+                const equipmentList = this.equipmentSelected.filter(x => x > 0).map(x => items[x]);
+                this.itemModifiers = this.computeModifiers(equipmentList);
+                this.mergeModifiers(this.itemModifiers, this.modifiers);
+
+                // mimic calculateCombatAreaEffectModifiers(selectedCombatArea)
                 // TODO: implement this
-                this.addModifiers(this.prayerBonus.modifiers, this.modifiers);
+
+                // mimic calculatePetModifiers
+                const petList = this.petOwned.map((x, i) => x ? i : undefined).filter(x => x !== undefined).map(x => PETS[x]);
+                this.petModifiers = this.computeModifiers(petList);
+                this.mergeModifiers(this.petModifiers, this.modifiers);
+
+                // mimic calculatePrayerModifiers
+                this.computePrayerBonus();
+                this.mergeModifiers(this.prayerBonus.modifiers, this.modifiers);
+
+                // mimic calculateAgilityModifiers
+                // TODO: implement this
+
+                // mimic calculateShopModifiers
+                // implement this if it ever is relevant
+
+                // mimic calculateMiscModifiers
+                // implement this if it ever is relevant
+
+                // TODO: SPECIAL ATTACKS, MASTERY, POTIONS
+                //  when they get made into modifiers in the game
             }
 
             /**

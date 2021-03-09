@@ -207,20 +207,6 @@
             }
 
             /**
-             * Calculates the equipment stats in `this.parent.combatData.equipmentStats`
-             */
-            updateEquipmentStats() {
-                this.parent.combatData.updateEquipmentStats();
-            }
-
-            /**
-             * Calculates the combat stats in `this.parent.combatData.updateCombatStats`
-             */
-            updateCombatStats() {
-                this.parent.combatData.updateCombatStats();
-            }
-
-            /**
              * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
              */
             simulateCombat() {

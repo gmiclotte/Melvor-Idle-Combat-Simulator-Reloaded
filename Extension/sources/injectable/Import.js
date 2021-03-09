@@ -132,8 +132,6 @@
                 this.app.combatData.updateEquipmentStats();
                 this.app.updateEquipmentStats();
                 this.app.combatData.computePotionBonus();
-                this.app.combatData.computePrayerBonus();
-                this.app.combatData.updateCombatStats();
                 this.app.updateCombatStats();
             }
 
@@ -303,7 +301,7 @@
                     this.app.combatData.isAdventure = false;
                     document.getElementById('MCS Adventure Mode Radio No').checked = true;
                 }
-                this.app.combatData.updateCombatStats();
+                this.app.updateCombatStats();
             }
 
             importUseCombinationRunes(useCombinationRunes) {
