@@ -196,7 +196,6 @@
                 worker.postMessage({
                     action: 'RECEIVE_GAMEDATA',
                     protectFromValue: protectFromValue,
-                    numberMultiplier: this.parent.combatData.numberMultiplier,
                     enemySpecialAttacks: enemySpecialAttacks,
                     enemySpawnTimer: enemySpawnTimer,
                     hitpointRegenInterval: hitpointRegenInterval,
@@ -715,9 +714,10 @@
                     this.simulationWorkers[workerID].worker.postMessage({
                         action: 'START_SIMULATION',
                         monsterID: monsterID,
+                        combatData: this.currentSim.combatData,
                         enemyStats: this.enemyStats[monsterID],
                         playerStats: this.currentSim.playerStats,
-                        simOptions: this.currentSim.options
+                        simOptions: this.currentSim.options,
                     });
                     this.simulationWorkers[workerID].inUse = true;
                     this.currentJob++;
