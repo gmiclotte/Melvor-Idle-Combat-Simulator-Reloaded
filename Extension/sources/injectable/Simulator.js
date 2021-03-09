@@ -396,16 +396,17 @@
              */
             getEnemyStats(monsterID) {
                 /** @type {enemyStats} */
+                const attackType = MONSTERS[monsterID].attackType;
                 const enemyStats = {
                     isPlayer: false,
                     // raw data
                     monsterID: monsterID,
-                    attackType: MONSTERS[monsterID].attackType,
+                    attackType: attackType,
                     baseMaxHitpoints: MONSTERS[monsterID].hitpoints,
                     attackSpeed: MONSTERS[monsterID].attackSpeed,
-                    isMelee: enemyStats.attackType === CONSTANTS.attackType.Melee,
-                    isRanged: enemyStats.attackType === CONSTANTS.attackType.Ranged,
-                    isMagic: enemyStats.attackType === CONSTANTS.attackType.Magic,
+                    isMelee: attackType === CONSTANTS.attackType.Melee,
+                    isRanged: attackType === CONSTANTS.attackType.Ranged,
+                    isMagic: attackType === CONSTANTS.attackType.Magic,
                     hasSpecialAttack: false,
                     specialAttackChances: [],
                     specialIDs: [],
