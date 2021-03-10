@@ -423,19 +423,14 @@
         let amt = Math.floor(player.maxHitpoints / 10);
         amt = Math.floor(amt / player.numberMultiplier);
         // modifiers
-        amt += player.numberMultiplier * mergePlayerModifiers(player, 'increasedHPRegenFlat')
-         - player.numberMultiplier * mergePlayerModifiers(player, 'decreasedHPRegenFlat');
+        amt += player.numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // rapid heal prayer
         if (playerStats.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
             amt *= 2;
         }
         // Regeneration Potion
         amt = Math.floor(amt * (1 + player.herbloreBonus.hpRegen / 100));
-        applyModifier(
-            amt,
-            mergePlayerModifiers(player, 'increasedHitpointRegeneration')
-            - mergePlayerModifiers(player, 'decreasedHitpointRegeneration')
-        );
+        applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
         healDamage(player, playerStats, amt);
         player.regenTimer += hitpointRegenInterval;
         playerStats.numberOfRegens += 1;
@@ -828,10 +823,8 @@
                 if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
                     actor.combatStats.attackSpeed -= 400;
                 }
-                speed -= actor.baseModifiers.decreasedPlayerAttackSpeed
-                    - actor.baseModifiers.increasedPlayerAttackSpeed;
-                let attackSpeedPercent = actor.baseModifiers.increasedPlayerAttackSpeedPercent
-                    - actor.baseModifiers.decreasedPlayerAttackSpeedPercent;
+                speed = mergePlayerModifiers(actor, 'PlayerAttackSpeed');
+                let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
                 attackSpeedPercent += calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats)
                 speed = applyModifier(speed, attackSpeedPercent);
             }
@@ -1388,7 +1381,11 @@
         player.actionsTaken = 0;
     }
 
-    function mergePlayerModifiers(player, modifier) {
+    function mergePlayerModifiers(player, modifier, both =  true) {
+        if (both) {
+            return mergePlayerModifiers(player, 'increased' + modifier, false)
+            - mergePlayerModifiers(player, 'decreased' + modifier, false);
+        }
         const base = player.baseModifiers[modifier];
         const temp = player.tempModifiers[modifier];
         if (temp === undefined) {
