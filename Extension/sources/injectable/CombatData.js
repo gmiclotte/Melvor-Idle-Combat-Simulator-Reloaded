@@ -651,7 +651,6 @@
                 this.setAttackType();
 
                 // attack speed
-                // TODO implement calculatePlayerAttackSpeed
                 this.combatStats.attackSpeed = 4000;
                 this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 1) {

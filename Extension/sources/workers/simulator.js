@@ -821,17 +821,20 @@
         let speed = actorStats.attackSpeed;
         if (actor.isPlayer) {
             // TODO: guardian amulet double effect when below 50% HP ?
-
-            // TODO: dark waters is a modifier, so recompute modifiers?
-            //  - pass all modifiers
-            //  - add the methods for modifier combination
-            //  - recompute modifiers *a lot* -> this might be a tad slow?
-            /*
-            // dark waters
+            // recompute attack speed if in dark waters
             if (actor.isPlayer && actorStats.slayerArea === 10) {
-                speed = Math.floor(speed * (1 + calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats) / 100));
+                speed = 4000;
+                speed = actor.equipmentStats.attackSpeed;
+                if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
+                    actor.combatStats.attackSpeed -= 400;
+                }
+                speed -= actor.baseModifiers.decreasedPlayerAttackSpeed
+                    - actor.baseModifiers.increasedPlayerAttackSpeed;
+                let attackSpeedPercent = actor.baseModifiers.increasedPlayerAttackSpeedPercent
+                    - actor.baseModifiers.decreasedPlayerAttackSpeedPercent;
+                attackSpeedPercent += calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats)
+                speed = applyModifier(speed, attackSpeedPercent);
             }
-            */
             // slow
             speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
             // increased attack speed buff (aurora)
