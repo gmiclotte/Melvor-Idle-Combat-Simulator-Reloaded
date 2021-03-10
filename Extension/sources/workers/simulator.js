@@ -425,7 +425,7 @@
         // modifiers
         amt += player.numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // rapid heal prayer
-        if (playerStats.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
+        if (player.prayerBonus.vars['prayerBonusHitpoints'] !== undefined) {
             amt *= 2;
         }
         // Regeneration Potion
