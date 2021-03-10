@@ -421,9 +421,9 @@
         }
         // base amount
         let amt = Math.floor(player.maxHitpoints / 10);
-        amt = Math.floor(amt / player.numberMultiplier);
+        amt = Math.floor(amt / numberMultiplier);
         // modifiers
-        amt += player.numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
+        amt += numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // rapid heal prayer
         if (player.prayerBonus.vars['prayerBonusHitpoints'] !== undefined) {
             amt *= 2;
