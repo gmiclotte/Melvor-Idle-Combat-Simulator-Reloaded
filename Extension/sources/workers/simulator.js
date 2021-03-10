@@ -30,7 +30,7 @@
             case 'START_SIMULATION':
                 const startTime = performance.now();
                 numberMultiplier = event.data.combatData.numberMultiplier;
-                combatSimulator.simulateMonster(event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
+                combatSimulator.simulateMonster(event.data.combatData, event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
                     postMessage({
                         action: 'FINISHED_SIM',
@@ -114,7 +114,7 @@
          * @param {number} maxActions
          * @return {Promise<Object>}
          */
-        async simulateMonster(enemyStats, playerStats, trials, maxActions, forceFullSim) {
+        async simulateMonster(combatData, enemyStats, playerStats, trials, maxActions, forceFullSim) {
             // configure some additional default values for the `playerStats` and `enemyStats` objects
             playerStats.isPlayer = true;
             playerStats.damageTaken = 0;
@@ -123,6 +123,7 @@
             playerStats.ate = 0;
             playerStats.highestDamageTaken = 0;
             playerStats.lowestHitpoints = playerStats.maxHitpoints;
+            playerStats.numberOfRegens = 0; // TODO: hook this up to rapid heal prayer and prayer potion usage
             enemyStats.isPlayer = false;
             enemyStats.damageTaken = 0;
             enemyStats.damageHealed = 0;
@@ -186,7 +187,7 @@
             let tooManyActions = 0;
             while (enemyKills < trials) {
                 // Reset Timers and statuses
-                resetPlayer(player, playerStats);
+                resetPlayer(combatData, player, playerStats);
                 // regen timer is not reset ! add respawn time to regen, and regen if required
                 player.regenTimer -= enemySpawnTimer;
                 if (player.regenTimer <= 0) {
@@ -412,8 +413,32 @@
     }
 
     function regen(player, playerStats) {
-        healDamage(player, playerStats, playerStats.avgHPRegen);
+        if (player.isHardcore) {
+            return;
+        }
+        if (player.hitpoints === player.maxHitPoints) {
+            return;
+        }
+        // base amount
+        let amt = Math.floor(player.maxHitpoints / 10);
+        amt = Math.floor(amt / player.numberMultiplier);
+        // modifiers
+        amt += player.numberMultiplier * mergePlayerModifiers(player, 'increasedHPRegenFlat')
+         - player.numberMultiplier * mergePlayerModifiers(player, 'decreasedHPRegenFlat');
+        // rapid heal prayer
+        if (playerStats.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
+            amt *= 2;
+        }
+        // Regeneration Potion
+        amt = Math.floor(amt * (1 + player.herbloreBonus.hpRegen / 100));
+        applyModifier(
+            amt,
+            mergePlayerModifiers(player, 'increasedHitpointRegeneration')
+            - mergePlayerModifiers(player, 'decreasedHitpointRegeneration')
+        );
+        healDamage(player, playerStats, amt);
         player.regenTimer += hitpointRegenInterval;
+        playerStats.numberOfRegens += 1;
     }
 
     function actorRecoilCD(actor) {
@@ -1332,7 +1357,7 @@
         common.maxHitpoints = stats.maxHitpoints;
     }
 
-    function resetPlayer(player, playerStats) {
+    function resetPlayer(combatData, player, playerStats) {
         resetCommonStats(player, playerStats);
         player.isPlayer = true;
         if (!player.hitpoints || player.hitpoints <= 0) {
@@ -1343,9 +1368,64 @@
             player.guardianAmuletBelow = false;
             updateGuardianAmuletEffect(player, playerStats);
         }
-        player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
-        player.actionsTaken = 0;
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
+        // copy from combatData;
+        player.equipmentStats = combatData.equipmentStats;
+        player.combatStats = combatData.combatStats;
+        player.attackStyle = combatData.attackStyle;
+        player.equipmentStats = combatData.equipmentStats;
+        player.prayerBonus = combatData.prayerBonus;
+        player.herbloreBonus = combatData.herbloreBonus;
+        // modifiers
+        player.baseModifiers = combatData.modifiers;
+        player.tempModifiers = {};
+        // aurora
+        player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
+        // init
+        player.actionsTaken = 0;
+    }
+
+    function mergePlayerModifiers(player, modifier) {
+        const base = player.baseModifiers[modifier];
+        const temp = player.tempModifiers[modifier];
+        if (temp === undefined) {
+            return base;
+        }
+        if (isNaN(base)) {
+            // if it is an array-type modifier, merge two arrays, might be too slow in practice
+            const result = [];
+            const known = {};
+            for (const entry in base) {
+                known[entry.id] = result.length;
+                result.push({...entry});
+            }
+            for (const t in temp) {
+                let entry;
+                if (t.length) {
+                    entry = {id: t[0], value: t[1]};
+                } else {
+                    entry = {id: t.id, value: t.value};
+                }
+                const idx = known[entry.id];
+                if (idx !== undefined) {
+                    result[idx].value += entry.value;
+                } else {
+                    known[entry.id] = result.length;
+                    result.push({...entry});
+                }
+            }
+            return result;
+        }
+        // if it is a number-type modifier, just add them up
+        return base + temp;
+    }
+
+    function applyModifier(baseStat, modifier, type = 0) {
+        if (type === 0) {
+            return Math.floor(baseStat * (1 + modifier / 100));
+        } else if (type === 1) {
+            return baseStat + modifier;
+        }
     }
 
 

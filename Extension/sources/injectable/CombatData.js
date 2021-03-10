@@ -1130,22 +1130,23 @@
 
                 // Regen Calculation
                 if (!this.isHardcore) {
-                    // Base
-                    playerStats.avgHPRegen = 1 + Math.floor(this.combatStats.maxHitpoints / 10 / this.numberMultiplier);
-                    // Shaman Ring
-                    playerStats.avgHPRegen += this.equipmentStats.increasedHPRegen;
-                    // Hitpoints Skillcape
-                    if (playerStats.activeItems.hitpointsSkillcape) {
-                        playerStats.avgHPRegen += 1 * this.numberMultiplier;
-                    }
-                    // Rapid Heal Prayer
-                    if (this.prayerSelected[CONSTANTS.prayer.Rapid_Heal]) {
-                        playerStats.avgHPRegen *= 2;
+                    let amt = Math.floor(this.combatStats.maxHitpoints / 10);
+                    amt = Math.floor(amt / this.numberMultiplier);
+                    // modifiers
+                    amt += this.numberMultiplier * this.modifiers.increasedHPRegenFlat
+                        - this.numberMultiplier * this.modifiers.decreasedHPRegenFlat;
+                    // rapid heal prayer
+                    if (this.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
+                        amt *= 2;
                     }
                     // Regeneration Potion
-                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.herbloreBonus.hpRegen / 100));
-                    // Gold Ruby Ring
-                    playerStats.avgHPRegen = Math.floor(playerStats.avgHPRegen * (1 + this.equipmentStats.hpRegenBonus / 100));
+                    amt = Math.floor(amt * (1 + this.herbloreBonus.hpRegen / 100));
+                    applyModifier(
+                        amt,
+                        this.modifiers.increasedHitpointRegeneration
+                        - this.modifiers.decreasedHitpointRegeneration
+                    );
+                    playerStats.avgHPRegen = amt;
                 }
 
                 // Life Steal from gear
