@@ -130,6 +130,8 @@
                     defence: 'assets/media/skills/defence/defence.svg',
                     hitpoints: 'assets/media/skills/hitpoints/hitpoints.svg',
                     emptyFood: 'assets/media/skills/combat/food_empty.svg',
+                    agility: 'assets/media/skills/agility/agility.svg',
+                    mastery: 'assets/media/main/mastery_header.svg',
                 };
 
                 // Forced equipment sorting
@@ -215,6 +217,7 @@
                 this.createPrayerSelectCard();
                 this.createPotionSelectCard();
                 this.createPetSelectCard();
+                this.createAgilitySelectCard();
                 this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
@@ -688,6 +691,61 @@
                 const tooltips = combatPets.map((pet) => `<div class="text-center">${pet.name}<br><small class='text-info'>${pet.description.replace(/\.$/, '')}</small></div>`);
                 this.petSelectCard.addImageButtons(petImageSources, petNames, 'Medium', petButtonCallbacks, tooltips);
                 this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
+            }
+
+            agilityCourseOnChange(event, position) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value);
+                this.combatData.course[position] = idx;
+                this.updateCombatStats();
+            }
+
+            agilityMasteryOnClick(event, position) {
+                if (this.combatData.courseMastery[position]) {
+                    this.combatData.courseMastery[position] = false;
+                    this.unselectButton(event.currentTarget);
+                } else {
+                    this.combatData.courseMastery[position] = true;
+                    this.selectButton(event.currentTarget);
+                }
+                this.updateCombatStats();
+            }
+
+            createAgilitySelectCard() {
+                this.agilitySelectCard = this.mainTabCard.addTab('Agility', this.media.agility, '', '100px');
+                this.agilitySelectCard.addSectionTitle('Agility Course');
+
+                // Style dropdown (Specially Coded)
+                const categories = [];
+                for (let i = 0; i < 10; i++) {
+                    categories.push([]);
+                }
+                agilityObstacles.forEach((o, j) =>
+                    categories[o.category].push(j)
+                );
+                let i = 0;
+                for (; i < 10; i++) {
+                    const idx = i;
+                    const dropDownContainer = this.agilitySelectCard.createCCContainer();
+                    const masteryButton = this.agilitySelectCard.createImageButton(this.media.mastery, `MICSR Agility Mastery ${idx} Toggle`, () => this.agilityMasteryOnClick(event, idx), 'Small', '99 Mastery');
+                    dropDownContainer.appendChild(masteryButton);
+                    const dropdown = this.agilitySelectCard.createDropdown(
+                        ['None'].concat(categories[idx].map(j => agilityObstacles[j].name)),
+                        [-1].concat(categories[idx]),
+                        `MICSR Agility Obstacle ${idx} Dropdown`,
+                        (event) => this.agilityCourseOnChange(event, idx)
+                    )
+                    dropDownContainer.appendChild(dropdown);
+                    this.agilitySelectCard.container.appendChild(dropDownContainer);
+                }
+                const dropDownContainer = this.agilitySelectCard.createCCContainer();
+                const dropdown = this.agilitySelectCard.createDropdown(
+                    ['None'].concat(agilityPassivePillars.map(p => p.name)),
+                    [-1, 0, 1, 2],
+                    `MICSR Agility Obstacle ${i} Dropdown`,
+                    (event) => this.agilityCourseOnChange(event, i)
+                )
+                dropDownContainer.appendChild(dropdown);
+                this.agilitySelectCard.container.appendChild(dropDownContainer);
             }
 
             createGPOptionsCard() {
