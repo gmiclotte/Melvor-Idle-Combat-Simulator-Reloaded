@@ -302,18 +302,18 @@
             /**
              * mimic calculatePlayerAccuracyRating
              */
-            calculatePlayerAccuracyRating(baseStats, modifiers) {
+            calculatePlayerAccuracyRating(combatStats, baseStats, modifiers) {
                 switch (this.combatStats.attackType) {
                     case CONSTANTS.attackType.Ranged:
-                        return this.maxRangedAttackRoll(baseStats, modifiers);
+                        return this.maxRangedAttackRoll(combatStats, baseStats, modifiers);
                     case CONSTANTS.attackType.Magic:
-                        return this.maxMagicAttackRoll(baseStats, modifiers);
+                        return this.maxMagicAttackRoll(combatStats, baseStats, modifiers);
                     case CONSTANTS.attackType.Melee:
-                        return this.maxMeleeAttackRoll(baseStats, modifiers);
+                        return this.maxMeleeAttackRoll(combatStats, baseStats, modifiers);
                 }
             }
 
-            maxRangedAttackRoll(baseStats, modifiers) {
+            maxRangedAttackRoll(combatStats, baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 if (this.attackStyle.Ranged === 0) {
@@ -330,6 +330,7 @@
                     * (baseStats.attackBonusRanged + 64)
                     * (1 + this.herbloreBonus.rangedAccuracy / 100)
                 );
+                combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedRangedAccuracyBonus
@@ -342,7 +343,7 @@
                 return maxAttackRoll;
             }
 
-            maxMagicAttackRoll(baseStats, modifiers) {
+            maxMagicAttackRoll(combatStats, baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 // effective level
@@ -356,6 +357,7 @@
                     * (baseStats.attackBonusMagic + 64)
                     * (1 + this.herbloreBonus.magicAccuracy / 100)
                 );
+                combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedMagicAccuracyBonus
@@ -368,7 +370,7 @@
                 return maxAttackRoll;
             }
 
-            maxMeleeAttackRoll(baseStats, modifiers) {
+            maxMeleeAttackRoll(combatStats, baseStats, modifiers) {
                 // attack style bonus
                 let attackStyleBonusAccuracy = 0;
                 if (this.petOwned[12]) {
@@ -385,6 +387,7 @@
                     * (baseStats.attackBonus[this.attackStyle.Melee] + 64)
                     * (1 + this.herbloreBonus.meleeAccuracy / 100)
                 );
+                combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedMeleeAccuracyBonus
@@ -542,12 +545,12 @@
             /**
              * mimic calculatePlayerEvasionRating
              */
-            calculatePlayerEvasionRating(player = {}) {
+            calculatePlayerEvasionRating(combatStats, player) {
                 //Melee defence
-                let effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
+                combatStats.effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 2) {
                     // long range // TODO this is not implemented in the game #
-                    // effectiveDefenceLevel += 3;
+                    // combatStats.effectiveDefenceLevel += 3;
                 }
                 const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     effectiveDefenceLevel,
@@ -559,7 +562,7 @@
                     player.meleeEvasionDebuff,
                 );
                 //Ranged Defence
-                const effectiveRangedDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
+                combatStats.effectiveRangedDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
                 const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     effectiveRangedDefenceLevel,
                     this.baseStats.defenceBonusRanged,
@@ -570,7 +573,7 @@
                     player.rangedEvasionDebuff,
                 );
                 //Magic Defence
-                const effectiveMagicDefenceLevel = Math.floor(
+                combatStats.effectiveMagicDefenceLevel = Math.floor(
                     (this.playerLevels.Magic + getSkillHiddenLevels(CONSTANTS.skill.Magic)) * 0.7
                     + (this.playerLevels.Defence + getSkillHiddenLevels(CONSTANTS.skill.Defence)) * 0.3
                     + 8 + 1
@@ -678,7 +681,7 @@
                 }
 
                 // max attack roll
-                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.baseStats, modifiers);
+                this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.combatStats, this.baseStats, modifiers);
 
                 // max hit roll
                 this.combatStats.maxHit = this.calculatePlayerMaxHit(this.baseStats, modifiers);
@@ -712,11 +715,14 @@
                 }
 
                 // max defence roll
-                const evasionRatings = this.calculatePlayerEvasionRating({
-                    meleeEvasionBuff: this.auroraBonus.meleeEvasionBuff,
-                    rangedEvasionBuff: this.auroraBonus.rangedEvasionBuff,
-                    magicEvasionBuff: this.auroraBonus.magicEvasionBuff,
-                });
+                const evasionRatings = this.calculatePlayerEvasionRating(
+                    this.combatStats,
+                    {
+                        meleeEvasionBuff: this.auroraBonus.meleeEvasionBuff,
+                        rangedEvasionBuff: this.auroraBonus.rangedEvasionBuff,
+                        magicEvasionBuff: this.auroraBonus.magicEvasionBuff,
+                    },
+                );
                 this.combatStats.maxDefRoll = evasionRatings.melee;
                 this.combatStats.maxRngDefRoll = evasionRatings.ranged;
                 this.combatStats.maxMagDefRoll = evasionRatings.magic;
@@ -1068,7 +1074,7 @@
                         efficiency: 0,
                         manual: false,
                     },
-                    foodHeal: 0, // TODO: add food selection and add cooking mastery checkboxes
+                    foodHeal: 0,
                 };
                 // MICSR.log({...playerStats});
 

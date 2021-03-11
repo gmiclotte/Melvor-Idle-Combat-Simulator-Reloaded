@@ -151,8 +151,6 @@
                 curseCasts: 0,
             };
 
-            setAreaEffects(playerStats);
-
             if (!playerStats.isMelee && enemyStats.passiveID.includes(2)) {
                 return {simSuccess: false, reason: 'wrong style'};
             }
@@ -188,6 +186,7 @@
             while (enemyKills < trials) {
                 // Reset Timers and statuses
                 resetPlayer(combatData, player, playerStats);
+                setAreaEffects(player, playerStats);
                 // regen timer is not reset ! add respawn time to regen, and regen if required
                 player.regenTimer -= enemySpawnTimer;
                 if (player.regenTimer <= 0) {
@@ -825,7 +824,7 @@
                 }
                 speed = mergePlayerModifiers(actor, 'PlayerAttackSpeed');
                 let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
-                attackSpeedPercent += calculateAreaEffectValue(actorStats.slayerAreaEffectValue, actorStats)
+                attackSpeedPercent += calculateAreaEffectValue(actor, actorStats)
                 speed = applyModifier(speed, attackSpeedPercent);
             }
             // slow
@@ -999,7 +998,7 @@
         if (!target.isPlayer && targetStats.passiveID.includes(1) && target.hitpoints <= 0) {
             let random = Math.random() * 100;
             if (random < 40) {
-                target.hitpoints = targetStats.maxHitpoints;
+                target.hitpoints = target.maxHitpoints;
             }
         }
         // update alive status
@@ -1215,7 +1214,7 @@
         if (damage === undefined) {
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
-        return applyDamageModifiers(damage, enemy, player, isSpecial, currentSpecial);
+        return getEnemyDamageModifier(damage, enemy, player, isSpecial, currentSpecial);
     }
 
     function setDamage(actor, actorStats, target, targetStats, isSpecial, currentSpecial) {
@@ -1233,10 +1232,10 @@
         } else if (currentSpecial.setDamage !== null && currentSpecial.setDamage !== undefined) {
             damage = currentSpecial.setDamage * numberMultiplier;
         } else if (isSpecial && currentSpecial.maxHit) {
-            damage = actorStats.maxHit;
+            damage = actorStats.maxHit * currentSpecial.damageMultiplier;
             cbTriangleAlreadyApplied = true;
         } else if (isSpecial && currentSpecial.stormsnap) {
-            damage = (6 + 6 * actorStats.levels.Magic);
+            damage = (6 + 6 * actorStats.levels.Magic) * numberMultiplier / 10;
         } else {
             return undefined
         }
@@ -1247,26 +1246,51 @@
         return damage;
     }
 
-    // stun, sleep and DR apply to fixed damage
-    function applyDamageModifiers(damage, actor, target, isSpecial, special) {
-        if (isSpecial && target.isStunned) {
+    function getPlayerDamageModifier(player, enemy) {
+        if (player.isMagic && player.isAncient) {
+            return 0;
+        }
+        let dmgModifier = 0;
+        // anguish curse
+        if (enemy.isCursed && enemy.curse.type === 'Anguish') {
+            dmgModifier += enemy.curse.damageMult;
+        }
+        // stun
+        if (enemy.isStunned) {
+            dmgModifier += 30;
+        }
+        //sleep
+        if (enemy.isSleeping) {
+            dmgModifier += 20;
+        }
+        // monster specific modifiers
+        dmgModifier += player.increasedDamageToMonster;
+        //
+        return dmgModifier;
+    }
+
+    // apply stun, sleep and DR to enemy damage
+    function getEnemyDamageModifier(damage, enemy, player, isSpecial, special) {
+        if (isSpecial && player.isStunned) {
             damage *= special.stunDamageMultiplier;
         }
-        if (isSpecial && target.isSleeping) {
+        if (isSpecial && player.isSleeping) {
             damage *= special.sleepDamageMultiplier;
         }
-        let damageReduction = target.damageReduction + target.increasedDamageReduction;
-        if (target.markOfDeath) {
-            damageReduction = Math.floor(damageReduction / 2);
-        }
-        if (target.isPlayer) {
-            damageReduction = Math.floor(damageReduction * target.reductionModifier);
-        }
-        damage -= Math.floor((damageReduction / 100) * damage);
+        damage -= Math.floor((calculatePlayerDamageReduction(player) / 100) * damage);
         return damage;
     }
 
+    function calculatePlayerDamageReduction(player) {
+        let damageReduction = player.baseStats.damageReduction + player.herbloreBonus.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
+        if (player.markOfDeath)
+            damageReduction = Math.floor(damageReduction / 2);
+        damageReduction = Math.floor(damageReduction * player.reductionModifier);
+        return damageReduction;
+    }
+
     function playerCalculateDamage(player, playerStats, enemy, enemyStats, isSpecial) {
+        // TODO setDamage
         let damage = setDamage(player, playerStats, enemy, enemyStats, isSpecial, player.currentSpecial);
         // Calculate attack Damage
         if (damage === undefined) {
@@ -1274,24 +1298,21 @@
             if (player.alwaysMaxHit) {
                 damage = playerStats.maxHit;
             } else {
-                damage = rollForDamage(playerStats);
+                damage = rollForDamage(player, playerStats);
             }
         }
+        // special attack damage multiplier
         if (isSpecial && player.currentSpecial.damageMultiplier) {
             damage *= player.currentSpecial.damageMultiplier;
         }
-        // player specific modifiers
-        if (enemy.isCursed && enemy.curse.type === 'Anguish') {
-            damage *= enemy.curse.damageMult;
-        }
+        // common modifiers
+        damage = damage * (1 + getPlayerDamageModifier(player, enemy) / 100)
+        // deadeye amulet
         if (playerStats.activeItems.deadeyeAmulet && playerStats.isRanged) {
             damage *= critDamageModifier(damage);
         }
-        if (playerStats.isSlayerTask && playerStats.activeItems.slayerSkillcape) {
-            damage *= 1.05;
-        }
-        // common modifiers
-        damage = applyDamageModifiers(damage, player, enemy, isSpecial, player.currentSpecial)
+        // damage reduction
+        damage = Math.floor(damage * (1 - enemy.damageReduction / 100));
         // cap damage, no overkill
         if (enemy.hitpoints < damage) {
             damage = enemy.hitpoints;
@@ -1350,7 +1371,7 @@
         common.rangedEvasionDebuff = 0;
         common.decreasedAccuracy = 0;
         // hp
-        common.maxHitpoints = stats.maxHitpoints;
+        common.maxHitpoints = stats.maxHitpoints | stats.baseMaxHitpoints;
     }
 
     function resetPlayer(combatData, player, playerStats) {
@@ -1360,10 +1381,6 @@
             player.hitpoints = playerStats.maxHitpoints;
         }
         player.damageReduction = playerStats.damageReduction;
-        if (playerStats.activeItems.guardianAmulet) {
-            player.guardianAmuletBelow = false;
-            updateGuardianAmuletEffect(player, playerStats);
-        }
         player.alwaysMaxHit = playerStats.minHit + 1 >= playerStats.maxHit; // Determine if player always hits for maxHit
         // copy from combatData;
         player.equipmentStats = combatData.equipmentStats;
@@ -1372,19 +1389,28 @@
         player.equipmentStats = combatData.equipmentStats;
         player.prayerBonus = combatData.prayerBonus;
         player.herbloreBonus = combatData.herbloreBonus;
+        player.baseStats = combatData.baseStats;
         // modifiers
         player.baseModifiers = combatData.modifiers;
         player.tempModifiers = {};
+        player.increasedDamageToMonster = playerStats.dmgModifier; // combines all the (in|de)creasedDamageToX modifiers
         // aurora
         player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
+        // compute guardian amulet
+        if (playerStats.activeItems.guardianAmulet) {
+            player.guardianAmuletBelow = false;
+            updateGuardianAmuletEffect(player, playerStats);
+        }
+        // compute initial accuracy
+        calculatePlayerEvasionRating(player, playerStats);
         // init
         player.actionsTaken = 0;
     }
 
-    function mergePlayerModifiers(player, modifier, both =  true) {
+    function mergePlayerModifiers(player, modifier, both = true) {
         if (both) {
             return mergePlayerModifiers(player, 'increased' + modifier, false)
-            - mergePlayerModifiers(player, 'decreased' + modifier, false);
+                - mergePlayerModifiers(player, 'decreased' + modifier, false);
         }
         const base = player.baseModifiers[modifier];
         const temp = player.tempModifiers[modifier];
@@ -1547,16 +1573,30 @@
             return;
         }
         // determine attack roll
-        let maxAttackRoll = actorStats.maxAttackRoll;
-        if (actor.decreasedAccuracy) {
-            maxAttackRoll = Math.floor(maxAttackRoll * (1 - actor.decreasedAccuracy / 100));
+        let maxAttackRoll;
+        if (actor.isPlayer) {
+            maxAttackRoll = actor.combatStats.unmodifierAttachRoll;
+            let multiplier = 1 + mergePlayerModifiers(actor, 'GlobalAccuracy') / 100 + actor.decreasedAccuracy
+            if (actor.isMelee) {
+                multiplier += mergePlayerModifiers(actor, 'MeleeAccuracyBonus') / 100;
+            } else if (actor.isRanged) {
+                multiplier += mergePlayerModifiers(actor, 'RangedAccuracyBonus') / 100;
+            } else if (actor.isMagic) {
+                multiplier += mergePlayerModifiers(actor, 'MagicAccuracyBonus') / 100;
+            }
+            maxAttackRoll = maxAttackRoll * multiplier;
+        } else {
+            maxAttackRoll = actorStats.baseMaximumAttackRoll;
+            if (actor.decreasedAccuracy) {
+                maxAttackRoll = Math.floor(maxAttackRoll * (1 - actor.decreasedAccuracy / 100));
+            }
+            if (actor.isCursed && actor.curse.accuracyDebuff) {
+                maxAttackRoll = Math.floor(maxAttackRoll * actor.curse.accuracyDebuff);
+            }
         }
-        if (actor.isCursed && actor.curse.accuracyDebuff) {
-            maxAttackRoll = Math.floor(maxAttackRoll * actor.curse.accuracyDebuff);
-        }
-        // handle player and enemy cases
+        // determine evasion roll
         if (target.isPlayer) {
-            setEvasionDebuffsPlayer(target, targetStats);
+            calculatePlayerEvasionRating(target, targetStats);
         } else {
             // Adjust ancient magick forcehit
             if (actorStats.usingAncient && (actorStats.specialData[0].forceHit || actorStats.specialData[0].checkForceHit)) {
@@ -1613,7 +1653,7 @@
             case CURSEIDS.Anguish_I:
             case CURSEIDS.Anguish_II:
             case CURSEIDS.Anguish_III:
-                enemy.curse.damageMult = 1 + effectValue / 100;
+                enemy.curse.damageMult = effectValue;
                 enemy.curse.type = 'Anguish';
                 break;
             case CURSEIDS.Decay:
@@ -1635,7 +1675,16 @@
      * @param {playerStats} playerStats
      * @returns {number} damage
      */
-    function rollForDamage(playerStats) {
+    function rollForDamage(player, playerStats) {
+        let minHitIncrease = 0;
+        minHitIncrease += Math.floor(playerStats.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
+        minHitIncrease -= Math.floor(playerStats.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
+        // static min hit increase (magic gear and Charged aurora)
+        minHitIncrease += playerStats.minHit;
+        // if min is equal to or larger than max, roll max
+        if (minHitIncrease + 1 >= playerStats.maxHit)
+            return playerStats.maxHit;
+        // roll between min and max
         return Math.ceil(Math.random() * (playerStats.maxHit - playerStats.minHit)) + playerStats.minHit;
     }
 
@@ -1678,39 +1727,75 @@
         return maxRoll
     }
 
-    function setEvasionDebuffsPlayer(player, playerStats) {
-        let areaEvasionDebuff = 0;
+    /**
+     * mimic calculatePlayerEvasionRating
+     */
+    function calculatePlayerEvasionRating(player, playerStats) {
+        // perilous peaks //TODO: precompute
         if (playerStats.slayerArea === 9 /*Perilous Peaks*/) {
-            areaEvasionDebuff = calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats);
+            const decreasedEvasion = calculateAreaEffectValue(player, playerStats);
+            player.tempModifiers.decreasedMeleeEvasion = decreasedEvasion;
+            player.tempModifiers.decreasedRangedEvasion = decreasedEvasion;
+            player.tempModifiers.decreasedMagicEvasion = decreasedEvasion;
         }
-        player.maxDefRoll = calculatePlayerEvasion(playerStats.maxDefRoll, player.meleeEvasionBuff, player.meleeEvasionDebuff + areaEvasionDebuff);
-        player.maxRngDefRoll = calculatePlayerEvasion(playerStats.maxRngDefRoll, player.rangedEvasionBuff, player.rangedEvasionDebuff + areaEvasionDebuff);
+        //Melee defence
+        player.maxDefRoll = calculateGenericPlayerEvasionRating(
+            player.combatStats.effectiveDefenceLevel,
+            player.baseStats.defenceBonus,
+            player.herbloreBonus.meleeEvasion,
+            mergePlayerModifiers(player, 'MeleeEvasion'),
+            player.meleeEvasionBuff,
+            player.meleeEvasionDebuff,
+        );
+        //Ranged Defence
+        player.maxRngDefRoll = calculateGenericPlayerEvasionRating(
+            player.combatStats.effectiveRangedDefenceLevel,
+            player.baseStats.defenceBonusRanged,
+            player.herbloreBonus.rangedEvasion,
+            mergePlayerModifiers(player, 'RangedEvasion'),
+            player.rangedEvasionBuff,
+            player.rangedEvasionDebuff,
+        );
+        // runic ruins //TODO: precompute
         if (playerStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
-            areaEvasionDebuff = calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats);
+            const decreasedEvasion = calculateAreaEffectValue(player, playerStats);
+            player.tempModifiers.decreasedMagicEvasion = decreasedEvasion;
         }
-        player.maxMagDefRoll = calculatePlayerEvasion(playerStats.maxMagDefRoll, player.magicEvasionBuff, player.magicEvasionDebuff + areaEvasionDebuff);
+        //Magic Defence
+        player.maxMagDefRoll = calculateGenericPlayerEvasionRating(
+            player.combatStats.effectiveMagicDefenceLevel,
+            player.baseStats.defenceBonusMagic,
+            player.herbloreBonus.magicEvasion,
+            mergePlayerModifiers(player, 'MagicEvasion'),
+            player.magicEvasionBuff,
+            player.magicEvasionDebuff,
+        );
     }
 
-    function calculatePlayerEvasion(initial, evasionBuff, evasionDebuff) {
-        let maxRoll = initial;
-        if (evasionBuff) {
-            maxRoll = Math.floor(maxRoll * (1 + evasionBuff / 100));
+    function calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, herbloreBonus, increaseModifier, buff, debuff) {
+        let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64) * (1 + herbloreBonus / 100));
+        maxDefRoll = applyModifier(maxDefRoll, increaseModifier);
+        //apply player buffs first
+        if (buff) {
+            maxDefRoll = Math.floor(maxDefRoll * (1 + buff / 100));
         }
-        maxRoll = Math.floor(maxRoll * (1 - evasionDebuff / 100));
-        return maxRoll
+        //then apply enemy debuffs
+        if (debuff) {
+            maxDefRoll = Math.floor(maxDefRoll * (1 - debuff / 100));
+        }
+        return maxDefRoll;
     }
 
     // Slayer area effect value
-    function calculateAreaEffectValue(base, playerStats) {
-        let value = Math.floor(base * (1 - playerStats.slayerAreaEffectNegationPercent / 100));
-        value -= playerStats.slayerAreaEffectNegationFlat;
+    function calculateAreaEffectValue(player, playerStats) {
+        let value = playerStats.slayerAreaEffectValue - mergePlayerModifiers(player, 'SlayerAreaEffectNegationFlat');
         if (value < 0) {
             value = 0;
         }
         return value;
     }
 
-    function setAreaEffects(playerStats) {
+    function setAreaEffects(player, playerStats) {
         // 0: "Penumbra" - no area effect
         // 1: "Strange Cave" - no area effect
         // 2: "High Lands" - no area effect
@@ -1721,7 +1806,7 @@
         // 7: "Arid Plains" - reduced food efficiency -> TODO: implement this when tracking player HP
         // 8: "Shrouded Badlands"
         if (playerStats.slayerArea === 8 /*Shrouded Badlands*/) {
-            playerStats.maxAttackRoll = Math.floor(playerStats.maxAttackRoll * (1 - calculateAreaEffectValue(playerStats.slayerAreaEffectValue, playerStats) / 100));
+            playerStats.maxAttackRoll = Math.floor(player * (1 - calculateAreaEffectValue(player, playerStats) / 100));
         }
         // 9: "Perilous Peaks" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
         // 10: "Dark Waters" - reduced player attack speed -> implemented in calculateSpeed

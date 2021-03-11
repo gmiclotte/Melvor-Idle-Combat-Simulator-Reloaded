@@ -773,7 +773,7 @@
                 if (combatData.isSlayerTask) {
                     dmgModifier += modifiers.increasedDamageToSlayerTasks - modifiers.decreasedDamageToSlayerTasks;
                 }
-                switch(findEnemyArea(monsterID, false)) {
+                switch (findEnemyArea(monsterID, false)) {
                     case 0:
                         dmgModifier += modifiers.increasedDamageToCombatAreaMonsters - modifiers.decreasedDamageToCombatAreaMonsters;
                         break;
@@ -793,9 +793,9 @@
                     // recompute base stats
                     const baseStats = combatData.updatePlayerBaseStats(monsterID);
                     // max attack roll
-                    combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(baseStats, modifiers);
+                    combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(combatStats, baseStats, modifiers);
                     // max hit roll
-                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
+                    combatStats.maxHit = combatData.calculatePlayerMaxHit(combatStats, baseStats, modifiers);
                 }
             }
 
