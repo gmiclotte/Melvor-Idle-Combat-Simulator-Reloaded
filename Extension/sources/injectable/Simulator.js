@@ -361,7 +361,9 @@
 
                 // setup combat data for simulation
                 this.setupCurrentSimCombatData(this.currentSim, this.parent.combatData);
-                this.currentSim.combatData = JSON.parse(JSON.stringify(this.parent.combatData, null, 1));
+                const rawCombatData = JSON.parse(JSON.stringify(this.parent.combatData, null, 1));
+                this.currentSim.combatData = new MICSR.CombatData([], []);
+                Object.getOwnPropertyNames(rawCombatData).forEach(prop => this.currentSim.combatData[prop] = rawCombatData[prop]);
 
                 // add sim options
                 this.currentSim.options = {
@@ -707,7 +709,7 @@
                     this.simulationWorkers[workerID].worker.postMessage({
                         action: 'START_SIMULATION',
                         monsterID: monsterID,
-                        combatData: this.currentSim.combatData,
+                        combatData: JSON.parse(JSON.stringify(this.currentSim.combatData, null, 1)),
                         enemyStats: this.enemyStats[monsterID],
                         playerStats: this.currentSim.playerStats,
                         simOptions: this.currentSim.options,
