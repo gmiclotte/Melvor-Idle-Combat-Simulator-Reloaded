@@ -688,23 +688,26 @@
 
                 // min hit roll
                 this.combatStats.minHit = 0;
-                // TODO: fix this
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
                     // Magic
                     if (this.spells.standard.isSelected) {
                         this.combatStats.minHit = 0;
                         switch (SPELLS[this.spells.standard.selectedID].spellType) {
                             case CONSTANTS.spellType.Air:
-                                this.combatStats.minHit = this.equipmentStats.increasedMinAirSpellDmg;
+                                this.combatStats.minHit = modifiers.increasedMinAirSpellDmg -
+                                    modifiers.decreasedMinAirSpellDmg;
                                 break;
                             case CONSTANTS.spellType.Water:
-                                this.combatStats.minHit = this.equipmentStats.increasedMinWaterSpellDmg;
+                                this.combatStats.minHit = modifiers.increasedMinWaterSpellDmg -
+                                    modifiers.decreasedMinWaterSpellDmg
                                 break;
                             case CONSTANTS.spellType.Earth:
-                                this.combatStats.minHit = this.equipmentStats.increasedMinEarthSpellDmg;
+                                this.combatStats.minHit = modifiers.increasedMinEarthSpellDmg -
+                                    modifiers.decreasedMinEarthSpellDmg;
                                 break;
                             case CONSTANTS.spellType.Fire:
-                                this.combatStats.minHit = this.equipmentStats.increasedMinFireSpellDmg;
+                                this.combatStats.minHit = modifiers.increasedMinFireSpellDmg -
+                                    modifiers.decreasedMinFireSpellDmg;
                                 break;
                             default:
                         }
@@ -713,6 +716,7 @@
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
                     this.combatStats.minHit += this.auroraBonus.increasedMinHit;
                 }
+                this.combatStats.minHit *= this.numberMultiplier;
 
                 // max defence roll
                 const evasionRatings = this.calculatePlayerEvasionRating(
