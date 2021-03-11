@@ -664,7 +664,7 @@
                     this.slayerSimData[slayerTaskID].avgKillTime /= this.slayerTaskMonsters[slayerTaskID].length;
                     // log monster IDs
                     if (this.slayerTaskMonsters[slayerTaskID].length) {
-                        console.log(`Tier ${slayerTaskID} auto slayer task list`, this.slayerTaskMonsters[slayerTaskID]);
+                        MICSR.log(`Tier ${slayerTaskID} auto slayer task list`, this.slayerTaskMonsters[slayerTaskID]);
                     }
                 }
                 // Update other data
@@ -746,28 +746,56 @@
              * @param {number} monsterID Index of MONSTERS
              */
             modifyCurrentSimStatsForMonster(monsterID) {
+                const playerStats = this.currentSim.playerStats;
+                const combatData = this.currentSim.combatData;
+                const combatStats = combatData.combatStats;
+                const modifiers = combatData.modifiers;
+                const prayerVars = combatData.prayerBonus.vars;
+
                 // Do check for protection prayer
                 switch (MONSTERS[monsterID].attackType) {
                     case CONSTANTS.attackType.Melee:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromMelee > 0;
+                        playerStats.isProtected = prayerVars.protectFromMelee > 0;
                         break;
                     case CONSTANTS.attackType.Ranged:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromRanged > 0;
+                        playerStats.isProtected = prayerVars.protectFromRanged > 0;
                         break;
                     case CONSTANTS.attackType.Magic:
-                        this.currentSim.playerStats.isProtected = this.currentSim.prayerBonus.vars.protectFromMagic > 0;
+                        playerStats.isProtected = prayerVars.protectFromMagic > 0;
                         break;
                 }
+
+                // Do preprocessing of player damage bonus vs monster
+                let dmgModifier = 0;
+                if (MONSTERS[monsterID].isBoss) {
+                    dmgModifier += modifiers.increasedDamageToBosses - modifiers.decreasedDamageToBosses;
+                }
+                if (combatData.isSlayerTask) {
+                    dmgModifier += modifiers.increasedDamageToSlayerTasks - modifiers.decreasedDamageToSlayerTasks;
+                }
+                switch(findEnemyArea(monsterID, false)) {
+                    case 0:
+                        dmgModifier += modifiers.increasedDamageToCombatAreaMonsters - modifiers.decreasedDamageToCombatAreaMonsters;
+                        break;
+                    case 1:
+                        dmgModifier += modifiers.increasedDamageToSlayerAreaMonsters - modifiers.decreasedDamageToSlayerAreaMonsters;
+                        break;
+                    case 2:
+                        dmgModifier += modifiers.increasedDamageToDungeonMonsters - modifiers.decreasedDamageToDungeonMonsters;
+                        break;
+                }
+                dmgModifier += modifiers.increasedDamageToAllMonsters - modifiers.decreasedDamageToAllMonsters;
+                playerStats.dmgModifier = dmgModifier;
                 // Do preprocessing of player stats for special weapons
-                if (this.currentSim.playerStats.activeItems.stormsnap
-                    || this.currentSim.playerStats.activeItems.slayerCrossbow
-                    || this.currentSim.playerStats.activeItems.bigRon) {
+                if (playerStats.activeItems.stormsnap
+                    || playerStats.activeItems.slayerCrossbow
+                    || playerStats.activeItems.bigRon) {
                     // recompute base stats
-                    this.currentSim.combatData.updatePlayerBaseStats(monsterID);
+                    const baseStats = combatData.updatePlayerBaseStats(monsterID);
                     // max attack roll
-                    this.combatStats.maxAttackRoll = this.currentSim.combatData.calculatePlayerAccuracyRating(this.currentSim.baseStats, this.currentSim.modifiers);
+                    combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(baseStats, modifiers);
                     // max hit roll
-                    this.combatStats.maxHit = this.currentSim.combatData.calculatePlayerMaxHit(this.currentSim.baseStats, this.currentSim.modifiers);
+                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
                 }
             }
 
