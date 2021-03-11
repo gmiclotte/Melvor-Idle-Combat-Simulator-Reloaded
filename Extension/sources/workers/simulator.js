@@ -1371,7 +1371,7 @@
         common.rangedEvasionDebuff = 0;
         common.decreasedAccuracy = 0;
         // hp
-        common.maxHitpoints = stats.maxHitpoints | stats.baseMaxHitpoints;
+        common.maxHitpoints = stats.maxHitpoints | (stats.baseMaxHitpoints * numberMultiplier);
     }
 
     function resetPlayer(combatData, player, playerStats) {
@@ -1458,7 +1458,7 @@
     function resetEnemy(enemy, enemyStats) {
         resetCommonStats(enemy, enemyStats);
         enemy.isPlayer = false;
-        enemy.hitpoints = enemyStats.baseMaxHitpoints * numberMultiplier;
+        enemy.hitpoints = enemy.maxHitpoints;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
         enemy.reflectRanged = 0;

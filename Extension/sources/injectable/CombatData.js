@@ -735,10 +735,8 @@
                 this.combatStats.damageReduction = this.calculatePlayerDamageReduction();
 
                 // Max Hitpoints
-                this.combatStats.maxHitpoints = this.playerLevels.Hitpoints + this.equipmentStats.increasedMaxHitpoints;
-                if (this.petOwned[15]) {
-                    this.combatStats.maxHitpoints++;
-                }
+                this.combatStats.maxHitpoints = this.playerLevels.Hitpoints;
+                this.combatStats.maxHitpoints += modifiers.increasedMaxHitpoints - modifiers.decreasedMaxHitpoints;
                 this.combatStats.maxHitpoints *= this.numberMultiplier;
             }
 
