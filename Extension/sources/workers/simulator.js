@@ -903,7 +903,7 @@
                 setAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
-                enemy.maxHit = enemyStats.baseMaximumStrengthRoll;
+                enemy.maxHit = Math.floor(enemyStats.baseMaximumStrengthRoll * numberMultiplier);
                 break;
         }
     }
@@ -1112,7 +1112,7 @@
                 setAccuracy(player, playerStats, enemy, enemyStats);
                 break;
             case 'Weakening':
-                enemy.maxHit = Math.floor(enemy.maxHit * enemy.curse.maxHitDebuff);
+                enemy.maxHit = Math.floor(enemyStats.baseMaximumStrengthRoll * numberMultiplier * enemy.curse.maxHitDebuff);
                 break;
         }
     }
@@ -1466,7 +1466,7 @@
         enemy.specialID = null;
         enemy.attackInterval = 0;
         enemy.maxAttackRoll = enemyStats.baseMaximumAttackRoll;
-        enemy.maxHit = enemyStats.baseMaximumStrengthRoll;
+        enemy.maxHit = Math.floor(enemyStats.baseMaximumStrengthRoll * numberMultiplier);
         enemy.maxDefRoll = enemyStats.baseMaximumDefenceRoll;
         enemy.maxRngDefRoll = enemyStats.baseMaximumRangedDefenceRoll;
         enemy.maxMagDefRoll = enemyStats.baseMaximumMagicDefenceRoll;
