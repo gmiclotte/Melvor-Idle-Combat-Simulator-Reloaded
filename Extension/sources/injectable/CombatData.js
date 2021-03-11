@@ -803,7 +803,9 @@
             addModifiers(source, target) {
                 for (const modifier in source) {
                     if (source[modifier].length) {
-                        MICSR.log(source, modifier, source[modifier])
+                        if (this.verbose) {
+                            MICSR.log(source, modifier, source[modifier]);
+                        }
                         for (const value of source[modifier]) {
                             this.updateKeyValuePair(target, modifier, value);
                         }
@@ -816,7 +818,9 @@
             mergeModifiers(source, target) {
                 for (const modifier in source) {
                     if (source[modifier].length) {
-                        MICSR.log(source, modifier, source[modifier])
+                        if (this.verbose) {
+                            MICSR.log(source, modifier, source[modifier]);
+                        }
                         for (const value of source[modifier]) {
                             this.updateKeyValuePair(target, modifier, [value.id, value.value]);
                         }
