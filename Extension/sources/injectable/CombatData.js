@@ -71,8 +71,9 @@
                 // Pet Selection
                 this.petOwned = PETS.map(() => false);
                 // Agility course selection
-                this.course = Array(11).fill(-1);
+                this.course = Array(10).fill(-1);
                 this.courseMastery = Array(10).fill(false);
+                this.pillar = -1;
                 // Style Selection
                 this.attackStyle = {
                     Melee: 0,
@@ -888,7 +889,7 @@
                 // mimic calculateAgilityModifiers
                 const obstacles = [];
                 let fullCourse = true
-                for (let i = 0; i < this.course.length - 1; i++) {
+                for (let i = 0; i < this.course.length; i++) {
                     if (this.course[i] < 0) {
                         fullCourse = false;
                         break;
@@ -914,9 +915,8 @@
                     obstacles.push({modifiers: modifiers});
                 }
                 this.agilityModifiers = this.computeModifiers(obstacles);
-                const pillarID = this.course[this.course.length - 1];
-                if (fullCourse && pillarID > -1) {
-                    this.mergeModifiers(agilityPassivePillars[pillarID], this.agilityModifiers);
+                if (fullCourse && this.pillar > -1) {
+                    this.mergeModifiers(agilityPassivePillars[this.pillar].modifiers, this.agilityModifiers);
                 }
                 this.mergeModifiers(this.agilityModifiers, this.modifiers);
 

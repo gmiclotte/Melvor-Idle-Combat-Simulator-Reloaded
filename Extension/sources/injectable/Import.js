@@ -73,6 +73,9 @@
                     isHardcore: currentGamemode === 1,
                     isAdventure: currentGamemode === 2,
                     useCombinationRunes: useCombinationRunes,
+                    course: chosenAgilityObstacles,
+                    courseMastery: MASTERY[CONSTANTS.skill.Agility].xp.map(x => x > 13034431),
+                    pillar: agilityPassivePillarActive,
                 }
 
                 // import settings
@@ -82,8 +85,10 @@
             }
 
             exportSettings() {
+                const courseMastery = {};
+                this.app.combatData.course.forEach((o, i) => courseMastery[o] = this.app.combatData.courseMastery[i]);
                 return {
-                    combatData: this.app.combatData,
+                    // combatData: this.app.combatData,
                     // TODO: all these should be in CombatData class?
                     equipment: this.app.equipmentSelected,
                     levels: this.app.combatData.virtualLevels,
@@ -106,6 +111,9 @@
                     isHardcore: this.app.combatData.isHardcore,
                     isAdventure: this.app.combatData.isAdventure,
                     useCombinationRunes: this.app.combatData.useCombinationRunes,
+                    course: this.app.combatData.course,
+                    courseMastery: courseMastery,
+                    pillar: this.app.combatData.pillar,
                 }
             }
 
@@ -122,6 +130,7 @@
                 this.importHardCore(settings.isHardcore);
                 this.importAdventure(settings.isAdventure);
                 this.importUseCombinationRunes(settings.useCombinationRunes);
+                this.importAgilityCourse(settings.course, settings.courseMastery, settings.pillar);
             }
 
             update() {
@@ -313,6 +322,41 @@
                     this.app.combatData.useCombinationRunes = false;
                     document.getElementById('MCS Use Combination Runes Radio No').checked = true;
                 }
+            }
+
+            importAgilityCourse(course, masteries, pillar) {
+                // clear current values
+                this.app.combatData.course.fill(-1);
+                this.app.combatData.courseMastery.fill(false);
+                // import settings
+                course.forEach((o, i) => {
+                    this.app.combatData.course[i] = o
+                    if (masteries[o]) {
+                        this.app.combatData.courseMastery[i] = true;
+                    }
+                });
+                this.app.combatData.pillar = pillar;
+                // set dropdowns
+                this.app.combatData.course.forEach((o, i) => {
+                    const elt = document.getElementById(`MICSR Agility Obstacle ${i} Dropdown`);
+                    for (let index = 0; elt[index] !== undefined; index++) {
+                        const tmp = elt[index].value;
+                        if (tmp === "" + o) {
+                            elt.selectedIndex = index;
+                            return;
+                        }
+                    }
+                })
+                document.getElementById(`MICSR Agility Pillar Dropdown`).selectedIndex = this.app.combatData.pillar + 1;
+                // set image selection
+                this.app.combatData.courseMastery.forEach((m, i) => {
+                    const elt = document.getElementById(`MCS Agility Mastery ${i} Toggle Button`);
+                    if (m) {
+                        this.app.selectButton(elt);
+                    } else {
+                        this.app.unselectButton(elt);
+                    }
+                });
             }
         }
     }

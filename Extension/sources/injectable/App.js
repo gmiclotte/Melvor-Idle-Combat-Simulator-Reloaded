@@ -734,6 +734,12 @@
                 this.updateCombatStats();
             }
 
+            agilityPillarOnChange(event) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value);
+                this.combatData.pillar = idx;
+                this.updateCombatStats();
+            }
+
             agilityMasteryOnClick(event, position) {
                 if (this.combatData.courseMastery[position]) {
                     this.combatData.courseMastery[position] = false;
@@ -761,7 +767,7 @@
                 for (; i < 10; i++) {
                     const idx = i;
                     const dropDownContainer = this.agilitySelectCard.createCCContainer();
-                    const masteryButton = this.agilitySelectCard.createImageButton(this.media.mastery, `MICSR Agility Mastery ${idx} Toggle`, () => this.agilityMasteryOnClick(event, idx), 'Small', '99 Mastery');
+                    const masteryButton = this.agilitySelectCard.createImageButton(this.media.mastery, `Agility Mastery ${idx} Toggle`, () => this.agilityMasteryOnClick(event, idx), 'Small', '99 Mastery');
                     dropDownContainer.appendChild(masteryButton);
                     const dropdown = this.agilitySelectCard.createDropdown(
                         ['None'].concat(categories[idx].map(j => agilityObstacles[j].name)),
@@ -776,8 +782,8 @@
                 const dropdown = this.agilitySelectCard.createDropdown(
                     ['None'].concat(agilityPassivePillars.map(p => p.name)),
                     [-1, 0, 1, 2],
-                    `MICSR Agility Obstacle ${i} Dropdown`,
-                    (event) => this.agilityCourseOnChange(event, i)
+                    `MICSR Agility Pillar Dropdown`,
+                    (event) => this.agilityPillarOnChange(event, i)
                 )
                 dropDownContainer.appendChild(dropdown);
                 this.agilitySelectCard.container.appendChild(dropDownContainer);
