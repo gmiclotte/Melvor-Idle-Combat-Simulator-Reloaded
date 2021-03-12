@@ -183,6 +183,22 @@
                     Prayer: 'Pra.',
                     Slayer: 'Sla.',
                 };
+                this.combatSkillIDs = [
+                    CONSTANTS.skill.Attack,
+                    CONSTANTS.skill.Strength,
+                    CONSTANTS.skill.Defence,
+                    CONSTANTS.skill.Hitpoints,
+                    CONSTANTS.skill.Ranged,
+                    CONSTANTS.skill.Magic,
+                    CONSTANTS.skill.Prayer,
+                    CONSTANTS.skill.Slayer,
+                ];
+                // patch showAllAgilityPassives
+                let codeString = showAllAgilityPassives.toString();
+                codeString = codeString.replace(/^function (\w+) *\(\)/, 'this.showAllModifiers = (modifiers, text) => ');
+                codeString = codeString.replace(/agilityPassiveBonuses/g, 'modifiers');
+                codeString = codeString.replace('Current Global Active Passives from Agility', '${text}');
+                eval(codeString);
                 // Combat Data Object
                 this.combatData = new MICSR.CombatData(this.equipmentSelected, this.equipmentSlotKeys);
                 // Simulation Object
@@ -314,6 +330,27 @@
                 this.gearSets = [];
             }
 
+
+            showModifiers(modifiers, text = 'Active Modifiers') {
+                const filteredModifiers = {};
+                Object.getOwnPropertyNames(modifiers).forEach(prop => {
+                    const value = modifiers[prop];
+                    if (value.length === undefined) {
+                        if (value === 0) {
+                            return;
+                        }
+                        filteredModifiers[prop] = value;
+                    } else {
+                        const filteredValue = value.filter(x => this.combatSkillIDs.includes(x.id));
+                        if (filteredValue.length === 0) {
+                            return;
+                        }
+                        filteredModifiers[prop] = filteredValue;
+                    }
+                });
+                this.showAllModifiers(filteredModifiers, text);
+            }
+
             createEquipmentSelectCard() {
                 this.equipmentSelectCard = new MICSR.Card(this.topContent, '', '150px', true);
                 const equipmentRows = [
@@ -434,6 +471,10 @@
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
                 this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.import.importButtonOnClick(0), () => this.import.importButtonOnClick(1), () => this.import.importButtonOnClick(2)], importSetCCContainer);
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
+                // add button to show all modifiers
+                const modifierCCContainer = this.equipmentSelectCard.createCCContainer();
+                modifierCCContainer.appendChild(this.equipmentSelectCard.addButton('Show Modifiers', () => this.showModifiers(this.combatData.modifiers)));
+                this.equipmentSelectCard.container.appendChild(modifierCCContainer);
             }
 
             equipFood(itemID) {
