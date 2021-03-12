@@ -893,7 +893,25 @@
                         fullCourse = false;
                         break;
                     }
-                    obstacles.push(agilityObstacles[this.course[i]]);
+                    let modifiers = {};
+                    if (this.courseMastery[i]) {
+                        const m = agilityObstacles[this.course[i]].modifiers;
+                        Object.getOwnPropertyNames(m).forEach(prop => {
+                            if (!prop.startsWith('decreased')) {
+                                modifiers[prop] = m[prop];
+                                return;
+                            }
+                            const value = m[prop];
+                            if (value.length === undefined) {
+                                modifiers[prop] = value / 2;
+                                return;
+                            }
+                            modifiers[prop] = value.map(x => [x[0], x[1] / 2]);
+                        });
+                    } else {
+                        modifiers = agilityObstacles[this.course[i]].modifiers;
+                    }
+                    obstacles.push({modifiers: modifiers});
                 }
                 this.agilityModifiers = this.computeModifiers(obstacles);
                 const pillarID = this.course[this.course.length - 1];
