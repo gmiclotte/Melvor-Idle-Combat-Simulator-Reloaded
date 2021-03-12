@@ -249,7 +249,7 @@
                 // Import PETS
                 petOwned.forEach((owned, petID) => {
                     this.app.combatData.petOwned[petID] = owned;
-                    if (this.app.combatPetsIds.includes(petID)) {
+                    if (this.app.combatData.petIds.includes(petID)) {
                         if (owned) {
                             this.app.selectButton(document.getElementById(`MCS ${PETS[petID].name} Button`));
                         } else {

@@ -676,18 +676,12 @@
             }
 
             createPetSelectCard() {
-                this.combatPetsIds = [
-                    2, // FM pet
-                    12, 13, 14, 15, 16, 17, 18, 19, 20, // cb skill pets
-                    22, 23, // slayer area pets
-                    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40 // dungeon pets
-                ];
-                const combatPets = this.combatPetsIds.map(id => PETS[id]);
+                const combatPets = this.combatData.petIds.map(id => PETS[id]);
                 this.petSelectCard = this.mainTabCard.addTab('Pets', this.media.pet, '', '100px');
                 this.petSelectCard.addSectionTitle('Pets');
                 const petImageSources = combatPets.map((pet) => pet.media);
                 const petNames = combatPets.map((pet) => pet.name);
-                const petButtonCallbacks = this.combatPetsIds.map((petId) => (e) => this.petButtonOnClick(e, petId));
+                const petButtonCallbacks = this.combatData.petIds.map((petId) => (e) => this.petButtonOnClick(e, petId));
                 const tooltips = combatPets.map((pet) => `<div class="text-center">${pet.name}<br><small class='text-info'>${pet.description.replace(/\.$/, '')}</small></div>`);
                 this.petSelectCard.addImageButtons(petImageSources, petNames, 'Medium', petButtonCallbacks, tooltips);
                 this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
