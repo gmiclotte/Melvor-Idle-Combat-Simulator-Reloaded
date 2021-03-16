@@ -745,6 +745,7 @@
              * Modifies the playerStats before starting a job for a specific monster
              * @param {number} monsterID Index of MONSTERS
              */
+            // TODO: move this to combatData?
             modifyCurrentSimStatsForMonster(monsterID) {
                 const playerStats = this.currentSim.playerStats;
                 const combatData = this.currentSim.combatData;
