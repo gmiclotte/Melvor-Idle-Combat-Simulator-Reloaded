@@ -17,5 +17,5 @@ window.MICSR = {
 
 // set itemID for each item
 items.forEach((x, i) => {
-    items[i].itemID = i;
+    x.itemID = i;
 });

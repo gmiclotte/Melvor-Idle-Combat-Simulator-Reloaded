@@ -67,6 +67,7 @@ function injectScripts() {
         // independent definitions
         'specialNames',
         'statNames',
+        'modifierNames',
         // class files
         'Card',
         'CombatData',
