@@ -38,6 +38,12 @@
                     Prayer: 1,
                     Slayer: 1,
                 };
+                // auto eat data
+                this.autoEatData = [
+                    SHOP["General"][CONSTANTS.shop.general.Auto_Eat_Tier_I],
+                    SHOP["General"][CONSTANTS.shop.general.Auto_Eat_Tier_II],
+                    SHOP["General"][CONSTANTS.shop.general.Auto_Eat_Tier_III],
+                ];
                 // pet IDs
                 this.petIds = [
                     2, // FM pet
@@ -921,7 +927,12 @@
                 this.mergeModifiers(this.agilityModifiers, this.modifiers);
 
                 // mimic calculateShopModifiers
-                // implement this if it ever is relevant
+                // implement other parts of this if they ever are relevant
+                this.autoEatModifiers = {};
+                for (let i = 0; i <= this.autoEatTier; i++) {
+                    this.mergeModifiers(this.autoEatData[i].contains.modifiers, this.autoEatModifiers);
+                }
+                this.mergeModifiers(this.autoEatModifiers, this.modifiers);
 
                 // mimic calculateMiscModifiers
                 // implement this if it ever is relevant
@@ -1116,7 +1127,6 @@
                     slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
                     // healing
                     autoEat: {
-                        cost: 0,
                         eatAt: 0,
                         maxHP: 0,
                         efficiency: 0,
@@ -1128,9 +1138,12 @@
 
                 // set auto eat
                 if (this.autoEatTier >= 0) {
-                    playerStats.autoEat = {...autoEatData[this.autoEatTier]};
-                    playerStats.autoEat.eatAt += this.equipmentStats.increasedAutoEat | 0;
-                    playerStats.autoEat.efficiency -= this.equipmentStats.decreasedAutoEatEfficiency | 0;
+                    playerStats.autoEat.eatAt = this.modifiers.increasedAutoEatThreshold -
+                        this.modifiers.decreasedAutoEatThreshold;
+                    playerStats.autoEat.efficiency = this.modifiers.increasedAutoEatEfficiency -
+                        this.modifiers.decreasedAutoEatEfficiency;
+                    playerStats.autoEat.maxHP = this.modifiers.increasedAutoEatHPLimit -
+                        this.modifiers.decreasedAutoEatHPLimit;
                 } else {
                     playerStats.autoEat.manual = true;
                 }

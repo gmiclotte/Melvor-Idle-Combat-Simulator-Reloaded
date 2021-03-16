@@ -35,9 +35,9 @@
             PlayerAttackSpeed: {implemented: false},
             PlayerAttackSpeedPercent: {implemented: false},
             // modifiers that relate to healing
-            AutoEatEfficiency: {implemented: false},
-            AutoEatHPLimit: {implemented: false},
-            AutoEatThreshold: {implemented: false},
+            AutoEatEfficiency: {implemented: true},
+            AutoEatHPLimit: {implemented: true},
+            AutoEatThreshold: {implemented: true},
             FoodHealingValue: {implemented: false},
             HPRegenFlat: {implemented: false},
             HitpointRegeneration: {implemented: false},

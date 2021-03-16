@@ -427,12 +427,13 @@
                 // auto eat dropdown
                 let autoEatTierNames = ['Manual Eating'];
                 let autoEatTierValues = [-1];
-                for (let i = 0; i < autoEatData.length; i++) {
-                    autoEatTierNames.push(autoEatData[i].title);
+                for (let i = 0; i < this.combatData.autoEatData.length; i++) {
+                    autoEatTierNames.push(this.combatData.autoEatData[i].name);
                     autoEatTierValues.push(i);
                 }
                 const autoEatTierDropdown = this.equipmentSelectCard.createDropdown(autoEatTierNames, autoEatTierValues, 'MCS Auto Eat Tier Dropdown', (event) => {
                     this.combatData.autoEatTier = parseInt(event.currentTarget.selectedOptions[0].value);
+                    this.updateCombatStats();
                 });
                 foodCCContainer.appendChild(autoEatTierDropdown);
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
