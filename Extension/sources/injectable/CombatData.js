@@ -669,7 +669,7 @@
                 // attack type
                 this.setAttackType();
 
-                // attack speed
+                // attack speed without aurora
                 this.combatStats.attackSpeed = 4000;
                 this.combatStats.attackSpeed = this.equipmentStats.attackSpeed;
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 1) {
@@ -1051,10 +1051,6 @@
 
             playerAttackSpeed() {
                 let attackSpeed = this.combatStats.attackSpeed;
-                if (this.equipmentSelected.includes(CONSTANTS.item.Guardian_Amulet)) {
-                    // Guardian Amulet gives 20% increase in attack speed (40% if below 50% HP)
-                    attackSpeed *= 1.2;
-                }
                 attackSpeed -= this.decreasedAttackSpeed();
                 return attackSpeed;
             }

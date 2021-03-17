@@ -808,17 +808,21 @@
         // base
         let speed = actorStats.attackSpeed;
         if (actor.isPlayer) {
-            // TODO: guardian amulet double effect when below 50% HP ?
-            // recompute attack speed if in dark waters
-            if (actor.isPlayer && actorStats.slayerArea === 10) {
+            // recompute attack speed if using guardian amulet or in dark waters
+            if (actorStats.activeItems.guardianAmulet || actorStats.slayerArea === 10) {
                 speed = 4000;
                 speed = actor.equipmentStats.attackSpeed;
                 if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
                     actor.combatStats.attackSpeed -= 400;
                 }
-                speed = mergePlayerModifiers(actor, 'PlayerAttackSpeed');
+                speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
                 let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
-                attackSpeedPercent += calculateAreaEffectValue(actor, actorStats)
+                if (actorStats.slayerArea === 10) {
+                    attackSpeedPercent += calculateAreaEffectValue(actor, actorStats)
+                }
+                if (actorStats.activeItems.guardianAmulet && actor.hitpoints < actor.maxHitpoints) {
+                    attackSpeedPercent += 10;
+                }
                 speed = applyModifier(speed, attackSpeedPercent);
             }
             // slow
