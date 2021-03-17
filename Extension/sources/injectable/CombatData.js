@@ -835,7 +835,7 @@
                 }
             }
 
-            updateKeyValuePair = (array, key, value, verbose) => {
+            updateKeyValuePair(array, key, value, verbose) {
                 if (this.verbose) {
                     MICSR.log(array + " / " + key + " / " + value);
                 }
