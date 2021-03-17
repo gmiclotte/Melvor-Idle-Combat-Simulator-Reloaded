@@ -166,10 +166,6 @@
                 this.combatStats = {};
             }
 
-            detach() {
-                this.equipmentSelected = [...this.equipmentSelected];
-            }
-
             /**
              * Calculates the equipment's combined stats and stores them in `this.equipmentStats`
              */
