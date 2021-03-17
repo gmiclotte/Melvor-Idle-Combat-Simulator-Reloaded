@@ -490,10 +490,9 @@
                         break;
                 }
                 // max hit modifiers apply to everything except for ancient magics
-                // TODO: not implemented in game yet
                 if (this.combatStats.attackType !== CONSTANTS.attackType.Magic || !this.spells.ancient.isSelected) {
-                    //maxHit += applyModifier(playerModifiers.increasedMaxHitPercent - playerModifiers.decreasedMaxHitPercent);
-                    //maxHit += getNumberMultiplierValue(playerModifiers.increasedMaxHitFlat - playerModifiers.decreasedMaxHitFlat);
+                    maxHit = applyModifier(maxHit, MICSR.getModifierValue(modifiers, 'MaxHitPercent'));
+                    maxHit += MICSR.getModifierValue(modifiers, 'MaxHitFlat');
                 }
                 return maxHit
             }
