@@ -249,10 +249,9 @@
                 // multiplier gp increase
                 currentSim.gpBonus = applyModifier(
                     1,
-                    combatData.modifiers.increasedGPFromMonsters
-                    - combatData.modifiers.decreasedGPFromMonsters
-                    + combatData.modifiers.increasedGPGlobal
-                    - combatData.modifiers.decreasedGPGlobal);
+                    MICSR.getModifierValue(combatData.modifiers, 'GPFromMonsters')
+                    + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal')
+                );
                 // check for ARS drop
                 currentSim.canTopazDrop = false;
                 if (combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
@@ -261,8 +260,8 @@
                 // loot bonus
                 currentSim.lootBonus = Math.max(1, applyModifier(
                     1,
-                    combatData.modifiers.increasedChanceToDoubleLootCombat
-                    - combatData.modifiers.decreasedChanceToDoubleLootCombat));
+                    MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat'),
+                ));
                 // misc
                 currentSim.herbConvertChance = combatData.herbloreBonus.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
@@ -577,7 +576,7 @@
             computeRuneUsage(runes, combinationRunes, runeCosts, castsPerSecond, preservation) {
                 runeCosts.forEach(x => {
                     const runeID = x.id;
-                    const qty = x.qty * castsPerSecond * (1 - preservation);
+                    const qty = x.qty * castsPerSecond * (1 - preservation / 100);
                     if (items[runeID].providesRune && items[runeID].providesRune.length > 1) {
                         combinationRunes[runeID] = qty + (combinationRunes[runeID] || 0);
                     } else {

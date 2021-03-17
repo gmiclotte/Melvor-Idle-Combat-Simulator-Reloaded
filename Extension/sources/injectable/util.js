@@ -118,7 +118,7 @@
         /**
          * Get the combined modifier value
          */
-        MICSR.getModifierValue = (modifiers, modifier, skillID) => {
+        MICSR.getModifierValue = (modifiers, modifier, skillID = undefined) => {
             const increased = modifiers['increased' + modifier];
             const decreased = modifiers['decreased' + modifier];
             if (increased.length !== undefined) {

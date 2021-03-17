@@ -30,6 +30,7 @@
             case 'START_SIMULATION':
                 const startTime = performance.now();
                 numberMultiplier = event.data.combatData.numberMultiplier;
+                enemySpawnTimer = event.data.combatData.enemySpawnTimer;
                 combatSimulator.simulateMonster(event.data.combatData, event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
                     postMessage({
@@ -99,7 +100,6 @@
             this.cancelStatus = false;
             protectFromValue = data.protectFromValue;
             enemySpecialAttacks = data.enemySpecialAttacks;
-            enemySpawnTimer = data.enemySpawnTimer;
             hitpointRegenInterval = data.hitpointRegenInterval;
             deadeyeAmulet = data.deadeyeAmulet;
             confettiCrossbow = data.confettiCrossbow;

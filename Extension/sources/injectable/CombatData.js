@@ -98,6 +98,7 @@
                     damageReduction: 0,
                     attackType: 0,
                     maxHitpoints: 0,
+                    ammoPreservation: 0,
                     runePreservation: 0,
                 };
                 // Prayer Stats
@@ -663,6 +664,9 @@
                 Second, start computing and configuring TODO: extract this
                  */
 
+                // set enemy spawn timer
+                this.enemySpawnTimer = enemySpawnTimer + MICSR.getModifierValue(modifiers, 'MonsterRespawnTimer');
+
                 // attack type
                 this.setAttackType();
 
@@ -681,17 +685,9 @@
                     - modifiers.decreasedPlayerAttackSpeedPercent
                 );
 
-                // rune preservation
-                this.combatStats.runePreservation = 0;
-                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
-                    // Magic
-                    if (this.equipmentStats.activeItems.skullCape) {
-                        this.combatStats.runePreservation += 0.2;
-                    }
-                    if (this.petOwned[17]) {
-                        this.combatStats.runePreservation += 0.05;
-                    }
-                }
+                // preservation
+                this.combatStats.ammoPreservation = MICSR.getModifierValue(this.modifiers, 'AmmoPreservation');
+                this.combatStats.runePreservation = MICSR.getModifierValue(this.modifiers, 'RunePreservation');
 
                 // max attack roll
                 this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.combatStats, this.baseStats, modifiers);
@@ -1103,7 +1099,7 @@
                     isProtected: false,
                     hardcore: this.isHardcore,
                     // passive stats
-                    ammoPreservation: this.equipmentStats.ammoPreservation,
+                    ammoPreservation: this.combatStats.ammoPreservation,
                     lifesteal: this.auroraBonus.lifesteal + this.equipmentStats.lifesteal,
                     spellheal: this.equipmentStats.spellheal,
                     reflectDamage: this.equipmentStats.reflectDamage,
@@ -1223,16 +1219,13 @@
                 }
                 // adjust prayer usage
                 const adjustPP = (pp) => {
-                    if (pp > 0) {
-                        pp -= this.equipmentStats.prayerCostReduction;
-                    }
+                    pp -= MICSR.getModifierValue(this.modifiers, 'FlatPrayerCostReduction');
                     if (playerStats.activeItems.prayerSkillcape && pp > 0) {
-                        pp = Math.max(1, Math.floor(pp / 2));
+                        pp = Math.floor(pp / 2);
                     }
-                    let save = this.herbloreBonus.divine;
-                    if (this.petOwned[18]) {
-                        save += 5;
-                    }
+                    pp = Math.max(1, pp);
+                    let save = MICSR.getModifierValue(this.modifiers, 'ChanceToPreservePrayerPoints');
+                    save += this.herbloreBonus.divine;
                     pp *= 1 - save / 100;
                     return pp;
                 }
@@ -1246,10 +1239,6 @@
                         // XP Gain
                         playerStats.prayerXpPerDamage += PRAYER[i].pointsPerPlayer / this.numberMultiplier;
                     }
-                }
-                // ammo preservation
-                if (this.petOwned[16]) {
-                    playerStats.ammoPreservation += 5;
                 }
                 // Xp Bonuses
                 const globalXpBonus = (this.modifiers.increasedGlobalSkillXP - this.modifiers.decreasedGlobalSkillXP) /100;
@@ -1369,6 +1358,7 @@
                 if (this.cookingMastery && items[this.foodSelected].masteryID && items[this.foodSelected].masteryID[0] === CONSTANTS.skill.Cooking) {
                     multiplier += .2;
                 }
+                multiplier += MICSR.getModifierValue(this.modifiers, 'FoodHealingValue') / 100;
                 amt *= multiplier;
                 return amt;
             }
