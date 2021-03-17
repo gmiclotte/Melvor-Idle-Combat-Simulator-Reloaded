@@ -1251,10 +1251,42 @@
                 if (this.petOwned[16]) {
                     playerStats.ammoPreservation += 5;
                 }
-                // Other Bonuses
-                if (playerStats.activeItems.goldEmeraldRing) {
-                    playerStats.xpBonus = 0.07;
+                // Xp Bonuses
+                const globalXpBonus = (this.modifiers.increasedGlobalSkillXP - this.modifiers.decreasedGlobalSkillXP) /100;
+                playerStats.combatXpBonus = globalXpBonus;
+                if (this.combatStats.attackType === CONSTANTS.attackType.Melee) {
+                    switch (this.attackStyle.Melee) {
+                        case 0:
+                            playerStats.combatXpBonus += MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Attack);
+                            break
+                        case 1:
+                            playerStats.combatXpBonus += MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Strength);
+                            break
+                        case 2:
+                            playerStats.combatXpBonus += MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Defence);
+                            break
+                    }
                 }
+                if (this.combatStats.attackType === CONSTANTS.attackType.Ranged) {
+                    const xpBonus = MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Ranged);
+                    if (this.attackStyle.Ranged === 2) {
+                        const defenceXpBonus = MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Defence);
+                        playerStats.combatXpBonus += (xpBonus + defenceXpBonus) / 2;
+                    } else {
+                        playerStats.combatXpBonus += xpBonus;
+                    }
+                }
+                if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
+                    const xpBonus = MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Magic);
+                    if (this.attackStyle.Magic === 2) {
+                        const defenceXpBonus = MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Defence);
+                        playerStats.combatXpBonus += (xpBonus + defenceXpBonus) / 2;
+                    } else {
+                        playerStats.combatXpBonus += xpBonus;
+                    }
+                }
+                playerStats.slayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Slayer);
+                playerStats.prayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Prayer);
                 return playerStats;
             }
 

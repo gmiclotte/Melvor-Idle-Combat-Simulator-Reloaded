@@ -537,11 +537,11 @@
                         }
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
                             let monsterXP = 0;
-                            monsterXP += Math.floor(((MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0) * (1 + this.currentSim.slayerBonusXP / 100));
+                            monsterXP += (MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0;
                             if (this.currentSim.isSlayerTask) {
-                                monsterXP += Math.floor(MONSTERS[monsterID].hitpoints * (1 + this.currentSim.slayerBonusXP / 100));
+                                monsterXP += MONSTERS[monsterID].hitpoints;
                             }
-                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * this.currentSim.playerStats.globalXPMult / this.monsterSimData[monsterID].killTimeS;
+                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * (1 + this.currentSim.playerStats.slayerXpBonus / 100) / this.monsterSimData[monsterID].killTimeS;
                         } else {
                             this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                         }

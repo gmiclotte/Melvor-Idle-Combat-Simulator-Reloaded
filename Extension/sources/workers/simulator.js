@@ -335,14 +335,9 @@
             }
 
             // Apply XP Bonuses
-            // Ring bonus
-            stats.totalCombatXP += stats.totalCombatXP * playerStats.xpBonus;
-            stats.totalHpXP += stats.totalHpXP * playerStats.xpBonus;
-            stats.totalPrayerXP += stats.totalPrayerXP * playerStats.xpBonus;
-            // Global XP Bonus
-            stats.totalCombatXP *= playerStats.globalXPMult;
-            stats.totalHpXP *= playerStats.globalXPMult;
-            stats.totalPrayerXP *= playerStats.globalXPMult;
+            stats.totalCombatXP *= 1 + playerStats.combatXpBonus / 100;
+            stats.totalHpXP *= 1 + playerStats.combatXpBonus / 100;
+            stats.totalPrayerXP *= 1 + playerStats.prayerXpBonus / 100;
 
             // Final Result from simulation
             return simulationResult(stats, playerStats, enemyStats, trials, tooManyActions);

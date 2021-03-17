@@ -101,6 +101,33 @@
             const levels = [melee, range, magic];
             return Math.floor(base + Math.max(...levels));
         }
+
+        /**
+         * Get the appropriate value from an array of skill modifiers
+         */
+        MICSR.arrayModifierToSkill = (array, skillID) => {
+            const result = array.filter(x => {
+                return x.id === skillID || x[0] === skillID
+            });
+            if (result.length === 0) {
+                return 0;
+            }
+            return result[0].value | result[0][1];
+        }
+
+        /**
+         * Get the combined modifier value
+         */
+        MICSR.getModifierValue = (modifiers, modifier, skillID) => {
+            const increased = modifiers['increased' + modifier];
+            const decreased = modifiers['decreased' + modifier];
+            if (increased.length !== undefined) {
+                const increasedEntry = MICSR.arrayModifierToSkill(increased, skillID);
+                const decreasedEntry = MICSR.arrayModifierToSkill(decreased, skillID);
+                return increasedEntry - decreasedEntry;
+            }
+            return increased - decreased;
+        }
     }
 
     let loadCounter = 0;

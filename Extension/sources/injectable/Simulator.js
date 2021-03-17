@@ -220,7 +220,6 @@
                     increasedGP: 0,
                     gpBonus: 1,
                     lootBonus: 1,
-                    slayerBonusXP: 0,
                     canTopazDrop: false,
                     herbConvertChance: 0,
                     doBonesAutoBury: false,
@@ -264,8 +263,6 @@
                     1,
                     combatData.modifiers.increasedChanceToDoubleLootCombat
                     - combatData.modifiers.decreasedChanceToDoubleLootCombat));
-                // TODO
-                currentSim.slayerBonusXP = combatData.equipmentStats.slayerBonusXP;
                 // misc
                 currentSim.herbConvertChance = combatData.herbloreBonus.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
