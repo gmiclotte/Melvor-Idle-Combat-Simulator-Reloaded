@@ -245,25 +245,28 @@
                 // Start by grabbing the player stats
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
-                currentSim.increasedGP = combatData.equipmentStats.increasedGP;
+                currentSim.increasedGP = combatData.modifiers.increasedGPFromMonstersFlat
+                 - combatData.modifiers.decreasedGPFromMonstersFlat;
                 // multiplier gp increase
-                currentSim.gpBonus = 1;
+                currentSim.gpBonus = applyModifier(
+                    1,
+                    combatData.modifiers.increasedGPFromMonsters
+                    - combatData.modifiers.decreasedGPFromMonsters
+                    + combatData.modifiers.increasedGPGlobal
+                    - combatData.modifiers.decreasedGPGlobal);
+                // check for ARS drop
                 currentSim.canTopazDrop = false;
                 if (combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
-                    currentSim.gpBonus *= 1.15;
                     currentSim.canTopazDrop = true;
                 }
-                if (combatData.equipmentSelected.includes(CONSTANTS.item.Aorpheats_Signet_Ring)) {
-                    currentSim.gpBonus *= 2;
-                }
-                if (combatData.equipmentSelected.includes(CONSTANTS.item.Almighty_Lute)) {
-                    currentSim.gpBonus *= 5;
-                }
-                currentSim.lootBonus = 1 + combatData.equipmentStats.chanceToDoubleLoot / 100;
-                if (combatData.petOwned[20]) {
-                    currentSim.lootBonus += 0.01;
-                }
+                // loot bonus
+                currentSim.lootBonus = Math.max(1, applyModifier(
+                    1,
+                    combatData.modifiers.increasedChanceToDoubleLootCombat
+                    - combatData.modifiers.decreasedChanceToDoubleLootCombat));
+                // TODO
                 currentSim.slayerBonusXP = combatData.equipmentStats.slayerBonusXP;
+                // misc
                 currentSim.herbConvertChance = combatData.herbloreBonus.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
                 currentSim.isSlayerTask = combatData.isSlayerTask;

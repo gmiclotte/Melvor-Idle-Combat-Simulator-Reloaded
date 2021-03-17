@@ -56,7 +56,7 @@
              * @return {number}
              */
             computeAverageCoins(monsterID) {
-                return ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP) * this.currentSim.gpBonus;
+                return Math.max(0, ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP)) * this.currentSim.gpBonus;
             }
 
             /**
