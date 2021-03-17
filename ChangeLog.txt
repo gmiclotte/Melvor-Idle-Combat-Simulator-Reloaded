@@ -1,3 +1,6 @@
+v1.3.1
+    Cleanup modifier display
+
 v1.3.0
     Update for 0.19
     Changes:
