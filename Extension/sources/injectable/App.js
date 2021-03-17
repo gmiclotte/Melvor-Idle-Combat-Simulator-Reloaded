@@ -193,12 +193,6 @@
                     CONSTANTS.skill.Prayer,
                     CONSTANTS.skill.Slayer,
                 ];
-                // patch showAllAgilityPassives
-                let codeString = showAllAgilityPassives.toString();
-                codeString = codeString.replace(/^function (\w+) *\(\)/, 'this.showAllModifiers = (modifiers, text) => ');
-                codeString = codeString.replace(/agilityPassiveBonuses/g, 'modifiers');
-                codeString = codeString.replace('Current Global Active Passives from Agility', '${text}');
-                eval(codeString);
                 // Combat Data Object
                 this.combatData = new MICSR.CombatData(this.equipmentSelected, this.equipmentSlotKeys);
                 // Simulation Object
@@ -330,25 +324,87 @@
                 this.gearSets = [];
             }
 
-
-            showModifiers(modifiers, text = 'Active Modifiers') {
-                const filteredModifiers = {};
-                Object.getOwnPropertyNames(modifiers).forEach(prop => {
-                    const value = modifiers[prop];
-                    if (value.length === undefined) {
-                        if (value === 0) {
-                            return;
-                        }
-                        filteredModifiers[prop] = value;
-                    } else {
-                        const filteredValue = value.filter(x => this.combatSkillIDs.includes(x.id));
-                        if (filteredValue.length === 0) {
-                            return;
-                        }
-                        filteredModifiers[prop] = filteredValue;
-                    }
+            arrayModifierToSkill(array, skillID) {
+                const result = array.filter(x => {
+                    return x.id === skillID || x[0] === skillID
                 });
-                this.showAllModifiers(filteredModifiers, text);
+                if (result.length === 0) {
+                    return 0;
+                }
+                return result[0].value | result[0][1];
+            }
+
+            printDiffModifier(modifier, increased, decreased, skillID = undefined) {
+                // compute difference
+                const value = increased - decreased;
+                if (value === 0) {
+                    return [];
+                }
+                // store if value is positive or negative
+                const positive = value > 0;
+                // take absolute value
+                let valueToPrint = positive ? value : -value;
+                // convert to array if required
+                valueToPrint = skillID !== undefined ? [skillID, valueToPrint] : valueToPrint;
+                // print increased or decreased
+                if (positive) {
+                    return [printPlayerModifier('increased' + modifier, valueToPrint)];
+                } else {
+                    return [printPlayerModifier('decreased' + modifier, valueToPrint)];
+                }
+            }
+
+            printModifier(modifiers, modifier, skillIDs) {
+                // modifiers that occur on their own
+                if (modifiers[modifier] !== undefined) {
+                    if (modifiers[modifier] === 0) {
+                        return [];
+                    }
+                    return [printPlayerModifier(modifier, modifiers[modifier])];
+                }
+                // increased-decreased type modifier
+                const increased = modifiers['increased' + modifier];
+                const decreased = modifiers['decreased' + modifier];
+                let toPrint = [];
+                if (increased.length !== undefined) {
+                    skillIDs.forEach(skillID => {
+                        const increasedEntry = this.arrayModifierToSkill(increased, skillID);
+                        const decreasedEntry = this.arrayModifierToSkill(decreased, skillID);
+                        toPrint = toPrint.concat(this.printDiffModifier(modifier, increasedEntry, decreasedEntry, skillID));
+                    });
+                } else {
+                    toPrint = toPrint.concat(this.printDiffModifier(modifier, increased, decreased));
+                }
+                return toPrint;
+            }
+
+            printRelevantModifiers(modifiers) {
+                const relevantNames = Object.getOwnPropertyNames(MICSR.modifierNames);
+                const skillIDs = [
+                    CONSTANTS.skill.Attack,
+                    CONSTANTS.skill.Strength,
+                    CONSTANTS.skill.Ranged,
+                    CONSTANTS.skill.Magic,
+                    CONSTANTS.skill.Defence,
+                    CONSTANTS.skill.Hitpoints,
+                    CONSTANTS.skill.Prayer,
+                    CONSTANTS.skill.Slayer,
+                ];
+                const toPrint = [];
+                relevantNames.forEach(name => {
+                    this.printModifier(modifiers, name, skillIDs).forEach(result => toPrint.push(result));
+                });
+                return toPrint;
+            }
+
+            showRelevantModifiers(modifiers, text) {
+                let passives = `<h5 class=\"font-w600 font-size-sm mb-1 text-combat-smoke\">${text}</h5><h5 class=\"font-w600 font-size-sm mb-3 text-warning\"></h5>`;
+                this.printRelevantModifiers(modifiers).forEach(toPrint => {
+                    passives += `<h5 class=\"font-w400 font-size-sm mb-1 ${toPrint[1]}\">${toPrint[0]}</h5>`;
+                });
+                Swal.fire({
+                    html: passives,
+                });
             }
 
             createEquipmentSelectCard() {
@@ -474,7 +530,7 @@
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
                 // add button to show all modifiers
                 const modifierCCContainer = this.equipmentSelectCard.createCCContainer();
-                modifierCCContainer.appendChild(this.equipmentSelectCard.addButton('Show Modifiers', () => this.showModifiers(this.combatData.modifiers)));
+                modifierCCContainer.appendChild(this.equipmentSelectCard.addButton('Show Modifiers', () => this.showRelevantModifiers(this.combatData.modifiers, 'Active modifiers')));
                 this.equipmentSelectCard.container.appendChild(modifierCCContainer);
             }
 
