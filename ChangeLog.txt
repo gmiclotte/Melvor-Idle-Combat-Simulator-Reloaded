@@ -1,3 +1,11 @@
+v1.3.0
+    Update for 0.19
+    Changes:
+    - implement modifiers (this might cause some bugs, some effects might be implemented in two ways now)
+    - add new pets
+    - add agility
+    - implement Redemption prayer effect
+
 v1.2.10
     Extract TabCard class
 

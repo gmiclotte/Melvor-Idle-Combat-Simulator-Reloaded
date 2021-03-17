@@ -56,20 +56,21 @@ function injectScript(scriptName) {
     document.body.appendChild(newScript);
 }
 
-// First inject the base MICSR object
-injectScript('MICSR');
-
-// Then try to inject the other scripts
+// Inject the scripts
 function injectScripts() {
-    // Order of scripts shouldn't matter, `loadRequiredVariables` takes care of appropriate loading order
+    // Order of scripts shouldn't matter, `waitLoadOrder` takes care of appropriate loading order
     const injectableNames = [
+        // MICSR object
+        'MICSR',
         // common
         'util',
         // independent definitions
         'specialNames',
         'statNames',
+        'modifierNames',
         // class files
         'Card',
+        'CombatData',
         'Import',
         'Loot',
         'Plotter',
@@ -86,5 +87,4 @@ function injectScripts() {
     }
 }
 
-// Delay this, so the MICSR object is first injected
-setTimeout(injectScripts(), 2000);
+injectScripts();

@@ -1,12 +1,12 @@
 (() => {
 
-    const MICSR = window.MICSR;
-
     const reqs = [
         'util',
     ];
 
     const setup = () => {
+
+        const MICSR = window.MICSR;
 
         // equipment stats are non-passive stats that apply to combat
         MICSR.equipmentStatNames = {
@@ -285,6 +285,26 @@
             increasedEarthFireSpellDmg: {},
         }
 
+        // report stats that no longer exist
+        const existing = {};
+        items.forEach(item => {
+            Object.getOwnPropertyNames(item).forEach(prop => {
+                existing[prop] = true;
+            });
+        });
+        [
+            MICSR.equipmentStatNames,
+            MICSR.passiveStatNames,
+            MICSR.requiredStatNames,
+            MICSR.irrelevantStatNames,
+        ].forEach(props => {
+            Object.getOwnPropertyNames(props).forEach(prop => {
+                if (!existing[prop]) {
+                    MICSR.log(`unknown item property ${prop}`);
+                }
+            });
+        });
+
         // report unknown stats
         const known = [MICSR.equipmentStatNames, MICSR.passiveStatNames, MICSR.requiredStatNames, MICSR.irrelevantStatNames];
         MICSR.checkUnknown(items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem), 'Item', 'items', known, MICSR.brokenStatNames);
@@ -295,6 +315,40 @@
         MICSR.checkImplemented(MICSR.requiredStatNames, "Item required");
     }
 
-    MICSR.waitLoadOrder(reqs, setup, 'statNames')
+    let loadCounter = 0;
+    const waitLoadOrder = (reqs, setup, id) => {
+        loadCounter++;
+        if (loadCounter > 100) {
+            console.log('Failed to load ' + id);
+            return;
+        }
+        // check requirements
+        let reqMet = true;
+        if (window.MICSR === undefined) {
+            reqMet = false;
+            console.log(id + ' is waiting for the MICSR object');
+        } else {
+            for (const req of reqs) {
+                if (window.MICSR.loadedFiles[req]) {
+                    continue;
+                }
+                reqMet = false;
+                // not defined yet: try again later
+                if (loadCounter === 1) {
+                    window.MICSR.log(id + ' is waiting for ' + req)
+                }
+            }
+        }
+        if (!reqMet) {
+            setTimeout(() => waitLoadOrder(reqs, setup, id), 50);
+            return;
+        }
+        // requirements met
+        window.MICSR.log('setting up ' + id)
+        setup();
+        // mark as loaded
+        window.MICSR.loadedFiles[id] = true;
+    }
+    waitLoadOrder(reqs, setup, 'statNames')
 
 })();

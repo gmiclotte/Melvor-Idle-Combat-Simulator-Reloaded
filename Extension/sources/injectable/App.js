@@ -1,11 +1,9 @@
 (() => {
-
-    const MICSR = window.MICSR;
-
     const reqs = [
         'util',
         'statNames',
         'Card',
+        'CombatData',
         'Import',
         'Plotter',
         'Loot',
@@ -15,6 +13,8 @@
     ];
 
     const setup = () => {
+
+        const MICSR = window.MICSR;
 
         /**
          * Container Class for the Combat Simulator.
@@ -130,6 +130,8 @@
                     defence: 'assets/media/skills/defence/defence.svg',
                     hitpoints: 'assets/media/skills/hitpoints/hitpoints.svg',
                     emptyFood: 'assets/media/skills/combat/food_empty.svg',
+                    agility: 'assets/media/skills/agility/agility.svg',
+                    mastery: 'assets/media/main/mastery_header.svg',
                 };
 
                 // Forced equipment sorting
@@ -181,10 +183,28 @@
                     Prayer: 'Pra.',
                     Slayer: 'Sla.',
                 };
+                this.combatSkillIDs = [
+                    CONSTANTS.skill.Attack,
+                    CONSTANTS.skill.Strength,
+                    CONSTANTS.skill.Defence,
+                    CONSTANTS.skill.Hitpoints,
+                    CONSTANTS.skill.Ranged,
+                    CONSTANTS.skill.Magic,
+                    CONSTANTS.skill.Prayer,
+                    CONSTANTS.skill.Slayer,
+                ];
+                // patch showAllAgilityPassives
+                let codeString = showAllAgilityPassives.toString();
+                codeString = codeString.replace(/^function (\w+) *\(\)/, 'this.showAllModifiers = (modifiers, text) => ');
+                codeString = codeString.replace(/agilityPassiveBonuses/g, 'modifiers');
+                codeString = codeString.replace('Current Global Active Passives from Agility', '${text}');
+                eval(codeString);
+                // Combat Data Object
+                this.combatData = new MICSR.CombatData(this.equipmentSelected, this.equipmentSlotKeys);
                 // Simulation Object
                 this.simulator = new MICSR.Simulator(this, urls.simulationWorker);
                 // Import Object
-                this.import = new MICSR.Import(this, this.simulator);
+                this.import = new MICSR.Import(this);
                 // Loot Object
                 this.loot = new MICSR.Loot(this, this.simulator);
                 // Temporary GP/s settings variable
@@ -213,6 +233,7 @@
                 this.createPrayerSelectCard();
                 this.createPotionSelectCard();
                 this.createPetSelectCard();
+                this.createAgilitySelectCard();
                 this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
@@ -298,17 +319,36 @@
                 this.updateSpellOptions();
                 this.updatePrayerOptions();
                 // Set up spells
-                const standardOpts = this.simulator.spells.standard;
+                const standardOpts = this.combatData.spells.standard;
                 this.selectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
                 this.updatePlotData();
                 // Export Options element
                 this.exportOptionsButton = document.getElementById('MCS Show Export Options Button');
                 // Saving and loading of Gear Sets
                 this.gearSets = [];
+            }
+
+
+            showModifiers(modifiers, text = 'Active Modifiers') {
+                const filteredModifiers = {};
+                Object.getOwnPropertyNames(modifiers).forEach(prop => {
+                    const value = modifiers[prop];
+                    if (value.length === undefined) {
+                        if (value === 0) {
+                            return;
+                        }
+                        filteredModifiers[prop] = value;
+                    } else {
+                        const filteredValue = value.filter(x => this.combatSkillIDs.includes(x.id));
+                        if (filteredValue.length === 0) {
+                            return;
+                        }
+                        filteredModifiers[prop] = filteredValue;
+                    }
+                });
+                this.showAllModifiers(filteredModifiers, text);
             }
 
             createEquipmentSelectCard() {
@@ -387,12 +427,13 @@
                 // auto eat dropdown
                 let autoEatTierNames = ['Manual Eating'];
                 let autoEatTierValues = [-1];
-                for (let i = 0; i < autoEatData.length; i++) {
-                    autoEatTierNames.push(autoEatData[i].title);
+                for (let i = 0; i < this.combatData.autoEatData.length; i++) {
+                    autoEatTierNames.push(this.combatData.autoEatData[i].name);
                     autoEatTierValues.push(i);
                 }
                 const autoEatTierDropdown = this.equipmentSelectCard.createDropdown(autoEatTierNames, autoEatTierValues, 'MCS Auto Eat Tier Dropdown', (event) => {
-                    this.simulator.autoEatTier = parseInt(event.currentTarget.selectedOptions[0].value);
+                    this.combatData.autoEatTier = parseInt(event.currentTarget.selectedOptions[0].value);
+                    this.updateCombatStats();
                 });
                 foodCCContainer.appendChild(autoEatTierDropdown);
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
@@ -400,33 +441,45 @@
                 this.equipmentSelectCard.addToggleRadio(
                     '95% Pool: +10%',
                     'cookingPool',
-                    this.simulator,
+                    this.combatData,
                     'cookingPool',
                 );
                 this.equipmentSelectCard.addToggleRadio(
                     '99 Mastery: +20%',
                     'cookingMastery',
-                    this.simulator,
+                    this.combatData,
                     'cookingMastery',
                 );
                 // Slayer task and hardcore mode
                 this.equipmentSelectCard.addRadio('Slayer Task', 25, 'slayerTask', ['Yes', 'No'], [(e) => this.slayerTaskRadioOnChange(e, true), (e) => this.slayerTaskRadioOnChange(e, false)], 1);
-                'Slayer Task',
-                    this.equipmentSelectCard.addToggleRadio(
-                        'Hardcore Mode',
-                        'hardcore',
-                        this.simulator,
-                        'isHardcore',
-                    );
+                this.equipmentSelectCard.addToggleRadio(
+                    'Hardcore Mode',
+                    'hardcore',
+                    this.combatData,
+                    'isHardcore',
+                );
+                this.equipmentSelectCard.addToggleRadio(
+                    'Adventure Mode',
+                    'adventure',
+                    this.combatData,
+                    'isAdventure',
+                    false, // default
+                    25, // default
+                    () => this.updateCombatStats(),
+                );
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
                 this.equipmentSelectCard.addMultiButton(['1', '2', '3'], [() => this.import.importButtonOnClick(0), () => this.import.importButtonOnClick(1), () => this.import.importButtonOnClick(2)], importSetCCContainer);
                 this.equipmentSelectCard.container.appendChild(importSetCCContainer);
+                // add button to show all modifiers
+                const modifierCCContainer = this.equipmentSelectCard.createCCContainer();
+                modifierCCContainer.appendChild(this.equipmentSelectCard.addButton('Show Modifiers', () => this.showModifiers(this.combatData.modifiers)));
+                this.equipmentSelectCard.container.appendChild(modifierCCContainer);
             }
 
             equipFood(itemID) {
-                this.simulator.foodSelected = itemID;
+                this.combatData.foodSelected = itemID;
                 const img = document.getElementById('MCS Food Image');
                 if (itemID === 0) {
                     img.src = 'assets/media/skills/combat/food_empty.svg';
@@ -567,7 +620,7 @@
                 this.spellSelectCard.addToggleRadio(
                     'Use Combination Runes',
                     'combinationRunes',
-                    this.simulator,
+                    this.combatData,
                     'useCombinationRunes',
                 );
             }
@@ -581,7 +634,7 @@
             createSpellSelectCard(title, spellType) {
                 const newCard = new MICSR.Card(this.spellSelectCard.container, '', '100px');
                 newCard.addSectionTitle(title);
-                const spells = this.simulator.spells[spellType].array;
+                const spells = this.combatData.spells[spellType].array;
                 const spellImages = spells.map((spell) => spell.media);
                 const spellNames = spells.map((spell) => spell.name);
                 const spellCallbacks = spells.map((_, spellID) => (event) => this.spellButtonOnClick(event, spellID, spellType));
@@ -617,44 +670,11 @@
                     prayerCallbacks.push((e) => this.prayerButtonOnClick(e, i));
                 }
 
-                // Generate the tooltip contents
-                const prayerBonuses = {
-                    prayerBonusAttack: {description: 'Melee Accuracy', isNumeric: true},
-                    prayerBonusStrength: {description: 'Melee Strength', isNumeric: true},
-                    prayerBonusDefence: {description: 'Melee Evasion', isNumeric: true},
-                    prayerBonusAttackRanged: {description: 'Ranged Accuracy', isNumeric: true},
-                    prayerBonusStrengthRanged: {description: 'Ranged Strength', isNumeric: true},
-                    prayerBonusDefenceRanged: {description: 'Ranged Evasion', isNumeric: true},
-                    prayerBonusAttackMagic: {description: 'Magic Accuracy', isNumeric: true},
-                    prayerBonusDamageMagic: {description: 'Magic Damage', isNumeric: true},
-                    prayerBonusDefenceMagic: {description: 'Magic Evasion', isNumeric: true},
-                    prayerBonusProtectItem: {description: 'Keep item on death', isNumeric: false},
-                    prayerBonusHitpoints: {description: '2x Restore Rate for Hitpoints', isNumeric: false},
-                    prayerBonusProtectFromMelee: {
-                        description: `${protectFromValue}% chance to dodge Melee Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusProtectFromRanged: {
-                        description: `${protectFromValue}% chance to dodge Ranged Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusProtectFromMagic: {
-                        description: `${protectFromValue}% chance to dodge Magic Attacks`,
-                        isNumeric: false
-                    },
-                    prayerBonusHitpointHeal: {description: 'Heal +20% HP when HP falls below 10%', isNumeric: false},
-                    prayerBonusDamageReduction: {description: 'Damage Reduction', isNumeric: true},
-                };
                 const tooltips = [];
                 PRAYER.forEach((prayer) => {
                     let tooltip = `<div class="text-center">${prayer.name}<br><small><span class='text-info'>`;
-                    prayer.vars.forEach((prayerBonus, i) => {
-                        if (prayerBonuses[prayerBonus].isNumeric) {
-                            tooltip += `+${prayer.values[i]}% `;
-                        }
-                        tooltip += `${prayerBonuses[prayerBonus].description}<br>`;
-                    });
-                    tooltip += '</span>';
+                    tooltip += prayer.description;
+                    tooltip += '<br></span>';
                     if (prayer.pointsPerPlayer > 0) {
                         tooltip += `<span class='text-success'>+${(2 / numberMultiplier * prayer.pointsPerPlayer).toFixed(2)} Prayer XP per damage dealt to enemy</span><br>`;
                     }
@@ -698,18 +718,76 @@
             }
 
             createPetSelectCard() {
-                this.combatPetsIds = [2, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23];
-                const combatPets = PETS.filter((_pet, petID) => {
-                    return this.combatPetsIds.includes(petID);
-                });
+                const combatPets = this.combatData.petIds.map(id => PETS[id]);
                 this.petSelectCard = this.mainTabCard.addTab('Pets', this.media.pet, '', '100px');
                 this.petSelectCard.addSectionTitle('Pets');
                 const petImageSources = combatPets.map((pet) => pet.media);
                 const petNames = combatPets.map((pet) => pet.name);
-                const petButtonCallbacks = this.combatPetsIds.map((petId) => (e) => this.petButtonOnClick(e, petId));
+                const petButtonCallbacks = this.combatData.petIds.map((petId) => (e) => this.petButtonOnClick(e, petId));
                 const tooltips = combatPets.map((pet) => `<div class="text-center">${pet.name}<br><small class='text-info'>${pet.description.replace(/\.$/, '')}</small></div>`);
                 this.petSelectCard.addImageButtons(petImageSources, petNames, 'Medium', petButtonCallbacks, tooltips);
                 this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
+            }
+
+            agilityCourseOnChange(event, position) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value);
+                this.combatData.course[position] = idx;
+                this.updateCombatStats();
+            }
+
+            agilityPillarOnChange(event) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value);
+                this.combatData.pillar = idx;
+                this.updateCombatStats();
+            }
+
+            agilityMasteryOnClick(event, position) {
+                if (this.combatData.courseMastery[position]) {
+                    this.combatData.courseMastery[position] = false;
+                    this.unselectButton(event.currentTarget);
+                } else {
+                    this.combatData.courseMastery[position] = true;
+                    this.selectButton(event.currentTarget);
+                }
+                this.updateCombatStats();
+            }
+
+            createAgilitySelectCard() {
+                this.agilitySelectCard = this.mainTabCard.addTab('Agility', this.media.agility, '', '100px');
+                this.agilitySelectCard.addSectionTitle('Agility Course');
+
+                // Style dropdown (Specially Coded)
+                const categories = [];
+                for (let i = 0; i < 10; i++) {
+                    categories.push([]);
+                }
+                agilityObstacles.forEach((o, j) =>
+                    categories[o.category].push(j)
+                );
+                let i = 0;
+                for (; i < 10; i++) {
+                    const idx = i;
+                    const dropDownContainer = this.agilitySelectCard.createCCContainer();
+                    const masteryButton = this.agilitySelectCard.createImageButton(this.media.mastery, `Agility Mastery ${idx} Toggle`, () => this.agilityMasteryOnClick(event, idx), 'Small', '99 Mastery');
+                    dropDownContainer.appendChild(masteryButton);
+                    const dropdown = this.agilitySelectCard.createDropdown(
+                        ['None'].concat(categories[idx].map(j => agilityObstacles[j].name)),
+                        [-1].concat(categories[idx]),
+                        `MICSR Agility Obstacle ${idx} Dropdown`,
+                        (event) => this.agilityCourseOnChange(event, idx)
+                    )
+                    dropDownContainer.appendChild(dropdown);
+                    this.agilitySelectCard.container.appendChild(dropDownContainer);
+                }
+                const dropDownContainer = this.agilitySelectCard.createCCContainer();
+                const dropdown = this.agilitySelectCard.createDropdown(
+                    ['None'].concat(agilityPassivePillars.map(p => p.name)),
+                    [-1, 0, 1, 2],
+                    `MICSR Agility Pillar Dropdown`,
+                    (event) => this.agilityPillarOnChange(event, i)
+                )
+                dropDownContainer.appendChild(dropdown);
+                this.agilitySelectCard.container.appendChild(dropDownContainer);
             }
 
             createGPOptionsCard() {
@@ -1148,9 +1226,7 @@
                     this.updateStyleDropdowns();
                 }
                 this.checkForElisAss();
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1329,8 +1405,8 @@
             levelInputOnChange(event, skillName) {
                 const newLevel = parseInt(event.currentTarget.value);
                 if (newLevel <= 500 && newLevel >= 1) {
-                    this.simulator.playerLevels[skillName] = Math.min(newLevel, 99);
-                    this.simulator.virtualLevels[skillName] = newLevel;
+                    this.combatData.playerLevels[skillName] = Math.min(newLevel, 99);
+                    this.combatData.virtualLevels[skillName] = newLevel;
                     // Update Spell and Prayer Button UIS, and deselect things if they become invalid
                     if (skillName === 'Magic') {
                         this.updateSpellOptions();
@@ -1340,7 +1416,6 @@
                         this.updatePrayerOptions();
                     }
                 }
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1351,8 +1426,7 @@
              */
             styleDropdownOnChange(event, combatType) {
                 const styleID = parseInt(event.currentTarget.selectedOptions[0].value);
-                this.simulator.attackStyle[combatType] = styleID;
-                this.simulator.updateCombatStats();
+                this.combatData.attackStyle[combatType] = styleID;
                 this.updateCombatStats();
             }
 
@@ -1365,20 +1439,20 @@
             prayerButtonOnClick(event, prayerID) {
                 // Escape if prayer level is not reached
                 const prayer = PRAYER[prayerID];
-                if (!this.simulator.prayerSelected[prayerID] && this.simulator.playerLevels.Prayer < prayer.prayerLevel) {
+                if (!this.combatData.prayerSelected[prayerID] && this.combatData.playerLevels.Prayer < prayer.prayerLevel) {
                     notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(prayerID)} requires level ${prayer.prayerLevel} Prayer.`, 'danger');
                     return;
                 }
                 let prayerChanged = false;
-                if (this.simulator.prayerSelected[prayerID]) {
-                    this.simulator.activePrayers--;
-                    this.simulator.prayerSelected[prayerID] = false;
+                if (this.combatData.prayerSelected[prayerID]) {
+                    this.combatData.activePrayers--;
+                    this.combatData.prayerSelected[prayerID] = false;
                     this.unselectButton(event.currentTarget);
                     prayerChanged = true;
                 } else {
-                    if (this.simulator.activePrayers < 2) {
-                        this.simulator.activePrayers++;
-                        this.simulator.prayerSelected[prayerID] = true;
+                    if (this.combatData.activePrayers < 2) {
+                        this.combatData.activePrayers++;
+                        this.combatData.prayerSelected[prayerID] = true;
                         this.selectButton(event.currentTarget);
                         prayerChanged = true;
                     } else {
@@ -1386,8 +1460,6 @@
                     }
                 }
                 if (prayerChanged) {
-                    this.simulator.computePrayerBonus();
-                    this.simulator.updateCombatStats();
                     this.updateCombatStats();
                 }
             }
@@ -1398,9 +1470,8 @@
              */
             potionTierDropDownOnChange(event) {
                 const potionTier = parseInt(event.currentTarget.selectedOptions[0].value);
-                this.simulator.potionTier = potionTier;
-                this.simulator.computePotionBonus();
-                this.simulator.updateCombatStats();
+                this.combatData.potionTier = potionTier;
+                this.combatData.computePotionBonus();
                 this.updateCombatStats();
                 this.updatePotionTier(potionTier);
             }
@@ -1411,23 +1482,22 @@
              * @param {number} potionID The ID of the potion
              */
             potionImageButtonOnClick(event, potionID) {
-                if (this.simulator.potionSelected) {
-                    if (this.simulator.potionID === potionID) { // Deselect Potion
-                        this.simulator.potionSelected = false;
-                        this.simulator.potionID = -1;
+                if (this.combatData.potionSelected) {
+                    if (this.combatData.potionID === potionID) { // Deselect Potion
+                        this.combatData.potionSelected = false;
+                        this.combatData.potionID = -1;
                         this.unselectButton(event.currentTarget);
                     } else { // Change Potion
-                        this.unselectButton(document.getElementById(`MCS ${this.getPotionName(this.simulator.potionID)} Button`));
-                        this.simulator.potionID = potionID;
+                        this.unselectButton(document.getElementById(`MCS ${this.getPotionName(this.combatData.potionID)} Button`));
+                        this.combatData.potionID = potionID;
                         this.selectButton(event.currentTarget);
                     }
                 } else { // Select Potion
-                    this.simulator.potionSelected = true;
-                    this.simulator.potionID = potionID;
+                    this.combatData.potionSelected = true;
+                    this.combatData.potionID = potionID;
                     this.selectButton(event.currentTarget);
                 }
-                this.simulator.computePotionBonus();
-                this.simulator.updateCombatStats();
+                this.combatData.computePotionBonus();
                 this.updateCombatStats();
             }
 
@@ -1439,10 +1509,10 @@
              * @param {string} spellType
              */
             spellButtonOnClick(event, spellID, spellType) {
-                const spellOpts = this.simulator.spells[spellType];
+                const spellOpts = this.combatData.spells[spellType];
                 const spell = spellOpts.array[spellID];
                 // Escape for not meeting the level/item requirement
-                if (this.simulator.playerLevels.Magic < spell.magicLevelRequired) {
+                if (this.combatData.playerLevels.Magic < spell.magicLevelRequired) {
                     notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} requires level ${spell.magicLevelRequired} Magic.`, 'danger');
                     return;
                 }
@@ -1457,7 +1527,7 @@
                     // Spell of type already selected
                     if (spellOpts.selectedID === spellID && spellType !== 'standard' && spellType !== 'ancient') {
                         spellOpts.isSelected = false;
-                        spellOpts.selectedID = -1;
+                        spellOpts.selectedID = null;
                         this.unselectButton(event.currentTarget);
                     } else {
                         this.unselectButton(document.getElementById(`MCS ${spellOpts.array[spellOpts.selectedID].name} Button`));
@@ -1467,27 +1537,27 @@
                 } else {
                     switch (spellType) {
                         case 'ancient':
-                            const standardOpts = this.simulator.spells.standard;
+                            const standardOpts = this.combatData.spells.standard;
                             standardOpts.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${standardOpts.array[standardOpts.selectedID].name} Button`));
-                            standardOpts.selectedID = -1;
-                            if (this.simulator.spells.curse.isSelected) {
-                                const curseOpts = this.simulator.spells.curse;
+                            standardOpts.selectedID = null;
+                            if (this.combatData.spells.curse.isSelected) {
+                                const curseOpts = this.combatData.spells.curse;
                                 curseOpts.isSelected = false;
                                 this.unselectButton(document.getElementById(`MCS ${curseOpts.array[curseOpts.selectedID].name} Button`));
-                                curseOpts.selectedID = -1;
+                                curseOpts.selectedID = null;
                                 notifyPlayer(CONSTANTS.skill.Magic, 'Curse Deselected, they cannot be used with Ancient Magicks', 'danger');
                             }
                             break;
                         case 'standard':
-                            const ancientOpts = this.simulator.spells.ancient;
+                            const ancientOpts = this.combatData.spells.ancient;
                             ancientOpts.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${ancientOpts.array[ancientOpts.selectedID].name} Button`));
-                            ancientOpts.selectedID = -1;
+                            ancientOpts.selectedID = null;
                             break;
                     }
                     // Spell of type not selected
-                    if (spellType === 'curse' && this.simulator.spells.ancient.isSelected) {
+                    if (spellType === 'curse' && this.combatData.spells.ancient.isSelected) {
                         notifyPlayer(CONSTANTS.skill.Magic, 'Curses cannot be used with Ancient Magicks', 'danger');
                     } else {
                         spellOpts.isSelected = true;
@@ -1496,7 +1566,6 @@
                     }
                 }
                 // Update combat stats for new spell
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1507,14 +1576,13 @@
              * @param {number} petID
              */
             petButtonOnClick(event, petID) {
-                if (this.simulator.petOwned[petID]) {
-                    this.simulator.petOwned[petID] = false;
+                if (this.combatData.petOwned[petID]) {
+                    this.combatData.petOwned[petID] = false;
                     this.unselectButton(event.currentTarget);
                 } else {
-                    this.simulator.petOwned[petID] = true;
+                    this.combatData.petOwned[petID] = true;
                     this.selectButton(event.currentTarget);
                 }
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -1628,7 +1696,7 @@
              * @param {boolean} newState The new value for the option
              */
             slayerTaskRadioOnChange(event, newState) {
-                this.simulator.isSlayerTask = newState;
+                this.combatData.isSlayerTask = newState;
                 this.updatePlotForSlayerXP();
             }
 
@@ -2048,18 +2116,18 @@
              * @param {number} magicLevel The magic level the player has
              */
             updateSpellOptions() {
-                const magicLevel = this.simulator.virtualLevels.Magic || 1;
+                const magicLevel = this.combatData.virtualLevels.Magic || 1;
                 const setSpellsPerLevel = (spell, index, type) => {
-                    const spellOption = this.simulator.spells[type];
+                    const spellOption = this.combatData.spells[type];
                     if (spell.magicLevelRequired > magicLevel) {
                         document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
                         if (spellOption.selectedID === index) {
-                            spellOption.selectedID = -1;
+                            spellOption.selectedID = null;
                             spellOption.isSelected = false;
                             this.unselectButton(document.getElementById(`MCS ${spell.name} Button`));
                             if (type === 'standard' || type === 'ancient') {
-                                this.simulator.spells.standard.isSelected = true;
-                                this.simulator.spells.standard.selectedID = 0;
+                                this.combatData.spells.standard.isSelected = true;
+                                this.combatData.spells.standard.selectedID = 0;
                                 this.selectButton(document.getElementById(`MCS ${SPELLS[0].name} Button`));
                             }
                             notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires level ${spell.magicLevelRequired} Magic.`, 'danger');
@@ -2079,15 +2147,15 @@
              * Checks if Eli's Ass is equipped and set aurora menu options
              */
             checkForElisAss() {
-                const spellOption = this.simulator.spells.aurora;
+                const spellOption = this.combatData.spells.aurora;
                 AURORAS.forEach((spell, index) => {
                     if (spell.requiredItem !== -1) {
-                        if (this.equipmentSelected.includes(spell.requiredItem) && this.simulator.playerLevels.Magic >= spell.magicLevelRequired) {
+                        if (this.equipmentSelected.includes(spell.requiredItem) && this.combatData.playerLevels.Magic >= spell.magicLevelRequired) {
                             document.getElementById(`MCS ${spell.name} Button Image`).src = spell.media;
                         } else {
                             document.getElementById(`MCS ${spell.name} Button Image`).src = 'assets/media/main/question.svg';
                             if (spellOption.selectedID === index) {
-                                spellOption.selectedID = -1;
+                                spellOption.selectedID = null;
                                 spellOption.isSelected = false;
                                 this.unselectButton(document.getElementById(`MCS ${spell.name} Button`));
                                 notifyPlayer(CONSTANTS.skill.Magic, `${spell.name} has been de-selected. It requires ${this.getItemName(spell.requiredItem)}.`, 'danger');
@@ -2101,11 +2169,11 @@
              * Updates the prayers that display in the prayer selection card, based on if the player can use it
              */
             updatePrayerOptions() {
-                const prayerLevel = this.simulator.virtualLevels.Prayer || 1;
+                const prayerLevel = this.combatData.virtualLevels.Prayer || 1;
                 PRAYER.forEach((prayer, i) => {
                     if (prayer.prayerLevel > prayerLevel) {
                         document.getElementById(`MCS ${this.getPrayerName(i)} Button Image`).src = 'assets/media/main/question.svg';
-                        if (this.simulator.prayerSelected[i]) {
+                        if (this.combatData.prayerSelected[i]) {
                             this.prayerButtonOnClick({currentTarget: document.getElementById(`MCS ${this.getPrayerName(i)} Button`)}, i);
                             notifyPlayer(CONSTANTS.skill.Prayer, `${this.getPrayerName(i)} has been de-selected. It requires level ${prayer.prayerLevel} Prayer.`, 'danger');
                         }
@@ -2119,14 +2187,16 @@
              * Updates the text fields for the stats provided by equipment
              */
             updateEquipmentStats() {
+                // first update the values
+                this.combatData.updateEquipmentStats();
                 let newStatValue;
                 [this.equipKeys, this.requiredKeys].forEach(keys => {
                     for (let i = 0; i < keys.length; i++) {
                         const key = keys[i];
                         if (Array.isArray(key)) {
-                            newStatValue = this.simulator.equipmentStats[key[0]][key[1]];
+                            newStatValue = this.combatData.equipmentStats[key[0]][key[1]];
                         } else {
-                            newStatValue = this.simulator.equipmentStats[key];
+                            newStatValue = this.combatData.equipmentStats[key];
                         }
                         document.getElementById(`MCS ${keys[i]} ES Output`).textContent = newStatValue.toLocaleString();
                     }
@@ -2137,12 +2207,15 @@
              * Updates the text fields for the computed combat stats
              */
             updateCombatStats() {
+                // first update the values
+                this.combatData.updateCombatStats();
+                // second update the view
                 this.combatStatKeys.forEach((key) => {
                     if (key === 'attackSpeed') {
-                        const attackSpeed = this.simulator.playerAttackSpeed();
+                        const attackSpeed = this.combatData.playerAttackSpeed();
                         document.getElementById(`MCS ${key} CS Output`).textContent = attackSpeed.toLocaleString();
                     } else {
-                        document.getElementById(`MCS ${key} CS Output`).textContent = this.simulator.combatStats[key].toLocaleString();
+                        document.getElementById(`MCS ${key} CS Output`).textContent = this.combatData.combatStats[key].toLocaleString();
                     }
                 });
             }
@@ -2351,9 +2424,7 @@
                     }
                 }
                 // Update equipment stats and combat stats
-                this.simulator.updateEquipmentStats();
                 this.updateEquipmentStats();
-                this.simulator.updateCombatStats();
                 this.updateCombatStats();
             }
 
@@ -2452,6 +2523,40 @@
         }
     }
 
-    MICSR.waitLoadOrder(reqs, setup, 'App')
+    let loadCounter = 0;
+    const waitLoadOrder = (reqs, setup, id) => {
+        loadCounter++;
+        if (loadCounter > 100) {
+            console.log('Failed to load ' + id);
+            return;
+        }
+        // check requirements
+        let reqMet = true;
+        if (window.MICSR === undefined) {
+            reqMet = false;
+            console.log(id + ' is waiting for the MICSR object');
+        } else {
+            for (const req of reqs) {
+                if (window.MICSR.loadedFiles[req]) {
+                    continue;
+                }
+                reqMet = false;
+                // not defined yet: try again later
+                if (loadCounter === 1) {
+                    window.MICSR.log(id + ' is waiting for ' + req)
+                }
+            }
+        }
+        if (!reqMet) {
+            setTimeout(() => waitLoadOrder(reqs, setup, id), 50);
+            return;
+        }
+        // requirements met
+        window.MICSR.log('setting up ' + id)
+        setup();
+        // mark as loaded
+        window.MICSR.loadedFiles[id] = true;
+    }
+    waitLoadOrder(reqs, setup, 'App')
 
 })();

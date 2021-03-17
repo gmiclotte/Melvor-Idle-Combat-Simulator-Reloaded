@@ -1,10 +1,10 @@
 (() => {
 
-    const MICSR = window.MICSR;
-
     const reqs = [];
 
     const setup = () => {
+
+        const MICSR = window.MICSR;
 
         /**
          * Loot class, used for all loot related work
@@ -56,7 +56,7 @@
              * @return {number}
              */
             computeAverageCoins(monsterID) {
-                return ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP) * this.currentSim.gpBonus;
+                return Math.max(0, ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP)) * this.currentSim.gpBonus;
             }
 
             /**
@@ -352,15 +352,20 @@
              */
             computeMonsterValue(monsterID) {
                 let monsterValue = 0;
-                monsterValue += this.computeAverageCoins(monsterID);
+
+                // loot and signet are affected by loot chance
                 monsterValue += this.computeDropTableValue(monsterID);
                 if (this.currentSim.canTopazDrop && this.shouldSell(CONSTANTS.item.Signet_Ring_Half_B)) {
                     monsterValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(monsterID) / 500000;
                 }
                 monsterValue *= this.computeLootChance(monsterID);
+
+                // coin and bones drops are not affected by loot chance
+                monsterValue += this.computeAverageCoins(monsterID);
                 if (this.sellBones && !this.currentSim.doBonesAutoBury && MONSTERS[monsterID].bones) {
                     monsterValue += items[MONSTERS[monsterID].bones].sellsFor * this.currentSim.lootBonus * ((MONSTERS[monsterID].boneQty) ? MONSTERS[monsterID].boneQty : 1);
                 }
+
                 return monsterValue;
             }
 
@@ -532,11 +537,11 @@
                         }
                         if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
                             let monsterXP = 0;
-                            monsterXP += Math.floor(((MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0) * (1 + this.currentSim.slayerBonusXP / 100));
+                            monsterXP += (MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0;
                             if (this.currentSim.isSlayerTask) {
-                                monsterXP += Math.floor(MONSTERS[monsterID].hitpoints * (1 + this.currentSim.slayerBonusXP / 100));
+                                monsterXP += MONSTERS[monsterID].hitpoints;
                             }
-                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * this.currentSim.playerStats.globalXPMult / this.monsterSimData[monsterID].killTimeS;
+                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * (1 + this.currentSim.playerStats.slayerXpBonus / 100) / this.monsterSimData[monsterID].killTimeS;
                         } else {
                             this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                         }
@@ -734,6 +739,40 @@
         }
     }
 
-    MICSR.waitLoadOrder(reqs, setup, 'Loot');
+    let loadCounter = 0;
+    const waitLoadOrder = (reqs, setup, id) => {
+        loadCounter++;
+        if (loadCounter > 100) {
+            console.log('Failed to load ' + id);
+            return;
+        }
+        // check requirements
+        let reqMet = true;
+        if (window.MICSR === undefined) {
+            reqMet = false;
+            console.log(id + ' is waiting for the MICSR object');
+        } else {
+            for (const req of reqs) {
+                if (window.MICSR.loadedFiles[req]) {
+                    continue;
+                }
+                reqMet = false;
+                // not defined yet: try again later
+                if (loadCounter === 1) {
+                    window.MICSR.log(id + ' is waiting for ' + req)
+                }
+            }
+        }
+        if (!reqMet) {
+            setTimeout(() => waitLoadOrder(reqs, setup, id), 50);
+            return;
+        }
+        // requirements met
+        window.MICSR.log('setting up ' + id)
+        setup();
+        // mark as loaded
+        window.MICSR.loadedFiles[id] = true;
+    }
+    waitLoadOrder(reqs, setup, 'Loot');
 
 })();
