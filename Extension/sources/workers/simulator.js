@@ -1009,6 +1009,9 @@
                     // TODO: use a more detailed manual eating simulation?
                     target.hitpoints = target.maxHitpoints;
                 }
+                if (target.prayerBonus.vars['prayerBonusHitpointHeal'] !== undefined) {
+                    target.hitpoints += Math.floor(target.maxHitpoints * (target.prayerBonus.vars['prayerBonusHitpointHeal'] / 100));
+                }
                 if (target.hitpoints < targetStats.lowestHitpoints) {
                     targetStats.lowestHitpoints = target.hitpoints;
                 }
