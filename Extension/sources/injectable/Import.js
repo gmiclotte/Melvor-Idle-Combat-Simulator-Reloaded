@@ -66,7 +66,7 @@
                     potionID: potionID,
                     potionTier: potionTier,
                     petOwned: petUnlocked,
-                    autoEatTier: currentAutoEat - 1,
+                    autoEatTier: -1,
                     foodSelected: equippedFood[currentCombatFood].itemID,
                     cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
                     cookingMastery: cookingMastery,
@@ -76,7 +76,18 @@
                     course: chosenAgilityObstacles,
                     courseMastery: MASTERY[CONSTANTS.skill.Agility].xp.map(x => x > 13034431),
                     pillar: agilityPassivePillarActive,
-                }
+                };
+
+                // get the player's auto eat tier
+                [
+                    CONSTANTS.shop.general.Auto_Eat_Tier_I,
+                    CONSTANTS.shop.general.Auto_Eat_Tier_II,
+                    CONSTANTS.shop.general.Auto_Eat_Tier_III,
+                ].forEach(id => {
+                    if (shopItemsPurchased.filter(x => x[0] === "General" && x[1] === id).length > 0) {
+                        settings.autoEatTier++;
+                    }
+                });
 
                 // import settings
                 this.importSettings(settings);
