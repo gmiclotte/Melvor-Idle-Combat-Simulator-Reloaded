@@ -421,8 +421,7 @@
         if (player.prayerBonus.vars['prayerBonusHitpoints'] !== undefined) {
             amt *= 2;
         }
-        // Regeneration Potion
-        amt = Math.floor(amt * (1 + player.herbloreBonus.hpRegen / 100));
+        // Regeneration modifiers
         applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
         healDamage(player, playerStats, amt);
         player.regenTimer += hitpointRegenInterval;
@@ -1137,14 +1136,14 @@
             attackHits = true;
         } else {
             // Roll for hit
-            let hitChance = Math.floor(Math.random() * 100);
-            if (playerStats.diamondLuck) {
-                const hitChance2 = Math.floor(Math.random() * 100);
-                if (hitChance > hitChance2) {
-                    hitChance = hitChance2;
+            let roll = 100;
+            for (let i = 0; i < player.attackRolls; i++) {
+                let rolledChance = Math.floor(Math.random() * 100);
+                if (rolledChance < roll) {
+                    roll = rolledChance;
                 }
             }
-            attackHits = player.accuracy > hitChance;
+            attackHits = player.accuracy > roll;
         }
         if (!attackHits) {
             // exit early
@@ -1283,7 +1282,7 @@
     }
 
     function calculatePlayerDamageReduction(player) {
-        let damageReduction = player.baseStats.damageReduction + player.herbloreBonus.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
+        let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
         damageReduction = Math.floor(damageReduction * player.reductionModifier);
@@ -1389,12 +1388,13 @@
         player.attackStyle = combatData.attackStyle;
         player.equipmentStats = combatData.equipmentStats;
         player.prayerBonus = combatData.prayerBonus;
-        player.herbloreBonus = combatData.herbloreBonus;
         player.baseStats = combatData.baseStats;
         // modifiers
         player.baseModifiers = combatData.modifiers;
         player.tempModifiers = {};
         player.increasedDamageToMonster = playerStats.dmgModifier; // combines all the (in|de)creasedDamageToX modifiers
+        // precompute number of attack rolls
+        player.attackRolls = 1 + mergePlayerModifiers(player, 'AttackRolls');
         // aurora
         player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
         // compute guardian amulet
@@ -1743,7 +1743,6 @@
         player.maxDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveDefenceLevel,
             player.baseStats.defenceBonus,
-            player.herbloreBonus.meleeEvasion,
             mergePlayerModifiers(player, 'MeleeEvasion'),
             player.meleeEvasionBuff,
             player.meleeEvasionDebuff,
@@ -1752,7 +1751,6 @@
         player.maxRngDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveRangedDefenceLevel,
             player.baseStats.defenceBonusRanged,
-            player.herbloreBonus.rangedEvasion,
             mergePlayerModifiers(player, 'RangedEvasion'),
             player.rangedEvasionBuff,
             player.rangedEvasionDebuff,
@@ -1766,15 +1764,14 @@
         player.maxMagDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveMagicDefenceLevel,
             player.baseStats.defenceBonusMagic,
-            player.herbloreBonus.magicEvasion,
             mergePlayerModifiers(player, 'MagicEvasion'),
             player.magicEvasionBuff,
             player.magicEvasionDebuff,
         );
     }
 
-    function calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, herbloreBonus, increaseModifier, buff, debuff) {
-        let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64) * (1 + herbloreBonus / 100));
+    function calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, increaseModifier, buff, debuff) {
+        let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64));
         maxDefRoll = applyModifier(maxDefRoll, increaseModifier);
         //apply player buffs first
         if (buff) {

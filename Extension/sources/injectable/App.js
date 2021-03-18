@@ -1527,7 +1527,6 @@
             potionTierDropDownOnChange(event) {
                 const potionTier = parseInt(event.currentTarget.selectedOptions[0].value);
                 this.combatData.potionTier = potionTier;
-                this.combatData.computePotionBonus();
                 this.updateCombatStats();
                 this.updatePotionTier(potionTier);
             }
@@ -1553,7 +1552,6 @@
                     this.combatData.potionID = potionID;
                     this.selectButton(event.currentTarget);
                 }
-                this.combatData.computePotionBonus();
                 this.updateCombatStats();
             }
 

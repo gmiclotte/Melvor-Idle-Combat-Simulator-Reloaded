@@ -232,7 +232,6 @@
                     equipmentStats: {},
                     options: {},
                     prayerBonus: {modifiers: {}, vars: {}},
-                    herbloreBonus: {},
                     combatStats: {},
                     attackStyle: {},
                     isSlayerTask: false,
@@ -245,7 +244,7 @@
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
                 currentSim.increasedGP = combatData.modifiers.increasedGPFromMonstersFlat
-                 - combatData.modifiers.decreasedGPFromMonstersFlat;
+                    - combatData.modifiers.decreasedGPFromMonstersFlat;
                 // multiplier gp increase
                 currentSim.gpBonus = applyModifier(
                     1,
@@ -263,12 +262,11 @@
                     MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat'),
                 ));
                 // misc
-                currentSim.herbConvertChance = combatData.herbloreBonus.luckyHerb / 100;
+                currentSim.herbConvertChance = combatData.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
                 currentSim.isSlayerTask = combatData.isSlayerTask;
                 currentSim.playerStats.isSlayerTask = combatData.isSlayerTask;
                 Object.assign(currentSim.equipmentStats, combatData.equipmentStats);
-                Object.assign(currentSim.herbloreBonus, combatData.herbloreBonus);
                 Object.assign(currentSim.prayerBonus, combatData.prayerBonus);
                 Object.assign(currentSim.attackStyle, combatData.attackStyle);
                 Object.assign(currentSim.virtualLevels, combatData.virtualLevels);

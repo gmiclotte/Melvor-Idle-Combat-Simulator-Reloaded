@@ -140,7 +140,6 @@
                 this.app.updatePrayerOptions();
                 this.app.combatData.updateEquipmentStats();
                 this.app.updateEquipmentStats();
-                this.app.combatData.computePotionBonus();
                 this.app.updateCombatStats();
             }
 

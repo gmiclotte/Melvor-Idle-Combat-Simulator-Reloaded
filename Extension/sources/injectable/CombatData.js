@@ -132,22 +132,8 @@
                 this.potionSelected = false;
                 this.potionTier = 0;
                 this.potionID = -1;
-                this.herbloreBonus = {
-                    damageReduction: 0, // 8
-                    rangedAccuracy: 0, // 3
-                    rangedStrength: 0, // 4
-                    magicAccuracy: 0, // 5
-                    magicDamage: 0, // 6
-                    meleeAccuracy: 0, // 0
-                    meleeStrength: 0, // 2
-                    meleeEvasion: 0, // 1
-                    rangedEvasion: 0, // 3
-                    magicEvasion: 0, // 5
-                    hpRegen: 0, // 7
-                    diamondLuck: false, // 9
-                    divine: 0, // 10
-                    luckyHerb: 0, // 11
-                };
+                this.herbloreModifiers = {};
+                this.luckyHerb = 0;
                 // Food
                 this.autoEatTier = -1;
                 this.foodSelected = 0;
@@ -342,7 +328,6 @@
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
                     * (baseStats.attackBonusRanged + 64)
-                    * (1 + this.herbloreBonus.rangedAccuracy / 100)
                 );
                 combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
@@ -369,7 +354,6 @@
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
                     * (baseStats.attackBonusMagic + 64)
-                    * (1 + this.herbloreBonus.magicAccuracy / 100)
                 );
                 combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
@@ -399,7 +383,6 @@
                 let maxAttackRoll = Math.floor(
                     effectiveAttackLevel
                     * (baseStats.attackBonus[this.attackStyle.Melee] + 64)
-                    * (1 + this.herbloreBonus.meleeAccuracy / 100)
                 );
                 combatStats.unmodifierAttachRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
@@ -503,7 +486,7 @@
                     attackStyleBonusStrength += 3;
                 }
                 const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonusStrength + this.getSkillHiddenLevels(CONSTANTS.skill.Ranged));
-                let baseMaxHit = Math.floor(this.numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640) * (1 + this.herbloreBonus.rangedStrength / 100)));
+                let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640));
                 baseMaxHit = applyModifier(
                     baseMaxHit,
                     modifiers.increasedRangedStrengthBonus
@@ -518,8 +501,7 @@
                 if (!this.spells.ancient.isSelected) {
                     baseMaxHit = Math.floor(this.numberMultiplier
                         * (SPELLS[selectedSpell].maxHit + SPELLS[selectedSpell].maxHit * baseStats.damageBonusMagic / 100)
-                        * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200)
-                        * (1 + this.herbloreBonus.magicDamage / 100));
+                        * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200));
                     baseMaxHit = applyModifier(
                         baseMaxHit,
                         modifiers.increasedMagicDamageBonus
@@ -546,7 +528,7 @@
 
             maxMeleeHit(baseStats, modifiers) {
                 const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + this.getSkillHiddenLevels(CONSTANTS.skill.Strength));
-                let baseMaxHit = Math.floor(this.numberMultiplier * ((1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640) * (1 + this.herbloreBonus.meleeStrength / 100)));
+                let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640));
                 baseMaxHit = applyModifier(
                     baseMaxHit,
                     modifiers.increasedMeleeStrengthBonus -
@@ -568,7 +550,6 @@
                 const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     effectiveDefenceLevel,
                     this.baseStats.defenceBonus,
-                    this.herbloreBonus.meleeEvasion,
                     this.modifiers.increasedMeleeEvasion,
                     this.modifiers.decreasedMeleeEvasion,
                     player.meleeEvasionBuff,
@@ -579,7 +560,6 @@
                 const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     effectiveRangedDefenceLevel,
                     this.baseStats.defenceBonusRanged,
-                    this.herbloreBonus.rangedEvasion,
                     this.modifiers.increasedRangedEvasion,
                     this.modifiers.decreasedRangedEvasion,
                     player.rangedEvasionBuff,
@@ -594,7 +574,6 @@
                 const maximumMagicDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     effectiveMagicDefenceLevel,
                     this.baseStats.defenceBonusMagic,
-                    this.herbloreBonus.magicEvasion,
                     this.modifiers.increasedMagicEvasion,
                     this.modifiers.decreasedMagicEvasion,
                     player.magicEvasionBuff,
@@ -607,8 +586,8 @@
                 }
             }
 
-            calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, herbloreBonus, increaseModifier, decreaseModifier, buff, debuff) {
-                let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64) * (1 + herbloreBonus / 100));
+            calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, increaseModifier, decreaseModifier, buff, debuff) {
+                let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64));
                 maxDefRoll = applyModifier(maxDefRoll, increaseModifier - decreaseModifier);
                 //apply player buffs first
                 if (buff) {
@@ -625,7 +604,7 @@
              * mimic calculatePlayerDamageReduction
              */
             calculatePlayerDamageReduction(player = {}) {
-                let damageReduction = this.baseStats.damageReduction + this.herbloreBonus.damageReduction + this.modifiers.increasedDamageReduction;
+                let damageReduction = this.baseStats.damageReduction + this.modifiers.increasedDamageReduction;
                 damageReduction -= this.modifiers.decreasedDamageReduction;
                 if (player.markOfDeath) {
                     damageReduction = Math.floor(damageReduction / 2);
@@ -928,7 +907,11 @@
                 // mimic calculateMiscModifiers
                 // implement this if it ever is relevant
 
-                // TODO: SPECIAL ATTACKS, MASTERY, POTIONS
+                // potion modifiers
+                this.computePotionBonus();
+                this.mergeModifiers(this.herbloreModifiers, this.modifiers);
+
+                // TODO: SPECIAL ATTACKS, MASTERY
                 //  when they get made into modifiers in the game
             }
 
@@ -980,73 +963,15 @@
              * Computes the potion bonuses for the selected potion
              * */
             computePotionBonus() {
-                this.resetPotionBonus();
+                this.herbloreModifiers = {};
+                this.luckyHerb = 0;
                 if (this.potionSelected) {
-                    const bonusID = items[herbloreItemData[this.potionID].itemID[this.potionTier]].potionBonusID;
-                    const bonusValue = items[herbloreItemData[this.potionID].itemID[this.potionTier]].potionBonus;
-                    switch (bonusID) {
-                        case 0: // Melee Accuracy
-                            this.herbloreBonus.meleeAccuracy = bonusValue;
-                            break;
-                        case 1: // Melee Evasion
-                            this.herbloreBonus.meleeEvasion = bonusValue;
-                            break;
-                        case 2: // Melee Strength
-                            this.herbloreBonus.meleeStrength = bonusValue;
-                            break;
-                        case 3: // Ranged Evasion/Accuracy
-                            this.herbloreBonus.rangedEvasion = bonusValue;
-                            this.herbloreBonus.rangedAccuracy = bonusValue;
-                            break;
-                        case 4: // Ranged Strength
-                            this.herbloreBonus.rangedStrength = bonusValue;
-                            break;
-                        case 5: // Magic Evasion/Accruracy
-                            this.herbloreBonus.magicEvasion = bonusValue;
-                            this.herbloreBonus.magicAccuracy = bonusValue;
-                            break;
-                        case 6: // Magic Damage
-                            this.herbloreBonus.magicDamage = bonusValue;
-                            break;
-                        case 7: // HP regen
-                            this.herbloreBonus.hpRegen = bonusValue;
-                            break;
-                        case 8: // Damage Reduction
-                            this.herbloreBonus.damageReduction = bonusValue;
-                            break;
-                        case 9: // Diamond luck
-                            this.herbloreBonus.diamondLuck = true;
-                            break;
-                        case 10: // Divine
-                            this.herbloreBonus.divine = bonusValue;
-                            break;
-                        case 11: // Lucky Herb
-                            this.herbloreBonus.luckyHerb = bonusValue;
-                            break;
-                        default:
-                            MICSR.error(`Unknown Potion Bonus: ${bonusID}`);
+                    const potion = items[herbloreItemData[this.potionID].itemID[this.potionTier]];
+                    this.herbloreModifiers = potion.modifiers;
+                    if (potion.potionBonusID === 11) {
+                        this.luckyHerb = potion.potionBonus;
                     }
                 }
-            }
-
-            /**
-             * Resets the potion bonuses to none
-             */
-            resetPotionBonus() {
-                this.herbloreBonus.meleeAccuracy = 0; // 0
-                this.herbloreBonus.meleeEvasion = 0; // 1
-                this.herbloreBonus.meleeStrength = 0; // 2
-                this.herbloreBonus.rangedAccuracy = 0; // 3
-                this.herbloreBonus.rangedEvasion = 0; // 3
-                this.herbloreBonus.rangedStrength = 0; // 4
-                this.herbloreBonus.magicEvasion = 0; // 5
-                this.herbloreBonus.magicAccuracy = 0; // 5
-                this.herbloreBonus.magicDamage = 0; // 6
-                this.herbloreBonus.hpRegen = 0; // 7
-                this.herbloreBonus.damageReduction = 0; // 8
-                this.herbloreBonus.diamondLuck = false; // 9
-                this.herbloreBonus.divine = 0; // 10
-                this.herbloreBonus.luckyHerb = 0; // 11
             }
 
             playerAttackSpeed() {
@@ -1078,7 +1003,6 @@
                     maxHitpoints: this.combatStats.maxHitpoints,
                     avgHPRegen: 0,
                     damageReduction: this.combatStats.damageReduction,
-                    diamondLuck: this.herbloreBonus.diamondLuck,
                     usingMagic: false,
                     usingAncient: false,
                     hasSpecialAttack: false,
@@ -1192,8 +1116,7 @@
                     if (this.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
                         amt *= 2;
                     }
-                    // Regeneration Potion
-                    amt = Math.floor(amt * (1 + this.herbloreBonus.hpRegen / 100));
+                    // Regeneration modifiers
                     applyModifier(
                         amt,
                         this.modifiers.increasedHitpointRegeneration
@@ -1220,7 +1143,6 @@
                     }
                     pp = Math.max(1, pp);
                     let save = MICSR.getModifierValue(this.modifiers, 'ChanceToPreservePrayerPoints');
-                    save += this.herbloreBonus.divine;
                     pp *= 1 - save / 100;
                     return pp;
                 }
@@ -1236,7 +1158,7 @@
                     }
                 }
                 // Xp Bonuses
-                const globalXpBonus = (this.modifiers.increasedGlobalSkillXP - this.modifiers.decreasedGlobalSkillXP) /100;
+                const globalXpBonus = (this.modifiers.increasedGlobalSkillXP - this.modifiers.decreasedGlobalSkillXP) / 100;
                 playerStats.combatXpBonus = globalXpBonus;
                 if (this.combatStats.attackType === CONSTANTS.attackType.Melee) {
                     switch (this.attackStyle.Melee) {
