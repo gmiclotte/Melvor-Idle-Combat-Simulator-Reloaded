@@ -329,7 +329,7 @@
                     effectiveAttackLevel
                     * (baseStats.attackBonusRanged + 64)
                 );
-                combatStats.unmodifierAttachRoll = maxAttackRoll;
+                combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedRangedAccuracyBonus
@@ -355,7 +355,7 @@
                     effectiveAttackLevel
                     * (baseStats.attackBonusMagic + 64)
                 );
-                combatStats.unmodifierAttachRoll = maxAttackRoll;
+                combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedMagicAccuracyBonus
@@ -384,7 +384,7 @@
                     effectiveAttackLevel
                     * (baseStats.attackBonus[this.attackStyle.Melee] + 64)
                 );
-                combatStats.unmodifierAttachRoll = maxAttackRoll;
+                combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
                     modifiers.increasedMeleeAccuracyBonus

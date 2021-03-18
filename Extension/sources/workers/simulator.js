@@ -503,6 +503,7 @@
             setupMultiAttack(enemy, player);
         }
         enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial);
+        computeTempModifiers(player, playerStats,-1);
         postAttack(enemy, enemyStats, player, playerStats);
         multiAttackTimer(enemy);
     }
@@ -586,13 +587,6 @@
         if (canApplyStatus(statusEffect.canSleep, target.isSleeping, undefined, stunImmunity)) {
             applySleep(statusEffect, target);
         }
-        // Apply Slow
-        if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
-            target.isSlowed = true;
-            target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
-            target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
-            calculateSpeed(target, targetStats);
-        }
         ///////////
         // timed //
         ///////////
@@ -621,24 +615,6 @@
                 target.markOfDeathStacks++;
             }
         }
-        // evasion debuffs
-        if (statusEffect.applyDebuffs && !target.activeDebuffs) {
-            target.activeDebuffs = true;
-            if (statusEffect.applyDebuffTurns !== null && statusEffect.applyDebuffTurns !== undefined) {
-                target.debuffTurns = statusEffect.applyDebuffTurns;
-            } else {
-                target.debuffTurns = 2;
-            }
-            if (statusEffect.meleeEvasionDebuff) {
-                target.meleeEvasionDebuff = statusEffect.meleeEvasionDebuff;
-            }
-            if (statusEffect.rangedEvasionDebuff) {
-                target.rangedEvasionDebuff = statusEffect.rangedEvasionDebuff;
-            }
-            if (statusEffect.magicEvasionDebuff) {
-                target.magicEvasionDebuff = statusEffect.magicEvasionDebuff;
-            }
-        }
         // accuracy debuffs
         if (statusEffect.decreasePlayerAccuracy !== undefined) {
             if (statusEffect.decreasePlayerAccuracyStack) {
@@ -647,6 +623,77 @@
             } else {
                 target.decreasedAccuracy += statusEffect.decreasePlayerAccuracy;
             }
+        }
+
+        // apply special attack modifiers to player, or apply special effect to enemy
+        if (target.isPlayer) {
+            // statusEffect is an element of `enemySpecialAttacks`
+            if (statusEffect.modifiers !== undefined && target.activeSpecialAttacks.fromEnemy[statusEffect.id] === undefined) {
+                // apply the effect
+                const turnsLeft = statusEffect.attackSpeedDebuffTurns | statusEffect.applyDebuffTurns | 2;
+                target.activeSpecialAttacks.fromEnemy[statusEffect.id] = {turnsLeft : turnsLeft};
+                computeTempModifiers(target, targetStats);
+            } else {
+                // effect already applied
+            }
+        } else {
+            // Apply Slow
+            if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
+                target.isSlowed = true;
+                target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
+                target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
+                calculateSpeed(target, targetStats);
+            }
+            // evasion debuffs
+            if (statusEffect.applyDebuffs && !target.activeDebuffs) {
+                target.activeDebuffs = true;
+                if (statusEffect.applyDebuffTurns !== null && statusEffect.applyDebuffTurns !== undefined) {
+                    target.debuffTurns = statusEffect.applyDebuffTurns;
+                } else {
+                    target.debuffTurns = 2;
+                }
+                if (statusEffect.meleeEvasionDebuff) {
+                    target.meleeEvasionDebuff = statusEffect.meleeEvasionDebuff;
+                }
+                if (statusEffect.rangedEvasionDebuff) {
+                    target.rangedEvasionDebuff = statusEffect.rangedEvasionDebuff;
+                }
+                if (statusEffect.magicEvasionDebuff) {
+                    target.magicEvasionDebuff = statusEffect.magicEvasionDebuff;
+                }
+            }
+        }
+    }
+
+    function computeTempModifiers(player, playerStats, turns = 0) {
+        player.tempModifiers = {};
+        const changedModifiers = {};
+        Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).forEach(id => {
+            const modifiers = enemySpecialAttacks[id].modifiers;
+            player.activeSpecialAttacks.fromEnemy[id] -= turns;
+            Object.getOwnPropertyNames(modifiers).forEach(modifier => {
+                changedModifiers[modifier] = true;
+                if (player.activeSpecialAttacks.fromEnemy[id] <= 0) {
+                    player.activeSpecialAttacks.fromEnemy[id] = undefined;
+                } else {
+                    if (player.tempModifiers[modifier] === undefined) {
+                        player.tempModifiers[modifier] = 0;
+                    }
+                    player.tempModifiers[modifier] += modifiers[modifier];
+                }
+            });
+        });
+        let unknownModifiers = Object.getOwnPropertyNames(changedModifiers).length;
+        if (changedModifiers['increasedPlayerAttackSpeedPercent'] !== undefined) {
+            calculateSpeed(player, playerStats);
+            unknownModifiers--;
+        }
+        if (changedModifiers['decreasedMagicEvasion']) {
+            calculatePlayerEvasionRating(player, playerStats);
+            unknownModifiers--;
+        }
+        if (unknownModifiers > 0) {
+            console.warn('Unknown enemy special attack modifiers!', {...changedModifiers});
         }
     }
 
@@ -824,8 +871,6 @@
                 }
                 speed = applyModifier(speed, attackSpeedPercent);
             }
-            // slow
-            speed = Math.floor(speed * (1 + actor.attackSpeedDebuff / 100));
             // increased attack speed buff (aurora)
             speed -= actor.attackSpeedBuff;
         } else {
@@ -1024,15 +1069,24 @@
         }
     }
 
+    function checkGuardianAmuletBelowHalf(player) {
+        return player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow;
+    }
+
+    function checkGuardianAmuletAboveHalf(player) {
+        return player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow;
+    }
+
     function updateGuardianAmuletEffect(player, playerStats) {
-        if (player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow) {
+        if (checkGuardianAmuletBelowHalf(player)) {
             player.increasedDamageReduction += 5;
             player.guardianAmuletBelow = true;
-        } else if (player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow) {
+            calculateSpeed(player, playerStats);
+        } else if (checkGuardianAmuletAboveHalf(player)) {
             player.increasedDamageReduction -= 5;
             player.guardianAmuletBelow = false;
+            calculateSpeed(player, playerStats);
         }
-        calculateSpeed(player, playerStats);
     }
 
     function autoEat(player, playerStats) {
@@ -1376,6 +1430,9 @@
 
     function resetPlayer(combatData, player, playerStats) {
         resetCommonStats(player, playerStats);
+        if (player.cache === undefined) {
+            player.cache = {}
+        }
         player.isPlayer = true;
         if (!player.hitpoints || player.hitpoints <= 0) {
             player.hitpoints = playerStats.maxHitpoints;
@@ -1392,6 +1449,10 @@
         // modifiers
         player.baseModifiers = combatData.modifiers;
         player.tempModifiers = {};
+        player.activeSpecialAttacks = {
+            fromEnemy: {},
+            fromPlayer: {},
+        };
         player.increasedDamageToMonster = playerStats.dmgModifier; // combines all the (in|de)creasedDamageToX modifiers
         // precompute number of attack rolls
         player.attackRolls = 1 + mergePlayerModifiers(player, 'AttackRolls');
@@ -1409,9 +1470,20 @@
     }
 
     function mergePlayerModifiers(player, modifier, both = true) {
+        const hash = Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).join('-')
+         + '+' + Object.getOwnPropertyNames(player.activeSpecialAttacks.fromPlayer).join('-');
+        if (player.cache[modifier] === undefined) {
+            player.cache[modifier] = {};
+        }
+        const cache = player.cache[modifier];
+        if (cache[hash] !== undefined) {
+            return cache[hash];
+        }
         if (both) {
-            return mergePlayerModifiers(player, 'increased' + modifier, false)
+            const result = mergePlayerModifiers(player, 'increased' + modifier, false)
                 - mergePlayerModifiers(player, 'decreased' + modifier, false);
+            cache[hash] = result;
+            return result;
         }
         const base = player.baseModifiers[modifier];
         const temp = player.tempModifiers[modifier];
@@ -1576,7 +1648,7 @@
         // determine attack roll
         let maxAttackRoll;
         if (actor.isPlayer) {
-            maxAttackRoll = actor.combatStats.unmodifierAttachRoll;
+            maxAttackRoll = actor.combatStats.unmodifiedAttackRoll;
             let multiplier = 1 + mergePlayerModifiers(actor, 'GlobalAccuracy') / 100 + actor.decreasedAccuracy
             if (actor.isMelee) {
                 multiplier += mergePlayerModifiers(actor, 'MeleeAccuracyBonus') / 100;
@@ -1745,7 +1817,6 @@
             player.baseStats.defenceBonus,
             mergePlayerModifiers(player, 'MeleeEvasion'),
             player.meleeEvasionBuff,
-            player.meleeEvasionDebuff,
         );
         //Ranged Defence
         player.maxRngDefRoll = calculateGenericPlayerEvasionRating(
@@ -1753,7 +1824,6 @@
             player.baseStats.defenceBonusRanged,
             mergePlayerModifiers(player, 'RangedEvasion'),
             player.rangedEvasionBuff,
-            player.rangedEvasionDebuff,
         );
         // runic ruins //TODO: precompute
         if (playerStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
@@ -1766,20 +1836,15 @@
             player.baseStats.defenceBonusMagic,
             mergePlayerModifiers(player, 'MagicEvasion'),
             player.magicEvasionBuff,
-            player.magicEvasionDebuff,
         );
     }
 
-    function calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, increaseModifier, buff, debuff) {
+    function calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, increaseModifier, buff) {
         let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64));
         maxDefRoll = applyModifier(maxDefRoll, increaseModifier);
-        //apply player buffs first
+        //apply player buffs
         if (buff) {
             maxDefRoll = Math.floor(maxDefRoll * (1 + buff / 100));
-        }
-        //then apply enemy debuffs
-        if (debuff) {
-            maxDefRoll = Math.floor(maxDefRoll * (1 - debuff / 100));
         }
         return maxDefRoll;
     }
