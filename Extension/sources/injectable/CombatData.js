@@ -444,8 +444,8 @@
                 }
                 // changes for items that have different formulas in combat
                 if (this.equipmentStats.activeItems.stormsnap) {
-                    baseStats.strengthBonusRanged = Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
-                    baseStats.attackBonusRanged = Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
+                    baseStats.strengthBonusRanged += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
+                    baseStats.attackBonusRanged += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
                 } else if (this.equipmentStats.activeItems.slayerCrossbow
                     // && !isDungeon // TODO: implement this check by duplicating certain sims? see issue #10
                     && (MONSTERS[monsterID].slayerXP !== undefined || this.isSlayerTask)) {

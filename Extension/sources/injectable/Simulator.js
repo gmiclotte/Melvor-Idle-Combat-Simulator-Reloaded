@@ -806,7 +806,7 @@
                     // max attack roll
                     combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(combatStats, baseStats, modifiers);
                     // max hit roll
-                    combatStats.maxHit = combatData.calculatePlayerMaxHit(combatStats, baseStats, modifiers);
+                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
                 }
             }
 

@@ -1344,7 +1344,6 @@
     }
 
     function playerCalculateDamage(player, playerStats, enemy, enemyStats, isSpecial) {
-        // TODO setDamage
         let damage = setDamage(player, playerStats, enemy, enemyStats, isSpecial, player.currentSpecial);
         // Calculate attack Damage
         if (damage === undefined) {
