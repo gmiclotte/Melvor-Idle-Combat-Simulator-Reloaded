@@ -503,7 +503,7 @@
             setupMultiAttack(enemy, player);
         }
         enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial);
-        computeTempModifiers(player, playerStats,-1);
+        computeTempModifiers(player, playerStats, -1);
         postAttack(enemy, enemyStats, player, playerStats);
         multiAttackTimer(enemy);
     }
@@ -631,7 +631,7 @@
             if (statusEffect.modifiers !== undefined && target.activeSpecialAttacks.fromEnemy[statusEffect.id] === undefined) {
                 // apply the effect
                 const turnsLeft = statusEffect.attackSpeedDebuffTurns | statusEffect.applyDebuffTurns | 2;
-                target.activeSpecialAttacks.fromEnemy[statusEffect.id] = {turnsLeft : turnsLeft};
+                target.activeSpecialAttacks.fromEnemy[statusEffect.id] = {turnsLeft: turnsLeft};
                 computeTempModifiers(target, targetStats);
             } else {
                 // effect already applied
@@ -1471,7 +1471,7 @@
 
     function mergePlayerModifiers(player, modifier, both = true) {
         const hash = Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).join('-')
-         + '+' + Object.getOwnPropertyNames(player.activeSpecialAttacks.fromPlayer).join('-');
+            + '+' + Object.getOwnPropertyNames(player.activeSpecialAttacks.fromPlayer).join('-');
         if (player.cache[modifier] === undefined) {
             player.cache[modifier] = {};
         }
