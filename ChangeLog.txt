@@ -1,3 +1,11 @@
+v1.3.2
+    Update for 0.19.1
+    Changes:
+    - implement potion modifiers
+    - implement enemy special attack modifiers
+    - fix auto eat import
+    - fix stormsnap
+
 v1.3.1
     Cleanup modifier display
 
