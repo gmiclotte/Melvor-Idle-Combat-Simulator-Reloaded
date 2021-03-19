@@ -757,10 +757,25 @@
              */
             // TODO: move this to combatData?
             modifyCurrentSimStatsForMonster(monsterID) {
-                const playerStats = this.currentSim.playerStats;
                 const combatData = this.currentSim.combatData;
                 const combatStats = combatData.combatStats;
                 const modifiers = combatData.modifiers;
+
+                // Do preprocessing of player stats for special weapons
+                if (this.currentSim.playerStats.activeItems.stormsnap
+                    || this.currentSim.playerStats.activeItems.slayerCrossbow
+                    || this.currentSim.playerStats.activeItems.bigRon) {
+                    // recompute base stats
+                    const baseStats = combatData.updatePlayerBaseStats(monsterID);
+                    // max attack roll
+                    combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(combatStats, baseStats, modifiers);
+                    // max hit roll
+                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
+                    // update player stats
+                    this.currentSim.playerStats = combatData.getPlayerStats();
+                }
+
+                const playerStats = this.currentSim.playerStats;
                 const prayerVars = combatData.prayerBonus.vars;
 
                 // Do check for protection prayer
@@ -797,17 +812,6 @@
                 }
                 dmgModifier += modifiers.increasedDamageToAllMonsters - modifiers.decreasedDamageToAllMonsters;
                 playerStats.dmgModifier = dmgModifier;
-                // Do preprocessing of player stats for special weapons
-                if (playerStats.activeItems.stormsnap
-                    || playerStats.activeItems.slayerCrossbow
-                    || playerStats.activeItems.bigRon) {
-                    // recompute base stats
-                    const baseStats = combatData.updatePlayerBaseStats(monsterID);
-                    // max attack roll
-                    combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(combatStats, baseStats, modifiers);
-                    // max hit roll
-                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
-                }
             }
 
             /**
