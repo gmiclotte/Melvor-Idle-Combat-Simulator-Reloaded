@@ -1299,7 +1299,7 @@
         } else if (currentSpecial.setDamage !== null && currentSpecial.setDamage !== undefined) {
             damage = currentSpecial.setDamage * numberMultiplier;
         } else if (isSpecial && currentSpecial.maxHit) {
-            damage = actorStats.maxHit * currentSpecial.damageMultiplier;
+            damage = actorStats.maxHit;
             cbTriangleAlreadyApplied = true;
         } else if (isSpecial && currentSpecial.stormsnap) {
             damage = (6 + 6 * actorStats.levels.Magic) * numberMultiplier / 10;
