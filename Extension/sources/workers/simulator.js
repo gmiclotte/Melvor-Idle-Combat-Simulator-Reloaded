@@ -126,8 +126,10 @@
             playerStats.numberOfRegens = 0; // TODO: hook this up to rapid heal prayer and prayer potion usage
             playerStats.regularAttackCount = 0;
             playerStats.regularHitCount = 0;
+            playerStats.regularDamage = 0;
             playerStats.specialAttackCount = 0;
             playerStats.specialHitCount = 0;
+            playerStats.specialDamage = 0;
             enemyStats.isPlayer = false;
             enemyStats.damageTaken = 0;
             enemyStats.damageHealed = 0;
@@ -1118,6 +1120,10 @@
             // attack missed, nothing to do
             return;
         }
+        // cap damage, to prevent overkill xp
+        if (enemy.hitpoints < attackResult.damageToEnemy) {
+            attackResult.damageToEnemy = enemy.hitpoints;
+        }
         // damage
         dealDamage(enemy, enemyStats, Math.floor(attackResult.damageToEnemy));
         // XP Tracking
@@ -1379,9 +1385,10 @@
         }
         // damage reduction
         damage = Math.floor(damage * (1 - enemy.damageReduction / 100));
-        // cap damage, no overkill
-        if (enemy.hitpoints < damage) {
-            damage = enemy.hitpoints;
+        if (isSpecial) {
+            playerStats.specialDamage += damage;
+        } else {
+            playerStats.regularDamage += damage;
         }
         return damage;
     }
@@ -1565,14 +1572,23 @@
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
         /*console.log({
+            // stats
+            maxHit: playerStats.maxHit,
+            maxAttackRoll: playerStats.maxAttackRoll,
             // regular accuracy
             regularAttackCount: playerStats.regularAttackCount,
             regularHitCount: playerStats.regularHitCount,
             regularAccuracy: playerStats.regularHitCount / playerStats.regularAttackCount,
+            regularDamage: playerStats.regularDamage,
+            regularDamagePerHit: playerStats.regularDamage / playerStats.regularHitCount,
+            regularDamagePerAttack: playerStats.regularDamage / playerStats.regularAttackCount,
             // special accuracy
             specialAttackCount: playerStats.specialAttackCount,
-            specialHitCount: playerStats.regularHitCount,
+            specialHitCount: playerStats.specialHitCount,
             specialAccuracy: playerStats.specialHitCount / playerStats.specialAttackCount,
+            specialDamage: playerStats.specialDamage,
+            specialDamagePerHit: playerStats.specialDamage / playerStats.specialHitCount,
+            specialDamagePerAttack: playerStats.specialDamage / playerStats.specialAttackCount,
             // special rate
             specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
         });*/
