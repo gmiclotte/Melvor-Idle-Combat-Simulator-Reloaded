@@ -1,3 +1,10 @@
+v1.3.3
+    Changes:
+    - fix "always max hit" player special attacks
+    - fix unique weapon stats bug (stormsnap, slayer xbow, big ron)
+    - fix slayer area effects (probably)
+    - fix special attack rate (off-by-one error)
+
 v1.3.2
     Update for 0.19.1
     Changes:
