@@ -479,7 +479,7 @@
             let specialChance = 0;
             for (let i = 0; i < enemyStats.specialLength; i++) {
                 specialChance += enemyStats.specialAttackChances[i];
-                if (specialRoll <= specialChance) {
+                if (specialRoll < specialChance) {
                     enemy.specialID = enemyStats.specialIDs[i];
                     enemy.currentSpecial = enemySpecialAttacks[enemy.specialID];
                     isSpecial = true;
@@ -996,7 +996,7 @@
             for (const special of playerStats.specialData) {
                 // Roll for player special
                 specialChance += special.chance;
-                if (specialRoll <= specialChance) {
+                if (specialRoll < specialChance) {
                     isSpecial = true;
                     player.currentSpecial = special;
                     break;
