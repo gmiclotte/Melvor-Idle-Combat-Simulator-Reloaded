@@ -183,10 +183,12 @@
             const enemy = {};
             let innerCount = 0;
             let tooManyActions = 0;
+            resetPlayer(combatData, player, playerStats);
+            // set slayer area effects
+            setAreaEffects(combatData, player, playerStats);
             while (enemyKills < trials) {
                 // Reset Timers and statuses
                 resetPlayer(combatData, player, playerStats);
-                setAreaEffects(player, playerStats);
                 // regen timer is not reset ! add respawn time to regen, and regen if required
                 player.regenTimer -= enemySpawnTimer;
                 if (player.regenTimer <= 0) {
@@ -850,12 +852,12 @@
         return currentSpecial;
     }
 
-    function calculateSpeed(actor, actorStats) {
+    function calculateSpeed(actor, actorStats, force = false) {
         // base
         let speed = actorStats.attackSpeed;
         if (actor.isPlayer) {
-            // recompute attack speed if using guardian amulet or in dark waters
-            if (actorStats.activeItems.guardianAmulet || actorStats.slayerArea === 10) {
+            // recompute attack speed if using guardian amulet
+            if (actorStats.activeItems.guardianAmulet || force) {
                 speed = 4000;
                 speed = actor.equipmentStats.attackSpeed;
                 if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
@@ -863,9 +865,6 @@
                 }
                 speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
                 let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
-                if (actorStats.slayerArea === 10) {
-                    attackSpeedPercent += calculateAreaEffectValue(actor, actorStats)
-                }
                 if (actorStats.activeItems.guardianAmulet && actor.hitpoints < actor.maxHitpoints) {
                     attackSpeedPercent += 10;
                 }
@@ -1803,13 +1802,6 @@
      * mimic calculatePlayerEvasionRating
      */
     function calculatePlayerEvasionRating(player, playerStats) {
-        // perilous peaks //TODO: precompute
-        if (playerStats.slayerArea === 9 /*Perilous Peaks*/) {
-            const decreasedEvasion = calculateAreaEffectValue(player, playerStats);
-            player.tempModifiers.decreasedMeleeEvasion = decreasedEvasion;
-            player.tempModifiers.decreasedRangedEvasion = decreasedEvasion;
-            player.tempModifiers.decreasedMagicEvasion = decreasedEvasion;
-        }
         //Melee defence
         player.maxDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveDefenceLevel,
@@ -1824,11 +1816,6 @@
             mergePlayerModifiers(player, 'RangedEvasion'),
             player.rangedEvasionBuff,
         );
-        // runic ruins //TODO: precompute
-        if (playerStats.slayerArea === 6 /*Runic Ruins*/ && !playerStats.isMagic) {
-            const decreasedEvasion = calculateAreaEffectValue(player, playerStats);
-            player.tempModifiers.decreasedMagicEvasion = decreasedEvasion;
-        }
         //Magic Defence
         player.maxMagDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveMagicDefenceLevel,
@@ -1857,21 +1844,38 @@
         return value;
     }
 
-    function setAreaEffects(player, playerStats) {
+    function setAreaEffects(combatData, player, playerStats) {
         // 0: "Penumbra" - no area effect
         // 1: "Strange Cave" - no area effect
         // 2: "High Lands" - no area effect
         // 3: "Holy Isles" - no area effect
         // 4: "Forest of Goo" - no area effect
         // 5: "Desolate Plains" - no area effect
-        // 6: "Runic Ruins" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
-        // 7: "Arid Plains" - reduced food efficiency -> TODO: implement this when tracking player HP
-        // 8: "Shrouded Badlands"
-        if (playerStats.slayerArea === 8 /*Shrouded Badlands*/) {
-            playerStats.maxAttackRoll = Math.floor(player * (1 - calculateAreaEffectValue(player, playerStats) / 100));
+        // 6: "Runic Ruins" - reduced evasion rating
+        if (playerStats.slayerArea === 6 && !playerStats.isMagic) {
+            combatData.modifiers.decreasedMagicEvasion += calculateAreaEffectValue(player, playerStats);
         }
-        // 9: "Perilous Peaks" - reduced evasion rating -> implemented in setEvasionDebuffsPlayer
-        // 10: "Dark Waters" - reduced player attack speed -> implemented in calculateSpeed
+        // 7: "Arid Plains" - reduced food efficiency
+        if (playerStats.slayerArea === 7) {
+            playerStats.autoEat.efficiency -= calculateAreaEffectValue(player, playerStats);
+        }
+        // 8: "Shrouded Badlands" - reduced global accuracy
+        if (playerStats.slayerArea === 8) {
+            combatData.modifiers.decreasedGlobalAccuracy += calculateAreaEffectValue(player, playerStats);
+        }
+        // 9: "Perilous Peaks" - reduced evasion rating
+        if (playerStats.slayerArea === 9) {
+            combatData.modifiers.decreasedMeleeEvasion += calculateAreaEffectValue(player, playerStats);
+            combatData.modifiers.decreasedRangedEvasion += calculateAreaEffectValue(player, playerStats);
+            combatData.modifiers.decreasedMagicEvasion += calculateAreaEffectValue(player, playerStats);
+        }
+        // 10: "Dark Waters" - reduced player attack speed
+        if (playerStats.slayerArea === 10) {
+            combatData.modifiers.increasedPlayerAttackSpeedPercent += calculateAreaEffectValue(player, playerStats);
+            resetPlayer(combatData, player, playerStats);
+            calculateSpeed(player, playerStats, true);
+            playerStats.attackSpeed = player.currentSpeed;
+        }
     }
 
 })();
