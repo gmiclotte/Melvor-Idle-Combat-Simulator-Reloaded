@@ -124,6 +124,10 @@
             playerStats.highestDamageTaken = 0;
             playerStats.lowestHitpoints = playerStats.maxHitpoints;
             playerStats.numberOfRegens = 0; // TODO: hook this up to rapid heal prayer and prayer potion usage
+            playerStats.regularAttackCount = 0;
+            playerStats.regularHitCount = 0;
+            playerStats.specialAttackCount = 0;
+            playerStats.specialHitCount = 0;
             enemyStats.isPlayer = false;
             enemyStats.damageTaken = 0;
             enemyStats.damageHealed = 0;
@@ -1003,6 +1007,11 @@
             }
         }
         if (isSpecial) {
+            playerStats.specialAttackCount++;
+        } else {
+            playerStats.regularAttackCount++;
+        }
+        if (isSpecial) {
             setupMultiAttack(player, enemy);
         }
         const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, isSpecial)
@@ -1201,6 +1210,11 @@
         if (!attackHits) {
             // exit early
             return attackResult;
+        }
+        if (isSpecial) {
+            playerStats.specialHitCount++;
+        } else {
+            playerStats.regularHitCount++;
         }
         // roll for pets
         stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
@@ -1550,6 +1564,19 @@
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
+        /*console.log({
+            // regular accuracy
+            regularAttackCount: playerStats.regularAttackCount,
+            regularHitCount: playerStats.regularHitCount,
+            regularAccuracy: playerStats.regularHitCount / playerStats.regularAttackCount,
+            // special accuracy
+            specialAttackCount: playerStats.specialAttackCount,
+            specialHitCount: playerStats.regularHitCount,
+            specialAccuracy: playerStats.specialHitCount / playerStats.specialAttackCount,
+            // special rate
+            specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
+        });*/
+
         /** @type {MonsterSimResult} */
         const simResult = {
             simSuccess: true,
@@ -1753,8 +1780,9 @@
         // static min hit increase (magic gear and Charged aurora)
         minHitIncrease += playerStats.minHit;
         // if min is equal to or larger than max, roll max
-        if (minHitIncrease + 1 >= playerStats.maxHit)
+        if (minHitIncrease + 1 >= playerStats.maxHit) {
             return playerStats.maxHit;
+        }
         // roll between min and max
         return Math.ceil(Math.random() * (playerStats.maxHit - playerStats.minHit)) + playerStats.minHit;
     }
