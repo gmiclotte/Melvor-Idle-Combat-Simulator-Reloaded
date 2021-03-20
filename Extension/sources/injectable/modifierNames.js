@@ -12,6 +12,7 @@
         // commented modifiers are not relevant yet or not implemented in the game
         MICSR.modifierNames = {
             // general modifiers
+            ChanceToDoubleItemsGlobal: {implemented: true},
             ChanceToPreservePotionCharge: {implemented: true},
             // GPFromSales: {implemented: false},
             GPGlobal: {implemented: true},

@@ -259,7 +259,8 @@
                 // loot bonus
                 currentSim.lootBonus = Math.max(1, applyModifier(
                     1,
-                    MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat'),
+                    MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat')
+                    + MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleItemsGlobal'),
                 ));
                 // misc
                 currentSim.herbConvertChance = combatData.luckyHerb / 100;
