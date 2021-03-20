@@ -391,7 +391,7 @@
                 reqMet = false;
                 // not defined yet: try again later
                 if (loadCounter === 1) {
-                    window.MICSR.log(id + ' is waiting for ' + req)
+                    window.MICSR.log(id + ' is waiting for ' + req);
                 }
             }
         }
@@ -400,11 +400,11 @@
             return;
         }
         // requirements met
-        window.MICSR.log('setting up ' + id)
+        window.MICSR.log('setting up ' + id);
         setup();
         // mark as loaded
         window.MICSR.loadedFiles[id] = true;
     }
-    waitLoadOrder(reqs, setup, 'Import')
+    waitLoadOrder(reqs, setup, 'Import');
 
 })();
