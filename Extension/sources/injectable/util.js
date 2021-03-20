@@ -38,7 +38,7 @@
         /**
          * Creates an id for an element from a name
          * @param {string} name The name describing the element
-         * @returns An id starting with "mcs-" and ending with the name in lowercase with spaces replaced by "-"
+         * @returns An id starting with 'mcs-' and ending with the name in lowercase with spaces replaced by '-'
          */
         MICSR.toId = (name) => {
             return `mcs-${name.toLowerCase().replace(/ /g, '-')}`;
@@ -52,11 +52,11 @@
                 if (Array.isArray(stats[stat])) {
                     for (const substat of stats[stat]) {
                         if (!substat.implemented) {
-                            MICSR.warn(tag + " stat not yet implemented: " + stat);
+                            MICSR.warn(tag + ' not yet implemented: ' + stat);
                         }
                     }
                 } else if (!stats[stat].implemented) {
-                    MICSR.warn(tag + " stat not yet implemented: " + stat);
+                    MICSR.warn(tag + ' stat not yet implemented: ' + stat);
                 }
             })
         }
@@ -71,7 +71,7 @@
                 Object.getOwnPropertyNames(element).forEach(stat => {
                     // check if any bugged stats are still present
                     if (broken[stat] !== undefined) {
-                        MICSR.warn(tag + " stat " + stat + " is bugged for " + element.name + "!")
+                        MICSR.warn(tag + ' stat ' + stat + ' is bugged for ' + element.name + '!')
                         return;
                     }
                     // check if we already know this stat

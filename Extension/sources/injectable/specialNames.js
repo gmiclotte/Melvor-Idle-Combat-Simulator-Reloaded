@@ -68,6 +68,9 @@
         };
 
         MICSR.enemySpecialNames = {
+            // general
+            modifiers: {implemented: true},
+
             // buff
             activeBuffs: {implemented: true},
             activeBuffTurns: {implemented: true},
@@ -116,9 +119,9 @@
         MICSR.checkUnknown(enemySpecialAttacks, 'Enemy special', 'enemy special attacks', [MICSR.commonSpecialNames, MICSR.enemySpecialNames], {});
 
         // report stats that are known but not implemented
-        MICSR.checkImplemented(MICSR.commonSpecialNames, 'Common special');
-        MICSR.checkImplemented(MICSR.playerSpecialNames, 'Player special');
-        MICSR.checkImplemented(MICSR.enemySpecialNames, 'Enemy special');
+        MICSR.checkImplemented(MICSR.commonSpecialNames, 'Common special stat');
+        MICSR.checkImplemented(MICSR.playerSpecialNames, 'Player special stat');
+        MICSR.checkImplemented(MICSR.enemySpecialNames, 'Enemy special stat');
     }
 
     let loadCounter = 0;

@@ -17,6 +17,7 @@
                 name: 'Weapon Speed',
                 icon: 'combat',
             },
+            modifiers: {implemented: true},
             isTwoHanded: {implemented: true},
 
             // special attack TODO: non-weapon special attacks
@@ -280,10 +281,7 @@
         };
 
         // stats bugged in the base game
-        MICSR.brokenStatNames = {
-            increasedWaterAirSpellDmg: {},
-            increasedEarthFireSpellDmg: {},
-        }
+        MICSR.brokenStatNames = {};
 
         // report stats that no longer exist
         const existing = {};
@@ -310,9 +308,9 @@
         MICSR.checkUnknown(items.filter(item => item.equipmentSlot !== undefined || item.isPassiveItem), 'Item', 'items', known, MICSR.brokenStatNames);
 
         // report stats that are known but not implemented
-        MICSR.checkImplemented(MICSR.equipmentStatNames, "Item equipment");
-        MICSR.checkImplemented(MICSR.passiveStatNames, "Item passive");
-        MICSR.checkImplemented(MICSR.requiredStatNames, "Item required");
+        MICSR.checkImplemented(MICSR.equipmentStatNames, 'Item equipment stat');
+        MICSR.checkImplemented(MICSR.passiveStatNames, 'Item passive stat');
+        MICSR.checkImplemented(MICSR.requiredStatNames, 'Item required stat');
     }
 
     let loadCounter = 0;
