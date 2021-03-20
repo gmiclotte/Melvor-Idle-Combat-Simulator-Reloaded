@@ -223,6 +223,30 @@
 
                 this.relevantModifiers = {};
 
+                // all
+                this.relevantModifiers.all = {
+                    names: [
+                        ...Object.getOwnPropertyNames(this.creasedModifiers).map(tag => this.creasedModifiers[tag]),
+                        ...Object.getOwnPropertyNames(this.singletonModifiers).map(tag => this.singletonModifiers[tag]),
+                    ],
+                    skillIDs: Object.getOwnPropertyNames(SKILLS).map(x => Number(x)),
+                };
+
+                // misc
+                this.relevantModifiers.misc = {
+                    names: [
+                        this.creasedModifiers.misc,
+                        this.singletonModifiers.misc,
+                    ],
+                    skillIDs: [],
+                };
+
+                // golbin raid
+                this.relevantModifiers.golbin = {
+                    names: [this.singletonModifiers.golbinRaid],
+                    skillIDs: [],
+                };
+
                 // all combat
                 this.relevantModifiers.combat = {
                     names: [
@@ -246,30 +270,6 @@
                         CONSTANTS.skill.Prayer,
                         CONSTANTS.skill.Slayer,
                     ],
-                };
-
-                // all
-                this.relevantModifiers.all = {
-                    names: [
-                        ...Object.getOwnPropertyNames(this.creasedModifiers).map(tag => this.creasedModifiers[tag]),
-                        ...Object.getOwnPropertyNames(this.singletonModifiers).map(tag => this.singletonModifiers[tag]),
-                    ],
-                    skillIDs: Object.getOwnPropertyNames(SKILLS).map(x => Number(x)),
-                };
-
-                // misc
-                this.relevantModifiers.misc = {
-                    names: [
-                        this.creasedModifiers.misc,
-                        this.singletonModifiers.misc,
-                    ],
-                    skillIDs: [],
-                };
-
-                // golbin raid
-                this.relevantModifiers.golbin = {
-                    names: [this.singletonModifiers.golbinRaid],
-                    skillIDs: [],
                 };
 
                 // melee combat
