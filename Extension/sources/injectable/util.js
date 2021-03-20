@@ -45,27 +45,33 @@
         }
 
         MICSR.checkImplemented = (stats, tag) => {
+            if(!MICSR.isDev) {
+                return;
+            }
             Object.getOwnPropertyNames(stats).forEach(stat => {
                 if (Array.isArray(stats[stat])) {
                     for (const substat of stats[stat]) {
                         if (!substat.implemented) {
-                            MICSR.log(tag + " stat not yet implemented: " + stat);
+                            MICSR.warn(tag + " stat not yet implemented: " + stat);
                         }
                     }
                 } else if (!stats[stat].implemented) {
-                    MICSR.log(tag + " stat not yet implemented: " + stat);
+                    MICSR.warn(tag + " stat not yet implemented: " + stat);
                 }
             })
         }
 
         MICSR.checkUnknown = (set, tag, elementType, knownSets, broken) => {
+            if(!MICSR.isDev) {
+                return;
+            }
             // construct a list of stats that are not in any of the previous categories
             const unknownStatNames = {};
             set.forEach(element => {
                 Object.getOwnPropertyNames(element).forEach(stat => {
                     // check if any bugged stats are still present
                     if (broken[stat] !== undefined) {
-                        MICSR.log(tag + " stat " + stat + " is bugged for " + element.name + "!")
+                        MICSR.warn(tag + " stat " + stat + " is bugged for " + element.name + "!")
                         return;
                     }
                     // check if we already know this stat
@@ -83,7 +89,7 @@
             })
 
             Object.getOwnPropertyNames(unknownStatNames).forEach(stat => {
-                MICSR.log('Unknown stat ' + stat + ' for ' + elementType + ': ', unknownStatNames[stat]);
+                MICSR.warn('Unknown stat ' + stat + ' for ' + elementType + ': ', unknownStatNames[stat]);
             });
         }
 

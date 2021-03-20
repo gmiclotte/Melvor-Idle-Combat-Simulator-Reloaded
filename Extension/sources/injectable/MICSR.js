@@ -1,5 +1,6 @@
 // set global variable
 window.MICSR = {
+    isDev: false,
     /////////////
     // logging //
     /////////////
