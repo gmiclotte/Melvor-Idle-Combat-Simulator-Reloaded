@@ -746,9 +746,7 @@
                 for (let i = 0; i < this.prayerSelected.length; i++) {
                     if (this.prayerSelected[i]) {
                         if (PRAYER[i].modifiers !== undefined) {
-                            for (const modifier in PRAYER[i].modifiers) {
-                                this.addModifiers(PRAYER[i].modifiers, this.prayerBonus.modifiers);
-                            }
+                            this.addModifiers(PRAYER[i].modifiers, this.prayerBonus.modifiers);
                         }
                         if (PRAYER[i].vars !== undefined) {
                             let j = 0;
