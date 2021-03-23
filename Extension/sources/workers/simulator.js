@@ -742,17 +742,30 @@
         target.bleedTimer = target.bleedInterval;
         target.bleedCount = 0;
         let totalBleedDamage = 1;
+        // base bleed
         if (statusEffect.totalBleedHP > 0) {
+            let totalBleedHP = statusEffect.totalBleedHP;
+            if (!target.isPlayer && statusEffect.id === 28 && target.hitpoints >= target.maxHitpoints) {
+                totalBleedHP = 2.5;
+            }
             // bleed for `statusEffect.totalBleedHP` times initial damage
             totalBleedDamage = damage * statusEffect.totalBleedHP;
             if (statusEffect.totalBleedHPCustom === 1) {
                 // bleed for up to `statusEffect.totalBleedHP` times initial damage
-                totalBleedDamage *= Math.random();
+                totalBleedDamage *= damage * totalBleedHP * Math.random();
+            } else {
+                // bleed for totalBleedHP times damage
+                totalBleedDamage = damage * totalBleedHP;
             }
-        } else {
+        } else if (statusEffect.totalBleedHPPercent !== undefined) {
             // bleed for `statusEffect.totalBleedHPPercent` % of max HP
-            totalBleedDamage = target.maxHitpoints * statusEffect.totalBleedHPPercent / 100;
+            totalBleedDamage = Math.floor(target.maxHitpoints * statusEffect.totalBleedHPPercent / 100);
         }
+        // extra bleed
+        if (statusEffect.extraBleedDmg) {
+            totalBleedDamage += numberMultiplier * statusEffect.extraBleedDmg;
+        }
+        // spread bleed damage over number of bleed hits
         target.bleedDamage = Math.floor(totalBleedDamage / statusEffect.bleedCount);
     }
 
