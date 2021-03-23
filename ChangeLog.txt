@@ -1,3 +1,13 @@
+v1.3.4
+    Changes:
+    - Implement and fix bleed specials, fixes #19
+    - Implement setHPDamageMinimum special, fixes #20
+    - Add notify on export, fixes #17
+    - Fix prayer multiple application bug
+    - Fix player accuracy bug, fixes #18
+    - Update Show Modifiers
+    - Implement ChanceToDoubleItemsGlobal modifiers
+
 v1.3.3
     Changes:
     - fix "always max hit" player special attacks
