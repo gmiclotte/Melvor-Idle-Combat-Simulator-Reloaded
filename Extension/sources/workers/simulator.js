@@ -1299,7 +1299,11 @@
         // check if any set damage cases apply
         if (currentSpecial.setHPDamage !== undefined) {
             const setHPDamage = currentSpecial.setHPDamage / 100 * actor.hitpoints;
-            damage = Math.floor(Math.random() * setHPDamage + 10);
+            let setHPDamageMinimum = actor.hitpoints / 100;
+            if (currentSpecial.setHPDamageMinimum !== undefined) {
+                setHPDamageMinimum = currentSpecial.setHPDamageMinimum / 100 * actor.hitpoints;
+            }
+            damage = Math.floor(Math.random() * (setHPDamage - setHPDamageMinimum) + setHPDamageMinimum);
         } else if (currentSpecial.customDamageModifier !== undefined) {
             damage = Math.floor(targetStats.maxHit * (1 - currentSpecial.customDamageModifier / 100));
         } else if (currentSpecial.setDamage !== null && currentSpecial.setDamage !== undefined) {
