@@ -1691,11 +1691,11 @@
         if (actor.isPlayer) {
             maxAttackRoll = actor.combatStats.unmodifiedAttackRoll;
             let multiplier = 1 + mergePlayerModifiers(actor, 'GlobalAccuracy') / 100 + actor.decreasedAccuracy
-            if (actor.isMelee) {
+            if (actorStats.isMelee) {
                 multiplier += mergePlayerModifiers(actor, 'MeleeAccuracyBonus') / 100;
-            } else if (actor.isRanged) {
+            } else if (actorStats.isRanged) {
                 multiplier += mergePlayerModifiers(actor, 'RangedAccuracyBonus') / 100;
-            } else if (actor.isMagic) {
+            } else if (actorStats.isMagic) {
                 multiplier += mergePlayerModifiers(actor, 'MagicAccuracyBonus') / 100;
             }
             maxAttackRoll = maxAttackRoll * multiplier;
