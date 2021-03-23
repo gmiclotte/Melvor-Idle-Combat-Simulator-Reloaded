@@ -1789,8 +1789,21 @@
                 this.updateZoneInfoCard();
             }
 
+            notify(message, type = 'success') {
+                let img = this.media.combat;
+                Toastify({
+                    text: `<div class=text-center><img class=notification-img src=${img}><span class=badge badge-${type}>${message}</span></div>`,
+                    duration: 2000,
+                    gravity: 'bottom',
+                    position: 'center',
+                    backgroundColor: 'transparent',
+                    stopOnFocus: false,
+                }).showToast();
+            }
+
             popExport(data) {
                 navigator.clipboard.writeText(data).then(() => {
+                    this.notify('Exported to clipboard!');
                 }, (error) => {
                     Swal.fire({
                         title: 'Clipboard API error!',
