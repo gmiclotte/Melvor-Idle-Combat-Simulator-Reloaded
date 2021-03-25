@@ -1346,9 +1346,6 @@
     }
 
     function getPlayerDamageModifier(player, enemy) {
-        if (player.isMagic && player.isAncient) {
-            return 0;
-        }
         let dmgModifier = 0;
         // anguish curse
         if (enemy.isCursed && enemy.curse.type === 'Anguish') {
@@ -1405,7 +1402,9 @@
             damage *= player.currentSpecial.damageMultiplier;
         }
         // common modifiers
-        damage = damage * (1 + getPlayerDamageModifier(player, enemy) / 100)
+        if (!playerStats.isMagic || !playerStats.usingAncient) {
+            damage = damage * (1 + getPlayerDamageModifier(player, enemy) / 100)
+        }
         // deadeye amulet
         if (playerStats.activeItems.deadeyeAmulet && playerStats.isRanged) {
             damage *= critDamageModifier(damage);
