@@ -782,13 +782,13 @@
                 // Do check for protection prayer
                 switch (MONSTERS[monsterID].attackType) {
                     case CONSTANTS.attackType.Melee:
-                        playerStats.isProtected = prayerVars.protectFromMelee > 0;
+                        playerStats.isProtected = prayerVars.prayerBonusProtectFromMelee > 0;
                         break;
                     case CONSTANTS.attackType.Ranged:
-                        playerStats.isProtected = prayerVars.protectFromRanged > 0;
+                        playerStats.isProtected = prayerVars.prayerBonusProtectFromRanged > 0;
                         break;
                     case CONSTANTS.attackType.Magic:
-                        playerStats.isProtected = prayerVars.protectFromMagic > 0;
+                        playerStats.isProtected = prayerVars.prayerBonusProtectFromMagic > 0;
                         break;
                 }
 

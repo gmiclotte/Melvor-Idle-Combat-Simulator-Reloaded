@@ -751,7 +751,7 @@
                         if (PRAYER[i].vars !== undefined) {
                             let j = 0;
                             for (const v of PRAYER[i].vars) {
-                                this.prayerBonus[v] += PRAYER[i].values[j];
+                                this.prayerBonus.vars[v] += PRAYER[i].values[j];
                                 j++;
                             }
                         }

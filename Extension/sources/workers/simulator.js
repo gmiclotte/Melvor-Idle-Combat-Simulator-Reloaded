@@ -426,8 +426,8 @@
         // modifiers
         amt += numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // rapid heal prayer
-        if (player.prayerBonus.vars['prayerBonusHitpoints'] !== undefined) {
-            amt *= 2;
+        if (player.prayerBonus.vars.prayerBonusHitpoints) {
+            amt *= player.prayerBonus.vars.prayerBonusHitpoints;
         }
         // Regeneration modifiers
         applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
@@ -1076,8 +1076,8 @@
                     // TODO: use a more detailed manual eating simulation?
                     target.hitpoints = target.maxHitpoints;
                 }
-                if (target.prayerBonus.vars['prayerBonusHitpointHeal'] !== undefined) {
-                    target.hitpoints += Math.floor(target.maxHitpoints * (target.prayerBonus.vars['prayerBonusHitpointHeal'] / 100));
+                if (target.hitpoints <= 0.1 * target.maxHitpoints && target.prayerBonus.vars.prayerBonusHitpointHeal) {
+                    target.hitpoints += Math.floor(target.maxHitpoints * (target.prayerBonus.vars.prayerBonusHitpointHeal / 100));
                 }
                 if (target.hitpoints < targetStats.lowestHitpoints) {
                     targetStats.lowestHitpoints = target.hitpoints;
