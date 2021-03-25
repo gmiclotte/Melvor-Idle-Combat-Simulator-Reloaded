@@ -494,6 +494,11 @@
                     break;
                 }
             }
+            // if selected special has active buff without turns, disable any active buffs
+            if (enemy.currentSpecial.activeBuffs && enemy.currentSpecial.activeBuffTurns === undefined) {
+                enemy.buffTurns = 0;
+                postAttack(enemy, enemyStats, player, playerStats);
+            }
             // don't stack active buffs
             if (enemy.activeBuffs && enemy.currentSpecial.activeBuffs) {
                 enemy.specialID = -1;
@@ -512,8 +517,8 @@
         }
         enemyDoAttack(player, playerStats, enemy, enemyStats, isSpecial);
         computeTempModifiers(player, playerStats, -1);
-        postAttack(enemy, enemyStats, player, playerStats);
         multiAttackTimer(enemy);
+        postAttack(enemy, enemyStats, player, playerStats);
     }
 
     function setupMultiAttack(actor, target) {
@@ -549,8 +554,8 @@
         }
         stats.enemyAttackCalls++;
         enemyDoAttack(player, playerStats, enemy, enemyStats, true);
-        postAttack(enemy, enemyStats, player, playerStats);
         multiAttackTimer(enemy);
+        postAttack(enemy, enemyStats, player, playerStats);
         if (!enemy.isAttacking && enemy.intoTheMist) {
             enemy.intoTheMist = false;
             enemy.increasedDamageReduction = 0;
@@ -901,6 +906,10 @@
     }
 
     function postAttack(actor, actorStats, target, targetStats) {
+        if (actor.isAttacking && actor.attackCount < actor.countMax) {
+            // next attack is part of multi attack, so don't advance timers
+            return;
+        }
         // Buff tracking
         if (actor.activeBuffs) {
             actor.buffTurns--;
@@ -1031,8 +1040,8 @@
         }
         const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, isSpecial)
         processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
-        postAttack(player, playerStats, enemy, enemyStats);
         multiAttackTimer(player);
+        postAttack(player, playerStats, enemy, enemyStats);
     }
 
     function playerContinueAction(stats, player, playerStats, enemy, enemyStats) {
@@ -1042,8 +1051,8 @@
         }
         const attackResult = playerDoAttack(stats, player, playerStats, enemy, enemyStats, true);
         processPlayerAttackResult(attackResult, stats, player, playerStats, enemy, enemyStats);
-        postAttack(player, playerStats, enemy, enemyStats);
         multiAttackTimer(player);
+        postAttack(player, playerStats, enemy, enemyStats);
     }
 
     function healDamage(target, targetStats, damage) {
@@ -1361,6 +1370,7 @@
 
     // apply stun, sleep and DR to enemy damage
     function getEnemyDamageModifier(damage, enemy, player, isSpecial, special) {
+        const initdmg = damage;
         if (isSpecial && player.isStunned) {
             damage *= special.stunDamageMultiplier;
         }
@@ -1567,6 +1577,7 @@
     function resetEnemy(enemy, enemyStats) {
         resetCommonStats(enemy, enemyStats);
         enemy.isPlayer = false;
+        enemy.monsterID = enemyStats.monsterID;
         enemy.hitpoints = enemy.maxHitpoints;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
