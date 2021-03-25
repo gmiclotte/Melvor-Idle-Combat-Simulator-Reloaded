@@ -1,3 +1,6 @@
+v1.3.6
+    Disable debugging
+
 v1.3.5
     Changes:
     - Fix ancients damage modifier bug, fixes #24
