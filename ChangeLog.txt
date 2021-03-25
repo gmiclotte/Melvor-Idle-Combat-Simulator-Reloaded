@@ -1,3 +1,9 @@
+v1.3.5
+    Changes:
+    - Fix ancients damage modifier bug, fixes #24
+    - Fix active buffs, fixes #22
+    - Fix non-modifier prayers, fixes #21
+
 v1.3.4
     Changes:
     - Implement and fix bleed specials, fixes #19

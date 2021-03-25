@@ -6,7 +6,7 @@
 
         const MICSR = window.MICSR;
 
-        MICSR.version = 'v1.3.4';
+        MICSR.version = 'v1.3.5';
         MICSR.gameVersion = 'Alpha v0.19.1';
         MICSR.maxActions = 300;
         MICSR.trials = 10000;
