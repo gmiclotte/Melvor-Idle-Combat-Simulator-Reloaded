@@ -751,13 +751,15 @@
         if (statusEffect.totalBleedHP > 0) {
             let totalBleedHP = statusEffect.totalBleedHP;
             if (!target.isPlayer && statusEffect.id === 28 && target.hitpoints >= target.maxHitpoints) {
+                // Rend
                 totalBleedHP = 2.5;
             }
             // bleed for `statusEffect.totalBleedHP` times initial damage
             totalBleedDamage = damage * statusEffect.totalBleedHP;
             if (statusEffect.totalBleedHPCustom === 1) {
+                // Rend
                 // bleed for up to `statusEffect.totalBleedHP` times initial damage
-                totalBleedDamage *= damage * totalBleedHP * Math.random();
+                totalBleedDamage = damage * totalBleedHP * Math.random();
             } else {
                 // bleed for totalBleedHP times damage
                 totalBleedDamage = damage * totalBleedHP;
