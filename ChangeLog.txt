@@ -1,3 +1,6 @@
+v1.3.7
+    Fix Rend (Sanguine Blade special)
+
 v1.3.6
     Disable debugging
 
