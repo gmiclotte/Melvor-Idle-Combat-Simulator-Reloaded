@@ -520,7 +520,7 @@
                 // Apply Fury aurora
                 if (this.auroraBonus.increasedMaxHit !== undefined && !this.spells.ancient.isSelected) {
                     if (this.auroraBonus.increasedMaxHit !== null) {
-                        baseMaxHit += this.auroraBonus.increasedMaxHit;
+                        baseMaxHit += this.auroraBonus.increasedMaxHit * this.numberMultiplier;
                     }
                 }
                 return baseMaxHit;
