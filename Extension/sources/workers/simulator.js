@@ -1328,18 +1328,19 @@
         // confetti crossbow
         if (playerStats.activeItems.confettiCrossbow) {
             // Add gp from this weapon
-            let gpMultiplier = playerStats.startingGP / 25000000;
+            let gpMultiplier = playerStats.startingGP / 20000000;
             if (gpMultiplier > confettiCrossbow.gpMultiplierCap) {
                 gpMultiplier = confettiCrossbow.gpMultiplierCap;
             } else if (gpMultiplier < confettiCrossbow.gpMultiplierMin) {
                 gpMultiplier = confettiCrossbow.gpMultiplierMin;
             }
-            if (playerStats.activeItems.aorpheatsSignetRing) {
-                gpMultiplier *= 2;
-            }
-            stats.gpGainedFromDamage += Math.floor(attackResult.damageToEnemy * gpMultiplier);
+            const damageToUse = Math.min(enemy.hitpoints, attackResult.damageToEnemy) * 10 / numberMultiplier;
+            stats.gpGainedFromDamage += damageToUse * gpMultiplier * (
+                1
+                + mergePlayerModifiers(player, 'GPGlobal') / 100
+                + mergePlayerModifiers(player, 'GPFromMonsters') / 100
+            );
         }
-
         // return the result of the attack
         attackResult.attackHits = true;
         attackResult.statusEffect = statusEffect;
