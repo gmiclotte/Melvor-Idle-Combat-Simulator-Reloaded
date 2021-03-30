@@ -1,3 +1,11 @@
+v1.3.8
+    Changes:
+    - Disable dungeon/autoslayer sim on/off task, fixes #10
+    - Fix confetti crossbow, fixes #25
+    - Add additional debug logging
+    - Fix protection prayers, fixes #27
+    - Fix max hit auroras, fixes #26
+
 v1.3.7
     Fix Rend (Sanguine Blade special)
 
