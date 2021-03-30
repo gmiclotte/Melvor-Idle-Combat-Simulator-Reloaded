@@ -82,10 +82,12 @@
                 // Time unit options
                 this.timeOptions = ['Kill', 'Second', 'Minute', 'Hour', 'Day'];
                 this.timeShorthand = ['kill', 's', 'm', 'h', 'd'];
-                this.selectedTimeUnit = this.timeOptions[1];
-                this.selectedTimeShorthand = this.timeShorthand[1];
-                this.timeMultiplier = 1;
                 this.timeMultipliers = [-1, 1, 60, 3600, 3600 * 24];
+                this.initialTimeUnitIndex = 3;
+                this.selectedTimeUnit = this.timeOptions[this.initialTimeUnitIndex];
+                this.selectedTimeShorthand = this.timeShorthand[this.initialTimeUnitIndex];
+                this.timeMultiplier = this.timeMultipliers[this.initialTimeUnitIndex];
+                // empty items
                 const makeEmptyItem = (img) => {
                     return {
                         name: 'None',
@@ -296,11 +298,11 @@
                 // Setup the default state of the UI
                 this.gpOptionsCard.container.style.display = 'none';
                 this.exportOptionsCard.outerContainer.style.display = 'none';
-                this.plotter.timeDropdown.selectedIndex = 1;
+                this.plotter.timeDropdown.selectedIndex = this.initialTimeUnitIndex;
                 document.getElementById('MCS Edit Subset Button').style.display = 'none';
                 this.subInfoCard.container.style.display = 'none';
                 this.plotter.petSkillDropdown.style.display = 'none';
-                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
+                document.getElementById(`MCS  Pet Chance/${this.timeShorthand[this.initialTimeUnitIndex]} Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
                 this.updateSpellOptions();
                 this.updatePrayerOptions();
                 // Set up spells
@@ -309,11 +311,9 @@
                 this.updateEquipmentStats();
                 this.updateCombatStats();
                 this.updatePlotData();
-                // Export Options element
-                this.exportOptionsButton = document.getElementById('MCS Show Export Options Button');
                 // Saving and loading of Gear Sets
                 this.gearSets = [];
-                // slayer sim is off by default
+                // slayer sim is off by default, so toggle auto slayer off
                 this.toggleSlayerSims();
             }
 
@@ -537,7 +537,7 @@
                 const zoneInfoLabelNames = [];
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     if (this.plotTypes[i].isTime) {
-                        zoneInfoLabelNames.push(this.plotTypes[i].info + this.timeShorthand[1]);
+                        zoneInfoLabelNames.push(this.plotTypes[i].info + this.selectedTimeShorthand);
                     } else {
                         zoneInfoLabelNames.push(this.plotTypes[i].info);
                     }
@@ -864,7 +864,7 @@
                 const dropDownOptionNames = [];
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     if (this.plotTypes[i].isTime) {
-                        dropDownOptionNames.push(this.plotTypes[i].option + this.timeOptions[1]);
+                        dropDownOptionNames.push(this.plotTypes[i].option + this.selectedTimeUnit);
                     } else {
                         dropDownOptionNames.push(this.plotTypes[i].option);
                     }
@@ -881,7 +881,7 @@
                     this.import.importSettings(this.importedSettings);
                     this.import.update();
                 });
-                this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
+                this.exportOptionsButton = this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
                 // Export Options Card
                 this.createExportOptionsCard();
             }
@@ -1614,7 +1614,7 @@
                 if (this.plotter.plotType === 'petChance') {
                     this.updatePlotData();
                 }
-                document.getElementById(`MCS  Pet Chance/s Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
+                document.getElementById(`MCS  Pet Chance/${this.timeShorthand[this.initialTimeUnitIndex]} Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
                 this.updateZoneInfoCard();
             }
 
@@ -1782,7 +1782,7 @@
                         newName = name + this.selectedTimeShorthand;
                     }
                     if (newName) {
-                        document.getElementById(`MCS ${name + this.timeShorthand[1]} Label`).textContent = newName;
+                        document.getElementById(`MCS ${name}h Label`).textContent = newName;
                     }
                 }
                 // Update pet chance
