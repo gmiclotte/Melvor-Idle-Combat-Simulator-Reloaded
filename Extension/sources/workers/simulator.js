@@ -1712,7 +1712,7 @@
     function setAccuracy(actor, actorStats, target, targetStats) {
         // if target is player using protection prayer: return early
         if (target.isPlayer && targetStats.isProtected) {
-            actor.accuracy = 100 - protectFromValue;
+            actor.accuracy = protectFromValue;
             return;
         }
         // determine attack roll
