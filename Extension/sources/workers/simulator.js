@@ -19,6 +19,11 @@
 
 (() => {
 
+    // set true to enable logging of additional accuracy and damage statistics
+    const verbose = false;
+    // set true to enable very verbose logging of combat
+    const veryVerbose = false;
+
     /** @type {CombatSimulator} */
     let combatSimulator;
 
@@ -54,7 +59,7 @@
         });
     }
 
-    // TODO move these globals
+    // TODO move these globals?
     let combatTriangle;
     let protectFromValue;
     let numberMultiplier;
@@ -253,15 +258,29 @@
                     // combat time tracker
                     stats.totalTime += timeStep;
 
+                    // set verboseLog
+                    let verboseLog = () => {
+                    };
+                    if (veryVerbose) {
+                        verboseLog = (...args) => console.log(stats.totalTime, timeStep, ...args);
+                        // store hp before action
+                        player.startHP = player.hitpoints;
+                        enemy.startHP = enemy.hitpoints;
+                        // set trials to 1 if doing detailed logging
+                        trials = 1;
+                    }
+
                     processTimeStep(player, timeStep);
                     processTimeStep(enemy, timeStep);
 
                     if (player.regenTimer <= 0) {
+                        verboseLog('player regen');
                         regen(player, playerStats);
                     }
 
                     if (enemy.alive && player.isActing) {
                         if (player.actionTimer <= 0) {
+                            verboseLog('player action');
                             playerAction(stats, player, playerStats, enemy, enemyStats);
                             // Multi attack once more when the monster died on the first hit
                             if (!enemy.alive && player.isAttacking && player.attackCount < player.countMax) {
@@ -271,49 +290,70 @@
                     }
                     if (enemy.alive && player.isAttacking) {
                         if (player.attackTimer <= 0) {
+                            verboseLog('player continue');
                             playerContinueAction(stats, player, playerStats, enemy, enemyStats);
                         }
                     }
                     if (enemy.alive && player.isBurning) {
                         if (player.burnTimer <= 0) {
+                            verboseLog('player burning');
                             actorBurn(player, playerStats);
                         }
                     }
                     if (enemy.alive && player.isRecoiling) {
                         if (player.recoilTimer <= 0) {
+                            verboseLog('player recoil CD reset');
                             actorRecoilCD(player);
                         }
                     }
                     if (enemy.alive && player.isBleeding) {
                         if (player.bleedTimer <= 0) {
+                            verboseLog('player bleeding');
                             targetBleed(enemy, enemyStats, player, playerStats);
                         }
                     }
                     //enemy
                     if (enemy.alive && enemy.isActing) {
                         if (enemy.actionTimer <= 0) {
+                            verboseLog('enemy action');
                             enemyAction(stats, player, playerStats, enemy, enemyStats);
                         }
                     }
                     if (enemy.alive && enemy.isAttacking) {
                         if (enemy.attackTimer <= 0) {
+                            verboseLog('enemy continue');
                             enemyContinueAction(stats, player, playerStats, enemy, enemyStats);
                         }
                     }
                     if (enemy.alive && enemy.isBurning) {
                         if (enemy.burnTimer <= 0) {
+                            verboseLog('enemy burning');
                             actorBurn(enemy, enemyStats);
                         }
                     }
                     if (enemy.alive && enemy.isRecoiling) {
                         if (enemy.recoilTimer <= 0) {
+                            verboseLog('enemy recoil CD reset');
                             actorRecoilCD(enemy);
                         }
                     }
                     if (enemy.alive && enemy.isBleeding) {
                         if (enemy.bleedTimer <= 0) {
+                            verboseLog('enemy bleeding');
                             targetBleed(player, playerStats, enemy, enemyStats);
                         }
+                    }
+
+                    // log status and hp changes
+                    if (veryVerbose) {
+                        [player, enemy].forEach(actor => {
+                            const name = actor.isPlayer ? 'player' : 'enemy';
+                            if (actor.startHP !== actor.hitpoints) {
+                                console.log(`${name} hp change: ${actor.hitpoints - actor.startHP}`);
+                            }
+                            if (actor.isStunned) console.log(`${name} status: stunned`);
+                            if (actor.isSleeping) console.log(`${name} status: sleeping`);
+                        });
                     }
                 }
                 if (isNaN(player.hitpoints) || isNaN(enemy.hitpoints)) {
@@ -1600,27 +1640,29 @@
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
-        /*console.log({
-            // stats
-            maxHit: playerStats.maxHit,
-            maxAttackRoll: playerStats.maxAttackRoll,
-            // regular accuracy
-            regularAttackCount: playerStats.regularAttackCount,
-            regularHitCount: playerStats.regularHitCount,
-            regularAccuracy: playerStats.regularHitCount / playerStats.regularAttackCount,
-            regularDamage: playerStats.regularDamage,
-            regularDamagePerHit: playerStats.regularDamage / playerStats.regularHitCount,
-            regularDamagePerAttack: playerStats.regularDamage / playerStats.regularAttackCount,
-            // special accuracy
-            specialAttackCount: playerStats.specialAttackCount,
-            specialHitCount: playerStats.specialHitCount,
-            specialAccuracy: playerStats.specialHitCount / playerStats.specialAttackCount,
-            specialDamage: playerStats.specialDamage,
-            specialDamagePerHit: playerStats.specialDamage / playerStats.specialHitCount,
-            specialDamagePerAttack: playerStats.specialDamage / playerStats.specialAttackCount,
-            // special rate
-            specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
-        });*/
+        if (verbose) {
+            console.log({
+                // stats
+                maxHit: playerStats.maxHit,
+                maxAttackRoll: playerStats.maxAttackRoll,
+                // regular accuracy
+                regularAttackCount: playerStats.regularAttackCount,
+                regularHitCount: playerStats.regularHitCount,
+                regularAccuracy: playerStats.regularHitCount / playerStats.regularAttackCount,
+                regularDamage: playerStats.regularDamage,
+                regularDamagePerHit: playerStats.regularDamage / playerStats.regularHitCount,
+                regularDamagePerAttack: playerStats.regularDamage / playerStats.regularAttackCount,
+                // special accuracy
+                specialAttackCount: playerStats.specialAttackCount,
+                specialHitCount: playerStats.specialHitCount,
+                specialAccuracy: playerStats.specialHitCount / playerStats.specialAttackCount,
+                specialDamage: playerStats.specialDamage,
+                specialDamagePerHit: playerStats.specialDamage / playerStats.specialHitCount,
+                specialDamagePerAttack: playerStats.specialDamage / playerStats.specialAttackCount,
+                // special rate
+                specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
+            });
+        }
 
         /** @type {MonsterSimResult} */
         const simResult = {
