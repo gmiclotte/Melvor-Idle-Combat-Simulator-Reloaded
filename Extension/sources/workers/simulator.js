@@ -35,6 +35,7 @@
             case 'START_SIMULATION':
                 const startTime = performance.now();
                 numberMultiplier = event.data.combatData.numberMultiplier;
+                applyEnemyStunSleepDamage = event.data.combatData.applyEnemyStunSleepDamage;
                 enemySpawnTimer = event.data.combatData.enemySpawnTimer;
                 combatSimulator.simulateMonster(event.data.combatData, event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
@@ -69,6 +70,7 @@
     let deadeyeAmulet;
     let confettiCrossbow;
     let CURSEIDS;
+    let applyEnemyStunSleepDamage;
 
     class CombatSimulator {
         constructor(data) {
@@ -1413,6 +1415,9 @@
     // get stun and sleep enemy damage modifiers
     function getEnemyDamageModifier(enemy, player) {
         let dmgModifier = 0;
+        if (!applyEnemyStunSleepDamage) {
+            return dmgModifier;
+        }
         // stun
         if (player.isStunned) {
             dmgModifier += 30;

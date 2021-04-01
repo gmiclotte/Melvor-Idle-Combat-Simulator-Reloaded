@@ -76,6 +76,7 @@
                     course: chosenAgilityObstacles,
                     courseMastery: MASTERY[CONSTANTS.skill.Agility].xp.map(x => x > 13034431),
                     pillar: agilityPassivePillarActive,
+                    applyEnemyStunSleepDamage: false,
                 };
 
                 // get the player's auto eat tier
@@ -125,6 +126,7 @@
                     course: this.app.combatData.course,
                     courseMastery: courseMastery,
                     pillar: this.app.combatData.pillar,
+                    applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,
                 }
             }
 
@@ -142,6 +144,7 @@
                 this.importAdventure(settings.isAdventure);
                 this.importUseCombinationRunes(settings.useCombinationRunes);
                 this.importAgilityCourse(settings.course, settings.courseMastery, settings.pillar);
+                this.importApplyEnemyStunSleepDamage(settings.applyEnemyStunSleepDamage);
             }
 
             update() {
@@ -308,6 +311,17 @@
                 } else {
                     this.app.combatData.isHardcore = false;
                     document.getElementById('MCS Hardcore Mode Radio No').checked = true;
+                }
+            }
+
+            importApplyEnemyStunSleepDamage(applyEnemyStunSleepDamage) {
+                // Update applyEnemyStunSleepDamage
+                if (applyEnemyStunSleepDamage) {
+                    this.app.combatData.applyEnemyStunSleepDamage = true;
+                    document.getElementById('MCS Apply Enemy Stun Dmg Radio Yes').checked = true;
+                } else {
+                    this.app.combatData.applyEnemyStunSleepDamage = false;
+                    document.getElementById('MCS Apply Enemy Stun Dmg Radio No').checked = true;
                 }
             }
 

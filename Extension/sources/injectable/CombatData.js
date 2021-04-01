@@ -151,6 +151,8 @@
                 this.equipmentStats = {};
                 // combat stats
                 this.combatStats = {};
+                // ignore stun sleep damage modifier on enemy attacks
+                this.applyEnemyStunSleepDamage = false;
             }
 
             /**

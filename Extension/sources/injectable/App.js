@@ -443,6 +443,16 @@
                     25, // default
                     () => this.updateCombatStats(),
                 );
+                this.equipmentSelectCard.addToggleRadio(
+                    'Apply Enemy Stun Dmg',
+                    'stunsleep',
+                    this.combatData,
+                    'applyEnemyStunSleepDamage',
+                    false, // default
+                    25, // default
+                    () => {
+                    },
+                );
                 // import equipment and settings
                 const importSetCCContainer = this.equipmentSelectCard.createCCContainer();
                 importSetCCContainer.appendChild(this.equipmentSelectCard.createLabel('Import Set', ''));
