@@ -1,3 +1,12 @@
+v1.3.9
+    Update for 0.19.2
+    Changes:
+    - Refactor exportData and change export time to seconds, fixes #28
+    - Refactor and fix enemy damage modifiers
+    - Fix DamageTo modifiers
+    - Fix GlobalSkillXP modifiers
+    - Change default time unit to hours, #28
+
 v1.3.8
     Changes:
     - Disable dungeon/autoslayer sim on/off task, fixes #10
