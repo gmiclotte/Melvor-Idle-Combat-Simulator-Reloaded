@@ -1,3 +1,7 @@
+v1.3.10
+    Changes:
+    - Add a toggle for applyEnemyStunSleepDamage
+
 v1.3.9
     Update for 0.19.2
     Changes:
