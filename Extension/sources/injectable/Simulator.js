@@ -795,23 +795,23 @@
                 // Do preprocessing of player damage bonus vs monster
                 let dmgModifier = 0;
                 if (MONSTERS[monsterID].isBoss) {
-                    dmgModifier += modifiers.increasedDamageToBosses - modifiers.decreasedDamageToBosses;
+                    dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToBosses', CONSTANTS.skill.Slayer);
                 }
                 if (combatData.isSlayerTask) {
-                    dmgModifier += modifiers.increasedDamageToSlayerTasks - modifiers.decreasedDamageToSlayerTasks;
+                    dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToSlayerTasks', CONSTANTS.skill.Slayer);
                 }
-                switch (findEnemyArea(monsterID, false)) {
+                switch (findEnemyArea(monsterID, false)[0]) {
                     case 0:
-                        dmgModifier += modifiers.increasedDamageToCombatAreaMonsters - modifiers.decreasedDamageToCombatAreaMonsters;
+                        dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToCombatAreaMonsters', CONSTANTS.skill.Slayer);
                         break;
                     case 1:
-                        dmgModifier += modifiers.increasedDamageToSlayerAreaMonsters - modifiers.decreasedDamageToSlayerAreaMonsters;
+                        dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToSlayerAreaMonsters', CONSTANTS.skill.Slayer);
                         break;
                     case 2:
-                        dmgModifier += modifiers.increasedDamageToDungeonMonsters - modifiers.decreasedDamageToDungeonMonsters;
+                        dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToDungeonMonsters', CONSTANTS.skill.Slayer);
                         break;
                 }
-                dmgModifier += modifiers.increasedDamageToAllMonsters - modifiers.decreasedDamageToAllMonsters;
+                dmgModifier += MICSR.getModifierValue(modifiers, 'DamageToAllMonsters', CONSTANTS.skill.Slayer);
                 playerStats.dmgModifier = dmgModifier;
             }
 
