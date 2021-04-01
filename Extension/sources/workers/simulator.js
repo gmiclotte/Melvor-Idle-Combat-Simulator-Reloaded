@@ -1352,7 +1352,9 @@
         if (damage === undefined) {
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
-        return getEnemyDamageModifier(damage, enemy, player, isSpecial, currentSpecial);
+        damage *= 1 + getEnemyDamageModifier(enemy, player) / 100;
+        damage -= Math.floor((calculatePlayerDamageReduction(player) / 100) * damage);
+        return damage;
     }
 
     function setDamage(actor, actorStats, target, targetStats, isSpecial, currentSpecial) {
@@ -1408,17 +1410,18 @@
         return dmgModifier;
     }
 
-    // apply stun, sleep and DR to enemy damage
-    function getEnemyDamageModifier(damage, enemy, player, isSpecial, special) {
-        const initdmg = damage;
-        if (isSpecial && player.isStunned) {
-            damage *= special.stunDamageMultiplier;
+    // get stun and sleep enemy damage modifiers
+    function getEnemyDamageModifier(enemy, player) {
+        let dmgModifier = 0;
+        // stun
+        if (player.isStunned) {
+            dmgModifier += 30;
         }
-        if (isSpecial && player.isSleeping) {
-            damage *= special.sleepDamageMultiplier;
+        //sleep
+        if (player.isSleeping) {
+            dmgModifier += 20;
         }
-        damage -= Math.floor((calculatePlayerDamageReduction(player) / 100) * damage);
-        return damage;
+        return dmgModifier;
     }
 
     function calculatePlayerDamageReduction(player) {
