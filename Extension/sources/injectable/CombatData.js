@@ -1156,7 +1156,7 @@
                     }
                 }
                 // Xp Bonuses
-                const globalXpBonus = (this.modifiers.increasedGlobalSkillXP - this.modifiers.decreasedGlobalSkillXP) / 100;
+                const globalXpBonus = MICSR.getModifierValue(this.modifiers, 'GlobalSkillXP', CONSTANTS.skill.Slayer);
                 playerStats.combatXpBonus = globalXpBonus;
                 if (this.combatStats.attackType === CONSTANTS.attackType.Melee) {
                     switch (this.attackStyle.Melee) {
