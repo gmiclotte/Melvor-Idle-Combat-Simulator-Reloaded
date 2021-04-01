@@ -944,81 +944,92 @@
                 return dataSet;
             }
 
+            exportEntity(exportOptions, entityID, filter, data, isDungeonMonster = false, nameOverride = undefined) {
+                const name = nameOverride !== undefined ? nameOverride : this.parent.getMonsterName(entityID);
+                const exportLine = [];
+                if (!exportOptions.nonSimmed && !filter[entityID]) {
+                    return exportLine;
+                }
+                if (exportOptions.name) {
+                    exportLine.push(name);
+                }
+                for (let i = 0; i < this.parent.plotTypes.length; i++) {
+                    if (!exportOptions.dataTypes[i]) {
+                        continue;
+                    }
+                    if (isDungeonMonster) {
+                        if (this.parent.plotTypes[i].value === 'signetChance') {
+                            exportLine.push(0);
+                        } else {
+                            let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultipliers[1] : 1;
+                            if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
+                            exportLine.push((data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0);
+                        }
+                    } else {
+                        let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultipliers[1] : 1;
+                        if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
+                        exportLine.push((filter[entityID] && data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0);
+                    }
+                }
+                return exportLine;
+            }
+
             /**
              * Creates a string to paste into your favourite spreadsheet software
              * @return {string}
              */
             exportData() {
+                // settings
                 const exportOptions = this.exportOptions;
-                const exportEntity = (entityID, filter, data, name, isDungeonMonster = false) => {
-                    if (!exportOptions.nonSimmed && !filter[entityID]) {
-                        return;
-                    }
-                    if (exportOptions.name) {
-                        exportString += name + colDel;
-                    }
-                    for (let i = 0; i < this.parent.plotTypes.length; i++) {
-                        if (!exportOptions.dataTypes[i]) {
-                            continue;
-                        }
-                        if (isDungeonMonster) {
-                            if (this.parent.plotTypes[i].value === 'signetChance') {
-                                exportString += '0';
-                            } else {
-                                let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultiplier : 1;
-                                if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
-                                exportString += (data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
-                            }
-                        } else {
-                            let dataMultiplier = this.parent.plotTypes[i].isTime ? this.parent.timeMultiplier : 1;
-                            if (dataMultiplier === -1) dataMultiplier = data[entityID].killTimeS;
-                            exportString += (filter[entityID] && data[entityID].simSuccess) ? data[entityID][this.parent.plotTypes[i].value] * dataMultiplier : 0;
-                        }
-                        exportString += colDel;
-                    }
-                    exportString = exportString.slice(0, -colLen);
-                    exportString += rowDel;
-                }
-                let exportString = '';
-                const colDel = '\t';
-                const colLen = colDel.length;
-                const rowDel = '\n';
-                const rowLen = rowDel.length;
+
+                // header
+                const headerLine = [];
                 if (exportOptions.name) {
-                    exportString += 'Monster/Dungeon Name' + colDel;
+                    headerLine.push('Monster/Dungeon Name');
                 }
                 for (let i = 0; i < this.parent.plotTypes.length; i++) {
                     if (exportOptions.dataTypes[i]) {
                         if (this.parent.plotTypes[i].isTime) {
-                            exportString += this.parent.plotTypes[i].option + this.parent.selectedTimeUnit + colDel;
+                            headerLine.push(this.parent.plotTypes[i].option + this.parent.timeOptions[1]);
                         } else {
-                            exportString += this.parent.plotTypes[i].option + colDel;
+                            headerLine.push(this.parent.plotTypes[i].option);
                         }
                     }
                 }
-                exportString = exportString.slice(0, -colLen);
-                exportString += rowDel;
+
+                // result
+                let exportString = [
+                    headerLine,
+                ];
+
                 // Combat Areas
                 combatAreas.forEach((area) => {
-                    area.monsters.forEach(monsterID => exportEntity(monsterID, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID)));
+                    area.monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, this.monsterSimFilter, this.monsterSimData)));
                 });
                 // Wandering Bard
                 const bardID = 139;
-                exportEntity(bardID, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(bardID));
+                exportString.push(this.exportEntity(exportOptions, bardID, this.monsterSimFilter, this.monsterSimData));
                 // Slayer Areas
                 slayerAreas.forEach((area) => {
-                    area.monsters.forEach(monsterID => exportEntity(monsterID, this.monsterSimFilter, this.monsterSimData, this.parent.getMonsterName(monsterID)));
+                    area.monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, this.monsterSimFilter, this.monsterSimData)));
                 });
                 // Dungeons
                 for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
-                    exportEntity(dungeonId, this.dungeonSimFilter, this.dungeonSimData, this.parent.getDungeonName(dungeonId))
+                    // dungeon
+                    exportString.push(this.exportEntity(exportOptions, dungeonId, this.dungeonSimFilter, this.dungeonSimData, false, this.parent.getDungeonName(dungeonId)));
+                    // dungeon monsters
                     if (exportOptions.dungeonMonsters) {
                         const dungeonMonsterFilter = Object.fromEntries(DUNGEONS[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
-                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportEntity(monsterID, dungeonMonsterFilter, this.monsterSimData, this.parent.getMonsterName(monsterID), true));
+                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, dungeonMonsterFilter, this.monsterSimData, true)));
                     }
                 }
                 // TODO: export for auto slayer
-                exportString = exportString.slice(0, -rowLen);
+
+                // add column separators
+                exportString = exportString.map(row => row.join('\t'));
+                // add row separators
+                exportString = exportString.join('\n');
+                // return the export string
                 return exportString;
             }
 
