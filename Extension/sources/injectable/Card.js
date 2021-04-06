@@ -32,6 +32,16 @@
                 this.numOutputs = [];
             }
 
+            clearContainer() {
+                const container = this.container;
+                if (!container) {
+                    return;
+                }
+                while (container.firstChild) {
+                    container.removeChild(container.lastChild);
+                }
+            }
+
             /**
              * Creates a new button and appends it to the container. Autoadds callbacks to change colour
              * @param {string} buttonText Text to display on button

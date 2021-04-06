@@ -687,6 +687,23 @@
                     this.slayerTaskMonsters,
                 );
                 MICSR.log(`Elapsed Simulation Time: ${performance.now() - this.simStartTime}ms`);
+                // store simulation
+                const save = {
+                    settings: this.parent.import.exportSettings(),
+                    export: '',
+                    monsterSimData: this.monsterSimData.map(x => {
+                        return {...x};
+                    }),
+                    dungeonSimData: this.dungeonSimData.map(x => {
+                        return {...x};
+                    }),
+                    slayerSimData: this.slayerSimData.map(x => {
+                        return {...x};
+                    }),
+                }
+                save.export = JSON.stringify(save.settings, null, 1);
+                this.parent.savedSimulations.push(save);
+                this.parent.createCompareCard();
             }
 
             /** Starts processing simulation jobs */

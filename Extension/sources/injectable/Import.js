@@ -102,8 +102,13 @@
                 return {
                     // combatData: this.app.combatData,
                     // TODO: all these should be in CombatData class?
-                    equipment: this.app.equipmentSelected,
-                    levels: this.app.combatData.virtualLevels,
+                    // lists
+                    equipment: [...this.app.equipmentSelected],
+                    petOwned: [...this.app.combatData.petOwned],
+                    course: [...this.app.combatData.course],
+                    // objects
+                    levels: {...this.app.combatData.virtualLevels},
+                    // simple values
                     meleeStyle: this.app.combatData.attackStyle.Melee,
                     rangedStyle: this.app.combatData.attackStyle.Ranged,
                     magicStyle: this.app.combatData.attackStyle.Magic,
@@ -115,7 +120,6 @@
                     prayerSelected: this.app.combatData.prayerSelected,
                     potionID: this.app.combatData.potionID,
                     potionTier: this.app.combatData.potionTier,
-                    petOwned: this.app.combatData.petOwned,
                     autoEatTier: this.app.combatData.autoEatTier,
                     foodSelected: this.app.combatData.foodSelected,
                     cookingPool: this.app.combatData.cookingPool,
@@ -123,7 +127,6 @@
                     isHardcore: this.app.combatData.isHardcore,
                     isAdventure: this.app.combatData.isAdventure,
                     useCombinationRunes: this.app.combatData.useCombinationRunes,
-                    course: this.app.combatData.course,
                     courseMastery: courseMastery,
                     pillar: this.app.combatData.pillar,
                     applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,

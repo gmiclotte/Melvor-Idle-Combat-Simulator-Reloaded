@@ -135,6 +135,7 @@
                     emptyFood: 'assets/media/skills/combat/food_empty.svg',
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
+                    statistics: 'assets/media/main/statistics_header.svg',
                 };
 
                 // Forced equipment sorting
@@ -224,6 +225,8 @@
                 this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
+                this.savedSimulations = [];
+                this.createCompareCard();
                 // Add Combat Stat Display Card
                 this.createCombatStatDisplayCard();
                 // Individual simulation info card
@@ -871,14 +874,6 @@
                     'forceFullSim',
                 );
                 this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
-                const dropDownOptionNames = [];
-                for (let i = 0; i < this.plotTypes.length; i++) {
-                    if (this.plotTypes[i].isTime) {
-                        dropDownOptionNames.push(this.plotTypes[i].option + this.selectedTimeUnit);
-                    } else {
-                        dropDownOptionNames.push(this.plotTypes[i].option);
-                    }
-                }
                 this.simOptionsCard.addSectionTitle('Export');
                 this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());
                 this.simOptionsCard.addButton('Export Settings', () => this.exportSettingButtonOnClick());
@@ -894,6 +889,33 @@
                 this.exportOptionsButton = this.simOptionsCard.addButton('Show Export Options', () => this.exportOptionsOnClick());
                 // Export Options Card
                 this.createExportOptionsCard();
+            }
+
+            createCompareCard() {
+                if (!this.compareCard) {
+                    this.compareCard = this.mainTabCard.addTab('Saved Simulations', this.media.statistics, '', '150px');
+                }
+                this.compareCard.clearContainer();
+                this.compareCard.addSectionTitle('Saved Simulations');
+                this.savedSimulations.forEach((_, i) => {
+                    this.compareCard.addButton(`Load simulation ${i}`, () => this.loadSavedSimulation(i));
+                });
+            }
+
+            loadSavedSimulation(idx) {
+                const simulation = this.savedSimulations[idx];
+                if (!simulation) {
+                    MICSR.log(`Unable to load simualtion with index ${idx}`);
+                    return;
+                }
+                // load settings
+                this.import.importSettings(simulation.settings);
+                this.import.update();
+                // load results
+                this.simulator.monsterSimData = simulation.monsterSimData;
+                this.simulator.dungeonSimData = simulation.dungeonSimData;
+                this.simulator.slayerSimData = simulation.slayerSimData;
+                this.updateDisplayPostSim();
             }
 
             createExportOptionsCard() {
@@ -1681,8 +1703,14 @@
              */
             slayerTaskRadioOnChange(event, newState) {
                 this.combatData.isSlayerTask = newState;
-                this.toggleDungeonSims(true);
-                this.toggleSlayerSims(true);
+                // toggle dungeon sims off if slayer task is on
+                if (this.combatData.isSlayerTask && this.dungeonToggleState) {
+                    this.toggleDungeonSims(true);
+                }
+                // toggle auto slayer sims off if slayer task is off
+                if (!this.combatData.isSlayerTask && this.slayerToggleState) {
+                    this.toggleSlayerSims(true);
+                }
                 this.updatePlotForSlayerXP();
             }
 
