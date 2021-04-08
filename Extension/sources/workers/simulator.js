@@ -1430,7 +1430,7 @@
     }
 
     function calculatePlayerDamageReduction(player) {
-        let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
+        let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction') + player.increasedDamageReduction;
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
         damageReduction = Math.floor(damageReduction * player.reductionModifier);
