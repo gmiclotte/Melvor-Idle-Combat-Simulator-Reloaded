@@ -70,6 +70,7 @@
                     foodSelected: equippedFood[currentCombatFood].itemID,
                     cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
                     cookingMastery: cookingMastery,
+                    isSlayerTask: false,
                     isHardcore: currentGamemode === 1,
                     isAdventure: currentGamemode === 2,
                     useCombinationRunes: useCombinationRunes,
@@ -124,6 +125,7 @@
                     foodSelected: this.app.combatData.foodSelected,
                     cookingPool: this.app.combatData.cookingPool,
                     cookingMastery: this.app.combatData.cookingMastery,
+                    isSlayerTask: this.app.combatData.isSlayerTask,
                     isHardcore: this.app.combatData.isHardcore,
                     isAdventure: this.app.combatData.isAdventure,
                     useCombinationRunes: this.app.combatData.useCombinationRunes,
@@ -143,6 +145,7 @@
                 this.importPotion(settings.potionID, settings.potionTier);
                 this.importPets(settings.petOwned);
                 this.importAutoEat(settings.autoEatTier, settings.foodSelected, settings.cookingPool, settings.cookingMastery);
+                this.importSlayerTask(settings.isSlayerTask);
                 this.importHardCore(settings.isHardcore);
                 this.importAdventure(settings.isAdventure);
                 this.importUseCombinationRunes(settings.useCombinationRunes);
@@ -303,6 +306,17 @@
                 } else {
                     this.app.combatData.cookingMastery = false;
                     document.getElementById('MCS 99 Mastery: +20% Radio No').checked = true;
+                }
+            }
+
+            importSlayerTask(isSlayerTask) {
+                // Update slayer task mode
+                if (isSlayerTask) {
+                    this.app.combatData.isSlayerTask = true;
+                    document.getElementById('MCS Slayer Task Radio Yes').checked = true;
+                } else {
+                    this.app.combatData.isSlayerTask = false;
+                    document.getElementById('MCS Slayer Task Radio No').checked = true;
                 }
             }
 
