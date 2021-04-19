@@ -550,7 +550,7 @@
                     // combatStats.effectiveDefenceLevel += 3;
                 }
                 const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
-                    effectiveDefenceLevel,
+                    combatStats.effectiveDefenceLevel,
                     this.baseStats.defenceBonus,
                     this.modifiers.increasedMeleeEvasion,
                     this.modifiers.decreasedMeleeEvasion,
@@ -560,7 +560,7 @@
                 //Ranged Defence
                 combatStats.effectiveRangedDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
                 const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
-                    effectiveRangedDefenceLevel,
+                    combatStats.effectiveRangedDefenceLevel,
                     this.baseStats.defenceBonusRanged,
                     this.modifiers.increasedRangedEvasion,
                     this.modifiers.decreasedRangedEvasion,
@@ -574,7 +574,7 @@
                     + 8 + 1
                 );
                 const maximumMagicDefenceRoll = this.calculateGenericPlayerEvasionRating(
-                    effectiveMagicDefenceLevel,
+                    combatStats.effectiveMagicDefenceLevel,
                     this.baseStats.defenceBonusMagic,
                     this.modifiers.increasedMagicEvasion,
                     this.modifiers.decreasedMagicEvasion,
