@@ -150,6 +150,7 @@
             // Stats from the simulation
             const stats = {
                 totalTime: 0,
+                killTimes: [],
                 playerAttackCalls: 0,
                 enemyAttackCalls: 0,
                 totalCombatXP: 0,
@@ -199,6 +200,8 @@
             resetPlayer(combatData, player, playerStats);
             // set slayer area effects
             setAreaEffects(combatData, player, playerStats);
+            // track stats.totalTime of previous kill
+            let timeStamp = 0;
             while (enemyKills < trials) {
                 // Reset Timers and statuses
                 resetPlayer(combatData, player, playerStats);
@@ -380,6 +383,11 @@
                             monsterID: enemyStats.monsterID,
                         }
                     }
+                }
+                if (verbose) {
+                    const killTime = stats.totalTime - timeStamp;
+                    stats.killTimes.push(killTime);
+                    timeStamp = stats.totalTime;
                 }
                 enemyKills++;
             }
@@ -1649,8 +1657,33 @@
     }
 
     function simulationResult(stats, playerStats, enemyStats, trials, tooManyActions) {
+        /** @type {MonsterSimResult} */
+        const simResult = {
+            simSuccess: true,
+            petRolls: {},
+            tooManyActions: tooManyActions,
+            monsterID: enemyStats.monsterID,
+        };
+
         if (verbose) {
-            console.log({
+            stats.killTimes = stats.killTimes.map(t => t + enemySpawnTimer);
+            let mean = 0;
+            const standardDeviation = (arr, usePopulation = false) => {
+                mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
+                return Math.sqrt(
+                    arr
+                        .reduce((acc, val) => acc.concat((val - mean) ** 2), [])
+                        .reduce((acc, val) => acc + val, 0) /
+                    (arr.length - (usePopulation ? 0 : 1))
+                );
+            };
+            const sd = standardDeviation(stats.killTimes);
+            let verboseResult = {
+                // killTimes
+                killTimeMean: mean,
+                killTimeSD: sd,
+                killTimeVar: sd ** 2,
+                killTimes: stats.killTimes,
                 // stats
                 maxHit: playerStats.maxHit,
                 maxAttackRoll: playerStats.maxAttackRoll,
@@ -1670,16 +1703,10 @@
                 specialDamagePerAttack: playerStats.specialDamage / playerStats.specialAttackCount,
                 // special rate
                 specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
-            });
+            };
+            console.log(verboseResult);
+            simResult.verbose = verboseResult;
         }
-
-        /** @type {MonsterSimResult} */
-        const simResult = {
-            simSuccess: true,
-            petRolls: {},
-            tooManyActions: tooManyActions,
-            monsterID: enemyStats.monsterID,
-        };
 
         simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
         // xp per second
