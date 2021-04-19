@@ -1469,7 +1469,7 @@
             damage *= critDamageModifier(damage);
         }
         // damage reduction
-        damage = Math.floor(damage * (1 - enemy.damageReduction / 100));
+        damage = Math.floor(damage * (1 - enemy.increasedDamageReduction / 100));
         if (isSpecial) {
             playerStats.specialDamage += damage;
         } else {
