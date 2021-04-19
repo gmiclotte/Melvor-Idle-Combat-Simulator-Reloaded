@@ -916,6 +916,10 @@
                     player.recoilTimer = 2000;
                 }
             }
+            // decay curse
+            if (enemy.isCursed && enemy.curse.type === 'Decay' && !enemy.isAttacking) {
+                dealDamage(enemy, enemyStats, enemy.curse.decayDamage);
+            }
             // confusion curse
             if (enemy.isCursed && enemy.curse.type === 'Confusion' && !enemy.isAttacking) {
                 dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
@@ -1003,10 +1007,6 @@
         // don't curse
         if (enemy.isAttacking) {
             return;
-        }
-        // Apply decay
-        if (enemy.curse.type === 'Decay') {
-            dealDamage(enemy, enemyStats, enemy.curse.decayDamage);
         }
         // reduce remaining curse turns
         enemy.curseTurns--;
