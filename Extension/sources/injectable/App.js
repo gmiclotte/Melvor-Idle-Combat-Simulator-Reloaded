@@ -198,6 +198,10 @@
                 // Temporary GP/s settings variable
                 this.itemSubsetTemp = [];
 
+                // verbose settings
+                this.verbose = false;
+                this.veryVerbose = false;
+
                 // Create the top container for the sim
                 this.topContent = document.createElement('div');
                 this.topContent.className = 'mcsTabContent';
@@ -867,11 +871,19 @@
                 this.simOptionsCard.addNumberInput('Max Actions', MICSR.maxActions, 1, 10000, (event) => this.maxActionsInputOnChange(event));
                 this.simOptionsCard.addNumberInput('# Trials', MICSR.trials, 1, 100000, (event) => this.numTrialsInputOnChange(event));
                 this.simOptionsCard.addToggleRadio(
-                    'Force full sim',
+                    'Force full simulation',
                     'forceFullSim',
                     this.simulator,
                     'forceFullSim',
                 );
+                this.simOptionsCard.addRadio('Verbose Logging', 25, 'verbose', ['Yes', 'No'], [
+                    () => this.verbose = true,
+                    () => this.verbose = false,
+                ], this.verbose ? 0 : 1);
+                this.simOptionsCard.addRadio('Verybose Logging', 25, 'veryVerbose', ['Yes', 'No'], [
+                    () => this.veryVerbose = true,
+                    () => this.veryVerbose = false,
+                ], this.veryVerbose ? 0 : 1);
                 this.simOptionsCard.addNumberInput('Signet Time (h)', 1, 1, 1000, (event) => this.signetTimeInputOnChange(event));
                 this.simOptionsCard.addSectionTitle('Export');
                 this.simOptionsCard.addButton('Export Data', () => this.exportDataOnClick());

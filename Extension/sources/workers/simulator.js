@@ -20,9 +20,9 @@
 (() => {
 
     // set true to enable logging of additional accuracy and damage statistics
-    const verbose = false;
+    let verbose = false;
     // set true to enable very verbose logging of combat
-    const veryVerbose = false;
+    let veryVerbose = false;
 
     /** @type {CombatSimulator} */
     let combatSimulator;
@@ -37,6 +37,8 @@
                 numberMultiplier = event.data.combatData.numberMultiplier;
                 applyEnemyStunSleepDamage = event.data.combatData.applyEnemyStunSleepDamage;
                 enemySpawnTimer = event.data.combatData.enemySpawnTimer;
+                verbose = event.data.verbose;
+                veryVerbose = event.data.veryVerbose;
                 combatSimulator.simulateMonster(event.data.combatData, event.data.enemyStats, event.data.playerStats, event.data.simOptions.trials, event.data.simOptions.maxActions, event.data.simOptions.forceFullSim).then((simResult) => {
                     const timeTaken = performance.now() - startTime;
                     postMessage({

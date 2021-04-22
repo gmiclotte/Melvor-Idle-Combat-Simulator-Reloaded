@@ -743,6 +743,8 @@
                         enemyStats: this.enemyStats[monsterID],
                         playerStats: this.currentSim.playerStats,
                         simOptions: this.currentSim.options,
+                        verbose: this.parent.verbose,
+                        veryVerbose: this.parent.veryVerbose,
                     });
                     this.simulationWorkers[workerID].inUse = true;
                     this.currentJob++;
