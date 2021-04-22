@@ -140,6 +140,10 @@
             enemyStats.isPlayer = false;
             enemyStats.damageTaken = 0;
             enemyStats.damageHealed = 0;
+            enemyStats.regularAttackCount = 0;
+            enemyStats.regularHitCount = 0;
+            enemyStats.specialAttackCount = 0;
+            enemyStats.specialHitCount = 0;
             // copy slayer area values to player stats
             playerStats.slayerArea = enemyStats.slayerArea;
             playerStats.slayerAreaEffectValue = enemyStats.slayerAreaEffectValue;
@@ -868,6 +872,9 @@
                 player.activeSpecialAttacks.fromEnemy[currentSpecial.id] = {turnsLeft: turnsLeft};
                 computeTempModifiers(player, playerStats);
             }
+            enemyStats.specialAttackCount++;
+        } else {
+            enemyStats.regularAttackCount++;
         }
         // Do the first hit
         let attackHits;
@@ -879,53 +886,58 @@
             attackHits = enemy.accuracy > hitChance;
         }
 
-        if (attackHits) {
-            //////////////////
-            // apply damage //
-            //////////////////
-            const damage = enemyCalculateDamage(enemy, enemyStats, player, playerStats, isSpecial, currentSpecial);
-            dealDamage(player, playerStats, damage);
-            //////////////////
-            // side effects //
-            //////////////////
-            // life steal
-            if (isSpecial && currentSpecial.lifesteal) {
-                healDamage(enemy, enemyStats, damage * currentSpecial.lifestealMultiplier);
+        if (!attackHits) {
+            return;
+        }
+        if (isSpecial) {
+            enemyStats.specialHitCount++;
+        } else {
+            enemyStats.regularHitCount++;
+        }
+        //////////////////
+        // apply damage //
+        //////////////////
+        const damage = enemyCalculateDamage(enemy, enemyStats, player, playerStats, isSpecial, currentSpecial);
+        dealDamage(player, playerStats, damage);
+        //////////////////
+        // side effects //
+        //////////////////
+        // life steal
+        if (isSpecial && currentSpecial.lifesteal) {
+            healDamage(enemy, enemyStats, damage * currentSpecial.lifestealMultiplier);
+        }
+        if (isSpecial && currentSpecial.setDOTHeal) {
+            enemy.intoTheMist = true;
+            healDamage(enemy, enemyStats, currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
+        }
+        // player recoil
+        if (player.canRecoil) {
+            let reflectDamage = 0;
+            if (playerStats.activeItems.goldSapphireRing) {
+                reflectDamage += Math.floor(Math.random() * 3 * numberMultiplier);
             }
-            if (isSpecial && currentSpecial.setDOTHeal) {
-                enemy.intoTheMist = true;
-                healDamage(enemy, enemyStats, currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
+            if (playerStats.reflectDamage) {
+                reflectDamage += damage * playerStats.reflectDamage / 100
             }
-            // player recoil
-            if (player.canRecoil) {
-                let reflectDamage = 0;
-                if (playerStats.activeItems.goldSapphireRing) {
-                    reflectDamage += Math.floor(Math.random() * 3 * numberMultiplier);
-                }
-                if (playerStats.reflectDamage) {
-                    reflectDamage += damage * playerStats.reflectDamage / 100
-                }
-                if (enemy.hitpoints > reflectDamage && reflectDamage > 0) {
-                    dealDamage(enemy, enemyStats, reflectDamage);
-                    player.canRecoil = false;
-                    player.isRecoiling = true;
-                    player.recoilTimer = 2000;
-                }
-            }
-            // decay curse
-            if (enemy.isCursed && enemy.curse.type === 'Decay' && !enemy.isAttacking) {
-                dealDamage(enemy, enemyStats, enemy.curse.decayDamage);
-            }
-            // confusion curse
-            if (enemy.isCursed && enemy.curse.type === 'Confusion' && !enemy.isAttacking) {
-                dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
-            }
-            // status effects
-            if (isSpecial) {
-                applyStatus(currentSpecial, damage, enemyStats, player, playerStats)
+            if (enemy.hitpoints > reflectDamage && reflectDamage > 0) {
+                dealDamage(enemy, enemyStats, reflectDamage);
+                player.canRecoil = false;
+                player.isRecoiling = true;
+                player.recoilTimer = 2000;
             }
         }
-        return currentSpecial;
+        // decay curse
+        if (enemy.isCursed && enemy.curse.type === 'Decay' && !enemy.isAttacking) {
+            dealDamage(enemy, enemyStats, enemy.curse.decayDamage);
+        }
+        // confusion curse
+        if (enemy.isCursed && enemy.curse.type === 'Confusion' && !enemy.isAttacking) {
+            dealDamage(enemy, enemyStats, Math.floor(enemy.hitpoints * enemy.curse.confusionMult));
+        }
+        // status effects
+        if (isSpecial) {
+            applyStatus(currentSpecial, damage, enemyStats, player, playerStats)
+        }
     }
 
     function calculateSpeed(actor, actorStats, force = false) {
@@ -1699,6 +1711,9 @@
                 specialDamagePerAttack: playerStats.specialDamage / playerStats.specialAttackCount,
                 // special rate
                 specialAttackRate: playerStats.specialAttackCount / (playerStats.specialAttackCount + playerStats.regularAttackCount),
+                // enemy accuracy
+                enemyRegularAccuracy: enemyStats.regularHitCount / enemyStats.regularAttackCount,
+                enemySpecialAccuracy: enemyStats.specialHitCount / enemyStats.specialAttackCount,
             };
             console.log(verboseResult);
             simResult.verbose = verboseResult;
