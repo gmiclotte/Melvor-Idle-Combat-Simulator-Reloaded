@@ -740,7 +740,7 @@
             });
         });
         let unknownModifiers = Object.getOwnPropertyNames(changedModifiers).length;
-        if (changedModifiers['increasedPlayerAttackSpeedPercent'] !== undefined) {
+        if (changedModifiers['increasedPlayerAttackSpeedPercent']) {
             calculateSpeed(player, playerStats);
             unknownModifiers--;
         }
