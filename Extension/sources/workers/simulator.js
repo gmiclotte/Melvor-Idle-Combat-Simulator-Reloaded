@@ -944,20 +944,18 @@
         // base
         let speed = actorStats.attackSpeed;
         if (actor.isPlayer) {
-            // recompute attack speed if using guardian amulet
-            if (actorStats.activeItems.guardianAmulet || force) {
-                speed = 4000;
-                speed = actor.equipmentStats.attackSpeed;
-                if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
-                    actor.combatStats.attackSpeed -= 400;
-                }
-                speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
-                let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
-                if (actorStats.activeItems.guardianAmulet && actor.hitpoints < actor.maxHitpoints) {
-                    attackSpeedPercent += 10;
-                }
-                speed = applyModifier(speed, attackSpeedPercent);
+            // recompute attack speed
+            speed = 4000;
+            speed = actor.equipmentStats.attackSpeed;
+            if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
+                actor.combatStats.attackSpeed -= 400;
             }
+            speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
+            let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
+            if (actorStats.activeItems.guardianAmulet && actor.hitpoints < actor.maxHitpoints) {
+                attackSpeedPercent += 10;
+            }
+            speed = applyModifier(speed, attackSpeedPercent);
             // increased attack speed buff (aurora)
             speed -= actor.attackSpeedBuff;
         } else {
