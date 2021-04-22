@@ -688,18 +688,7 @@
             }
         }
 
-        // apply special attack modifiers to player, or apply special effect to enemy
-        if (target.isPlayer) {
-            // statusEffect is an element of `enemySpecialAttacks`
-            if (statusEffect.modifiers !== undefined && target.activeSpecialAttacks.fromEnemy[statusEffect.id] === undefined) {
-                // apply the effect
-                const turnsLeft = statusEffect.attackSpeedDebuffTurns | statusEffect.applyDebuffTurns | 2;
-                target.activeSpecialAttacks.fromEnemy[statusEffect.id] = {turnsLeft: turnsLeft};
-                computeTempModifiers(target, targetStats);
-            } else {
-                // effect already applied
-            }
-        } else {
+        if (!target.isPlayer) {
             // Apply Slow
             if (canApplyStatus(statusEffect.attackSpeedDebuff, target.isSlowed)) {
                 target.isSlowed = true;
@@ -872,6 +861,13 @@
                 setAccuracy(player, playerStats, enemy, enemyStats);
             }
             forceHit = currentSpecial.forceHit;
+            // apply special attack modifiers to player, or apply special effect to enemy
+            if (currentSpecial.modifiers !== undefined && player.activeSpecialAttacks.fromEnemy[currentSpecial.id] === undefined) {
+                // apply the effect
+                const turnsLeft = currentSpecial.attackSpeedDebuffTurns | currentSpecial.applyDebuffTurns | 2;
+                player.activeSpecialAttacks.fromEnemy[currentSpecial.id] = {turnsLeft: turnsLeft};
+                computeTempModifiers(player, playerStats);
+            }
         }
         // Do the first hit
         let attackHits;
