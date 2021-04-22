@@ -225,7 +225,6 @@
                 this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
-                this.savedSimulations = [];
                 this.createCompareCard();
                 // Add Combat Stat Display Card
                 this.createCombatStatDisplayCard();
@@ -893,9 +892,21 @@
 
             createCompareCard() {
                 if (!this.compareCard) {
+                    this.trackHistory = false;
+                    this.savedSimulations = [];
                     this.compareCard = this.mainTabCard.addTab('Saved Simulations', this.media.statistics, '', '150px');
+                } else {
+                    this.compareCard.clearContainer();
                 }
-                this.compareCard.clearContainer();
+                this.compareCard.addButton('Clear History', () => {
+                    this.savedSimulations = [];
+                    this.createCompareCard();
+                });
+                this.compareCard.addRadio('Track History', 25, 'trackHistory', ['Yes', 'No'], [
+                    () => this.trackHistory = true,
+                    () => this.trackHistory = false,
+                ], this.trackHistory ? 0 : 1);
+
                 this.compareCard.addSectionTitle('Saved Simulations');
                 this.savedSimulations.forEach((_, i) => {
                     this.compareCard.addButton(`Load simulation ${i}`, () => this.loadSavedSimulation(i));
