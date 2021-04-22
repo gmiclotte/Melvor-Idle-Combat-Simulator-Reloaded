@@ -1,3 +1,17 @@
+v1.3.11
+    Changes:
+    - Fix player attack speed
+    - Fix enemy special attack modifiers
+    - Fix enemy DR
+    - Fix decay bug, fixes #29
+    - Fix player evasion
+    - Fix player DR
+    - Fix slayer task setting json export/import
+    - Add sim setting/result saving - WIP
+    - Add verbose toggles
+    - Track individual kill times in verbose mode
+    - Track enemy accuracy in verbose mode
+
 v1.3.10
     Changes:
     - Add a toggle for applyEnemyStunSleepDamage
