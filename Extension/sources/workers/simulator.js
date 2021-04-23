@@ -1333,8 +1333,8 @@
         if (isSpecial && player.currentSpecial.healsFor) {
             lifeSteal += player.currentSpecial.healsFor * 100;
         }
-        if (playerStats.spellHeal && playerStats.isMagic) {
-            lifeSteal += playerStats.spellHeal;
+        if (player.equipmentStats.spellHeal && playerStats.isMagic) {
+            lifeSteal += player.equipmentStats.spellHeal;
         }
         if (playerStats.lifesteal !== 0) {
             // fervor + passive item stat
@@ -1555,7 +1555,6 @@
         player.equipmentStats = combatData.equipmentStats;
         player.combatStats = combatData.combatStats;
         player.attackStyle = combatData.attackStyle;
-        player.equipmentStats = combatData.equipmentStats;
         player.prayerBonus = combatData.prayerBonus;
         player.baseStats = combatData.baseStats;
         // modifiers

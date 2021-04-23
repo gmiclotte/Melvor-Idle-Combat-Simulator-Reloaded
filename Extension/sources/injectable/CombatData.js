@@ -1020,7 +1020,6 @@
                     // passive stats
                     ammoPreservation: this.combatStats.ammoPreservation,
                     lifesteal: this.auroraBonus.lifesteal + this.equipmentStats.lifesteal,
-                    spellheal: this.equipmentStats.spellheal,
                     reflectDamage: this.equipmentStats.reflectDamage,
                     decreasedAttackSpeed: this.decreasedAttackSpeed(),
                     runePreservation: this.combatStats.runePreservation,
