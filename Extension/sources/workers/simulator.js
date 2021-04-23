@@ -950,7 +950,7 @@
             speed = 4000;
             speed = actor.equipmentStats.attackSpeed;
             if (actorStats.isRanged && actor.attackStyle.Ranged === 1) {
-                actor.combatStats.attackSpeed -= 400;
+                speed -= 400;
             }
             speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
             let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
