@@ -72,6 +72,7 @@
                 addPlotOption('Chance for Signet Part B(%)', false, 'signetChance', 'Signet Chance (%)');
                 addPlotOption('Pet Chance per ', true, 'petChance', ' Pet Chance/');
                 addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
+                addPlotOption('Slayer Coins per ', true, 'slayerCoinsPerSecond', 'Slayer Coins/');
                 // unsorted
                 addPlotOption('XP per Attack', false, 'xpPerHit', 'XP/attack');
                 addPlotOption('Damage per ', true, 'dmgPerSecond', 'Damage/');
@@ -1735,6 +1736,7 @@
                     this.toggleSlayerSims(true);
                 }
                 this.updatePlotForSlayerXP();
+                this.updatePlotForSlayerCoins();
             }
 
             /**
@@ -2314,6 +2316,17 @@
             }
 
             /**
+             * Updates the simulator display for when the slayer task option is changed
+             */
+            updatePlotForSlayerCoins() {
+                this.loot.updateSlayerCoins();
+                if (this.plotter.plotType === 'slayerCoinsPerSecond') {
+                    this.updatePlotData();
+                }
+                this.updateZoneInfoCard();
+            }
+
+            /**
              * Updates the simulator display for when the signet time option is changed
              */
             updatePlotForSignetChance() {
@@ -2389,10 +2402,7 @@
             setPlotToDungeon(dungeonID) {
                 this.isViewingDungeon = true;
                 this.viewedDungeonID = dungeonID;
-                this.loot.updateGPData();
-                this.loot.updateSignetChance();
-                this.loot.updateSlayerXP();
-                this.loot.updateHerbloreXP();
+                this.loot.update();
                 this.updatePlotData();
                 // Undo bar selection if needed
                 if (this.barSelected) {
@@ -2408,11 +2418,7 @@
              */
             setPlotToGeneral() {
                 this.isViewingDungeon = false;
-                this.loot.updateGPData();
-                this.loot.updateSignetChance();
-                this.loot.updateSlayerXP();
-                this.loot.updateHerbloreXP();
-
+                this.loot.update();
                 if (this.barSelected) {
                     this.removeBarhighlight(this.selectedBar);
                 }
@@ -2421,7 +2427,6 @@
                 this.selectedBar = barID;
                 this.setBarHighlight(barID);
                 this.plotter.inspectButton.style.display = '';
-
                 this.updatePlotData();
                 this.updateZoneInfoCard();
                 this.plotter.displayGeneral();

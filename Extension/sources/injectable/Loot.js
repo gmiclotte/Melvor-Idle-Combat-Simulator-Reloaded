@@ -436,15 +436,18 @@
              * Update all loot related statistics
              */
             update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters) {
-                this.currentSim = currentSim;
-                this.monsterSimData = monsterSimData;
-                this.dungeonSimData = dungeonSimData;
-                this.slayerSimData = slayerSimData;
-                this.slayerTaskMonsters = slayerTaskMonsters;
+                if (currentSim !== undefined) {
+                    this.currentSim = currentSim;
+                    this.monsterSimData = monsterSimData;
+                    this.dungeonSimData = dungeonSimData;
+                    this.slayerSimData = slayerSimData;
+                    this.slayerTaskMonsters = slayerTaskMonsters;
+                }
                 this.updateGPData();
                 this.updateHerbloreXP();
                 this.updateSignetChance();
                 this.updateSlayerXP();
+                this.updateSlayerCoins();
                 this.updatePetChance();
             }
 
@@ -530,38 +533,103 @@
                         }
                         this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                     });
-                } else {
-                    const updateMonsterSlayerXP = (monsterID) => {
+                    return;
+                }
+
+                const updateMonsterSlayerXP = (monsterID) => {
+                    if (!this.monsterSimData[monsterID]) {
+                        return;
+                    }
+                    if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
+                        let monsterXP = 0;
+                        monsterXP += (MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0;
+                        if (this.currentSim.isSlayerTask) {
+                            monsterXP += MONSTERS[monsterID].hitpoints;
+                        }
+                        this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * (1 + this.currentSim.playerStats.slayerXpBonus / 100) / this.monsterSimData[monsterID].killTimeS;
+                    } else {
+                        this.monsterSimData[monsterID].slayerXpPerSecond = 0;
+                    }
+                };
+
+                // combat zones
+                combatAreas.forEach(area => {
+                    area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
+                });
+                const bardID = 139;
+                updateMonsterSlayerXP(bardID);
+                // slayer areas
+                slayerAreas.forEach((area) => {
+                    area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
+                });
+                // auto slayer
+                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                    let sum = 0;
+                    let time = 0;
+                    for (const monsterID of this.slayerTaskMonsters[i]) {
+                        sum += this.monsterSimData[monsterID].slayerXpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        time += this.monsterSimData[monsterID].killTimeS;
+                    }
+                    this.slayerSimData[i].slayerXpPerSecond = sum / time;
+                }
+            }
+
+            /**
+             * Updates the amount of slayer coins earned when killing monsters
+             */
+            updateSlayerCoins() {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
-                        if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].killTimeS) {
-                            let monsterXP = 0;
-                            monsterXP += (MONSTERS[monsterID].slayerXP !== undefined) ? MONSTERS[monsterID].slayerXP : 0;
-                            if (this.currentSim.isSlayerTask) {
-                                monsterXP += MONSTERS[monsterID].hitpoints;
-                            }
-                            this.monsterSimData[monsterID].slayerXpPerSecond = monsterXP * (1 + this.currentSim.playerStats.slayerXpBonus / 100) / this.monsterSimData[monsterID].killTimeS;
-                        } else {
-                            this.monsterSimData[monsterID].slayerXpPerSecond = 0;
-                        }
-                    };
-                    // Set data for monsters in combat zones
-                    combatAreas.forEach((area) => {
-                        area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
+                        this.monsterSimData[monsterID].slayerXpPerSecond = 0;
                     });
-                    const bardID = 139;
-                    updateMonsterSlayerXP(bardID);
-                    slayerAreas.forEach((area) => {
-                        area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
-                    });
-                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        let sum = 0;
-                        for (const monsterID of this.slayerTaskMonsters[i]) {
-                            sum += this.monsterSimData[monsterID].slayerXpPerSecond;
-                        }
-                        this.slayerSimData[i].slayerXpPerSecond = sum / this.slayerTaskMonsters[i].length;
+                    return;
+                }
+
+                const updateMonsterSlayerCoins = (monsterID) => {
+                    if (!this.monsterSimData[monsterID]) {
+                        return;
                     }
+                    this.monsterSimData[monsterID].slayerCoinsPerSecond = 0;
+                    if (!this.currentSim.isSlayerTask) {
+                        return;
+                    }
+                    if (!this.monsterSimData[monsterID].simSuccess) {
+                        return;
+                    }
+                    if (!this.monsterSimData[monsterID].killTimeS) {
+                        return;
+                    }
+                    let sc = MONSTERS[monsterID].hitpoints;
+                    sc = applyModifier(
+                        sc,
+                        this.currentSim.combatData.modifiers.increasedSlayerCoins -
+                        this.currentSim.combatData.modifiers.decreasedSlayerCoins
+                    );
+                    this.monsterSimData[monsterID].slayerCoinsPerSecond = sc / this.monsterSimData[monsterID].killTimeS;
+                };
+
+                // combat zones
+                combatAreas.forEach(area => {
+                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID));
+                });
+                const bardID = 139;
+                updateMonsterSlayerCoins(bardID);
+                // slayer areas
+                slayerAreas.forEach((area) => {
+                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID));
+                });
+                // auto slayer
+                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                    let sum = 0;
+                    let time = 0
+                    for (const monsterID of this.slayerTaskMonsters[i]) {
+                        sum += this.monsterSimData[monsterID].slayerCoinsPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        time += this.monsterSimData[monsterID].killTimeS;
+                    }
+                    this.slayerSimData[i].slayerCoinsPerSecond = sum / time;
                 }
             }
 
