@@ -1,3 +1,10 @@
+v1.3.13
+    Changes:
+    - Remove level input limit
+    - Fix agility obstacle debuff halving
+    - Fix auto slayer kill rates
+    - Add slayer coin display
+
 v1.3.12
     Changes:
     - Fix warlock amulet
