@@ -572,7 +572,7 @@
                     if (skillName === 'Hitpoints') {
                         minLevel = 10;
                     }
-                    this.levelSelectCard.addNumberInput(skillName, minLevel, minLevel, 500, (event) => this.levelInputOnChange(event, skillName));
+                    this.levelSelectCard.addNumberInput(skillName, minLevel, minLevel, Infinity, (event) => this.levelInputOnChange(event, skillName));
                 });
             }
 
@@ -1436,7 +1436,7 @@
              */
             levelInputOnChange(event, skillName) {
                 const newLevel = parseInt(event.currentTarget.value);
-                if (newLevel <= 500 && newLevel >= 1) {
+                if (newLevel >= 1) {
                     this.combatData.playerLevels[skillName] = Math.min(newLevel, 99);
                     this.combatData.virtualLevels[skillName] = newLevel;
                     // Update Spell and Prayer Button UIS, and deselect things if they become invalid
