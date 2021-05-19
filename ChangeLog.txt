@@ -1,3 +1,7 @@
+v1.3.14
+    Changes:
+    - Fix agility obstacle debuff halving again
+
 v1.3.13
     Changes:
     - Remove level input limit
