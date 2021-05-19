@@ -895,7 +895,7 @@
                         const m = agilityObstacles[this.course[i]].modifiers;
                         Object.getOwnPropertyNames(m).forEach(prop => {
                             let passiveType = printPlayerModifier(prop, m[prop]);
-                            if (!passiveType[1] !== "text-danger") {
+                            if (passiveType[1] !== "text-danger") {
                                 modifiers[prop] = m[prop];
                                 return;
                             }
