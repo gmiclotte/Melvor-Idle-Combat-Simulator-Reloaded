@@ -1,3 +1,6 @@
+v1.4.0
+    WIP
+
 v1.3.14
     Changes:
     - Fix agility obstacle debuff halving again
