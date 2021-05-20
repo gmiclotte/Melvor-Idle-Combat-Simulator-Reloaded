@@ -1243,7 +1243,7 @@
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterRemainingPassive(item), 'name');
                 } else if (equipmentSlot === MICSR.equipmentSlot.Summon || equipmentSlot === MICSR.equipmentSlot.Summon_Right) {
                     equipmentSelectCard.addSectionTitle('Familiars')
-                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'name');
+                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'itemID');
                 } else {
                     throw Error(`Invalid equipmentSlot: ${equipmentSlot}`);
                 }
