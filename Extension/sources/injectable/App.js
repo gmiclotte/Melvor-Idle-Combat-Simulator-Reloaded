@@ -179,7 +179,9 @@
                         if (i === CONSTANTS.item.Candy_Cane) {
                             continue;
                         }
-                        if (items[i].equipmentSlot === CONSTANTS.equipmentSlot[this.equipmentSlotKeys[equipmentSlot]]) {
+                        if (items[i].equipmentSlot === slotId
+                            || (items[i].equipmentSlot === MICSR.equipmentSlot.Summon
+                                && slotId === MICSR.equipmentSlot.Summon_Right)) {
                             this.equipmentSubsets[equipmentSlot].push(items[i]);
                         }
                     }
