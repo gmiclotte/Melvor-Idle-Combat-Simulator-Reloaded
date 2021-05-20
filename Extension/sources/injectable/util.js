@@ -36,8 +36,7 @@
         // Change shorthand for Summoning Familiar slots
         // This will lead to some import-export incompatibility if there is ever a new equipment slot added
         //  but other than that it should be fine
-        const Summon_Right = Object.keys(MICSR.equipmentSlot).length;
-        MICSR.equipmentSlot.Summon_Right = Summon_Right;
+        MICSR.equipmentSlot.SummonRight = Object.keys(MICSR.equipmentSlot).length;
 
         /**
          }
@@ -73,7 +72,7 @@
         }
 
         MICSR.checkImplemented = (stats, tag) => {
-            if(!MICSR.isDev) {
+            if (!MICSR.isDev) {
                 return;
             }
             Object.getOwnPropertyNames(stats).forEach(stat => {
@@ -90,7 +89,7 @@
         }
 
         MICSR.checkUnknown = (set, tag, elementType, knownSets, broken) => {
-            if(!MICSR.isDev) {
+            if (!MICSR.isDev) {
                 return;
             }
             // construct a list of stats that are not in any of the previous categories

@@ -133,7 +133,7 @@
                     Cape: makeEmptyItem('assets/media/bank/armour_cape.svg'),
                     Passive: makeEmptyItem('assets/media/bank/passive_slot.svg'),
                     Summon: makeEmptyItem('assets/media/bank/misc_summon.svg'),
-                    Summon_Right: makeEmptyItem('assets/media/bank/misc_summon.svg'),
+                    SummonRight: makeEmptyItem('assets/media/bank/misc_summon.svg'),
                 };
 
                 // Useful assets
@@ -181,7 +181,7 @@
                         }
                         if (items[i].equipmentSlot === slotId
                             || (items[i].equipmentSlot === MICSR.equipmentSlot.Summon
-                                && slotId === MICSR.equipmentSlot.Summon_Right)) {
+                                && slotId === MICSR.equipmentSlot.SummonRight)) {
                             this.equipmentSubsets[equipmentSlot].push(items[i]);
                         }
                     }
@@ -368,7 +368,7 @@
                     [MICSR.equipmentSlot.Weapon, MICSR.equipmentSlot.Platebody, MICSR.equipmentSlot.Shield],
                     [MICSR.equipmentSlot.Platelegs],
                     [MICSR.equipmentSlot.Gloves, MICSR.equipmentSlot.Boots, MICSR.equipmentSlot.Ring],
-                    [MICSR.equipmentSlot.Summon, MICSR.equipmentSlot.Summon_Right]
+                    [MICSR.equipmentSlot.Summon, MICSR.equipmentSlot.SummonRight]
                 ];
                 equipmentRows.forEach((row) => {
                     const rowSources = [];
@@ -1241,7 +1241,7 @@
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterSlayer(item), 'name');
                     equipmentSelectCard.addSectionTitle('Other');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterRemainingPassive(item), 'name');
-                } else if (equipmentSlot === MICSR.equipmentSlot.Summon || equipmentSlot === MICSR.equipmentSlot.Summon_Right) {
+                } else if (equipmentSlot === MICSR.equipmentSlot.Summon || equipmentSlot === MICSR.equipmentSlot.SummonRight) {
                     equipmentSelectCard.addSectionTitle('Familiars')
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'itemID');
                 } else {
