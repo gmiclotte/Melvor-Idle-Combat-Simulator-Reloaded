@@ -132,6 +132,8 @@
                     Quiver: makeEmptyItem('assets/media/bank/weapon_quiver.svg'),
                     Cape: makeEmptyItem('assets/media/bank/armour_cape.svg'),
                     Passive: makeEmptyItem('assets/media/bank/passive_slot.svg'),
+                    Summon: makeEmptyItem('assets/media/bank/misc_summon.svg'),
+                    Summon_Right: makeEmptyItem('assets/media/bank/misc_summon.svg'),
                 };
 
                 // Useful assets
@@ -163,6 +165,10 @@
                 this.forceMeleeArmour = [CONSTANTS.item.Slayer_Helmet_Basic, CONSTANTS.item.Slayer_Platebody_Basic];
                 this.forceRangedArmour = [CONSTANTS.item.Slayer_Cowl_Basic, CONSTANTS.item.Slayer_Leather_Body_Basic];
                 this.forceMagicArmour = [CONSTANTS.item.Slayer_Wizard_Hat_Basic, CONSTANTS.item.Slayer_Wizard_Robes_Basic, CONSTANTS.item.Enchanted_Shield];
+
+                // Change shorthand for Summoning Familiar slots
+                CONSTANTS.equipmentSlot.Summon_Right = 13;
+
                 // Generate equipment subsets
                 this.equipmentSlotKeys = Object.keys(CONSTANTS.equipmentSlot);
                 this.equipmentSubsets = [];
@@ -362,6 +368,7 @@
                     [CONSTANTS.equipmentSlot.Weapon, CONSTANTS.equipmentSlot.Platebody, CONSTANTS.equipmentSlot.Shield],
                     [CONSTANTS.equipmentSlot.Platelegs],
                     [CONSTANTS.equipmentSlot.Gloves, CONSTANTS.equipmentSlot.Boots, CONSTANTS.equipmentSlot.Ring],
+                    [CONSTANTS.equipmentSlot.Summon, CONSTANTS.equipmentSlot.Summon_Right]
                 ];
                 equipmentRows.forEach((row) => {
                     const rowSources = [];
@@ -1226,6 +1233,9 @@
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterSlayer(item), 'name');
                     equipmentSelectCard.addSectionTitle('Other');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterRemainingPassive(item), 'name');
+                } else if (equipmentSlot === CONSTANTS.equipmentSlot.Summon || equipmentSlot === CONSTANTS.equipmentSlot.Summon_Right) {
+                    equipmentSelectCard.addSectionTitle('Familiars')
+                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'name');
                 } else {
                     throw Error(`Invalid equipmentSlot: ${equipmentSlot}`);
                 }
