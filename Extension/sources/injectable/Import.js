@@ -400,11 +400,15 @@
                 // set dropdowns
                 this.app.combatData.course.forEach((o, i) => {
                     const elt = document.getElementById(`MICSR Agility Obstacle ${i} Dropdown`);
-                    for (let index = 0; elt[index] !== undefined; index++) {
-                        const tmp = elt[index].value;
-                        if (tmp === "" + o) {
-                            elt.selectedIndex = index;
-                            return;
+
+                    // Checks that this element exists before trying to iterate on it
+                    if(elt){
+                        for (let index = 0; elt[index] !== null; index++) {
+                            const tmp = elt[index].value;
+                            if (tmp === "" + o) {
+                                elt.selectedIndex = index;
+                                return;
+                            }
                         }
                     }
                 })
