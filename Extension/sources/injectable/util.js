@@ -31,6 +31,14 @@
         MICSR.maxActions = 300;
         MICSR.trials = 10000;
 
+        // Copy equipmentSlot enum, so we don't break the game when we change the enum for Summoning
+        MICSR.equipmentSlot = {...CONSTANTS.equipmentSlot};
+        // Change shorthand for Summoning Familiar slots
+        // This will lead to some import-export incompatibility if there is ever a new equipment slot added
+        //  but other than that it should be fine
+        const Summon_Right = Object.keys(MICSR.equipmentSlot).length;
+        MICSR.equipmentSlot.Summon_Right = Summon_Right;
+
         /**
          }
          * Formats a number with the specified number of sigfigs, Addings suffixes as required

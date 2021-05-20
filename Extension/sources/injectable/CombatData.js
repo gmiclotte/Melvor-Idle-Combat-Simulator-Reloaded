@@ -22,6 +22,7 @@
 
     const reqs = [
         'statNames',
+        'util',
     ];
 
     const setup = () => {
@@ -239,7 +240,7 @@
 
                     // passive stats
                     Object.getOwnPropertyNames(MICSR.passiveStatNames).forEach(stat => {
-                        if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                        if (equipmentSlot === MICSR.equipmentSlot.Weapon && item.isAmmo) {
                             return;
                         }
                         equipmentStats[stat] += item[stat] || 0;
@@ -255,7 +256,7 @@
                     });
 
                     // equipment stats
-                    if (equipmentSlot !== CONSTANTS.equipmentSlot.Passive) {
+                    if (equipmentSlot !== MICSR.equipmentSlot.Passive) {
                         Object.getOwnPropertyNames(MICSR.equipmentStatNames).forEach(stat => {
                             const itemStat = item[stat];
                             if (itemStat === undefined || itemStat === null) {
@@ -269,21 +270,21 @@
                                     }
                                     return;
                                 case 'attackSpeed':
-                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
+                                    if (equipmentSlot === MICSR.equipmentSlot.Weapon) {
                                         equipmentStats.attackSpeed = item.attackSpeed || 4000;
                                     }
                                     return;
                                 case 'providesRuneQty':
-                                    if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon) {
+                                    if (equipmentSlot === MICSR.equipmentSlot.Weapon) {
                                         item.providesRune.forEach((rune) => equipmentStats.runesProvidedByWeapon[rune] = itemStat * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
-                                    } else if (equipmentSlot === CONSTANTS.equipmentSlot.Shield) {
+                                    } else if (equipmentSlot === MICSR.equipmentSlot.Shield) {
                                         item.providesRune.forEach((rune) => equipmentStats.runesProvidedByShield[rune] = itemStat * (equipmentStats.activeItems.magicSkillcape ? 2 : 1));
                                     } else {
                                         console.error(`Runes provided by ${item.name} are not taken into account!`)
                                     }
                                     return;
                             }
-                            if (equipmentSlot === CONSTANTS.equipmentSlot.Weapon && item.isAmmo) {
+                            if (equipmentSlot === MICSR.equipmentSlot.Weapon && item.isAmmo) {
                                 return;
                             }
                             // standard stats
@@ -295,7 +296,7 @@
             }
 
             setAttackType() {
-                const weaponID = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
+                const weaponID = this.equipmentSelected[MICSR.equipmentSlot.Weapon];
                 if (items[weaponID].type === 'Ranged Weapon' || items[weaponID].isRanged) {
                     // Ranged
                     this.combatStats.attackType = CONSTANTS.attackType.Ranged;

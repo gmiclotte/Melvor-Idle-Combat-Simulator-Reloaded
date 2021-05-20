@@ -166,15 +166,13 @@
                 this.forceRangedArmour = [CONSTANTS.item.Slayer_Cowl_Basic, CONSTANTS.item.Slayer_Leather_Body_Basic];
                 this.forceMagicArmour = [CONSTANTS.item.Slayer_Wizard_Hat_Basic, CONSTANTS.item.Slayer_Wizard_Robes_Basic, CONSTANTS.item.Enchanted_Shield];
 
-                // Change shorthand for Summoning Familiar slots
-                CONSTANTS.equipmentSlot.Summon_Right = 13;
-
                 // Generate equipment subsets
-                this.equipmentSlotKeys = Object.keys(CONSTANTS.equipmentSlot);
+                this.equipmentSlotKeys = Object.keys(MICSR.equipmentSlot);
                 this.equipmentSubsets = [];
                 /** @type {number[]} */
                 this.equipmentSelected = [];
                 for (let equipmentSlot = 0; equipmentSlot < this.equipmentSlotKeys.length; equipmentSlot++) {
+                    const slotId = MICSR.equipmentSlot[this.equipmentSlotKeys[equipmentSlot]];
                     this.equipmentSubsets.push([this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]]);
                     this.equipmentSelected.push(0);
                     for (let i = 0; i < items.length; i++) {
@@ -186,11 +184,11 @@
                         }
                     }
                 }
-                this.equipmentSubsets[CONSTANTS.equipmentSlot.Passive].push(...items.filter(x => x.isPassiveItem));
+                this.equipmentSubsets[MICSR.equipmentSlot.Passive].push(...items.filter(x => x.isPassiveItem));
                 // Add ammoType 2 and 3 to weapon subsets
                 for (let i = 0; i < items.length; i++) {
-                    if (items[i].equipmentSlot === CONSTANTS.equipmentSlot.Quiver && (items[i].ammoType === 2 || items[i].ammoType === 3)) {
-                        this.equipmentSubsets[CONSTANTS.equipmentSlot.Weapon].push(items[i]);
+                    if (items[i].equipmentSlot === MICSR.equipmentSlot.Quiver && (items[i].ammoType === 2 || items[i].ammoType === 3)) {
+                        this.equipmentSubsets[MICSR.equipmentSlot.Weapon].push(items[i]);
                     }
                 }
                 // Sort equipment subsets
@@ -199,7 +197,7 @@
                     this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.defenceLevelRequired || 0) - (b.defenceLevelRequired || 0));
                     this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.rangedLevelRequired || 0) - (b.rangedLevelRequired || 0));
                     this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.magicLevelRequired || 0) - (b.magicLevelRequired || 0));
-                    if (equipmentSlot === CONSTANTS.equipmentSlot.Quiver) {
+                    if (equipmentSlot === MICSR.equipmentSlot.Quiver) {
                         this.equipmentSubsets[equipmentSlot].sort((a, b) => (a.ammoType || 0) - (b.ammoType || 0));
                     }
                 }
@@ -363,12 +361,12 @@
             createEquipmentSelectCard() {
                 this.equipmentSelectCard = new MICSR.Card(this.topContent, '', '150px', true);
                 const equipmentRows = [
-                    [CONSTANTS.equipmentSlot.Passive, CONSTANTS.equipmentSlot.Helmet],
-                    [CONSTANTS.equipmentSlot.Cape, CONSTANTS.equipmentSlot.Amulet, CONSTANTS.equipmentSlot.Quiver],
-                    [CONSTANTS.equipmentSlot.Weapon, CONSTANTS.equipmentSlot.Platebody, CONSTANTS.equipmentSlot.Shield],
-                    [CONSTANTS.equipmentSlot.Platelegs],
-                    [CONSTANTS.equipmentSlot.Gloves, CONSTANTS.equipmentSlot.Boots, CONSTANTS.equipmentSlot.Ring],
-                    [CONSTANTS.equipmentSlot.Summon, CONSTANTS.equipmentSlot.Summon_Right]
+                    [MICSR.equipmentSlot.Passive, MICSR.equipmentSlot.Helmet],
+                    [MICSR.equipmentSlot.Cape, MICSR.equipmentSlot.Amulet, MICSR.equipmentSlot.Quiver],
+                    [MICSR.equipmentSlot.Weapon, MICSR.equipmentSlot.Platebody, MICSR.equipmentSlot.Shield],
+                    [MICSR.equipmentSlot.Platelegs],
+                    [MICSR.equipmentSlot.Gloves, MICSR.equipmentSlot.Boots, MICSR.equipmentSlot.Ring],
+                    [MICSR.equipmentSlot.Summon, MICSR.equipmentSlot.Summon_Right]
                 ];
                 equipmentRows.forEach((row) => {
                     const rowSources = [];
@@ -376,6 +374,14 @@
                     const rowPopups = [];
                     const tooltips = [];
                     row.forEach((equipmentSlot) => {
+                        if (!this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]) {
+                            console.log(MICSR.equipmentSlot)
+                            console.log(this.emptyItems)
+                            console.log(this.equipmentSlotKeys)
+                            console.log(equipmentSlot)
+                            console.log(this.equipmentSlotKeys[equipmentSlot])
+                            console.log(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]])
+                        }
                         rowSources.push(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]].media);
                         rowIDs.push(`MCS ${this.equipmentSlotKeys[equipmentSlot]} Image`);
                         rowPopups.push(this.createEquipmentPopup(equipmentSlot));
@@ -1226,14 +1232,14 @@
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(2, item), 'rangedLevelRequired');
                     equipmentSelectCard.addSectionTitle('Throwing Knives');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterByAmmoType(3, item), 'rangedLevelRequired');
-                } else if (equipmentSlot === CONSTANTS.equipmentSlot.Passive) {
+                } else if (equipmentSlot === MICSR.equipmentSlot.Passive) {
                     equipmentSelectCard.addSectionTitle('Magic Damage');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterMagicDamage(item), 'name');
                     equipmentSelectCard.addSectionTitle('Slayer');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterSlayer(item), 'name');
                     equipmentSelectCard.addSectionTitle('Other');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterRemainingPassive(item), 'name');
-                } else if (equipmentSlot === CONSTANTS.equipmentSlot.Summon || equipmentSlot === CONSTANTS.equipmentSlot.Summon_Right) {
+                } else if (equipmentSlot === MICSR.equipmentSlot.Summon || equipmentSlot === MICSR.equipmentSlot.Summon_Right) {
                     equipmentSelectCard.addSectionTitle('Familiars')
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'name');
                 } else {
@@ -1254,37 +1260,37 @@
                     return;
                 }
 
-                const prevWeapon = this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon];
+                const prevWeapon = this.equipmentSelected[MICSR.equipmentSlot.Weapon];
                 this.equipmentSelected[equipmentSlot] = itemId;
                 this.setEquipmentImage(equipmentSlot, itemId);
 
                 const item = items[itemId];
                 const weaponAmmo = [2, 3];
                 switch (equipmentSlot) {
-                    case CONSTANTS.equipmentSlot.Weapon:
-                        if (item.equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping to throwing knives / javelins
-                            this.equipItem(CONSTANTS.equipmentSlot.Quiver, itemId);
-                        } else if (weaponAmmo.includes(items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) { // Swapping from throwing knives / javelins
-                            this.equipItem(CONSTANTS.equipmentSlot.Quiver, 0);
+                    case MICSR.equipmentSlot.Weapon:
+                        if (item.equipmentSlot === MICSR.equipmentSlot.Quiver) { // Swapping to throwing knives / javelins
+                            this.equipItem(MICSR.equipmentSlot.Quiver, itemId);
+                        } else if (weaponAmmo.includes(items[this.equipmentSelected[MICSR.equipmentSlot.Quiver]].ammoType)) { // Swapping from throwing knives / javelins
+                            this.equipItem(MICSR.equipmentSlot.Quiver, 0);
                         }
                         if (item.isTwoHanded) {
-                            this.equipItem(CONSTANTS.equipmentSlot.Shield, 0);
+                            this.equipItem(MICSR.equipmentSlot.Shield, 0);
                         }
                         break;
-                    case CONSTANTS.equipmentSlot.Shield:
-                        if (itemId && items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isTwoHanded) {
-                            this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
+                    case MICSR.equipmentSlot.Shield:
+                        if (itemId && items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].isTwoHanded) {
+                            this.equipItem(MICSR.equipmentSlot.Weapon, 0);
                         }
                         break;
-                    case CONSTANTS.equipmentSlot.Quiver:
+                    case MICSR.equipmentSlot.Quiver:
                         if (weaponAmmo.includes(item.ammoType)) { // Swapping to throwing knives / javelins
-                            this.equipItem(CONSTANTS.equipmentSlot.Weapon, itemId);
-                        } else if (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].equipmentSlot === CONSTANTS.equipmentSlot.Quiver) { // Swapping from throwing knives / javelins
-                            this.equipItem(CONSTANTS.equipmentSlot.Weapon, 0);
+                            this.equipItem(MICSR.equipmentSlot.Weapon, itemId);
+                        } else if (items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].equipmentSlot === MICSR.equipmentSlot.Quiver) { // Swapping from throwing knives / javelins
+                            this.equipItem(MICSR.equipmentSlot.Weapon, 0);
                         }
                         break;
                 }
-                if (prevWeapon !== this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]) {
+                if (prevWeapon !== this.equipmentSelected[MICSR.equipmentSlot.Weapon]) {
                     this.updateStyleDropdowns();
                 }
                 this.checkForElisAss();
@@ -1439,7 +1445,7 @@
              * @memberof McsApp
              */
             updateStyleDropdowns() {
-                const item = items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]];
+                const item = items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]];
                 switch (this.getWeaponType(item)) {
                     case 'Ranged':
                         this.disableStyleDropdown('Magic');
@@ -1709,7 +1715,7 @@
              * @param {MouseEvent} event The onclick event for a button
              */
             simulateButtonOnClick() {
-                if (((items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].isRanged) && (items[this.equipmentSelected[CONSTANTS.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.equipmentSelected[CONSTANTS.equipmentSlot.Quiver]].ammoType)) {
+                if (((items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].isRanged) && (items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.equipmentSelected[MICSR.equipmentSlot.Quiver]].ammoType)) {
                     notifyPlayer(CONSTANTS.skill.Ranged, 'Incorrect Ammo type equipped for weapon.', 'danger');
                 } else {
                     if (this.simulator.simInProgress) {
@@ -2503,13 +2509,13 @@
                         }
                     }
                     // Do check for weapon type
-                    if (i === CONSTANTS.equipmentSlot.Weapon) {
+                    if (i === MICSR.equipmentSlot.Weapon) {
                         if (items[gearID].isTwoHanded) {
-                            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].selectedIndex = 0;
-                            this.equipmentSelected[CONSTANTS.equipmentSlot.Shield] = 0;
-                            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = true;
+                            this.equipmentSelectCard.dropDowns[MICSR.equipmentSlot.Shield].selectedIndex = 0;
+                            this.equipmentSelected[MICSR.equipmentSlot.Shield] = 0;
+                            this.equipmentSelectCard.dropDowns[MICSR.equipmentSlot.Shield].disabled = true;
                         } else {
-                            this.equipmentSelectCard.dropDowns[CONSTANTS.equipmentSlot.Shield].disabled = false;
+                            this.equipmentSelectCard.dropDowns[MICSR.equipmentSlot.Shield].disabled = false;
                         }
                         // Change to the correct combat style selector
                         if ((items[gearID].type === 'Ranged Weapon') || items[gearID].isRanged) {
