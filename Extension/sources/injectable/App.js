@@ -89,6 +89,7 @@
                 addPlotOption('Kills per ', true, 'killsPerSecond', 'Kills/');
                 // loot gains
                 addPlotOption('GP per ', true, 'gpPerSecond', 'GP/');
+                addPlotOption('Drops per', true, 'dropChance', 'Drops/');
                 addPlotOption('Chance for Signet Part B(%)', false, 'signetChance', 'Signet Chance (%)');
                 addPlotOption('Pet Chance per ', true, 'petChance', ' Pet Chance/');
                 addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
@@ -159,6 +160,7 @@
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
                     statistics: 'assets/media/main/statistics_header.svg',
+                    drops: 'assets/media/bank/chapeau_noir.svg'
                 };
 
                 // Forced equipment sorting
@@ -254,6 +256,7 @@
                 this.createPetSelectCard();
                 this.createAgilitySelectCard();
                 this.createGPOptionsCard();
+                this.createDropChanceCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
                 this.createCompareCard();
@@ -858,6 +861,17 @@
                     this.gpSearchResults.container.style.marginRight = '0px';
                     this.gpSearchResults.container.style.marginBottom = '5px';
                 }
+            }
+
+            dropChanceOnChange(event) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value)
+                this.combatData.dropSelected = idx;
+            }
+
+            createDropChanceCard() {
+                this.dropChanceCard = this.mainTabCard.addTab('Drop Chance Options', this.media.drops);
+                this.dropChanceCard.addSectionTitle('Drop Chance Options');
+                this.dropChanceCard.addDropdown('Choose Item', items.map((item) => item.name), items.map((item, index) => index), (event) => this.dropChanceOnChange(event))
             }
 
             createEquipmentStatCard() {
@@ -2370,6 +2384,17 @@
             updatePlotForSignetChance() {
                 this.loot.updateSignetChance();
                 if (this.plotter.plotType === 'signetChance') {
+                    this.updatePlotData();
+                }
+                this.updateZoneInfoCard();
+            }
+            
+            /**
+             * Updates the simulator display for when the drop chance time option is changed
+             */
+            updatePlotForDropChance() {
+                this.loot.updateDropChance();
+                if (this.plotter.plotType === 'dropChance') {
                     this.updatePlotData();
                 }
                 this.updateZoneInfoCard();

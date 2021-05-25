@@ -174,6 +174,8 @@
                 this.combatStats = {};
                 // ignore stun sleep damage modifier on enemy attacks
                 this.applyEnemyStunSleepDamage = false;
+                // selected item drop
+                this.dropSelected = 0;
             }
 
             /**

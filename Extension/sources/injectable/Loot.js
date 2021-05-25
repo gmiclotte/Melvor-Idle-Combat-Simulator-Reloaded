@@ -466,6 +466,7 @@
                 this.updateGPData();
                 this.updateHerbloreXP();
                 this.updateSignetChance();
+                this.updateDropChance();
                 this.updateSlayerXP();
                 this.updateSlayerCoins();
                 this.updatePetChance();
@@ -692,6 +693,66 @@
                         this.slayerSimData[i].herbloreXPPerSecond = sum / this.slayerTaskMonsters[i].length;
                     }
                 }
+            }
+
+            /**
+             * Updates the chance to receive your selected loot when killing monsters
+             */
+            updateDropChance() {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
+                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                        if (!this.monsterSimData[monsterID]) {
+                            return;
+                        }
+                        this.monsterSimData[monsterID].updateDropChance = 0;
+                    });
+                } else {
+                    const updateMonsterDropChance = (monsterID, data) => {
+                        if (!data) {
+                            return;
+                        }
+                        const dropRateResult = this.getDropRate(monsterID)
+                        const dropRate = dropRateResult[0]
+                        // TODO: This does not take item doubling into account, AT ALL
+                        const dropCount = dropRateResult[1]
+                        data.dropChance =  (dropRate * dropCount) / this.monsterSimData[monsterID].killTimeS;
+                    };
+
+                    // Set data for monsters in combat zones
+                    combatAreas.forEach((area) => {
+                        area.monsters.forEach(monsterID => updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]));
+                    });
+                    const bardID = 139;
+                    updateMonsterDropChance(bardID, this.monsterSimData[bardID]);
+                    slayerAreas.forEach((area) => {
+                        area.monsters.forEach(monsterID => updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]));
+                    });
+                    for (let i = 0; i < DUNGEONS.length; i++) {
+                        const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
+                        updateMonsterDropChance(monsterID, this.dungeonSimData[i]);
+                    }
+                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
+                        // TODO: drop chance rolls for auto slayer
+                        this.slayerSimData[i].dropChance = undefined;
+                    }
+                }
+            }
+
+            getDropRate(monsterId) {
+                let totalChances = 0
+                let selectedChance = 0
+                let selectedCount = 0
+                MONSTERS[monsterId].lootTable.forEach((drop) => {
+                    const itemId = drop[0]
+                    totalChances += drop[1]
+
+                    if (itemId == this.app.combatData.dropSelected) {
+                        selectedChance = drop[1]
+                        selectedCount = drop[2]
+                    }
+                })
+
+                return [selectedChance / totalChances, selectedCount];
             }
 
             /**

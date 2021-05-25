@@ -80,6 +80,7 @@
                         attacksMadePerSecond: 0,
                         simulationTime: 0,
                         petChance: 0,
+                        dropChance: 0,
                     };
                     if (monster) {
                         data.inQueue = false;
