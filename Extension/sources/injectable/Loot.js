@@ -739,20 +739,28 @@
             }
 
             getDropRate(monsterId) {
-                let totalChances = 0
-                let selectedChance = 0
-                let selectedCount = 0
-                MONSTERS[monsterId].lootTable.forEach((drop) => {
-                    const itemId = drop[0]
-                    totalChances += drop[1]
+                const monsterData = MONSTERS[monsterId]
+                if(monsterData.lootChance) {
+                    // Grab the sole loot object
+                    const item = monsterData.lootTable[0]
+                    const lootChance = item[0] == this.app.combatData.dropSelected ? (monsterData.lootChance / 100) : 0
+                    return [lootChance, item[2]]
+                } else {
+                    let totalChances = 0
+                    let selectedChance = 0
+                    let selectedCount = 0
+                    monsterData.lootTable.forEach((drop) => {
+                        const itemId = drop[0]
+                        totalChances += drop[1]
 
-                    if (itemId == this.app.combatData.dropSelected) {
-                        selectedChance = drop[1]
-                        selectedCount = drop[2]
-                    }
-                })
+                        if (itemId == this.app.combatData.dropSelected) {
+                            selectedChance = drop[1]
+                            selectedCount = drop[2]
+                        }
+                    })
 
-                return [selectedChance / totalChances, selectedCount];
+                    return [selectedChance / totalChances, selectedCount];
+                }
             }
 
             /**
