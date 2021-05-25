@@ -210,11 +210,15 @@
                 icon: 'ranged',
             },
 
-            // other requirements
             slayerLevelRequired: {
                 implemented: true,
                 icon: 'slayer',
             },
+
+            summoningLevel: {
+                implemented: true,
+                icon: 'summoning',
+            }
         };
 
         // stats that do not apply to combat

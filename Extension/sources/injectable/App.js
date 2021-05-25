@@ -159,6 +159,7 @@
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
                     statistics: 'assets/media/main/statistics_header.svg',
+                    summoning: 'assets/media/skills/summoning/summoning.svg',
                 };
 
                 // Forced equipment sorting
@@ -1413,6 +1414,7 @@
                     {description: 'Ranged Level', property: 'rangedLevelRequired'},
                     {description: 'Magic Level', property: 'magicLevelRequired'},
                     {description: 'Slayer Level', property: 'slayerLevelRequired'},
+                    {description: 'Summoning Level', property: 'summoningLevel'},
                 ];
                 if (requirements.some((req) => item[req.property])) {
                     tooltip += `<span class="text-warning">Requires:</span> ${requirements.flatMap((req) => item[req.property] ? `${req.description} ${item[req.property]}` : []).join(', ')}`;
