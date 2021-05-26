@@ -1102,14 +1102,27 @@
             }
 
             filterMagicDamage(item) {
-                return item.increasedMinAirSpellDmg !== undefined
-                    || item.increasedMinEarthSpellDmg !== undefined
-                    || item.increasedMinFireSpellDmg !== undefined
-                    || item.increasedMinWaterSpellDmg !== undefined
+                if (item.modifiers === undefined) {
+                    return false;
+                }
+                return item.modifiers.increasedMinAirSpellDmg > 0
+                    || item.modifiers.increasedMinEarthSpellDmg > 0
+                    || item.modifiers.increasedMinFireSpellDmg > 0
+                    || item.modifiers.increasedMinWaterSpellDmg > 0
             }
 
             filterSlayer(item) {
-                return item.slayerAreaEffectNegationPercent !== undefined || item.slayerBonusXP !== undefined
+                if (item.modifiers === undefined) {
+                    return false;
+                }
+                if (item.modifiers.increasedSkillXP && item.modifiers.increasedSkillXP.filter(x => x[0] === CONSTANTS.skill.Slayer).length > 0) {
+                    return true;
+                }
+                return item.modifiers.increasedSlayerAreaEffectNegationFlat > 0
+                    || item.modifiers.increasedDamageToSlayerTasks > 0
+                    || item.modifiers.increasedDamageToSlayerAreaMonsters > 0
+                    || item.modifiers.increasedSlayerTaskLength > 0
+                    || item.modifiers.increasedSlayerCoins > 0
             }
 
             filterRemainingPassive(item) {
