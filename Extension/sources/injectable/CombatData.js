@@ -1054,9 +1054,6 @@
                         curse: [],
                         aurora: [],
                     },
-                    // area effects
-                    slayerAreaEffectNegationPercent: this.equipmentStats.slayerAreaEffectNegationPercent,
-                    slayerAreaEffectNegationFlat: this.equipmentStats.slayerAreaEffectNegationFlat,
                     // healing
                     autoEat: {
                         eatAt: 0,
