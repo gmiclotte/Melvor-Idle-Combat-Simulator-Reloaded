@@ -271,10 +271,7 @@
                     + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal')
                 );
                 // check for ARS drop
-                currentSim.canTopazDrop = false;
-                if (combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
-                    currentSim.canTopazDrop = true;
-                }
+                currentSim.canTopazDrop = combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring);
                 // loot bonus
                 currentSim.lootBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat')
