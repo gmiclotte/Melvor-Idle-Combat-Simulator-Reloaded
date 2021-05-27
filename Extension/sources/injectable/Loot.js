@@ -622,11 +622,9 @@
                     if (!this.monsterSimData[monsterID].killTimeS) {
                         return;
                     }
-                    let sc = MONSTERS[monsterID].hitpoints;
-                    sc = applyModifier(
-                        sc,
-                        this.currentSim.combatData.modifiers.increasedSlayerCoins -
-                        this.currentSim.combatData.modifiers.decreasedSlayerCoins
+                    const sc = applyModifier(
+                        MONSTERS[monsterID].hitpoints,
+                        MICSR.getModifierValue(this.currentSim.combatData.modifiers, 'SlayerCoins')
                     );
                     this.monsterSimData[monsterID].slayerCoinsPerSecond = sc / this.monsterSimData[monsterID].killTimeS;
                 };

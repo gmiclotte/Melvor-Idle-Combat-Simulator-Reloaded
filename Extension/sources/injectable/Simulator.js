@@ -263,8 +263,7 @@
                 // Start by grabbing the player stats
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
-                currentSim.increasedGP = combatData.modifiers.increasedGPFromMonstersFlat
-                    - combatData.modifiers.decreasedGPFromMonstersFlat;
+                currentSim.increasedGP = MICSR.getModifierValue(combatData.modifiers, 'GPFromMonstersFlat');
                 // multiplier gp increase
                 currentSim.gpBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'GPFromMonsters')
@@ -637,12 +636,9 @@
                         }
                     }
                 }
-                const potionPreservation = modifiers.increasedChanceToPreservePotionCharge
-                    - modifiers.decreasedChanceToPreservePotionCharge;
+                const potionPreservation = MICSR.getModifierValue(modifiers, 'ChanceToPreservePotionCharge');
                 const potion = items[herbloreItemData[combatData.potionID].itemID[combatData.potionTier]];
-                const potionCharges = potion.potionCharges
-                    + modifiers.increasedPotionChargesFlat
-                    - modifiers.decreasedPotionChargesFlat;
+                const potionCharges = potion.potionCharges + MICSR.getModifierValue(modifiers, 'PotionChargesFlat');
                 // set potion usage for each monster
                 for (let data of monsterSimData) {
                     let chargesUsedPerSecond = 0;

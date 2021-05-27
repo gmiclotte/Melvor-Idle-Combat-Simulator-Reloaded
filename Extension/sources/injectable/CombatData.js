@@ -310,16 +310,7 @@
             }
 
             getSkillHiddenLevels(skill) {
-                let hiddenLevels = 0;
-                for (let i = 0; i < this.modifiers.increasedHiddenSkillLevel.length; i++) {
-                    if (this.modifiers.increasedHiddenSkillLevel[i].id === skill)
-                        hiddenLevels += this.modifiers.increasedHiddenSkillLevel[i].value;
-                }
-                for (let i = 0; i < this.modifiers.decreasedHiddenSkillLevel.length; i++) {
-                    if (this.modifiers.decreasedHiddenSkillLevel[i].id === skill)
-                        hiddenLevels -= this.modifiers.increasedHiddenSkillLevel[i].value;
-                }
-                return hiddenLevels;
+                return MICSR.getModifierValue(this.modifiers, 'HiddenSkillLevel', skill);
             }
 
             /**
@@ -355,10 +346,8 @@
                 combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
-                    modifiers.increasedRangedAccuracyBonus
-                    + modifiers.increasedGlobalAccuracy
-                    - modifiers.decreasedRangedAccuracyBonus
-                    - modifiers.decreasedGlobalAccuracy
+                    MICSR.getModifierValue(modifiers, 'RangedAccuracyBonus')
+                    + MICSR.getModifierValue(modifiers, 'GlobalAccuracy')
                     // TODO: is this a debuff? if so, add it to the acc calc in the simulation
                     // - combatData.player.decreasedAccuracy
                 );
@@ -381,10 +370,8 @@
                 combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
-                    modifiers.increasedMagicAccuracyBonus
-                    + modifiers.increasedGlobalAccuracy
-                    - modifiers.decreasedMagicAccuracyBonus
-                    - modifiers.decreasedGlobalAccuracy
+                    MICSR.getModifierValue(modifiers, 'MagicAccuracyBonus')
+                    + MICSR.getModifierValue(modifiers, 'GlobalAccuracy')
                     // TODO: is this a debuff? if so, add it to the acc calc in the simulation
                     // - combatData.player.decreasedAccuracy
                 );
@@ -410,10 +397,8 @@
                 combatStats.unmodifiedAttackRoll = maxAttackRoll;
                 maxAttackRoll = applyModifier(
                     maxAttackRoll,
-                    modifiers.increasedMeleeAccuracyBonus
-                    + modifiers.increasedGlobalAccuracy
-                    - modifiers.decreasedMeleeAccuracyBonus
-                    - modifiers.decreasedGlobalAccuracy
+                    MICSR.getModifierValue(modifiers, 'MeleeAccuracyBonus')
+                    + MICSR.getModifierValue(modifiers, 'GlobalAccuracy')
                     // TODO: is this a debuff? if so, add it to the acc calc in the simulation
                     // - combatData.player.decreasedAccuracy
                 );
@@ -512,8 +497,7 @@
                 let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640));
                 baseMaxHit = applyModifier(
                     baseMaxHit,
-                    modifiers.increasedRangedStrengthBonus
-                    - modifiers.decreasedRangedStrengthBonus
+                    MICSR.getModifierValue(modifiers, 'RangedStrengthBonus')
                 );
                 return baseMaxHit;
             }
@@ -527,8 +511,7 @@
                         * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200));
                     baseMaxHit = applyModifier(
                         baseMaxHit,
-                        modifiers.increasedMagicDamageBonus
-                        - modifiers.decreasedMagicDamageBonus
+                        MICSR.getModifierValue(modifiers, 'MagicDamageBonus')
                     );
                 } else {
                     selectedSpell = this.spells.ancient.selectedID;
@@ -554,8 +537,7 @@
                 let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640));
                 baseMaxHit = applyModifier(
                     baseMaxHit,
-                    modifiers.increasedMeleeStrengthBonus -
-                    modifiers.decreasedMeleeStrengthBonus
+                    MICSR.getModifierValue(modifiers, 'MeleeStrengthBonus')
                 );
                 return baseMaxHit;
             }
@@ -573,8 +555,7 @@
                 const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     combatStats.effectiveDefenceLevel,
                     this.baseStats.defenceBonus,
-                    this.modifiers.increasedMeleeEvasion,
-                    this.modifiers.decreasedMeleeEvasion,
+                    'MeleeEvasion',
                     player.meleeEvasionBuff,
                     player.meleeEvasionDebuff,
                 );
@@ -583,8 +564,7 @@
                 const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     combatStats.effectiveRangedDefenceLevel,
                     this.baseStats.defenceBonusRanged,
-                    this.modifiers.increasedRangedEvasion,
-                    this.modifiers.decreasedRangedEvasion,
+                    'RangedEvasion',
                     player.rangedEvasionBuff,
                     player.rangedEvasionDebuff,
                 );
@@ -597,8 +577,7 @@
                 const maximumMagicDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     combatStats.effectiveMagicDefenceLevel,
                     this.baseStats.defenceBonusMagic,
-                    this.modifiers.increasedMagicEvasion,
-                    this.modifiers.decreasedMagicEvasion,
+                    'MagicEvasion',
                     player.magicEvasionBuff,
                     player.magicEvasionDebuff,
                 );
@@ -609,9 +588,9 @@
                 }
             }
 
-            calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, increaseModifier, decreaseModifier, buff, debuff) {
+            calculateGenericPlayerEvasionRating(effectiveDefenceLevel, baseStat, modifier, buff, debuff) {
                 let maxDefRoll = Math.floor(effectiveDefenceLevel * (baseStat + 64));
-                maxDefRoll = applyModifier(maxDefRoll, increaseModifier - decreaseModifier);
+                maxDefRoll = applyModifier(maxDefRoll, MICSR.getModifierValue(this.modifiers, modifier));
                 //apply player buffs first
                 if (buff) {
                     maxDefRoll = Math.floor(maxDefRoll * (1 + buff / 100));
@@ -627,8 +606,7 @@
              * mimic calculatePlayerDamageReduction
              */
             calculatePlayerDamageReduction(player = {}) {
-                let damageReduction = this.baseStats.damageReduction + this.modifiers.increasedDamageReduction;
-                damageReduction -= this.modifiers.decreasedDamageReduction;
+                let damageReduction = this.baseStats.damageReduction + MICSR.getModifierValue(this.modifiers, 'DamageReduction');
                 if (player.markOfDeath) {
                     damageReduction = Math.floor(damageReduction / 2);
                 }
@@ -677,13 +655,10 @@
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 1) {
                     this.combatStats.attackSpeed -= 400;
                 }
-                this.combatStats.attackSpeed -=
-                    modifiers.decreasedPlayerAttackSpeed
-                    + modifiers.increasedPlayerAttackSpeed;
+                this.combatStats.attackSpeed += MICSR.getModifierValue(modifiers, 'PlayerAttackSpeed');
                 this.combatStats.attackSpeed = applyModifier(
                     this.combatStats.attackSpeed,
-                    modifiers.increasedPlayerAttackSpeedPercent
-                    - modifiers.decreasedPlayerAttackSpeedPercent
+                    MICSR.getModifierValue(modifiers, 'PlayerAttackSpeedPercent')
                 );
 
                 // preservation
@@ -704,20 +679,16 @@
                         this.combatStats.minHit = 0;
                         switch (SPELLS[this.spells.standard.selectedID].spellType) {
                             case CONSTANTS.spellType.Air:
-                                this.combatStats.minHit = modifiers.increasedMinAirSpellDmg -
-                                    modifiers.decreasedMinAirSpellDmg;
+                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinAirSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Water:
-                                this.combatStats.minHit = modifiers.increasedMinWaterSpellDmg -
-                                    modifiers.decreasedMinWaterSpellDmg
+                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinWaterSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Earth:
-                                this.combatStats.minHit = modifiers.increasedMinEarthSpellDmg -
-                                    modifiers.decreasedMinEarthSpellDmg;
+                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinEarthSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Fire:
-                                this.combatStats.minHit = modifiers.increasedMinFireSpellDmg -
-                                    modifiers.decreasedMinFireSpellDmg;
+                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinFireSpellDmg');
                                 break;
                             default:
                         }
@@ -746,7 +717,7 @@
 
                 // Max Hitpoints
                 this.combatStats.maxHitpoints = this.playerLevels.Hitpoints;
-                this.combatStats.maxHitpoints += modifiers.increasedMaxHitpoints - modifiers.decreasedMaxHitpoints;
+                this.combatStats.maxHitpoints += MICSR.getModifierValue(modifiers, 'MaxHitpoints');
                 this.combatStats.maxHitpoints *= this.numberMultiplier;
             }
 
@@ -1067,12 +1038,9 @@
 
                 // set auto eat
                 if (this.autoEatTier >= 0) {
-                    playerStats.autoEat.eatAt = this.modifiers.increasedAutoEatThreshold -
-                        this.modifiers.decreasedAutoEatThreshold;
-                    playerStats.autoEat.efficiency = this.modifiers.increasedAutoEatEfficiency -
-                        this.modifiers.decreasedAutoEatEfficiency;
-                    playerStats.autoEat.maxHP = this.modifiers.increasedAutoEatHPLimit -
-                        this.modifiers.decreasedAutoEatHPLimit;
+                    playerStats.autoEat.eatAt = MICSR.getModifierValue(this.modifiers, 'AutoEatThreshold');
+                    playerStats.autoEat.efficiency = MICSR.getModifierValue(this.modifiers, 'AutoEatEfficiency');
+                    playerStats.autoEat.maxHP = MICSR.getModifierValue(this.modifiers, 'AutoEatHPLimit');
                 } else {
                     playerStats.autoEat.manual = true;
                 }
@@ -1128,8 +1096,7 @@
                     let amt = Math.floor(this.combatStats.maxHitpoints / 10);
                     amt = Math.floor(amt / this.numberMultiplier);
                     // modifiers
-                    amt += this.numberMultiplier * this.modifiers.increasedHPRegenFlat
-                        - this.numberMultiplier * this.modifiers.decreasedHPRegenFlat;
+                    amt += this.numberMultiplier * MICSR.getModifierValue(this.modifiers, 'HPRegenFlat');
                     // rapid heal prayer
                     if (this.prayerBonus.vars[prayerBonusHitpoints] !== undefined) {
                         amt *= 2;
@@ -1137,8 +1104,7 @@
                     // Regeneration modifiers
                     applyModifier(
                         amt,
-                        this.modifiers.increasedHitpointRegeneration
-                        - this.modifiers.decreasedHitpointRegeneration
+                        MICSR.getModifierValue(this.modifiers, 'HitpointRegeneration')
                     );
                     playerStats.avgHPRegen = amt;
                 }
