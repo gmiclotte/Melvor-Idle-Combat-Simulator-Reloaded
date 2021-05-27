@@ -667,7 +667,7 @@
                     }
                     // take potion preservation into account
                     if (potionPreservation > 0) {
-                        chargesUsedPerSecond /= 1 + potionPreservation / 100;
+                        chargesUsedPerSecond *= 1 - potionPreservation / 100;
                     }
                     // convert charges to potions
                     data.potionsUsedPerSecond = chargesUsedPerSecond / potionCharges;
