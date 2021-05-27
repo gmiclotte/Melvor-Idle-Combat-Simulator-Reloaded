@@ -458,13 +458,13 @@
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
                 // cooking mastery
                 this.equipmentSelectCard.addToggleRadio(
-                    '95% Pool: +10%',
+                    '95% Cooking Pool',
                     'cookingPool',
                     this.combatData,
                     'cookingPool',
                 );
                 this.equipmentSelectCard.addToggleRadio(
-                    '99 Mastery: +20%',
+                    '99 Cooking Mastery',
                     'cookingMastery',
                     this.combatData,
                     'cookingMastery',
