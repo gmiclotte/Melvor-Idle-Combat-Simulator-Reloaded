@@ -1127,15 +1127,9 @@
             }
         }
         if (isSpecial) {
-            stats.player.tracking[attackSources.special].attacks++;
-        } else {
-            stats.player.tracking[attackSources.regular].attacks++;
-        }
-        if (isSpecial) {
             setupMultiAttack(player, enemy);
         }
-        const attackResult = playerDoAttack(stats, player, enemy, isSpecial)
-        processPlayerAttackResult(stats, attackResult, player, enemy);
+        playerDoAttack(stats, player, enemy, isSpecial);
         multiAttackTimer(player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
@@ -1145,8 +1139,7 @@
         if (skipsTurn(player)) {
             return;
         }
-        const attackResult = playerDoAttack(stats, player, enemy, true);
-        processPlayerAttackResult(stats, attackResult, player, enemy);
+        playerDoAttack(stats, player, enemy, true);
         multiAttackTimer(player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
@@ -1202,9 +1195,11 @@
         damage = calculateFinalDamageToEnemy(damage, enemy);
 
         // apply damage
-        stats.enemy.damageTaken += Math.floor(Math.min(damage, enemy.hitpoints));
-        enemy.hitpoints -= Math.floor(damage);
+        stats.enemy.damageTaken += damage;
+        enemy.hitpoints -= damage;
         // track damage
+        stats.player.tracking[attackSource].attacks++;
+        stats.player.tracking[attackSource].hits += damage > 0;
         stats.player.tracking[attackSource].damage += damage;
 
         // Check for Phoenix Rebirth
@@ -1222,6 +1217,9 @@
 
         // update alive status
         enemy.alive = enemy.hitpoints > 0;
+
+        // return actual damage dealt
+        return damage;
     }
 
     function calculateFinalDamageToEnemy(damage, enemy) {
@@ -1272,33 +1270,23 @@
     }
 
     function processPlayerAttackResult(stats, attackResult, player, enemy) {
-        if (!attackResult.attackHits) {
-            // attack missed, nothing to do
-            return;
-        }
-        // cap damage, to prevent overkill xp
-        if (enemy.hitpoints < attackResult.damageToEnemy) {
-            attackResult.damageToEnemy = enemy.hitpoints;
-        }
         // damage
-        dealDamageToEnemy(stats, enemy, Math.floor(attackResult.damageToEnemy),
+        const damage = dealDamageToEnemy(stats, enemy, attackResult.damageToEnemy,
             attackResult.isSpecial ? attackSources.special : attackSources.regular);
         // XP Tracking
-        if (attackResult.damageToEnemy > 0) {
-            let xpToAdd = attackResult.damageToEnemy / numberMultiplier * 4;
+        if (damage > 0) {
+            let xpToAdd = damage / numberMultiplier * 4;
             if (xpToAdd < 4) {
                 xpToAdd = 4;
             }
-            stats.totalHpXP += attackResult.damageToEnemy / numberMultiplier * 1.33;
-            stats.totalPrayerXP += attackResult.damageToEnemy * stats.player.prayerXpPerDamage;
+            stats.totalHpXP += damage / numberMultiplier * 1.33;
+            stats.totalPrayerXP += damage * stats.player.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
             if (stats.player.prayerXpPerDamage > 0) {
                 stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
             }
         }
-        if (attackResult.isSpecial) {
-            applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, stats.player, enemy, stats.enemy)
-        }
+        return damage;
     }
 
     function playerUsePreAttackSpecial(stats, enemy, player) {
@@ -1377,7 +1365,13 @@
         // roll for pets
         stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
         // calculate damage
-        attackResult.damageToEnemy = playerCalculateDamage(stats, enemy, isSpecial, player);
+        if (!attackHits) {
+            attackResult.damageToEnemy = 0;
+        } else {
+            attackResult.damageToEnemy = playerCalculateDamage(stats, enemy, isSpecial, player);
+        }
+        // calculate effective damage and deal damage
+        attackResult.damageToEnemy = processPlayerAttackResult(stats, attackResult, player, enemy);
         // reflect melee damage
         if (enemy.reflectMelee) {
             dealDamage(stats, player, enemy.reflectMelee * numberMultiplier, attackSources.reflect);
@@ -1391,6 +1385,10 @@
         ////////////////////
         // status effects //
         ////////////////////
+        if (!attackHits) {
+            // exit early
+            return;
+        }
         let statusEffect = {...player.currentSpecial};
         // Fighter amulet stun overrides special attack stun
         if (stats.player.activeItems.fighterAmulet && stats.player.isMelee && attackResult.damageToEnemy >= stats.player.maxHit * 0.70) {
@@ -1432,7 +1430,8 @@
         // return the result of the attack
         attackResult.attackHits = true;
         attackResult.statusEffect = statusEffect;
-        return attackResult;
+        // apply any status effects
+        applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, stats.player, enemy, stats.enemy)
     }
 
     function enemyCalculateDamage(stats, enemy, isSpecial, currentSpecial, player) {
