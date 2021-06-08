@@ -175,6 +175,8 @@
                 this.combatStats = {};
                 // ignore stun sleep damage modifier on enemy attacks
                 this.applyEnemyStunSleepDamage = false;
+                // enable summoning synergy
+                this.summoningSynergy = true;
             }
 
             /**
@@ -693,8 +695,11 @@
                                 break;
                             default:
                         }
+                        // TODO synergy 6, 8
                     }
                 }
+                // TODO synergy 6, 12
+                // TODO synergy 7, 12
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
                     this.combatStats.minHit += this.auroraBonus.increasedMinHit;
                 }

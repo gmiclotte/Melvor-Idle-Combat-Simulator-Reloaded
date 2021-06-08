@@ -413,6 +413,11 @@
                             monsterID: stats.enemy.monsterID,
                         }
                     }
+                } else {
+                    // enemy killed
+                    // TODO synergy 0, 1
+                    // TODO synergy 0, 12
+                    // TODO synergy 0, 15
                 }
                 if (verbose) {
                     const killTime = stats.totalTime - timeStamp;
@@ -496,6 +501,12 @@
     }
 
     function regen(stats, player) {
+        // TODO synergy 6, 14
+        // TODO synergy 7, 14
+        // TODO synergy 8, 14
+        // TODO synergy 1, 14
+        // TODO synergy 13, 14
+        // TODO synergy 0, 14
         if (player.isHardcore) {
             return;
         }
@@ -524,6 +535,8 @@
     }
 
     function actorBurn(stats, actor) {
+        // TODO synergy 13, 15
+        // TODO synergy 14, 15
         // reset timer
         actor.burnTimer = actor.burnInterval;
         // Check if stopped burning
@@ -537,6 +550,7 @@
     }
 
     function targetBleed(stats, actor, target) {
+        // TODO synergy 2, 14
         // reset timer
         target.bleedTimer = target.bleedInterval;
         // Check if stopped bleeding
@@ -554,6 +568,8 @@
     }
 
     function summonAttack(stats, enemy, player) {
+        // TODO synergy 2, 15
+        // TODO if synergy active: use 2 tablets per summon per attack, else use 1 tablet per summon per attack
         let damage = 0;
         if (rollPlayerHit(player, 1)) {
             damage = stats.player.summoningMaxHit;
@@ -1160,10 +1176,13 @@
             return dealDamageToEnemy(stats, target, damage, attackSource);
         }
 
-        // TODO
+
+        // TODO synergy 12, 15
+        // TODO: apply DR at this point
 
         stats.player.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
         target.hitpoints -= Math.floor(damage);
+        // TODO synergy 0, 13
         // update alive status
         target.alive = target.hitpoints > 0;
         // Check for player eat
@@ -1201,6 +1220,9 @@
         stats.player.tracking[attackSource].attacks++;
         stats.player.tracking[attackSource].hits += damage > 0;
         stats.player.tracking[attackSource].damage += damage;
+        // TODO synergy 0, 6
+        // TODO synergy 0, 7
+        // TODO synergy 0, 8
 
         // Check for Phoenix Rebirth
         if (!enemy.isPlayer && stats.enemy.passiveID.includes(1) && enemy.hitpoints <= 0) {
@@ -1209,11 +1231,6 @@
                 enemy.hitpoints = enemy.maxHitpoints;
             }
         }
-
-        // check synergies
-        // TODO synergy 0, 6
-        // TODO synergy 0, 7
-        // TODO synergy 0, 8
 
         // update alive status
         enemy.alive = enemy.hitpoints > 0;
@@ -1408,9 +1425,13 @@
             // fervor + passive item stat
             lifeSteal += stats.player.lifesteal;
         }
+        // TODO synergy 12, 14
+        // TODO synergy 2, 13
         if (lifeSteal > 0) {
+            // TODO synergy 2, 12
             healDamage(stats, player, attackResult.damageToEnemy * lifeSteal / 100)
         }
+        // TODO synergy 8, 12
         // confetti crossbow
         if (stats.player.activeItems.confettiCrossbow) {
             // Add gp from this weapon

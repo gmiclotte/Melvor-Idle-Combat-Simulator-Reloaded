@@ -392,6 +392,13 @@
                     });
                     this.equipmentSelectCard.addMultiPopupMenu(rowSources, rowIDs, rowPopups, tooltips);
                 });
+                this.equipmentSelectCard.addToggleRadio(
+                    'Activate Synergy',
+                    'summoningSynergy',
+                    this.combatData,
+                    'summoningSynergy',
+                    this.combatData.summoningSynergy,
+                );
                 // Style dropdown (Specially Coded)
                 const combatStyleCCContainer = this.equipmentSelectCard.createCCContainer();
                 const combatStyleLabel = this.equipmentSelectCard.createLabel('Combat Style', '');
