@@ -90,7 +90,7 @@
                     foodSelected: equippedFood[currentCombatFood].itemID,
                     cookingPool: getMasteryPoolProgress(CONSTANTS.skill.Cooking) >= 95,
                     cookingMastery: cookingMastery,
-                    isSlayerTask: false,
+                    isSlayerTask: this.app.combatData.isSlayerTask,
                     isHardcore: currentGamemode === 1,
                     isAdventure: currentGamemode === 2,
                     useCombinationRunes: useCombinationRunes,
