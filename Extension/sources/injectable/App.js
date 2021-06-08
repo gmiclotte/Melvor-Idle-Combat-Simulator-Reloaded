@@ -498,7 +498,7 @@
                     'stunsleep',
                     this.combatData,
                     'applyEnemyStunSleepDamage',
-                    false, // default
+                    this.combatData.applyEnemyStunSleepDamage, // default
                     25, // default
                     () => {
                     },

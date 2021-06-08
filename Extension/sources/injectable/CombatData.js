@@ -173,8 +173,8 @@
                 this.equipmentStats = {};
                 // combat stats
                 this.combatStats = {};
-                // ignore stun sleep damage modifier on enemy attacks
-                this.applyEnemyStunSleepDamage = false;
+                // apply stun sleep damage modifier on enemy attacks
+                this.applyEnemyStunSleepDamage = true;
                 // enable summoning synergy
                 this.summoningSynergy = true;
             }
