@@ -257,7 +257,6 @@
                 this.createPetSelectCard();
                 this.createAgilitySelectCard();
                 this.createGPOptionsCard();
-                this.createDropChanceCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
                 this.createCompareCard();
@@ -823,7 +822,7 @@
             }
 
             createGPOptionsCard() {
-                this.gpSelectCard = this.mainTabCard.addTab('GP Options', this.media.gp, '', '150px');
+                this.gpSelectCard = this.mainTabCard.addTab('GP & Drop Options', this.media.gp, '', '150px');
                 this.gpSelectCard.addSectionTitle('GP/s Options');
                 this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
                 this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
@@ -862,17 +861,26 @@
                     this.gpSearchResults.container.style.marginRight = '0px';
                     this.gpSearchResults.container.style.marginBottom = '5px';
                 }
+                this.gpSelectCard.addSectionTitle('Drop Chance Options');
+
+                const droppedItems = this.buildItemDropList()
+                this.gpSelectCard.addDropdown('Choose Item', items.filter((item) => droppedItems.indexOf(item) !== -1).map((item) => item.name), items.filter((item) => droppedItems.indexOf(item) !== -1).map((item, index) => index), (event) => this.dropChanceOnChange(event))
+            }
+
+            buildItemDropList() {
+                MONSTERS.reduce((acc, curr) => {
+                    if(curr.lootTable) {
+                        curr.lootTable.map((tableRow) => tableRow[0])
+                                      .filter((item) => acc.indexOf(item) === -1)
+                                      .forEach((item) => acc.push(item))
+                    }
+                    return acc
+                }, []).sort((a,b) => a < b ? -1 : 1)
             }
 
             dropChanceOnChange(event) {
                 const idx = parseInt(event.currentTarget.selectedOptions[0].value)
                 this.combatData.dropSelected = idx;
-            }
-
-            createDropChanceCard() {
-                this.dropChanceCard = this.mainTabCard.addTab('Drop Chance Options', this.media.drops);
-                this.dropChanceCard.addSectionTitle('Drop Chance Options');
-                this.dropChanceCard.addDropdown('Choose Item', items.map((item) => item.name), items.map((item, index) => index), (event) => this.dropChanceOnChange(event))
             }
 
             createEquipmentStatCard() {

@@ -716,11 +716,6 @@
                         const dropCount = Math.max((dropRateResult[1] / 2), 1) 
 
                         const itemDoubleChance = this.currentSim.lootBonus
-                        if(monsterID === 136) {
-                            console.log('itemDoubleChance:' + itemDoubleChance)
-                            console.log('dropRate:' + dropRate)
-                            console.log('dropCount:' + dropCount)
-                        }
                         data.dropChance =  (dropRate * dropCount * itemDoubleChance) / this.monsterSimData[monsterID].killTimeS;
                     };
 
