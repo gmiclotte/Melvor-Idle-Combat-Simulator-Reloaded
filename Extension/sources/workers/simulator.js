@@ -1634,9 +1634,9 @@
 
     function applyModifier(baseStat, modifier, type = 0) {
         if (type === 0) {
-            return Math.floor(baseStat * (1 + modifier / 100));
+            return Math.floor(baseStat * (1 + (modifier / 100)));
         } else if (type === 1) {
-            return baseStat + modifier;
+            return (baseStat * (1 + (modifier / 100)));
         }
     }
 

@@ -712,8 +712,16 @@
                         const dropRateResult = this.getDropRate(monsterID)
                         const dropRate = dropRateResult[0]
                         // TODO: This does not take item doubling into account, AT ALL
-                        const dropCount = dropRateResult[1]
-                        data.dropChance =  (dropRate * dropCount) / this.monsterSimData[monsterID].killTimeS;
+                        // On average, an item with 1-10 drops will drop items
+                        const dropCount = Math.max((dropRateResult[1] / 2), 1) 
+
+                        const itemDoubleChance = this.currentSim.lootBonus
+                        if(monsterID === 136) {
+                            console.log('itemDoubleChance:' + itemDoubleChance)
+                            console.log('dropRate:' + dropRate)
+                            console.log('dropCount:' + dropCount)
+                        }
+                        data.dropChance =  (dropRate * dropCount * itemDoubleChance) / this.monsterSimData[monsterID].killTimeS;
                     };
 
                     // Set data for monsters in combat zones

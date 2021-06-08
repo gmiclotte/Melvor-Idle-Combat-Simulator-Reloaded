@@ -259,6 +259,10 @@
                     virtualLevels: {},
                 }
             }
+            
+            applyLootBonus(baseStat, modifier) {
+                return (baseStat * (1 + (modifier / 100)));
+            }
 
             setupCurrentSimCombatData(currentSim, combatData) {
                 // Start by grabbing the player stats
@@ -268,7 +272,8 @@
                 // multiplier gp increase
                 currentSim.gpBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'GPFromMonsters')
-                    + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal')
+                    + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal'),
+                    1
                 );
                 // check for ARS drop
                 currentSim.canTopazDrop = combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring);
