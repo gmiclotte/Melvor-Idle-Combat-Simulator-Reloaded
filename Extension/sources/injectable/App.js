@@ -864,11 +864,11 @@
                 this.gpSelectCard.addSectionTitle('Drop Chance Options');
 
                 const droppedItems = this.buildItemDropList()
-                this.gpSelectCard.addDropdown('Choose Item', items.filter((item) => droppedItems.indexOf(item) !== -1).map((item) => item.name), items.filter((item) => droppedItems.indexOf(item) !== -1).map((item, index) => index), (event) => this.dropChanceOnChange(event))
+                this.gpSelectCard.addDropdown('Choose Item', droppedItems.map((itemID) => items[itemID].name), droppedItems, (event) => this.dropChanceOnChange(event))
             }
 
             buildItemDropList() {
-                MONSTERS.reduce((acc, curr) => {
+                return MONSTERS.reduce((acc, curr) => {
                     if(curr.lootTable) {
                         curr.lootTable.map((tableRow) => tableRow[0])
                                       .filter((item) => acc.indexOf(item) === -1)
