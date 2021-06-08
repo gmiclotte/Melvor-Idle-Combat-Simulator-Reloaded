@@ -97,7 +97,8 @@
                     course: chosenAgilityObstacles,
                     courseMastery: MASTERY[CONSTANTS.skill.Agility].xp.map(x => x > 13034431),
                     pillar: agilityPassivePillarActive,
-                    applyEnemyStunSleepDamage: false,
+                    applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,
+                    summoningSynergy: this.app.combatData.summoningSynergy, // TODO: import mark levels
                 };
 
                 // get the player's auto eat tier
@@ -152,6 +153,7 @@
                     courseMastery: courseMastery,
                     pillar: this.app.combatData.pillar,
                     applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,
+                    summoningSynergy: this.app.combatData.summoningSynergy,
                 }
             }
 
@@ -171,6 +173,7 @@
                 this.importUseCombinationRunes(settings.useCombinationRunes);
                 this.importAgilityCourse(settings.course, settings.courseMastery, settings.pillar);
                 this.importApplyEnemyStunSleepDamage(settings.applyEnemyStunSleepDamage);
+                this.importSummoningSynergy(settings.summoningSynergy);
             }
 
             update() {
@@ -359,6 +362,17 @@
                 } else {
                     this.app.combatData.applyEnemyStunSleepDamage = false;
                     document.getElementById('MCS Apply Enemy Stun Dmg Radio No').checked = true;
+                }
+            }
+
+            importSummoningSynergy(summoningSynergy) {
+                // Update summoningSynergy
+                if (summoningSynergy) {
+                    this.app.combatData.summoningSynergy = true;
+                    document.getElementById('MCS Activate Synergy Radio Yes').checked = true;
+                } else {
+                    this.app.combatData.summoningSynergy = false;
+                    document.getElementById('MCS Activate Synergy Radio No').checked = true;
                 }
             }
 
