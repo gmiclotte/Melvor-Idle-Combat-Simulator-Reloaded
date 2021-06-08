@@ -1145,7 +1145,7 @@
         if (isSpecial) {
             setupMultiAttack(player, enemy);
         }
-        playerDoAttack(stats, player, enemy, isSpecial);
+        playerDoAttack(stats, player, enemy, isSpecial, false);
         multiAttackTimer(player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
@@ -1155,7 +1155,7 @@
         if (skipsTurn(player)) {
             return;
         }
-        playerDoAttack(stats, player, enemy, true);
+        playerDoAttack(stats, player, enemy, true, true);
         multiAttackTimer(player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
@@ -1358,7 +1358,7 @@
         return player.accuracy > roll;
     }
 
-    function playerDoAttack(stats, player, enemy, isSpecial) {
+    function playerDoAttack(stats, player, enemy, isSpecial, isMulti) {
         stats.playerAttackCalls++;
         // Apply pre-attack special effects
         if (isSpecial) {
@@ -1402,7 +1402,7 @@
         ////////////////////
         // status effects //
         ////////////////////
-        if (!attackHits) {
+        if (!attackHits || isMulti) {
             // exit early
             return;
         }
