@@ -983,7 +983,7 @@
 
             getSMH() {
                 const summ1 = this.equipmentSelected[MICSR.equipmentSlot.Summon];
-                const summ2 = equippedItems[MICSR.equipmentSlot.SummonRight];
+                const summ2 = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
                 let smh1 = 0;
                 if (summ1 >= 0) {
                     smh1 = summ1.summoningMaxHit | 0;
