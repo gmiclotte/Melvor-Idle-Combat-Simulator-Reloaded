@@ -264,25 +264,21 @@
                 // Start by grabbing the player stats
                 currentSim.playerStats = combatData.getPlayerStats();
                 // base gp increase
-                currentSim.increasedGP = combatData.modifiers.increasedGPFromMonstersFlat
-                    - combatData.modifiers.decreasedGPFromMonstersFlat;
+                currentSim.increasedGP = MICSR.getModifierValue(combatData.modifiers, 'GPFromMonstersFlat');
                 // multiplier gp increase
-                currentSim.gpBonus = applyModifier(
-                    1,
+                currentSim.gpBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'GPFromMonsters')
                     + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal')
                 );
                 // check for ARS drop
-                currentSim.canTopazDrop = false;
-                if (combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring)) {
-                    currentSim.canTopazDrop = true;
-                }
+                currentSim.canTopazDrop = combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring);
                 // loot bonus
-                currentSim.lootBonus = Math.max(1, applyModifier(
-                    1,
+                currentSim.lootBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat')
                     + MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleItemsGlobal'),
-                ));
+                );
+                currentSim.lootBonus = Math.max(1, currentSim.lootBonus);
+                currentSim.lootBonus = Math.min(2, currentSim.lootBonus);
                 // misc
                 currentSim.herbConvertChance = combatData.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));
@@ -641,12 +637,9 @@
                         }
                     }
                 }
-                const potionPreservation = modifiers.increasedChanceToPreservePotionCharge
-                    - modifiers.decreasedChanceToPreservePotionCharge;
+                const potionPreservation = MICSR.getModifierValue(modifiers, 'ChanceToPreservePotionCharge');
                 const potion = items[herbloreItemData[combatData.potionID].itemID[combatData.potionTier]];
-                const potionCharges = potion.potionCharges
-                    + modifiers.increasedPotionChargesFlat
-                    - modifiers.decreasedPotionChargesFlat;
+                const potionCharges = potion.potionCharges + MICSR.getModifierValue(modifiers, 'PotionChargesFlat');
                 // set potion usage for each monster
                 for (let data of monsterSimData) {
                     let chargesUsedPerSecond = 0;
@@ -675,7 +668,7 @@
                     }
                     // take potion preservation into account
                     if (potionPreservation > 0) {
-                        chargesUsedPerSecond /= 1 + potionPreservation / 100;
+                        chargesUsedPerSecond *= 1 - potionPreservation / 100;
                     }
                     // convert charges to potions
                     data.potionsUsedPerSecond = chargesUsedPerSecond / potionCharges;

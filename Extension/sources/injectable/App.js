@@ -160,7 +160,8 @@
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
                     statistics: 'assets/media/main/statistics_header.svg',
-                    drops: 'assets/media/bank/chapeau_noir.svg'
+                    drops: 'assets/media/bank/chapeau_noir.svg',
+                    summoning: 'assets/media/skills/summoning/summoning.svg',
                 };
 
                 // Forced equipment sorting
@@ -460,13 +461,13 @@
                 this.equipmentSelectCard.container.appendChild(foodCCContainer);
                 // cooking mastery
                 this.equipmentSelectCard.addToggleRadio(
-                    '95% Pool: +10%',
+                    '95% Cooking Pool',
                     'cookingPool',
                     this.combatData,
                     'cookingPool',
                 );
                 this.equipmentSelectCard.addToggleRadio(
-                    '99 Mastery: +20%',
+                    '99 Cooking Mastery',
                     'cookingMastery',
                     this.combatData,
                     'cookingMastery',
@@ -1115,14 +1116,27 @@
             }
 
             filterMagicDamage(item) {
-                return item.increasedMinAirSpellDmg !== undefined
-                    || item.increasedMinEarthSpellDmg !== undefined
-                    || item.increasedMinFireSpellDmg !== undefined
-                    || item.increasedMinWaterSpellDmg !== undefined
+                if (item.modifiers === undefined) {
+                    return false;
+                }
+                return item.modifiers.increasedMinAirSpellDmg > 0
+                    || item.modifiers.increasedMinEarthSpellDmg > 0
+                    || item.modifiers.increasedMinFireSpellDmg > 0
+                    || item.modifiers.increasedMinWaterSpellDmg > 0
             }
 
             filterSlayer(item) {
-                return item.slayerAreaEffectNegationPercent !== undefined || item.slayerBonusXP !== undefined
+                if (item.modifiers === undefined) {
+                    return false;
+                }
+                if (item.modifiers.increasedSkillXP && item.modifiers.increasedSkillXP.filter(x => x[0] === CONSTANTS.skill.Slayer).length > 0) {
+                    return true;
+                }
+                return item.modifiers.increasedSlayerAreaEffectNegationFlat > 0
+                    || item.modifiers.increasedDamageToSlayerTasks > 0
+                    || item.modifiers.increasedDamageToSlayerAreaMonsters > 0
+                    || item.modifiers.increasedSlayerTaskLength > 0
+                    || item.modifiers.increasedSlayerCoins > 0
             }
 
             filterRemainingPassive(item) {
@@ -1427,6 +1441,7 @@
                     {description: 'Ranged Level', property: 'rangedLevelRequired'},
                     {description: 'Magic Level', property: 'magicLevelRequired'},
                     {description: 'Slayer Level', property: 'slayerLevelRequired'},
+                    {description: 'Summoning Level', property: 'summoningLevel'},
                 ];
                 if (requirements.some((req) => item[req.property])) {
                     tooltip += `<span class="text-warning">Requires:</span> ${requirements.flatMap((req) => item[req.property] ? `${req.description} ${item[req.property]}` : []).join(', ')}`;

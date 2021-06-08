@@ -161,6 +161,13 @@
             }
             return increased - decreased;
         }
+
+        /**
+         * Apply modifier without rounding
+         */
+        MICSR.averageDoubleMultiplier = (modifier) => {
+            return 1 + modifier / 100
+        }
     }
 
     let loadCounter = 0;

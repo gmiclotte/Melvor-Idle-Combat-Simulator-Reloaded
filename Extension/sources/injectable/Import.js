@@ -315,17 +315,17 @@
                 this.app.equipFood(foodSelected);
                 if (cookingPool) {
                     this.app.combatData.cookingPool = true;
-                    document.getElementById('MCS 95% Pool: +10% Radio Yes').checked = true;
+                    document.getElementById('MCS 95% Cooking Pool Radio Yes').checked = true;
                 } else {
                     this.app.combatData.cookingPool = false;
-                    document.getElementById('MCS 95% Pool: +10% Radio No').checked = true;
+                    document.getElementById('MCS 95% Cooking Pool Radio No').checked = true;
                 }
                 if (cookingMastery) {
                     this.app.combatData.cookingMastery = true;
-                    document.getElementById('MCS 99 Mastery: +20% Radio Yes').checked = true;
+                    document.getElementById('MCS 99 Cooking Mastery Radio Yes').checked = true;
                 } else {
                     this.app.combatData.cookingMastery = false;
-                    document.getElementById('MCS 99 Mastery: +20% Radio No').checked = true;
+                    document.getElementById('MCS 99 Cooking Mastery Radio No').checked = true;
                 }
             }
 

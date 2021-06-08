@@ -165,10 +165,6 @@
             ammoPreservation: {implemented: true},
 
             // magic
-            increasedMinAirSpellDmg: {implemented: true},
-            increasedMinEarthSpellDmg: {implemented: true},
-            increasedMinFireSpellDmg: {implemented: true},
-            increasedMinWaterSpellDmg: {implemented: true},
             spellHeal: {implemented: true},
 
             // hitpoints
@@ -184,9 +180,15 @@
             // prayer
             prayerCostReduction: {implemented: true},
 
-            // slayer
-            slayerAreaEffectNegationFlat: {implemented: true},
-            slayerAreaEffectNegationPercent: {implemented: true},
+            // summoning
+            summoningDescription: {implemented: false},
+            summoningID: {implemented: false},
+            summoningReq: {implemented: false},
+            summoningQty: {implemented: false},
+            summoningXP: {implemented: false},
+            summoningTier: {implemented: false},
+            summoningSkills: {implemented: false},
+            summoningMaxHit: {implemented: false},
         };
 
         // requirements to wear gear
@@ -210,11 +212,15 @@
                 icon: 'ranged',
             },
 
-            // other requirements
             slayerLevelRequired: {
                 implemented: true,
                 icon: 'slayer',
             },
+
+            summoningLevel: {
+                implemented: true,
+                icon: 'summoning',
+            }
         };
 
         // stats that do not apply to combat
@@ -222,6 +228,11 @@
 
             // this does nothing
             prayerBonus: {implemented: false},
+            slayerAreaEffectNegationPercent: {implemented: false},
+            increasedMinAirSpellDmg: {implemented: false},
+            increasedMinEarthSpellDmg: {implemented: false},
+            increasedMinFireSpellDmg: {implemented: false},
+            increasedMinWaterSpellDmg: {implemented: false},
 
             // crafting
             craftingID: {},
@@ -231,7 +242,6 @@
             craftReq: {},
 
             // fishing
-            fishingBonusXP: {},
             fishingCatchWeight: {},
             fishingSpeedBonus: {},
 
