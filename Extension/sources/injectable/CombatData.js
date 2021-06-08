@@ -986,11 +986,11 @@
                 const summ2 = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
                 let smh1 = 0;
                 if (summ1 >= 0) {
-                    smh1 = summ1.summoningMaxHit | 0;
+                    smh1 = items[summ1].summoningMaxHit | 0;
                 }
                 let smh2 = 0;
                 if (summ2 >= 0) {
-                    smh2 = summ2.summoningMaxHit | 0;
+                    smh2 = items[summ2].summoningMaxHit | 0;
                 }
                 return Math.max(smh1, smh2);
             }
