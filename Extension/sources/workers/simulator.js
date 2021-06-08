@@ -186,7 +186,7 @@
             stats.player.slayerAreaEffectValue = stats.enemy.slayerAreaEffectValue;
 
             // Start Monte Carlo simulation
-            let enemyKills = 0;
+            let enemyFights = 0;
 
             if (!stats.player.isMelee && stats.enemy.passiveID.includes(2)) {
                 return {simSuccess: false, reason: 'wrong style'};
@@ -226,7 +226,7 @@
             setAreaEffects(stats, combatData, player);
             // track stats.totalTime of previous kill
             let timeStamp = 0;
-            while (enemyKills < trials) {
+            while (enemyFights < trials) {
                 // Reset Timers and statuses
                 resetPlayer(stats, combatData, player);
                 // regen timer is not reset ! add respawn time to regen, and regen if required
@@ -419,7 +419,7 @@
                     stats.killTimes.push(killTime);
                     timeStamp = stats.totalTime;
                 }
-                enemyKills++;
+                enemyFights++;
             }
 
             // Apply XP Bonuses
