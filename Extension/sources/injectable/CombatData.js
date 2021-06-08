@@ -112,6 +112,7 @@
                     attackSpeed: 4000,
                     maxHit: 0,
                     minHit: 0,
+                    summoningMaxHit: 0,
                     maxAttackRoll: 0,
                     maxDefRoll: 0,
                     maxRngDefRoll: 0,
@@ -699,6 +700,9 @@
                 }
                 this.combatStats.minHit *= this.numberMultiplier;
 
+                // max summ roll
+                this.combatStats.summoningMaxHit = this.getSMH();
+
                 // max defence roll
                 const evasionRatings = this.calculatePlayerEvasionRating(
                     this.combatStats,
@@ -977,6 +981,20 @@
                 return this.auroraBonus.attackSpeedBuff;
             }
 
+            getSMH() {
+                const summ1 = this.equipmentSelected[MICSR.equipmentSlot.Summon];
+                const summ2 = equippedItems[MICSR.equipmentSlot.SummonRight];
+                let smh1 = 0;
+                if (summ1 >= 0) {
+                    smh1 = summ1.summoningMaxHit | 0;
+                }
+                let smh2 = 0;
+                if (summ2 >= 0) {
+                    smh2 = summ2.summoningMaxHit | 0;
+                }
+                return Math.max(smh1, smh2);
+            }
+
             getPlayerStats() {
                 /** @type {PlayerStats} */
                 const playerStats = {
@@ -988,6 +1006,7 @@
                     maxAttackRoll: this.combatStats.maxAttackRoll,
                     maxHit: this.combatStats.maxHit,
                     minHit: this.combatStats.minHit,
+                    summoningMaxHit: this.combatStats.summoningMaxHit,
                     maxDefRoll: this.combatStats.maxDefRoll,
                     maxMagDefRoll: this.combatStats.maxMagDefRoll,
                     maxRngDefRoll: this.combatStats.maxRngDefRoll,

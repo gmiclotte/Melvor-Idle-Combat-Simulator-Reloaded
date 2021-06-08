@@ -202,6 +202,7 @@
             }
             // Multiply player max hit
             playerStats.maxHit = Math.floor(playerStats.maxHit * player.damageModifier);
+            playerStats.summoningMaxHit = Math.floor(playerStats.summoningMaxHit * player.damageModifier);
             const enemy = {};
             let innerCount = 0;
             let tooManyActions = 0;
@@ -325,6 +326,12 @@
                             targetBleed(enemy, enemyStats, player, playerStats);
                         }
                     }
+                    if (enemy.alive && playerStats.summoningMaxHit > 0) {
+                        if (player.summonTimer <= 0) {
+                            verboseLog('summon attacks');
+                            summonAttack(enemy, enemyStats, player, playerStats);
+                        }
+                    }
                     //enemy
                     if (enemy.alive && enemy.isActing) {
                         if (enemy.actionTimer <= 0) {
@@ -445,6 +452,7 @@
         // only the player has regen
         if (actor.isPlayer) {
             timeStep = Math.min(timeStep, actor.regenTimer);
+            timeStep = Math.min(timeStep, actor.summonTimer);
         }
         return timeStep;
     }
@@ -467,6 +475,7 @@
         }
         if (actor.isPlayer) {
             actor.regenTimer -= timeStep;
+            actor.summonTimer -= timeStep;
         }
         return timeStep;
     }
@@ -527,6 +536,13 @@
         if (actor.isPlayer && actorStats.activeItems.elderCrown) {
             healDamage(actor, actorStats, target.bleedDamage);
         }
+    }
+
+    function summonAttack(enemy, enemyStats, player, playerStats) {
+        let damage = playerStats.summoningMaxHit;
+        damage = Math.floor(Math.random() * damage);
+        dealDamage(enemy, enemyStats, damage);
+        player.summonTimer = 3000;
     }
 
     function enemyAction(stats, player, playerStats, enemy, enemyStats) {
@@ -1571,6 +1587,8 @@
         player.attackRolls = 1 + mergePlayerModifiers(player, 'AttackRolls');
         // aurora
         player.attackSpeedBuff = playerStats.decreasedAttackSpeed;
+        // summon timer
+        player.summonTimer = playerStats.summoningMaxHit > 0 ? 3000 : Infinity;
         // compute guardian amulet
         if (playerStats.activeItems.guardianAmulet) {
             player.guardianAmuletBelow = false;
