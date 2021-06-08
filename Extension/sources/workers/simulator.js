@@ -554,8 +554,11 @@
     }
 
     function summonAttack(stats, enemy, player) {
-        let damage = stats.player.summoningMaxHit;
-        damage = Math.floor(Math.random() * damage);
+        let damage = 0;
+        if (rollPlayerHit(player, 1)) {
+            damage = stats.player.summoningMaxHit;
+            damage = Math.floor(Math.random() * damage);
+        }
         dealDamageToEnemy(stats, enemy, damage, attackSources.summon);
         player.summonTimer = 3000;
     }
@@ -1339,6 +1342,17 @@
         }
     }
 
+    function rollPlayerHit(player, rolls = 1) {
+        let roll = 100;
+        for (let i = 0; i < rolls; i++) {
+            let rolledChance = Math.floor(Math.random() * 100);
+            if (rolledChance < roll) {
+                roll = rolledChance;
+            }
+        }
+        return player.accuracy > roll;
+    }
+
     function playerDoAttack(stats, player, enemy, isSpecial) {
         stats.playerAttackCalls++;
         // Apply pre-attack special effects
@@ -1358,23 +1372,7 @@
             attackHits = true;
         } else {
             // Roll for hit
-            let roll = 100;
-            for (let i = 0; i < player.attackRolls; i++) {
-                let rolledChance = Math.floor(Math.random() * 100);
-                if (rolledChance < roll) {
-                    roll = rolledChance;
-                }
-            }
-            attackHits = player.accuracy > roll;
-        }
-        if (!attackHits) {
-            // exit early
-            return attackResult;
-        }
-        if (isSpecial) {
-            stats.player.tracking[attackSources.special].hits++;
-        } else {
-            stats.player.tracking[attackSources.regular].hits++;
+            attackHits = rollPlayerHit(player, player.attackRolls);
         }
         // roll for pets
         stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
