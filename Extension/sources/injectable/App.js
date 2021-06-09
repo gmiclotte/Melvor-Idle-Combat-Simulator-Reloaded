@@ -228,6 +228,12 @@
                 // Temporary GP/s settings variable
                 this.itemSubsetTemp = [];
 
+                // drop list filters
+                this.dropListFilters = {
+                    selectedMonster: false,
+                    onlyUndiscovered: false,
+                }
+
                 // verbose settings
                 this.verbose = false;
                 this.veryVerbose = false;
@@ -257,6 +263,7 @@
                 this.createPetSelectCard();
                 this.createAgilitySelectCard();
                 this.createLootOptionsCard();
+                this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
                 this.createCompareCard();
@@ -835,68 +842,148 @@
             }
 
             createLootOptionsCard() {
-                this.lootSelectCard = this.mainTabCard.addTab('Loot Options', this.media.loot, '', '150px');
+                if (!this.lootSelectCard) {
+                    this.lootSelectCard = this.mainTabCard.addTab('Loot Options', this.media.loot, '', '150px');
+                } else {
+                    this.lootSelectCard.clearContainer();
+                }
                 // drop chance options
                 this.lootSelectCard.addSectionTitle('Drop Chance Options');
+                this.lootSelectCard.addToggleRadio(
+                    'Only Selected Monster',
+                    'selectedMonster',
+                    this.dropListFilters,
+                    'selectedMonster',
+                    this.dropListFilters.selectedMonster, // default
+                    25, // default
+                    () => {
+                        this.createLootOptionsCard();
+                        this.updatePlotForLoot();
+                    },
+                );
+                this.lootSelectCard.addToggleRadio(
+                    'Only Undiscovered',
+                    'onlyUndiscovered',
+                    this.dropListFilters,
+                    'onlyUndiscovered',
+                    this.dropListFilters.onlyUndiscovered, // default
+                    25, // default
+                    () => {
+                        this.createLootOptionsCard();
+                        this.updatePlotForLoot();
+                    },
+                );
                 const droppedItems = this.buildItemDropList()
-                this.lootSelectCard.addDropdown('Choose Item', droppedItems.map((itemID) => items[itemID].name), droppedItems, (event) => this.dropChanceOnChange(event))
+                let index = droppedItems.indexOf(this.combatData.dropSelected);
+                if (index === -1) {
+                    index = 0;
+                    this.combatData.dropSelected = -1;
+                    this.updatePlotForLoot();
+                }
+                const dropdown = this.lootSelectCard.addDropdown(
+                    'Choose Item',
+                    droppedItems.map((itemID) => this.getItemName(itemID, -1)),
+                    droppedItems,
+                    (event) => this.dropChanceOnChange(event),
+                );
+                dropdown.selectedIndex = index;
+
                 // gp options
+                this.lootSelectCard.addSectionTitle('');
                 this.lootSelectCard.addSectionTitle('GP/s Options');
                 this.lootSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
                 this.lootSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
                 this.lootSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
                 this.lootSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
+                // show or hide "edit subset" button
+                this.setEditSubsetDisplay();
+            }
+
+            createGPOptionsCard() {
                 // GP/s options card
-                {
-                    this.gpOptionsCard = new MICSR.Card(this.lootSelectCard.container, '', '200px');
-                    this.gpOptionsCard.addSectionTitle('Item Subset Selection');
-                    this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
-                    this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
-                    this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
-                    // Top labels
-                    const labelCont = document.createElement('div');
-                    labelCont.className = 'mcsMultiButtonContainer';
-                    labelCont.style.borderBottom = 'solid thin';
-                    const lab1 = document.createElement('div');
-                    lab1.className = 'mcsMultiHeader';
-                    lab1.style.borderRight = 'solid thin';
-                    lab1.textContent = 'Item';
-                    lab1.style.width = '218px';
-                    labelCont.appendChild(lab1);
-                    const lab2 = document.createElement('div');
-                    lab2.className = 'mcsMultiHeader';
-                    lab2.textContent = 'Sell';
-                    lab2.style.width = '124px';
-                    labelCont.appendChild(lab2);
-                    this.gpOptionsCard.container.appendChild(labelCont);
-                    this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
-                    for (let i = 0; i < this.loot.lootList.length; i++) {
-                        this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
-                    }
-                    this.gpSearchResults.container.style.width = '100%';
-                    this.gpSearchResults.container.style.overflowY = 'scroll';
-                    this.gpSearchResults.container.style.overflowX = 'hidden';
-                    this.gpSearchResults.container.style.marginRight = '0px';
-                    this.gpSearchResults.container.style.marginBottom = '5px';
+                this.gpOptionsCard = new MICSR.Card(this.lootSelectCard.container, '', '200px');
+                this.gpOptionsCard.addSectionTitle('Item Subset Selection');
+                this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
+                this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
+                this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
+                // Top labels
+                const labelCont = document.createElement('div');
+                labelCont.className = 'mcsMultiButtonContainer';
+                labelCont.style.borderBottom = 'solid thin';
+                const lab1 = document.createElement('div');
+                lab1.className = 'mcsMultiHeader';
+                lab1.style.borderRight = 'solid thin';
+                lab1.textContent = 'Item';
+                lab1.style.width = '218px';
+                labelCont.appendChild(lab1);
+                const lab2 = document.createElement('div');
+                lab2.className = 'mcsMultiHeader';
+                lab2.textContent = 'Sell';
+                lab2.style.width = '124px';
+                labelCont.appendChild(lab2);
+                this.gpOptionsCard.container.appendChild(labelCont);
+                this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
+                for (let i = 0; i < this.loot.lootList.length; i++) {
+                    this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
                 }
+                this.gpSearchResults.container.style.width = '100%';
+                this.gpSearchResults.container.style.overflowY = 'scroll';
+                this.gpSearchResults.container.style.overflowX = 'hidden';
+                this.gpSearchResults.container.style.marginRight = '0px';
+                this.gpSearchResults.container.style.marginBottom = '5px';
             }
 
             buildItemDropList() {
                 // construct map
                 const lootMap = {};
-                MONSTERS.forEach(x => {
-                    if (x.lootTable) {
-                        x.lootTable.forEach(entry => lootMap[entry[0]] = true);
+                const addToLootMap = (monster) => {
+                    if (monster.lootTable) {
+                        monster.lootTable.forEach(entry => {
+                            const itemID = entry[0];
+                            lootMap[itemID] = true;
+                        });
                     }
-                });
+                };
+                if (this.dropListFilters.selectedMonster) {
+                    if (!this.isViewingDungeon) {
+                        if (this.barIsDungeon(this.selectedBar)) {
+                            const dungeonID = this.barMonsterIDs[this.selectedBar];
+                            const monsters = DUNGEONS[dungeonID].monsters;
+                            const bossID = monsters[monsters.length - 1];
+                            addToLootMap(MONSTERS[bossID]);
+                        } else if (this.barIsTask(this.selectedBar)) {
+                            const taskID = this.barMonsterIDs[this.selectedBar] - DUNGEONS.length;
+                            const monsters = this.simulator.slayerTaskMonsters[taskID];
+                            monsters.map(id => MONSTERS[id]).forEach(monster => addToLootMap(monster));
+                        } else {
+                            addToLootMap(MONSTERS[this.barMonsterIDs[this.selectedBar]]);
+                        }
+                    }
+                } else {
+                    MONSTERS.forEach(monster => addToLootMap(monster));
+                }
                 // construct list
-                const lootList = Object.getOwnPropertyNames(lootMap);
+                let lootList = Object.getOwnPropertyNames(lootMap).map(x => parseInt(x));
+                // apply undiscovered filter
+                if (this.dropListFilters.onlyUndiscovered) {
+                    lootList = lootList.filter(itemID => {
+                        return itemStats[itemID].stats[CONSTANTS.itemStats.timesFound] === 0;
+                    });
+                }
                 // sort by name
-                return lootList.sort((a, b) => items[a].name > items[b].name);
+                return [-1, ...lootList.sort((a, b) => items[a].name > items[b].name)];
             }
 
             dropChanceOnChange(event) {
                 this.combatData.dropSelected = parseInt(event.currentTarget.selectedOptions[0].value);
+                this.updatePlotForLoot();
+            }
+
+            getSelectedDropLabel() {
+                if (this.combatData.dropSelected === -1) {
+                    return `Drops/${this.selectedTimeShorthand}`;
+                }
+                return `${this.getItemName(this.combatData.dropSelected, -1)}/${this.selectedTimeShorthand}`;
             }
 
             createEquipmentStatCard() {
@@ -1937,9 +2024,12 @@
                 // Update zone info card time units
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     const name = this.plotTypes[i].info;
+                    const value = this.plotTypes[i].value;
                     let newName = '';
-                    if (name === ' Pet Chance/') {
+                    if (value === 'petChance') {
                         newName = this.skillShorthand[this.loot.petSkill] + name + this.selectedTimeShorthand;
+                    } else if (value === 'dropChance') {
+                        newName = this.getSelectedDropLabel();
                     } else if (this.plotTypes[i].isTime) {
                         newName = name + this.selectedTimeShorthand;
                     }
@@ -2059,6 +2149,7 @@
                     this.plotter.inspectButton.style.display = 'none';
                 }
                 this.updateZoneInfoCard();
+                this.createLootOptionsCard();
             }
 
             /**
@@ -2407,6 +2498,18 @@
             }
 
             /**
+             * Updates the simulator display for when a loot option is changed
+             */
+            updatePlotForLoot() {
+                document.getElementById('MCS Drops/h Label').textContent = this.getSelectedDropLabel();
+                this.loot.updateDropChance();
+                if (this.plotter.plotType === 'dropChance') {
+                    this.updatePlotData();
+                }
+                this.updateZoneInfoCard();
+            }
+
+            /**
              * Updates the simulator display for when the slayer task option is changed
              */
             updatePlotForSlayerXP() {
@@ -2659,8 +2762,8 @@
              * @param {number} itemID The index of items
              * @return {string} The name of an item
              */
-            getItemName(itemID) {
-                if (itemID === 0) {
+            getItemName(itemID, defaultItemID = 0) {
+                if (itemID === defaultItemID) {
                     return 'None';
                 } else if (!items[itemID]) {
                     MICSR.warn(`Invalid itemID ${itemID} in getItemName`);
@@ -2690,6 +2793,7 @@
 
             /** Updates the display post simulation */
             updateDisplayPostSim() {
+                this.createLootOptionsCard(); // update in case slayer task monsters changed
                 this.updatePlotData();
                 this.updateZoneInfoCard();
                 if (this.isViewingDungeon) {

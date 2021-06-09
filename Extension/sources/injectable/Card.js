@@ -225,6 +225,7 @@
                 const newDropdown = this.createDropdown(optionText, optionValues, dropDownID, onChangeCallback);
                 newCCContainer.appendChild(newDropdown);
                 this.container.appendChild(newCCContainer);
+                return newDropdown;
             }
 
             /**
