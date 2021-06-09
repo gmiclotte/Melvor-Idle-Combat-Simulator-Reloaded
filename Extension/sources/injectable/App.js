@@ -941,6 +941,10 @@
                         monster.lootTable.forEach(entry => {
                             const itemID = entry[0];
                             lootMap[itemID] = true;
+                            const dropTable = items[itemID].dropTable;
+                            if (dropTable) {
+                                dropTable.forEach(x => lootMap[x[0]] = true);
+                            }
                         });
                     }
                 };

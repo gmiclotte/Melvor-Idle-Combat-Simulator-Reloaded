@@ -735,9 +735,21 @@
                 monsterData.lootTable.forEach(drop => {
                     const itemId = drop[0];
                     totalChances += drop[1];
-                    if (itemId == this.app.combatData.dropSelected) {
-                        selectedChance = drop[1];
-                        selectedCount = drop[2];
+                    if (itemId === this.app.combatData.dropSelected) {
+                        selectedChance += drop[1];
+                        selectedCount += drop[2];
+                    }
+                    const dropTable = items[itemId].dropTable;
+                    if (dropTable) {
+                        const chestSum = dropTable.reduce((acc, x) => acc + x[1], 0);
+                        dropTable.forEach((x, i) => {
+                            const chestItemId = x[0];
+                            if (chestItemId === this.app.combatData.dropSelected) {
+                                const weight = x[1];
+                                selectedChance += drop[1] * weight / chestSum;
+                                selectedCount += drop[2] * items[itemId].dropQty[i];
+                            }
+                        });
                     }
                 })
                 return {
