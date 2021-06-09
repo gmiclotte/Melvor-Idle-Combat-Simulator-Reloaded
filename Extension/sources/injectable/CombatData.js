@@ -177,6 +177,8 @@
                 this.applyEnemyStunSleepDamage = true;
                 // enable summoning synergy
                 this.summoningSynergy = true;
+                // selected item drop
+                this.dropSelected = 0;
             }
 
             /**

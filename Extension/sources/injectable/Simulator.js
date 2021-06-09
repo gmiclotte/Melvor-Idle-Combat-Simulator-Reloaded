@@ -80,6 +80,7 @@
                         attacksMadePerSecond: 0,
                         simulationTime: 0,
                         petChance: 0,
+                        dropChance: 0,
                     };
                     if (monster) {
                         data.inQueue = false;
@@ -274,7 +275,7 @@
                 // loot bonus
                 currentSim.lootBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat')
-                    + MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleItemsGlobal'),
+                    + MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleItemsGlobal')
                 );
                 currentSim.lootBonus = Math.max(1, currentSim.lootBonus);
                 currentSim.lootBonus = Math.min(2, currentSim.lootBonus);

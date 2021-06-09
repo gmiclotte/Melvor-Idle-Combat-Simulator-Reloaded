@@ -89,6 +89,7 @@
                 addPlotOption('Kills per ', true, 'killsPerSecond', 'Kills/');
                 // loot gains
                 addPlotOption('GP per ', true, 'gpPerSecond', 'GP/');
+                addPlotOption('Drops per', true, 'dropChance', 'Drops/');
                 addPlotOption('Chance for Signet Part B(%)', false, 'signetChance', 'Signet Chance (%)');
                 addPlotOption('Pet Chance per ', true, 'petChance', ' Pet Chance/');
                 addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
@@ -159,6 +160,7 @@
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
                     statistics: 'assets/media/main/statistics_header.svg',
+                    drops: 'assets/media/bank/chapeau_noir.svg',
                     summoning: 'assets/media/skills/summoning/summoning.svg',
                 };
 
@@ -827,7 +829,7 @@
             }
 
             createGPOptionsCard() {
-                this.gpSelectCard = this.mainTabCard.addTab('GP Options', this.media.gp, '', '150px');
+                this.gpSelectCard = this.mainTabCard.addTab('GP & Drop Options', this.media.gp, '', '150px');
                 this.gpSelectCard.addSectionTitle('GP/s Options');
                 this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
                 this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
@@ -866,6 +868,26 @@
                     this.gpSearchResults.container.style.marginRight = '0px';
                     this.gpSearchResults.container.style.marginBottom = '5px';
                 }
+                this.gpSelectCard.addSectionTitle('Drop Chance Options');
+
+                const droppedItems = this.buildItemDropList()
+                this.gpSelectCard.addDropdown('Choose Item', droppedItems.map((itemID) => items[itemID].name), droppedItems, (event) => this.dropChanceOnChange(event))
+            }
+
+            buildItemDropList() {
+                return MONSTERS.reduce((acc, curr) => {
+                    if (curr.lootTable) {
+                        curr.lootTable.map((tableRow) => tableRow[0])
+                            .filter((item) => acc.indexOf(item) === -1)
+                            .forEach((item) => acc.push(item))
+                    }
+                    return acc
+                }, []).sort((a, b) => a < b ? -1 : 1)
+            }
+
+            dropChanceOnChange(event) {
+                const idx = parseInt(event.currentTarget.selectedOptions[0].value)
+                this.combatData.dropSelected = idx;
             }
 
             createEquipmentStatCard() {
@@ -2392,6 +2414,17 @@
             updatePlotForSignetChance() {
                 this.loot.updateSignetChance();
                 if (this.plotter.plotType === 'signetChance') {
+                    this.updatePlotData();
+                }
+                this.updateZoneInfoCard();
+            }
+
+            /**
+             * Updates the simulator display for when the drop chance time option is changed
+             */
+            updatePlotForDropChance() {
+                this.loot.updateDropChance();
+                if (this.plotter.plotType === 'dropChance') {
                     this.updatePlotData();
                 }
                 this.updateZoneInfoCard();
