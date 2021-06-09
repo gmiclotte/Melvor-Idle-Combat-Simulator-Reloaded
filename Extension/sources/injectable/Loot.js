@@ -532,13 +532,7 @@
                     }
                     // slayer tasks
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        if (this.slayerSimData[i].simSuccess) {
-                            let sum = 0;
-                            for (const monsterID of this.slayerTaskMonsters[i]) {
-                                sum += this.monsterSimData[monsterID].gpPerSecond;
-                            }
-                            this.slayerSimData[i].gpPerSecond = sum / this.slayerTaskMonsters[i].length;
-                        }
+                        this.setSlayerTaskAverageDropRate('gpPerSecond', i);
                     }
                 }
             }
@@ -585,13 +579,7 @@
                 });
                 // auto slayer
                 for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                    let sum = 0;
-                    let time = 0;
-                    for (const monsterID of this.slayerTaskMonsters[i]) {
-                        sum += this.monsterSimData[monsterID].slayerXpPerSecond * this.monsterSimData[monsterID].killTimeS;
-                        time += this.monsterSimData[monsterID].killTimeS;
-                    }
-                    this.slayerSimData[i].slayerXpPerSecond = sum / time;
+                    this.setSlayerTaskAverageDropRate('slayerXpPerSecond', i);
                 }
             }
 
@@ -642,13 +630,7 @@
                 });
                 // auto slayer
                 for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                    let sum = 0;
-                    let time = 0
-                    for (const monsterID of this.slayerTaskMonsters[i]) {
-                        sum += this.monsterSimData[monsterID].slayerCoinsPerSecond * this.monsterSimData[monsterID].killTimeS;
-                        time += this.monsterSimData[monsterID].killTimeS;
-                    }
-                    this.slayerSimData[i].slayerCoinsPerSecond = sum / time;
+                    this.setSlayerTaskAverageDropRate('slayerCoinsPerSecond', i);
                 }
             }
 
@@ -684,11 +666,7 @@
                         area.monsters.forEach((monsterID) => updateMonsterHerbloreXP(monsterID));
                     });
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        let sum = 0;
-                        for (const monsterID of this.slayerTaskMonsters[i]) {
-                            sum += this.monsterSimData[monsterID].herbloreXPPerSecond;
-                        }
-                        this.slayerSimData[i].herbloreXPPerSecond = sum / this.slayerTaskMonsters[i].length;
+                        this.setSlayerTaskAverageDropRate('herbloreXPPerSecond', i);
                     }
                 }
             }
@@ -711,7 +689,6 @@
                         }
                         const dropRateResult = this.getDropRate(monsterID);
                         const dropRate = dropRateResult.lootChance;
-                        // TODO: This does not take item doubling into account, AT ALL
                         // On average, an item with up to `n` drops will drop `(n + 1) / 2` items
                         const dropCount = Math.max((dropRateResult.maxDropAmt + 1) / 2, 1);
                         const itemDoubleChance = this.currentSim.lootBonus;
@@ -727,15 +704,26 @@
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach(monsterID => updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]));
                     });
+                    // compute dungeon drop rates
                     for (let i = 0; i < DUNGEONS.length; i++) {
                         const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
                         updateMonsterDropChance(monsterID, this.dungeonSimData[i]);
                     }
+                    // compute auto slayer drop rates
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        // TODO: drop chance rolls for auto slayer
-                        this.slayerSimData[i].dropChance = undefined;
+                        this.setSlayerTaskAverageDropRate('dropChance', i);
                     }
                 }
+            }
+
+            setSlayerTaskAverageDropRate(property, taskID) {
+                let drops = 0;
+                let killTime = 0;
+                for (const monsterID of this.slayerTaskMonsters[taskID]) {
+                    drops += this.monsterSimData[monsterID][property] * this.monsterSimData[monsterID].killTimeS;
+                    killTime += this.monsterSimData[monsterID].killTimeS;
+                }
+                this.slayerSimData[taskID][property] = drops / killTime;
             }
 
             getDropRate(monsterId) {
