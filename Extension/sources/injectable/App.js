@@ -876,19 +876,21 @@
             }
 
             buildItemDropList() {
-                return MONSTERS.reduce((acc, curr) => {
-                    if (curr.lootTable) {
-                        curr.lootTable.map((tableRow) => tableRow[0])
-                            .filter((item) => acc.indexOf(item) === -1)
-                            .forEach((item) => acc.push(item))
+                // construct map
+                const lootMap = {};
+                MONSTERS.forEach(x => {
+                    if (x.lootTable) {
+                        x.lootTable.forEach(entry => lootMap[entry[0]] = true);
                     }
-                    return acc
-                }, []).sort((a, b) => a < b ? -1 : 1)
+                });
+                // construct list
+                const lootList = Object.getOwnPropertyNames(lootMap);
+                // sort by name
+                return lootList.sort((a, b) => items[a].name > items[b].name);
             }
 
             dropChanceOnChange(event) {
-                const idx = parseInt(event.currentTarget.selectedOptions[0].value)
-                this.combatData.dropSelected = idx;
+                this.combatData.dropSelected = parseInt(event.currentTarget.selectedOptions[0].value);
             }
 
             createEquipmentStatCard() {
