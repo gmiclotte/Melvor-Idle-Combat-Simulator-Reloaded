@@ -558,6 +558,8 @@
                     'Evasion Rating',
                     'Max Hitpoints',
                     'Damage Reduction',
+                    'Drop Doubling (%)',
+                    'GP Multiplier',
                 ];
                 const combatStatIcons = [
                     '',
@@ -567,6 +569,8 @@
                     this.media.attack,
                     this.media.ranged,
                     this.media.magic,
+                    '',
+                    '',
                     '',
                     '',
                 ];
@@ -580,6 +584,8 @@
                     'maxMagDefRoll',
                     'maxHitpoints',
                     'damageReduction',
+                    'lootBonusPercent',
+                    'gpBonus',
                 ];
                 for (let i = 0; i < combatStatNames.length; i++) {
                     this.combatStatCard.addNumberOutput(combatStatNames[i], 0, 20, (combatStatIcons[i] !== '') ? combatStatIcons[i] : '', `MCS ${this.combatStatKeys[i]} CS Output`);

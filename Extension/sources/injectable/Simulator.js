@@ -266,19 +266,11 @@
                 // base gp increase
                 currentSim.increasedGP = MICSR.getModifierValue(combatData.modifiers, 'GPFromMonstersFlat');
                 // multiplier gp increase
-                currentSim.gpBonus = MICSR.averageDoubleMultiplier(
-                    MICSR.getModifierValue(combatData.modifiers, 'GPFromMonsters')
-                    + MICSR.getModifierValue(combatData.modifiers, 'GPGlobal')
-                );
+                currentSim.gpBonus = combatData.combatStats.gpBonus;
                 // check for ARS drop
                 currentSim.canTopazDrop = combatData.equipmentSelected.includes(CONSTANTS.item.Gold_Topaz_Ring);
                 // loot bonus
-                currentSim.lootBonus = MICSR.averageDoubleMultiplier(
-                    MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleLootCombat')
-                    + MICSR.getModifierValue(combatData.modifiers, 'ChanceToDoubleItemsGlobal')
-                );
-                currentSim.lootBonus = Math.max(1, currentSim.lootBonus);
-                currentSim.lootBonus = Math.min(2, currentSim.lootBonus);
+                currentSim.lootBonus = combatData.combatStats.lootBonus;
                 // misc
                 currentSim.herbConvertChance = combatData.luckyHerb / 100;
                 currentSim.doBonesAutoBury = (combatData.equipmentSelected.includes(CONSTANTS.item.Bone_Necklace));

@@ -122,6 +122,9 @@
                     maxHitpoints: 0,
                     ammoPreservation: 0,
                     runePreservation: 0,
+                    lootBonusPercent: 0,
+                    lootBonus: 0,
+                    gpBonus: 0,
                 };
                 // Prayer Stats
                 /** @type {boolean[]} */
@@ -647,6 +650,20 @@
                 /*
                 Second, start computing and configuring TODO: extract this
                  */
+
+                // loot doubling
+                this.combatStats.lootBonusPercent = MICSR.getModifierValue(this.modifiers, 'ChanceToDoubleLootCombat')
+                    + MICSR.getModifierValue(this.modifiers, 'ChanceToDoubleItemsGlobal');
+                // loot doubling is always between 0% and 100% chance
+                this.combatStats.lootBonusPercent = Math.max(0, this.combatStats.lootBonusPercent);
+                this.combatStats.lootBonusPercent = Math.min(100, this.combatStats.lootBonusPercent);
+                // convert to average loot multiplier
+                this.combatStats.lootBonus = MICSR.averageDoubleMultiplier(this.combatStats.lootBonusPercent);
+                // gp bonus
+                this.combatStats.gpBonus = MICSR.averageDoubleMultiplier(
+                    MICSR.getModifierValue(this.modifiers, 'GPFromMonsters')
+                    + MICSR.getModifierValue(this.modifiers, 'GPGlobal')
+                );
 
                 // set enemy spawn timer
                 this.enemySpawnTimer = enemySpawnTimer + MICSR.getModifierValue(modifiers, 'MonsterRespawnTimer');
