@@ -160,7 +160,7 @@
                     agility: 'assets/media/skills/agility/agility.svg',
                     mastery: 'assets/media/main/mastery_header.svg',
                     statistics: 'assets/media/main/statistics_header.svg',
-                    drops: 'assets/media/bank/chapeau_noir.svg',
+                    loot: 'assets/media/bank/chapeau_noir.svg',
                     summoning: 'assets/media/skills/summoning/summoning.svg',
                 };
 
@@ -256,7 +256,7 @@
                 this.createPotionSelectCard();
                 this.createPetSelectCard();
                 this.createAgilitySelectCard();
-                this.createGPOptionsCard();
+                this.createLootOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
                 this.createCompareCard();
@@ -828,16 +828,21 @@
                 this.agilitySelectCard.container.appendChild(dropDownContainer);
             }
 
-            createGPOptionsCard() {
-                this.gpSelectCard = this.mainTabCard.addTab('GP & Drop Options', this.media.gp, '', '150px');
-                this.gpSelectCard.addSectionTitle('GP/s Options');
-                this.gpSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
-                this.gpSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
-                this.gpSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
-                this.gpSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
+            createLootOptionsCard() {
+                this.lootSelectCard = this.mainTabCard.addTab('Loot Options', this.media.loot, '', '150px');
+                // drop chance options
+                this.lootSelectCard.addSectionTitle('Drop Chance Options');
+                const droppedItems = this.buildItemDropList()
+                this.lootSelectCard.addDropdown('Choose Item', droppedItems.map((itemID) => items[itemID].name), droppedItems, (event) => this.dropChanceOnChange(event))
+                // gp options
+                this.lootSelectCard.addSectionTitle('GP/s Options');
+                this.lootSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
+                this.lootSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
+                this.lootSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
+                this.lootSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
                 // GP/s options card
                 {
-                    this.gpOptionsCard = new MICSR.Card(this.gpSelectCard.container, '', '200px');
+                    this.gpOptionsCard = new MICSR.Card(this.lootSelectCard.container, '', '200px');
                     this.gpOptionsCard.addSectionTitle('Item Subset Selection');
                     this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
                     this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
@@ -868,10 +873,6 @@
                     this.gpSearchResults.container.style.marginRight = '0px';
                     this.gpSearchResults.container.style.marginBottom = '5px';
                 }
-                this.gpSelectCard.addSectionTitle('Drop Chance Options');
-
-                const droppedItems = this.buildItemDropList()
-                this.gpSelectCard.addDropdown('Choose Item', droppedItems.map((itemID) => items[itemID].name), droppedItems, (event) => this.dropChanceOnChange(event))
             }
 
             buildItemDropList() {
