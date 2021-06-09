@@ -692,7 +692,7 @@
                         // On average, an item with up to `n` drops will drop `(n + 1) / 2` items
                         const dropCount = Math.max((dropRateResult.maxDropAmt + 1) / 2, 1);
                         const itemDoubleChance = this.currentSim.lootBonus;
-                        data.dropChance = (dropRate * dropCount * itemDoubleChance) / this.monsterSimData[monsterID].killTimeS;
+                        data.dropChance = (dropRate * dropCount * itemDoubleChance) / data.killTimeS;
                     };
 
                     // Set data for monsters in combat zones
