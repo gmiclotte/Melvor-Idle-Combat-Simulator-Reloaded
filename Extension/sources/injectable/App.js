@@ -1836,12 +1836,20 @@
              */
             sellLootDropdownOnChange(event) {
                 this.loot.sellLoot = event.currentTarget.value;
-                if (this.loot.sellLoot === 'Subset') {
-                    document.getElementById('MCS Edit Subset Button').style.display = 'block';
-                } else {
-                    document.getElementById('MCS Edit Subset Button').style.display = 'none';
-                }
+                this.setEditSubsetDisplay();
                 this.updatePlotForGP();
+            }
+
+            setEditSubsetDisplay() {
+                const button = document.getElementById('MCS Edit Subset Button');
+                if (!button) {
+                    return;
+                }
+                if (this.loot.sellLoot === 'Subset') {
+                    button.style.display = 'block';
+                } else {
+                    button.style.display = 'none';
+                }
             }
 
             /**
