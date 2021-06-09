@@ -2178,8 +2178,8 @@
                 this.plotter.updateBarData(this.simulator.getDataSet(this.plotter.plotType));
             }
 
-            setZoneInfoCard(title, media, data) {
-                document.getElementById('MCS Zone Info Title').textContent = title;
+            setZoneInfoCard(title, id, media, data) {
+                document.getElementById('MCS Zone Info Title').textContent = `${title} (id ${id})`;
                 document.getElementById('MCS Info Image').src = media;
                 const updateInfo = data.simSuccess;
                 for (let i = 0; i < this.plotTypes.length; i++) {
@@ -2210,6 +2210,7 @@
                         const dungeonID = this.barMonsterIDs[this.selectedBar];
                         this.setZoneInfoCard(
                             this.getDungeonName(dungeonID),
+                            dungeonID,
                             DUNGEONS[dungeonID].media,
                             this.simulator.dungeonSimData[dungeonID],
                         );
@@ -2217,6 +2218,7 @@
                         const taskID = this.barMonsterIDs[this.selectedBar] - DUNGEONS.length;
                         this.setZoneInfoCard(
                             this.slayerTasks[taskID].display,
+                            taskID,
                             SKILLS[CONSTANTS.skill.Slayer].media,
                             this.simulator.slayerSimData[taskID],
                         );
@@ -2230,6 +2232,7 @@
                         }
                         this.setZoneInfoCard(
                             this.getMonsterName(monsterID),
+                            monsterID,
                             MONSTERS[monsterID].media,
                             this.simulator.monsterSimData[monsterID],
                         );
