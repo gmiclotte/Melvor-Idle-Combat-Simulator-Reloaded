@@ -411,6 +411,9 @@
                             simSuccess: false,
                             reason: 'too many actions',
                             monsterID: stats.enemy.monsterID,
+                            innerCount: innerCount,
+                            actionsTaken: player.actionsTaken,
+                            maxActions: maxActions,
                         }
                     }
                 } else {
