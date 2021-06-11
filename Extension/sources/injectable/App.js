@@ -559,6 +559,7 @@
                     'Attack Speed',
                     'Min Hit',
                     'Max Hit',
+                    'Summoning Max Hit',
                     'Accuracy Rating',
                     'Evasion Rating',
                     'Evasion Rating',
@@ -569,6 +570,7 @@
                     'GP Multiplier',
                 ];
                 const combatStatIcons = [
+                    '',
                     '',
                     '',
                     '',
@@ -585,6 +587,7 @@
                     'attackSpeed',
                     'minHit',
                     'maxHit',
+                    'summoningMaxHit',
                     'maxAttackRoll',
                     'maxDefRoll',
                     'maxRngDefRoll',
