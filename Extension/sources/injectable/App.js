@@ -375,6 +375,9 @@
             setSummoningSynergyText() {
                 // set image
                 const img = document.getElementById('MCS Summoning Synergy Button Image');
+                if (!img) {
+                    return;
+                }
                 if (this.combatData.summoningSynergy) {
                     img.src = this.media.synergy;
                 } else {
@@ -382,6 +385,9 @@
                 }
                 // set text
                 const text = document.getElementById('MCS Summoning Synergy Info');
+                if (!text) {
+                    return;
+                }
                 if (!this.combatData.summoningSynergy) {
                     text.textContent = 'Synergy locked';
                     return;
