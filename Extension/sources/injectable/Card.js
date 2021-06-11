@@ -444,8 +444,29 @@
                 container.appendChild(newCCContainer);
             }
 
-            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25, callBack = () => {
-            }) {
+            addImageToggleWithInfo(imgSrc, id, callBack, text, size = 'Medium', tooltip = '') {
+                const container = this.createCCContainer();
+                // image
+                const img = this.createImageButton(imgSrc, id, callBack, size, tooltip);
+                container.appendChild(img);
+                // filled to push icon to the left and text to the righ
+                const filler = document.createElement('p');
+                filler.style.flexGrow = '1';
+                container.appendChild(filler);
+                // text
+                const span = document.createElement('span');
+                span.textContent = text;
+                span.className = 'mcsInfoText';
+                if (id) {
+                    span.id = `MCS ${id} Info`;
+                }
+                span.style.display = 'block';
+                container.appendChild(span);
+                // push container to parent
+                this.container.appendChild(container);
+            }
+
+            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25, callBack = () => {}) {
                 const yesToggle = () => {
                     object[flag] = true;
                     callBack();

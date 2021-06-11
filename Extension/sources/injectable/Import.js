@@ -369,10 +369,8 @@
                 // Update summoningSynergy
                 if (summoningSynergy) {
                     this.app.combatData.summoningSynergy = true;
-                    document.getElementById('MCS Activate Synergy Radio Yes').checked = true;
                 } else {
                     this.app.combatData.summoningSynergy = false;
-                    document.getElementById('MCS Activate Synergy Radio No').checked = true;
                 }
             }
 

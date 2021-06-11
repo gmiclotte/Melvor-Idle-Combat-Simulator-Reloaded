@@ -162,6 +162,8 @@
                     statistics: 'assets/media/main/statistics_header.svg',
                     loot: 'assets/media/bank/chapeau_noir.svg',
                     summoning: 'assets/media/skills/summoning/summoning.svg',
+                    synergy: 'assets/media/skills/summoning/synergy.svg',
+                    synergyLock: 'assets/media/skills/summoning/synergy_locked.svg',
                 };
 
                 // Forced equipment sorting
@@ -370,6 +372,34 @@
                 });
             }
 
+            setSummoningSynergyText() {
+                // set image
+                const img = document.getElementById('MCS Summoning Synergy Button Image');
+                if (this.combatData.summoningSynergy) {
+                    img.src = this.media.synergy;
+                } else {
+                    img.src = this.media.synergyLock;
+                }
+                // set text
+                const text = document.getElementById('MCS Summoning Synergy Info');
+                if (!this.combatData.summoningSynergy) {
+                    text.textContent = 'Synergy locked';
+                    return;
+                }
+                const summLeft = this.equipmentSelected[MICSR.equipmentSlot.Summon];
+                const summRight = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
+                if (summLeft > 0 && summRight > 0 && summLeft !== summRight) {
+                    const min = Math.min(items[summLeft].summoningID, items[summRight].summoningID);
+                    const max = Math.max(items[summLeft].summoningID, items[summRight].summoningID);
+                    const synergy = SUMMONING.Synergies[min][max];
+                    if (synergy) {
+                        text.textContent = synergy.description;
+                        return;
+                    }
+                }
+                text.textContent = 'No synergy possible.';
+            }
+
             createEquipmentSelectCard() {
                 this.equipmentSelectCard = new MICSR.Card(this.topContent, '', '150px', true);
                 const equipmentRows = [
@@ -401,13 +431,16 @@
                     });
                     this.equipmentSelectCard.addMultiPopupMenu(rowSources, rowIDs, rowPopups, tooltips);
                 });
-                this.equipmentSelectCard.addToggleRadio(
-                    'Activate Synergy',
-                    'summoningSynergy',
-                    this.combatData,
-                    'summoningSynergy',
-                    this.combatData.summoningSynergy,
+                this.equipmentSelectCard.addImageToggleWithInfo(
+                    this.media.synergyLock,
+                    'Summoning Synergy',
+                    () => {
+                        this.combatData.summoningSynergy = !this.combatData.summoningSynergy;
+                        this.setSummoningSynergyText();
+                    },
+                    'Synergy locked.',
                 );
+
                 // Style dropdown (Specially Coded)
                 const combatStyleCCContainer = this.equipmentSelectCard.createCCContainer();
                 const combatStyleLabel = this.equipmentSelectCard.createLabel('Combat Style', '');
@@ -2491,6 +2524,7 @@
                         document.getElementById(`MCS ${key} CS Output`).textContent = this.combatData.combatStats[key].toLocaleString();
                     }
                 });
+                this.setSummoningSynergyText();
             }
 
             /**
