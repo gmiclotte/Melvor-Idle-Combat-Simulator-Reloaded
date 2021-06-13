@@ -1931,7 +1931,7 @@
                 actorStats.specialData[0].forceHit = maxAttackRoll > 20000;
                 actorStats.specialData[0].checkForceHit = true;
             }
-            setEvasionDebuffsEnemy(stats, target);
+            setEvasionDebuffsEnemy(stats, target, actor);
         }
         // determine relevant defence roll
         let targetDefRoll;
@@ -2034,12 +2034,22 @@
      * Modifies the stats of the enemy by the curse
      * @param {stats.enemy} stats.enemy
      * @param {Object} enemy
+     * @param {Object} player
      */
-    function setEvasionDebuffsEnemy(stats, enemy) {
+    function setEvasionDebuffsEnemy(stats, enemy, player) {
         const isCursed = enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split');
-        enemy.maxDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumDefenceRoll, enemy.decreasedMeleeEvasion, enemy.meleeEvasionBuff, isCursed ? enemy.curse.meleeEvasionDebuff : 0);
-        enemy.maxRngDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumRangedDefenceRoll, enemy.decreasedRangedEvasion, enemy.rangedEvasionBuff, isCursed ? enemy.curse.rangedEvasionDebuff : 0);
-        enemy.maxMagDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumMagicDefenceRoll, enemy.decreasedMagicEvasion, enemy.magicEvasionBuff, isCursed ? enemy.curse.magicEvasionDebuff : 0);
+        enemy.maxDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumDefenceRoll,
+            mergePlayerModifiers(player, 'EnemyMeleeEvasion', true) + enemy.decreasedMeleeEvasion,
+            enemy.meleeEvasionBuff,
+            isCursed ? enemy.curse.meleeEvasionDebuff : 0);
+        enemy.maxRngDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumRangedDefenceRoll,
+            mergePlayerModifiers(player, 'EnemyRangedEvasion', true) + enemy.decreasedRangedEvasion,
+            enemy.rangedEvasionBuff,
+            isCursed ? enemy.curse.rangedEvasionDebuff : 0);
+        enemy.maxMagDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumMagicDefenceRoll,
+            mergePlayerModifiers(player, 'EnemyMagicEvasion', true) + enemy.decreasedMagicEvasion,
+            enemy.magicEvasionBuff,
+            isCursed ? enemy.curse.magicEvasionDebuff : 0);
     }
 
     function calculateEnemyEvasion(initial, decreasedEvasion, evasionBuff, curseEvasionDebuff) {
