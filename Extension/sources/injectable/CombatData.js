@@ -917,6 +917,10 @@
                 }
                 this.mergeModifiers(this.agilityModifiers, this.modifiers);
 
+                // mimic calculateSummoningSynergyModifiers
+                this.synergyModifiers = this.computeSynergyBonus();
+                this.mergeModifiers(this.synergyModifiers, this.modifiers);
+
                 // mimic calculateShopModifiers
                 // implement other parts of this if they ever are relevant
                 this.autoEatModifiers = {};
@@ -969,6 +973,25 @@
                             break;
                     }
                 }
+            }
+
+            computeSynergyBonus() {
+                if (!this.summoningSynergy) {
+                    return {};
+                }
+                const summons = [
+                    items[this.equipmentSelected[MICSR.equipmentSlot.Summon]].summoningID,
+                    items[this.equipmentSelected[MICSR.equipmentSlot.SummonRight]].summoningID,
+                ];
+                const synergies = SUMMONING.Synergies[Math.min(...summons)];
+                if (!synergies) {
+                    return {};
+                }
+                const synergy = synergies[Math.max(...summons)];
+                if (!synergy) {
+                    return {};
+                }
+                return synergy.modifiers;
             }
 
             /**
