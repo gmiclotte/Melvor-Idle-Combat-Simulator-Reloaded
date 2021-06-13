@@ -26,7 +26,7 @@
 
         const MICSR = window.MICSR;
 
-        MICSR.version = 'v1.4.0-0';
+        MICSR.version = 'v1.4.0-1';
         MICSR.gameVersion = 'Alpha v0.20';
         MICSR.maxActions = 300;
         MICSR.trials = 10000;
