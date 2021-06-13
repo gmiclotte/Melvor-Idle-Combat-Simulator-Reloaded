@@ -718,7 +718,7 @@
         if (canApplyStatus(statusEffect.burnDebuff, target.isBurning)) {
             target.isBurning = true;
             target.burnCount = 0;
-            target.burnDamage = Math.floor((target.maxHitpoints * (statusEffect.burnDebuff / 100)) / target.burnMaxCount);
+            target.burnDamage = Math.floor(target.maxHitpoints * 0.15 / target.burnMaxCount);
             target.burnTimer = target.burnInterval;
         }
         // Apply Bleeding
