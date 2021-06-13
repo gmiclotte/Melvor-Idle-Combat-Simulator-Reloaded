@@ -1452,6 +1452,10 @@
                 + mergePlayerModifiers(player, 'GPFromMonsters') / 100
             );
         }
+        // burn
+        if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn', true)) {
+            attackResult.statusEffect.burnDebuff = 15;
+        }
         // return the result of the attack
         attackResult.attackHits = true;
         attackResult.statusEffect = statusEffect;
