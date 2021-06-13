@@ -1302,6 +1302,7 @@
             stats.totalHpXP += damage / numberMultiplier * 1.33;
             stats.totalPrayerXP += damage * stats.player.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
+            stats.gpGainedFromDamage += mergePlayerModifiers(player, 'GPOnEnemyHit', true);
             if (stats.player.prayerXpPerDamage > 0) {
                 stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
             }
