@@ -512,7 +512,6 @@
         // TODO synergy 8, 14
         // TODO synergy 1, 14
         // TODO synergy 13, 14
-        // TODO synergy 0, 14
         if (player.isHardcore) {
             return;
         }
@@ -527,6 +526,11 @@
         // rapid heal prayer
         if (player.prayerBonus.vars.prayerBonusHitpoints) {
             amt *= player.prayerBonus.vars.prayerBonusHitpoints;
+        }
+        // synergies
+        if (stats.player.combatData.modifiers.summoningSynergy_0_14) {
+            stats.gpGainedFromDamage += 1000 / numberMultiplier * amt
+                * mergePlayerModifiers(player, 'GPGlobal');
         }
         // Regeneration modifiers
         applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
