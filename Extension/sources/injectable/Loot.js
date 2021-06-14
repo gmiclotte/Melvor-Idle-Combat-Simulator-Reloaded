@@ -37,6 +37,7 @@
 
                 // TODO: set some default values ?
                 this.currentSim = {};
+                this.modifiers = {};
                 this.monsterSimData = {};
                 this.dungeonSimData = {};
                 this.slayerSimData = {};
@@ -76,7 +77,12 @@
              * @return {number}
              */
             computeAverageCoins(monsterID) {
-                return Math.max(0, ((MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2 + this.currentSim.increasedGP)) * this.currentSim.gpBonus;
+                let coinsToDrop = Math.max(0, (MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2);
+                coinsToDrop += this.currentSim.increasedGP;
+                let coinDropModifier = this.currentSim.gpBonus;
+                // apply multiplier
+                coinsToDrop *= coinDropModifier;
+                return coinsToDrop;
             }
 
             /**
@@ -458,6 +464,7 @@
             update(currentSim, monsterSimData, dungeonSimData, slayerSimData, slayerTaskMonsters) {
                 if (currentSim !== undefined) {
                     this.currentSim = currentSim;
+                    this.modifiers = currentSim.combatData.modifiers;
                     this.monsterSimData = monsterSimData;
                     this.dungeonSimData = dungeonSimData;
                     this.slayerSimData = slayerSimData;
@@ -613,7 +620,7 @@
                     }
                     const sc = applyModifier(
                         MONSTERS[monsterID].hitpoints,
-                        MICSR.getModifierValue(this.currentSim.combatData.modifiers, 'SlayerCoins')
+                        MICSR.getModifierValue(this.modifiers, 'SlayerCoins')
                     );
                     this.monsterSimData[monsterID].slayerCoinsPerSecond = sc / this.monsterSimData[monsterID].killTimeS;
                 };
