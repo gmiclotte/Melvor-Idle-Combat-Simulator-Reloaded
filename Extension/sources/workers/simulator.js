@@ -629,7 +629,7 @@
         if (isSpecial) {
             setupMultiAttack(enemy, player);
         }
-        enemyDoAttack(stats, player, enemy, isSpecial);
+        enemyDoAttack(stats, player, enemy, isSpecial, true);
         computeTempModifiers(stats, player, -1);
         multiAttackTimer(enemy);
         postAttack(stats, enemy, player, stats.player, stats.enemy);
@@ -667,7 +667,7 @@
             return;
         }
         stats.enemyAttackCalls++;
-        enemyDoAttack(stats, player, enemy, true);
+        enemyDoAttack(stats, player, enemy, true, false);
         multiAttackTimer(enemy);
         postAttack(stats, enemy, player, stats.player, stats.enemy);
         if (!enemy.isAttacking && enemy.intoTheMist) {
@@ -879,7 +879,7 @@
         target.bleedDamage = Math.floor(totalBleedDamage / statusEffect.bleedCount);
     }
 
-    function enemyDoAttack(stats, player, enemy, isSpecial) {
+    function enemyDoAttack(stats, player, enemy, isSpecial, isAttack) {
         let forceHit = false;
         let currentSpecial = enemy.currentSpecial;
         if (isSpecial) {
@@ -958,7 +958,7 @@
         // apply damage //
         //////////////////
         const damage = enemyCalculateDamage(stats, enemy, isSpecial, currentSpecial, player);
-        dealDamage(stats, player, damage, isSpecial ? attackSources.special : attackSources.regular);
+        dealDamage(stats, player, damage, isSpecial ? attackSources.special : attackSources.regular, isAttack);
         //////////////////
         // side effects //
         //////////////////
@@ -1177,7 +1177,7 @@
         }
     }
 
-    function dealDamage(stats, target, damage, attackSource = 0) {
+    function dealDamage(stats, target, damage, attackSource = 0, isAttack = false) {
         if (!target.isPlayer) {
             return dealDamageToEnemy(stats, target, damage, attackSource);
         }
@@ -1186,7 +1186,12 @@
 
         stats.player.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
         target.hitpoints -= Math.floor(damage);
-        // TODO synergy 0, 13
+        // synergy 0, 13
+        if (isAttack && stats.player.combatData.modifiers.summoningSynergy_0_13) {
+            stats.gpGainedFromDamage += stats.player.combatData.modifiers.summoningSynergy_0_13
+                * calculatePlayerDamageReduction(target)
+                * (1 + mergePlayerModifiers(target, 'GPGlobal', true) / 100);
+        }
         // update alive status
         target.alive = target.hitpoints > 0;
         // Check for player eat
