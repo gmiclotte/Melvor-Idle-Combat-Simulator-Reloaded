@@ -1304,7 +1304,6 @@
             stats.totalHpXP += damage / numberMultiplier * 1.33;
             stats.totalPrayerXP += damage * stats.player.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
-            stats.gpGainedFromDamage += mergePlayerModifiers(player, 'GPOnEnemyHit', true);
             if (stats.player.prayerXpPerDamage > 0) {
                 stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
             }
@@ -1846,7 +1845,11 @@
                 * numberMultiplier
                 * (1 + globalGPMultiplier / 100);
         }
+        // other post processing
+        stats.gpGainedFromDamage += stats.playerInflictedHit * mergePlayerModifiers(player, 'GPOnEnemyHit', true);
+        simResult.burningEnemyKilledRate = stats.burningEnemyKilled / trials;
 
+        // convert gains to average rates
         simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
         // xp per second
         const totalTime = (trials - tooManyActions) * enemySpawnTimer + stats.totalTime;
@@ -1903,8 +1906,6 @@
             simResult.killTimeS = NaN;
             simResult.killsPerSecond = 0;
         }
-
-        simResult.burningEnemyKilledRate = stats.burningEnemyKilled / trials;
 
         // Throw pet rolls in here to be further processed later
         Object.keys(stats.petRolls).forEach((petType) =>
