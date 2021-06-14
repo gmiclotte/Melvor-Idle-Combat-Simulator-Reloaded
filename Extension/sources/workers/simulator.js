@@ -1190,7 +1190,7 @@
         if (isAttack && stats.player.combatData.modifiers.summoningSynergy_0_13) {
             stats.gpGainedFromDamage += stats.player.combatData.modifiers.summoningSynergy_0_13
                 * calculatePlayerDamageReduction(target)
-                * (1 + mergePlayerModifiers(target, 'GPGlobal', true) / 100);
+                * (1 + mergePlayerModifiers(target, 'GPGlobal') / 100);
         }
         // update alive status
         target.alive = target.hitpoints > 0;
@@ -1459,7 +1459,7 @@
             );
         }
         // burn
-        if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn', true)) {
+        if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn')) {
             attackResult.statusEffect.burnDebuff = 15;
         }
         // return the result of the attack
@@ -1831,7 +1831,7 @@
         }
 
         // synergies
-        const globalGPMultiplier = mergePlayerModifiers(player, 'GPGlobal', true);
+        const globalGPMultiplier = mergePlayerModifiers(player, 'GPGlobal');
         if (stats.player.isMelee && stats.player.combatData.modifiers.summoningSynergy_0_6) {
             stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
                 * stats.player.combatData.modifiers.summoningSynergy_0_6 / 100
@@ -1851,7 +1851,7 @@
                 * (1 + globalGPMultiplier / 100);
         }
         // other post processing
-        stats.gpGainedFromDamage += stats.playerInflictedHit * mergePlayerModifiers(player, 'GPOnEnemyHit', true);
+        stats.gpGainedFromDamage += stats.playerInflictedHit * mergePlayerModifiers(player, 'GPOnEnemyHit');
         simResult.burningEnemyKilledRate = stats.burningEnemyKilled / trials;
 
         // convert gains to average rates
@@ -2074,15 +2074,15 @@
     function setEvasionDebuffsEnemy(stats, enemy, player) {
         const isCursed = enemy.isCursed && (enemy.curse.type === 'Decay' || enemy.curse.type === 'Soul Split');
         enemy.maxDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumDefenceRoll,
-            mergePlayerModifiers(player, 'EnemyMeleeEvasion', true) + enemy.decreasedMeleeEvasion,
+            mergePlayerModifiers(player, 'EnemyMeleeEvasion') + enemy.decreasedMeleeEvasion,
             enemy.meleeEvasionBuff,
             isCursed ? enemy.curse.meleeEvasionDebuff : 0);
         enemy.maxRngDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumRangedDefenceRoll,
-            mergePlayerModifiers(player, 'EnemyRangedEvasion', true) + enemy.decreasedRangedEvasion,
+            mergePlayerModifiers(player, 'EnemyRangedEvasion') + enemy.decreasedRangedEvasion,
             enemy.rangedEvasionBuff,
             isCursed ? enemy.curse.rangedEvasionDebuff : 0);
         enemy.maxMagDefRoll = calculateEnemyEvasion(stats.enemy.baseMaximumMagicDefenceRoll,
-            mergePlayerModifiers(player, 'EnemyMagicEvasion', true) + enemy.decreasedMagicEvasion,
+            mergePlayerModifiers(player, 'EnemyMagicEvasion') + enemy.decreasedMagicEvasion,
             enemy.magicEvasionBuff,
             isCursed ? enemy.curse.magicEvasionDebuff : 0);
     }
