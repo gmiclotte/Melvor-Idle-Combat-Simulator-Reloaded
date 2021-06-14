@@ -162,6 +162,8 @@
             const setupCommonStats = (stats) => {
                 stats.damageTaken = 0;
                 stats.damageHealed = 0;
+                stats.playerInflictedDamage = 0;
+                stats.playerInflictedHit = 0;
                 stats.tracking = {};
                 Object.getOwnPropertyNames(attackSources).forEach((prop, i) => {
                     stats.tracking[i] = {
@@ -437,7 +439,7 @@
             stats.totalPrayerXP *= 1 + stats.player.prayerXpBonus / 100;
 
             // Final Result from simulation
-            return simulationResult(stats, trials, tooManyActions);
+            return simulationResult(stats, trials, tooManyActions, player);
         };
 
         /**
@@ -1211,7 +1213,7 @@
         }
     }
 
-    function dealDamageToEnemy(stats, enemy, damage, attackSource) {
+    function dealDamageToEnemy(stats, enemy, damage, attackSource, playerHit = false) {
         // apply reductions
         damage = calculateFinalDamageToEnemy(damage, enemy);
 
@@ -1222,9 +1224,10 @@
         stats.player.tracking[attackSource].attacks++;
         stats.player.tracking[attackSource].hits += damage > 0;
         stats.player.tracking[attackSource].damage += damage;
-        // TODO synergy 0, 6
-        // TODO synergy 0, 7
-        // TODO synergy 0, 8
+        if (playerHit && damage > 0) {
+            stats.playerInflictedDamage += damage;
+            stats.playerInflictedHit++;
+        }
 
         // Check for Phoenix Rebirth
         if (!enemy.isPlayer && stats.enemy.passiveID.includes(1) && enemy.hitpoints <= 0) {
@@ -1291,7 +1294,7 @@
     function processPlayerAttackResult(stats, attackResult, player, enemy) {
         // damage
         const damage = dealDamageToEnemy(stats, enemy, attackResult.damageToEnemy,
-            attackResult.isSpecial ? attackSources.special : attackSources.regular);
+            attackResult.isSpecial ? attackSources.special : attackSources.regular, true);
         // XP Tracking
         if (damage > 0) {
             let xpToAdd = damage / numberMultiplier * 4;
@@ -1804,7 +1807,7 @@
         }
     }
 
-    function simulationResult(stats, trials, tooManyActions) {
+    function simulationResult(stats, trials, tooManyActions, player) {
         /** @type {MonsterSimResult} */
         const simResult = {
             simSuccess: true,
@@ -1821,6 +1824,27 @@
             };
             console.log(verboseResult);
             simResult.verbose = verboseResult;
+        }
+
+        // synergies
+        const globalGPMultiplier = mergePlayerModifiers(player, 'GPGlobal', true);
+        if (stats.player.isMelee && stats.player.combatData.modifiers.summoningSynergy_0_6) {
+            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
+                * stats.player.combatData.modifiers.summoningSynergy_0_6 / 100
+                * numberMultiplier
+                * (1 + globalGPMultiplier / 100);
+        }
+        if (stats.player.isRanged && stats.player.combatData.modifiers.summoningSynergy_0_7) {
+            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
+                * stats.player.combatData.modifiers.summoningSynergy_0_7 / 100
+                * numberMultiplier
+                * (1 + globalGPMultiplier / 100);
+        }
+        if (stats.player.isMagic && stats.player.combatData.modifiers.summoningSynergy_0_8) {
+            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
+                * stats.player.combatData.modifiers.summoningSynergy_0_8 / 100
+                * numberMultiplier
+                * (1 + globalGPMultiplier / 100);
         }
 
         simResult.xpPerHit = stats.totalCombatXP / stats.playerAttackCalls;
