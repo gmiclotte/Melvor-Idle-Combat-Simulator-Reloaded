@@ -663,7 +663,7 @@
                 this.combatStats.gpBonus = MICSR.averageDoubleMultiplier(
                     MICSR.getModifierValue(this.modifiers, 'GPFromMonsters')
                     + MICSR.getModifierValue(this.modifiers, 'GPGlobal')
-                    + (this.isSlayerTask ? MICSR.getModifierValue(this.modifiers, 'summoningSynergy_0_12') : 0)
+                    + (this.isSlayerTask ? this.modifiers.summoningSynergy_0_12 : 0)
                 );
 
                 // set enemy spawn timer

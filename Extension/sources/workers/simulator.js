@@ -146,7 +146,7 @@
                 totalCombatXP: 0,
                 totalHpXP: 0,
                 totalPrayerXP: 0,
-                gpGainedFromDamage: 0,
+                gpGained: 0,
                 playerActions: 0,
                 enemyActions: 0,
                 /** @type {PetRolls} */
@@ -154,6 +154,7 @@
                 spellCasts: 0,
                 curseCasts: 0,
                 player: playerStats,
+                combatData: combatData,
                 enemy: enemyStats,
                 burningEnemyKilled: 0,
             };
@@ -162,8 +163,8 @@
             const setupCommonStats = (stats) => {
                 stats.damageTaken = 0;
                 stats.damageHealed = 0;
-                stats.playerInflictedDamage = 0;
-                stats.playerInflictedHit = 0;
+                stats.inflictedDamage = 0;
+                stats.inflictedHits = 0;
                 stats.tracking = {};
                 Object.getOwnPropertyNames(attackSources).forEach((prop, i) => {
                     stats.tracking[i] = {
@@ -528,8 +529,8 @@
             amt *= player.prayerBonus.vars.prayerBonusHitpoints;
         }
         // synergies
-        if (stats.player.combatData.modifiers.summoningSynergy_0_14) {
-            stats.gpGainedFromDamage += 1000 / numberMultiplier * amt
+        if (stats.combatData.modifiers.summoningSynergy_0_14) {
+            stats.gpGained += 1000 / numberMultiplier * amt
                 * mergePlayerModifiers(player, 'GPGlobal');
         }
         // Regeneration modifiers
@@ -1191,8 +1192,8 @@
         stats.player.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
         target.hitpoints -= Math.floor(damage);
         // synergy 0, 13
-        if (isAttack && stats.player.combatData.modifiers.summoningSynergy_0_13) {
-            stats.gpGainedFromDamage += stats.player.combatData.modifiers.summoningSynergy_0_13
+        if (isAttack && stats.combatData.modifiers.summoningSynergy_0_13) {
+            stats.gpGained += stats.combatData.modifiers.summoningSynergy_0_13
                 * calculatePlayerDamageReduction(target)
                 * (1 + mergePlayerModifiers(target, 'GPGlobal') / 100);
         }
@@ -1234,8 +1235,8 @@
         stats.player.tracking[attackSource].hits += damage > 0;
         stats.player.tracking[attackSource].damage += damage;
         if (playerHit && damage > 0) {
-            stats.playerInflictedDamage += damage;
-            stats.playerInflictedHit++;
+            stats.player.inflictedDamage += damage;
+            stats.player.inflictedHits++;
         }
 
         // Check for Phoenix Rebirth
@@ -1456,7 +1457,7 @@
                 gpMultiplier = confettiCrossbow.gpMultiplierMin;
             }
             const damageToUse = Math.min(enemy.hitpoints, attackResult.damageToEnemy) * 10 / numberMultiplier;
-            stats.gpGainedFromDamage += damageToUse * gpMultiplier * (
+            stats.gpGained += damageToUse * gpMultiplier * (
                 1
                 + mergePlayerModifiers(player, 'GPGlobal') / 100
                 + mergePlayerModifiers(player, 'GPFromMonsters') / 100
@@ -1834,28 +1835,39 @@
             simResult.verbose = verboseResult;
         }
 
+        const successes = trials - stats.player.deaths;
+
         // synergies
-        const globalGPMultiplier = mergePlayerModifiers(player, 'GPGlobal');
-        if (stats.player.isMelee && stats.player.combatData.modifiers.summoningSynergy_0_6) {
-            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
-                * stats.player.combatData.modifiers.summoningSynergy_0_6 / 100
+        const globalGPMultiplier = 1 + mergePlayerModifiers(player, 'GPGlobal') / 100;
+        if (stats.player.isMelee && stats.combatData.modifiers.summoningSynergy_0_6) {
+            stats.gpGained += stats.player.inflictedDamage / 10
+                * stats.combatData.modifiers.summoningSynergy_0_6 / 100
                 * numberMultiplier
-                * (1 + globalGPMultiplier / 100);
+                * globalGPMultiplier;
         }
-        if (stats.player.isRanged && stats.player.combatData.modifiers.summoningSynergy_0_7) {
-            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
-                * stats.player.combatData.modifiers.summoningSynergy_0_7 / 100
+        if (stats.player.isRanged && stats.combatData.modifiers.summoningSynergy_0_7) {
+            stats.gpGained += stats.player.inflictedDamage / 10
+                * stats.combatData.modifiers.summoningSynergy_0_7 / 100
                 * numberMultiplier
-                * (1 + globalGPMultiplier / 100);
+                * globalGPMultiplier;
         }
-        if (stats.player.isMagic && stats.player.combatData.modifiers.summoningSynergy_0_8) {
-            stats.gpGainedFromDamage += stats.playerInflictedDamage / 10
-                * stats.player.combatData.modifiers.summoningSynergy_0_8 / 100
+        if (stats.player.isMagic && stats.combatData.modifiers.summoningSynergy_0_8) {
+            stats.gpGained += stats.player.inflictedDamage / 10
+                * stats.combatData.modifiers.summoningSynergy_0_8 / 100
                 * numberMultiplier
-                * (1 + globalGPMultiplier / 100);
+                * globalGPMultiplier;
+        }
+        if (stats.combatData.modifiers.summoningSynergy_0_1) {
+            stats.gpGained += Math.max(
+                stats.enemy.baseMaximumDefenceRoll,
+                stats.enemy.baseMaximumRangedDefenceRoll,
+                stats.enemy.baseMaximumMagicDefenceRoll)
+                * stats.combatData.modifiers.summoningSynergy_0_1 / 100
+                * globalGPMultiplier
+                * successes;
         }
         // other post processing
-        stats.gpGainedFromDamage += stats.playerInflictedHit * mergePlayerModifiers(player, 'GPOnEnemyHit');
+        stats.gpGained += stats.player.inflictedHits * (mergePlayerModifiers(player, 'GPOnEnemyHit') | 0);
         simResult.burningEnemyKilledRate = stats.burningEnemyKilled / trials;
 
         // convert gains to average rates
@@ -1900,10 +1912,9 @@
             simResult.atePerSecond = NaN;
         }
         // gp
-        simResult.gpFromDamagePerSecond = stats.gpGainedFromDamage / totalTime * 1000;
+        simResult.gpFromDamagePerSecond = stats.gpGained / totalTime * 1000;
 
         // stats depending on kills
-        const successes = trials - stats.player.deaths;
         if (tooManyActions === 0 && successes) {
             // kill time
             simResult.avgKillTime = totalTime / successes;
