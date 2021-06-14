@@ -82,6 +82,14 @@
                 let coinDropModifier = this.currentSim.gpBonus;
                 // apply multiplier
                 coinsToDrop *= coinDropModifier;
+                // not affected by multiplier
+                if (this.modifiers.summoningSynergy_0_1) {
+                    coinsToDrop += Math.max(
+                        this.currentSim.enemyStats.baseMaximumDefenceRoll,
+                        this.currentSim.enemyStats.baseMaximumRangedDefenceRoll,
+                        this.currentSim.enemyStats.baseMaximumMagicDefenceRoll,
+                    ) * this.modifiers.summoningSynergy_0_1 / 100;
+                }
                 return coinsToDrop;
             }
 

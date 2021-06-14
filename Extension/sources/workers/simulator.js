@@ -418,7 +418,6 @@
                     }
                 } else {
                     // enemy killed
-                    // TODO synergy 0, 1
                     // TODO synergy 0, 12
                     // TODO synergy 0, 15
                 }
@@ -1178,8 +1177,6 @@
         if (!target.isPlayer) {
             return dealDamageToEnemy(stats, target, damage, attackSource);
         }
-
-
         // TODO synergy 12, 15
         // TODO: apply DR at this point
 
