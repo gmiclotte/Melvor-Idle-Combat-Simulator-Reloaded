@@ -418,7 +418,6 @@
                     }
                 } else {
                     // enemy killed
-                    // TODO synergy 0, 12
                     // TODO synergy 0, 15
                 }
                 if (verbose) {
