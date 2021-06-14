@@ -155,6 +155,7 @@
                 curseCasts: 0,
                 player: playerStats,
                 enemy: enemyStats,
+                burningEnemyKilled: 0,
             };
 
             // configure some additional default values for the `stats.player` and `stats.enemy` objects
@@ -418,7 +419,9 @@
                     }
                 } else {
                     // enemy killed
-                    // TODO synergy 0, 15
+                    if (enemy.isBurning) {
+                        stats.burningEnemyKilled++;
+                    }
                 }
                 if (verbose) {
                     const killTime = stats.totalTime - timeStamp;
@@ -1876,6 +1879,8 @@
             simResult.killTimeS = NaN;
             simResult.killsPerSecond = 0;
         }
+
+        simResult.burningEnemyKilledRate = stats.burningEnemyKilled / trials;
 
         // Throw pet rolls in here to be further processed later
         Object.keys(stats.petRolls).forEach((petType) =>

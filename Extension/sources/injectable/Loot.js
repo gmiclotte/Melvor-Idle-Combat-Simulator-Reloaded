@@ -80,6 +80,9 @@
                 let coinsToDrop = Math.max(0, (MONSTERS[monsterID].dropCoins[1] + MONSTERS[monsterID].dropCoins[0] - 1) / 2);
                 coinsToDrop += this.currentSim.increasedGP;
                 let coinDropModifier = this.currentSim.gpBonus;
+                if (this.modifiers.summoningSynergy_0_15) {
+                    coinDropModifier += this.monsterSimData[monsterID].burningEnemyKilledRate * this.modifiers.summoningSynergy_0_15 / 100;
+                }
                 // apply multiplier
                 coinsToDrop *= coinDropModifier;
                 // not affected by multiplier
