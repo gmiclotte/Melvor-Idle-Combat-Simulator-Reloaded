@@ -236,7 +236,7 @@
                 // regen timer is not reset ! add respawn time to regen, and regen if required
                 player.regenTimer -= enemySpawnTimer;
                 if (player.regenTimer <= 0) {
-                    regen(stats, player);
+                    regen(stats, player, enemy);
                 }
                 resetEnemy(stats, enemy);
                 if (stats.player.canCurse) {
@@ -308,7 +308,7 @@
 
                     if (player.regenTimer <= 0) {
                         verboseLog('player regen');
-                        regen(stats, player);
+                        regen(stats, player, enemy);
                     }
 
                     if (enemy.alive && player.isActing) {
@@ -507,7 +507,7 @@
         return timeStep;
     }
 
-    function regen(stats, player) {
+    function regen(stats, player, enemy) {
         // TODO synergy 6, 14
         // TODO synergy 7, 14
         // TODO synergy 8, 14
