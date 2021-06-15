@@ -983,9 +983,6 @@
             }
             speed += mergePlayerModifiers(actor, 'PlayerAttackSpeed');
             let attackSpeedPercent = mergePlayerModifiers(actor, 'PlayerAttackSpeedPercent');
-            if (actorStats.activeItems.guardianAmulet && actor.hitpoints < actor.maxHitpoints) {
-                attackSpeedPercent += 10;
-            }
             speed = applyModifier(speed, attackSpeedPercent);
             // increased attack speed buff (aurora)
             speed -= actor.attackSpeedBuff;
@@ -1230,9 +1227,36 @@
         return Math.floor(damage);
     }
 
-    function checkGuardianAmuletBelowHalf(player) {
-        return player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow;
+    function applyHPBasedModifiers(player, prop, modifiers, changedHPBasedEffects, changedModifiers, whenBelow = false) {
+        if (whenBelow ? !player.hpBasedEffects[prop] : player.hpBasedEffects[prop]) {
+            for (let modifier in modifiers) {
+                addTempModifier(player, modifier, modifiers[modifier]);
+                changedModifiers[modifier] = true;
+            }
+        } else if (changedHPBasedEffects[prop]) {
+            for (let modifier in modifiers) {
+                changedModifiers[modifier] = true;
+            }
+        }
     }
+
+    function checkChangedCreasedModifiers(changedModifiers, modifiers) {
+        let changed = false;
+        modifiers.forEach(modifier => {
+            changed ||= checkChangedModifiers(changedModifiers, 'increased' + modifier);
+            changed ||= checkChangedModifiers(changedModifiers, 'decreased' + modifier);
+        });
+        return changed;
+    }
+
+    function checkChangedModifier(changedModifiers, modifier) {
+        if (changedModifiers[modifier]) {
+            delete changedModifiers[modifier];
+            return true;
+        }
+        return false;
+    }
+
     function computeTempModifiers(stats, player, enemy, turns = 0, changedHPBasedEffects = {}) {
         player.tempModifiers = {};
         const changedModifiers = {};
@@ -1249,6 +1273,10 @@
                 }
             });
         });
+        // hp based modifiers
+        if (stats.player.activeItems.guardianAmulet) {
+            applyHPBasedModifiers(player, 'guardianAmuletAbove', constantModifiers.guardianAmulet, changedHPBasedEffects, changedModifiers, true);
+        }
         // process changed modifiers
         if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
             calculateSpeed(player, stats.player);
@@ -1267,25 +1295,50 @@
         }
     }
 
-    function checkGuardianAmuletAboveHalf(player) {
-        return player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow;
+    function addTempModifier(player, modifier, value) {
+        if (player.tempModifiers[modifier] === undefined) {
+            player.tempModifiers[modifier] = 0;
+        }
+        player.tempModifiers[modifier] += value;
+    }
+
+    function removeTempModifier(player, modifier, value) {
+        addTempModifier(player, modifier, -value);
+    }
+
+    function checkBelowHPThreshold(player, factor, prop) {
+        const check = player.hitpoints < player.maxHitpoints * factor && player.hpBasedEffects[prop];
+        if (check) {
+            delete player.hpBasedEffects[prop];
+        }
+        return check;
+    }
+
+    function checkAboveHPThreshold(player, factor, prop) {
+        const check = player.hitpoints >= player.maxHitpoints * factor && !player.hpBasedEffects[prop];
+        if (check) {
+            player.hpBasedEffects[prop] = true;
+        }
+        return check;
+    }
+
+    function updatePlayerHPBasedEffect(stats, player, enemy, factor, prop) {
+        if (checkBelowHPThreshold(player, factor, prop)) {
+            computeTempModifiers(stats, player, enemy, 0, {prop: true});
+        } else if (checkAboveHPThreshold(player, factor, prop)) {
+            computeTempModifiers(stats, player, enemy, 0, {prop: true});
+        }
     }
 
     function updatePlayerHPBasedEffects(stats, player, enemy) {
         if (stats.player.activeItems.guardianAmulet) {
-            updateGuardianAmuletEffect(stats, player);
+            updatePlayerHPBasedEffect(stats, player, enemy, 1 / 2, 'guardianAmuletAbove');
         }
     }
 
-    function updateGuardianAmuletEffect(stats, player) {
-        if (checkGuardianAmuletBelowHalf(player)) {
-            player.increasedDamageReduction += 5;
-            player.guardianAmuletBelow = true;
-            calculateSpeed(player, stats.player);
-        } else if (checkGuardianAmuletAboveHalf(player)) {
-            player.increasedDamageReduction -= 5;
-            player.guardianAmuletBelow = false;
-            calculateSpeed(player, stats.player);
+    function initPlayerHPBasedEffects(stats, player) {
+        if (stats.player.activeItems.guardianAmulet) {
+            player.hpBasedEffects.guardianAmuletAbove = true;
         }
     }
 
@@ -1560,7 +1613,7 @@
     }
 
     function calculatePlayerDamageReduction(player) {
-        let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction') + player.increasedDamageReduction;
+        let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
         damageReduction = Math.floor(damageReduction * player.reductionModifier);
@@ -1672,6 +1725,9 @@
             fromPlayer: {},
         };
         player.increasedDamageToMonster = stats.player.dmgModifier; // combines all the (in|de)creasedDamageToX modifiers
+        // compute player hp based effects
+        player.hpBasedEffects = {};
+        initPlayerHPBasedEffects(stats, player);
         updatePlayerHPBasedEffects(stats, player, enemy);
         // precompute number of attack rolls
         player.attackRolls = 1 + mergePlayerModifiers(player, 'AttackRolls');
@@ -1679,9 +1735,6 @@
         player.attackSpeedBuff = stats.player.decreasedAttackSpeed;
         // summon timer
         player.summonTimer = stats.player.summoningMaxHit > 0 ? 3000 : Infinity;
-        // compute player hp based effects
-        player.guardianAmuletBelow = false;
-        updatePlayerHPBasedEffects(stats, player);
         // compute initial accuracy
         calculatePlayerEvasionRating(stats, player);
         // init
@@ -1690,7 +1743,8 @@
 
     function mergePlayerModifiers(player, modifier, both = true) {
         const hash = Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).join('-')
-            + '+' + Object.getOwnPropertyNames(player.activeSpecialAttacks.fromPlayer).join('-');
+            + '+' + Object.getOwnPropertyNames(player.activeSpecialAttacks.fromPlayer).join('-')
+            + '+' + Object.getOwnPropertyNames(player.hpBasedEffects).join('-');
         if (player.cache[modifier] === undefined) {
             player.cache[modifier] = {};
         }

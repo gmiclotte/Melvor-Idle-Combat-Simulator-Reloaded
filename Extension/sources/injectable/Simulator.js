@@ -148,6 +148,8 @@
                     // legacy: pass actual item, not the modifiers
                     deadeyeAmulet: items[CONSTANTS.item.Deadeye_Amulet],
                     confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
+                    // modifiers
+                    guardianAmulet: items[CONSTANTS.item.Guardian_Amulet].modifiers,
                 }
                 // Create Web workers
                 this.createWorkers();
