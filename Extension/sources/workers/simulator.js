@@ -535,7 +535,7 @@
         }
         // Regeneration modifiers
         applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
-        healDamage(stats, player, amt);
+        healDamage(stats, enemy, player, amt);
         player.regenTimer += hitpointRegenInterval;
         stats.player.numberOfRegens += 1;
     }
@@ -574,7 +574,7 @@
         target.bleedCount++;
         // Elder Crown life steals bleed damage
         if (actor.isPlayer && stats.player.activeItems.elderCrown) {
-            healDamage(stats, actor, target.bleedDamage);
+            healDamage(stats, target, actor, target.bleedDamage);
         }
     }
 
@@ -969,11 +969,11 @@
         //////////////////
         // life steal
         if (isSpecial && currentSpecial.lifesteal) {
-            healDamage(stats, enemy, damage * currentSpecial.lifestealMultiplier);
+            healDamage(stats, player, enemy, damage * currentSpecial.lifestealMultiplier);
         }
         if (isSpecial && currentSpecial.setDOTHeal) {
             enemy.intoTheMist = true;
-            healDamage(stats, enemy, currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
+            healDamage(stats, player, enemy, currentSpecial.setDOTHeal * enemy.maxHitpoints / currentSpecial.DOTMaxProcs);
         }
         // player recoil
         if (player.canRecoil) {
@@ -1171,7 +1171,7 @@
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
 
-    function healDamage(stats, target, damage) {
+    function healDamage(stats, actor, target, damage) {
         const targetStats = target.isPlayer ? stats.player : stats.enemy;
         const amt = Math.floor(Math.min(damage, target.maxHitpoints - target.hitpoints));
         target.hitpoints += amt;
@@ -1449,7 +1449,7 @@
         // TODO synergy 2, 13
         if (lifeSteal > 0) {
             // TODO synergy 2, 12
-            healDamage(stats, player, attackResult.damageToEnemy * lifeSteal / 100)
+            healDamage(stats, enemy, player, attackResult.damageToEnemy * lifeSteal / 100)
         }
         // TODO synergy 8, 12
         // confetti crossbow
