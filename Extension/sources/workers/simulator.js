@@ -1144,7 +1144,7 @@
         target.hitpoints = Math.min(target.hitpoints, target.maxHitpoints);
         targetStats.damageHealed += amt;
         if (target.isPlayer) {
-            updatePlayerHPBasedEffects(stats, target);
+            updatePlayerHPBasedEffects(stats, target, actor);
         }
     }
 
@@ -1181,7 +1181,7 @@
             if (player.hitpoints < stats.player.lowestHitpoints) {
                 stats.player.lowestHitpoints = player.hitpoints;
             }
-            updatePlayerHPBasedEffects(stats, player);
+            updatePlayerHPBasedEffects(stats, player, enemy);
         }
         if (damage > stats.player.highestDamageTaken) {
             stats.player.highestDamageTaken = damage;
@@ -1271,7 +1271,7 @@
         return player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow;
     }
 
-    function updatePlayerHPBasedEffects(stats, player) {
+    function updatePlayerHPBasedEffects(stats, player, enemy) {
         if (stats.player.activeItems.guardianAmulet) {
             updateGuardianAmuletEffect(stats, player);
         }
@@ -1672,6 +1672,7 @@
             fromPlayer: {},
         };
         player.increasedDamageToMonster = stats.player.dmgModifier; // combines all the (in|de)creasedDamageToX modifiers
+        updatePlayerHPBasedEffects(stats, player, enemy);
         // precompute number of attack rolls
         player.attackRolls = 1 + mergePlayerModifiers(player, 'AttackRolls');
         // aurora
