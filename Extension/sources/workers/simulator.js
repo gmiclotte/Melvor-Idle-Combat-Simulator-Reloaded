@@ -71,10 +71,9 @@
     let enemySpecialAttacks;
     let enemySpawnTimer;
     let hitpointRegenInterval;
-    let deadeyeAmulet;
-    let confettiCrossbow;
     let CURSEIDS;
     let applyEnemyStunSleepDamage;
+    let constantModifiers;
 
     const attackSources = {
         regular: 0,
@@ -122,9 +121,8 @@
             protectFromValue = data.protectFromValue;
             enemySpecialAttacks = data.enemySpecialAttacks;
             hitpointRegenInterval = data.hitpointRegenInterval;
-            deadeyeAmulet = data.deadeyeAmulet;
-            confettiCrossbow = data.confettiCrossbow;
             CURSEIDS = data.CURSEIDS;
+            constantModifiers = data.constantModifiers;
         }
 
         /**
@@ -1456,10 +1454,11 @@
         if (stats.player.activeItems.confettiCrossbow) {
             // Add gp from this weapon
             let gpMultiplier = stats.player.startingGP / 20000000;
-            if (gpMultiplier > confettiCrossbow.gpMultiplierCap) {
-                gpMultiplier = confettiCrossbow.gpMultiplierCap;
-            } else if (gpMultiplier < confettiCrossbow.gpMultiplierMin) {
-                gpMultiplier = confettiCrossbow.gpMultiplierMin;
+            const modifiers = constantModifiers.confettiCrossbow;
+            if (gpMultiplier > modifiers.gpMultiplierCap) {
+                gpMultiplier = modifiers.gpMultiplierCap;
+            } else if (gpMultiplier < modifiers.gpMultiplierMin) {
+                gpMultiplier = modifiers.gpMultiplierMin;
             }
             const damageToUse = Math.min(enemy.hitpoints, attackResult.damageToEnemy) * 10 / numberMultiplier;
             stats.gpGained += damageToUse * gpMultiplier * (
@@ -2077,8 +2076,8 @@
      */
     function critDamageModifier(damageToEnemy) {
         const chance = Math.random() * 100;
-        if (chance < deadeyeAmulet.chanceToCrit) {
-            return deadeyeAmulet.critDamage;
+        if (chance < constantModifiers.deadeyeAmulet.chanceToCrit) {
+            return constantModifiers.deadeyeAmulet.critDamage;
         }
         return 1;
     }

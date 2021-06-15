@@ -143,6 +143,12 @@
                 this.simStartTime = 0;
                 /** If the current sim has been cancelled */
                 this.simCancelled = false;
+                // modifiers to pass to webworker
+                this.constantModifiers = {
+                    // legacy: pass actual item, not the modifiers
+                    deadeyeAmulet: items[CONSTANTS.item.Deadeye_Amulet],
+                    confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
+                }
                 // Create Web workers
                 this.createWorkers();
             }
@@ -220,9 +226,8 @@
                     enemySpecialAttacks: enemySpecialAttacks,
                     enemySpawnTimer: enemySpawnTimer,
                     hitpointRegenInterval: hitpointRegenInterval,
-                    deadeyeAmulet: items[CONSTANTS.item.Deadeye_Amulet],
-                    confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
                     CURSEIDS: CONSTANTS.curse,
+                    constantModifiers: this.constantModifiers,
                 });
             }
 
