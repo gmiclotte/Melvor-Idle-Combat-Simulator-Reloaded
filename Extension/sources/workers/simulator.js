@@ -240,9 +240,6 @@
                 if (stats.player.canCurse) {
                     setEnemyCurseValues(enemy, stats.player.curseID, stats.player.curseData.effectValue);
                 }
-                // Set accuracy based on protection prayers or stats
-                setAccuracy(stats, player, enemy);
-                setAccuracy(stats, enemy, player);
                 // set action speed
                 calculateSpeed(player, stats.player);
                 player.actionTimer = player.currentSpeed;
@@ -346,7 +343,7 @@
                     if (enemy.alive && stats.player.summoningMaxHit > 0) {
                         if (player.summonTimer <= 0) {
                             verboseLog('summon attacks');
-                            summonAttack(stats, enemy, player);
+                            summonAttack(stats, player, enemy);
                         }
                     }
                     //enemy
@@ -576,11 +573,11 @@
         }
     }
 
-    function summonAttack(stats, enemy, player) {
+    function summonAttack(stats, player, enemy) {
         // TODO synergy 2, 15
         // TODO if synergy active: use 2 tablets per summon per attack, else use 1 tablet per summon per attack
         let damage = 0;
-        if (rollPlayerHit(player, 1)) {
+        if (rollPlayerHit(stats, player, enemy, 1)) {
             damage = stats.player.summoningMaxHit;
             damage = Math.floor(Math.random() * damage);
         }
@@ -893,7 +890,7 @@
                     enemy.increasedDamageReduction = currentSpecial.increasedDamageReduction;
                 }
                 // update player accuracy
-                setAccuracy(stats, player, enemy);
+                player.recompute.accuracy = true;
             }
             forceHit = currentSpecial.forceHit;
             // apply special attack modifiers to player, or apply special effect to enemy
@@ -914,7 +911,7 @@
         } else {
             // Roll for hit
             const hitChance = Math.floor(Math.random() * 100);
-            attackHits = enemy.accuracy > hitChance;
+            attackHits = getAccuracy(stats, enemy, player) > hitChance;
         }
 
         if (!attackHits) {
@@ -1015,7 +1012,7 @@
                 actor.reflectRanged = 0;
                 actor.reflectMagic = 0;
                 actor.increasedDamageReduction = 0;
-                setAccuracy(stats, target, actor);
+                target.recompute.accuracy = true;
             }
         }
         // Slow Tracking
@@ -1051,11 +1048,11 @@
         enemy.isCursed = false;
         switch (enemy.curse.type) {
             case 'Blinding':
-                setAccuracy(stats, enemy, player);
+                enemy.recompute.accuracy = true;
                 break;
             case 'Soul Split':
             case 'Decay':
-                setAccuracy(stats, player, enemy);
+                player.recompute.accuracy = true;
                 break;
             case 'Weakening':
                 enemy.maxHit = Math.floor(stats.enemy.baseMaximumStrengthRoll * numberMultiplier);
@@ -1283,13 +1280,14 @@
         }
         // process changed modifiers
         if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
+            player.recompute.speed = true;
             calculateSpeed(player, stats.player);
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['MeleeEvasion', 'RangedEvasion', 'MagicEvasion'])) {
-            setAccuracy(stats, enemy, player);
+            enemy.recompute.accuracy = true;
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['EnemyMeleeEvasion', 'EnemyRangedEvasion', 'EnemyMagicEvasion'])) {
-            setAccuracy(stats, player, enemy);
+            player.recompute.accuracy = true;
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['DamageReduction'])) {
             // do nothing, player DR is always calculated on the fly
@@ -1392,19 +1390,19 @@
     function playerUsePreAttackSpecial(stats, enemy, player) {
         if (stats.player.isMelee && player.currentSpecial.decreasedMeleeEvasion) {
             enemy.decreasedMeleeEvasion = player.currentSpecial.decreasedMeleeEvasion;
-            setAccuracy(stats, player, enemy);
+            player.recompute.accuracy = true;
         }
         if (stats.player.isRanged && player.currentSpecial.decreasedRangedEvasion) {
             enemy.decreasedRangedEvasion = player.currentSpecial.decreasedRangedEvasion;
-            setAccuracy(stats, player, enemy);
+            player.recompute.accuracy = true;
         }
         if (stats.player.isMagic && player.currentSpecial.decreasedMagicEvasion) {
             enemy.decreasedMagicEvasion = player.currentSpecial.decreasedMagicEvasion;
-            setAccuracy(stats, player, enemy);
+            player.recompute.accuracy = true;
         }
         if (player.currentSpecial.decreasedAccuracy && !enemy.decreasedAccuracy) {
             enemy.decreasedAccuracy = player.currentSpecial.decreasedAccuracy;
-            setAccuracy(stats, enemy, player);
+            enemy.recompute.accuracy = true;
         }
     }
 
@@ -1418,11 +1416,11 @@
         // Update the curses that change stats
         switch (enemy.curse.type) {
             case 'Blinding':
-                setAccuracy(stats, enemy, player);
+                enemy.recompute.accuracy = true;
                 break;
             case 'Soul Split':
             case 'Decay':
-                setAccuracy(stats, player, enemy);
+                player.recompute.accuracy = true;
                 break;
             case 'Weakening':
                 enemy.maxHit = Math.floor(stats.enemy.baseMaximumStrengthRoll * numberMultiplier * enemy.curse.maxHitDebuff);
@@ -1430,7 +1428,7 @@
         }
     }
 
-    function rollPlayerHit(player, rolls = 1) {
+    function rollPlayerHit(stats, player, enemy, rolls = 1) {
         let roll = 100;
         for (let i = 0; i < rolls; i++) {
             let rolledChance = Math.floor(Math.random() * 100);
@@ -1438,7 +1436,7 @@
                 roll = rolledChance;
             }
         }
-        return player.accuracy > roll;
+        return getAccuracy(stats, player, enemy) > roll;
     }
 
     function playerDoAttack(stats, player, enemy, isSpecial, isMulti) {
@@ -1460,7 +1458,7 @@
             attackHits = true;
         } else {
             // Roll for hit
-            attackHits = rollPlayerHit(player, player.attackRolls);
+            attackHits = rollPlayerHit(stats, player, enemy, player.attackRolls);
         }
         // roll for pets
         stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
@@ -1709,6 +1707,11 @@
         common.decreasedAccuracy = 0;
         // hp
         common.maxHitpoints = stats.maxHitpoints | (stats.baseMaxHitpoints * numberMultiplier);
+        // recompute flags
+        common.recompute = {
+            speed: true,
+            accuracy: true,
+        }
     }
 
     function resetPlayer(stats, combatData, player, enemy) {
@@ -2005,6 +2008,14 @@
         );
         // return successful results
         return simResult;
+    }
+
+    function getAccuracy(stats, actor, target) {
+        if (actor.recompute.accuracy) {
+            setAccuracy(stats, actor, target);
+            actor.recompute.accuracy = false;
+        }
+        return actor.accuracy;
     }
 
     // TODO: duplicated in injectable/Simulator.js
