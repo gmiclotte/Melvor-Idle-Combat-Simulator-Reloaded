@@ -1177,53 +1177,52 @@
         target.hitpoints += amt;
         target.hitpoints = Math.min(target.hitpoints, target.maxHitpoints);
         targetStats.damageHealed += amt;
-        if (target.isPlayer && targetStats.activeItems.guardianAmulet) {
-            updateGuardianAmuletEffect(stats, target);
+        if (target.isPlayer) {
+            updatePlayerHPBasedEffects(stats, target);
         }
     }
 
     function dealDamage(stats, target, damage, attackSource = 0, isAttack = false) {
         if (!target.isPlayer) {
-            return dealDamageToEnemy(stats, target, damage, attackSource);
+            return dealDamageToEnemy(stats, target, damage, attackSource, isAttack);
         }
-        // TODO synergy 12, 15
-        // TODO: apply DR at this point
+        return dealDamageToPlayer(stats, target, damage, attackSource, isAttack);
+    }
 
-        stats.player.damageTaken += Math.floor(Math.min(damage, target.hitpoints));
-        target.hitpoints -= Math.floor(damage);
+    function dealDamageToPlayer(stats, player, damage, attackSource = 0, isAttack = false) {
+        // TODO synergy 12, 15
+        // do not apply DR at this point, player DR is only applied to monster attacks, not to other damage sources
+        stats.player.damageTaken += Math.floor(Math.min(damage, player.hitpoints));
+        player.hitpoints -= Math.floor(damage);
         // synergy 0, 13
         if (isAttack && stats.combatData.modifiers.summoningSynergy_0_13) {
             stats.gpGained += stats.combatData.modifiers.summoningSynergy_0_13
-                * calculatePlayerDamageReduction(target)
-                * (1 + mergePlayerModifiers(target, 'GPGlobal') / 100);
+                * calculatePlayerDamageReduction(player)
+                * (1 + mergePlayerModifiers(player, 'GPGlobal') / 100);
         }
         // update alive status
-        target.alive = target.hitpoints > 0;
+        player.alive = player.hitpoints > 0;
         // Check for player eat
-        if (target.isPlayer) {
-            if (target.alive) {
-                autoEat(stats, target);
-                if (stats.player.autoEat.manual && stats.player.foodHeal > 0) {
-                    // TODO: use a more detailed manual eating simulation?
-                    target.hitpoints = target.maxHitpoints;
-                }
-                if (target.hitpoints <= 0.1 * target.maxHitpoints && target.prayerBonus.vars.prayerBonusHitpointHeal) {
-                    target.hitpoints += Math.floor(target.maxHitpoints * (target.prayerBonus.vars.prayerBonusHitpointHeal / 100));
-                }
-                if (target.hitpoints < stats.player.lowestHitpoints) {
-                    stats.player.lowestHitpoints = target.hitpoints;
-                }
-                if (stats.player.activeItems.guardianAmulet) {
-                    updateGuardianAmuletEffect(stats, target);
-                }
+        if (player.alive) {
+            autoEat(stats, player);
+            if (stats.player.autoEat.manual && stats.player.foodHeal > 0) {
+                // TODO: use a more detailed manual eating simulation?
+                player.hitpoints = player.maxHitpoints;
             }
-            if (damage > stats.player.highestDamageTaken) {
-                stats.player.highestDamageTaken = damage;
+            if (player.hitpoints <= 0.1 * player.maxHitpoints && player.prayerBonus.vars.prayerBonusHitpointHeal) {
+                player.hitpoints += Math.floor(player.maxHitpoints * (player.prayerBonus.vars.prayerBonusHitpointHeal / 100));
             }
+            if (player.hitpoints < stats.player.lowestHitpoints) {
+                stats.player.lowestHitpoints = player.hitpoints;
+            }
+            updatePlayerHPBasedEffects(stats, player);
+        }
+        if (damage > stats.player.highestDamageTaken) {
+            stats.player.highestDamageTaken = damage;
         }
     }
 
-    function dealDamageToEnemy(stats, enemy, damage, attackSource, playerHit = false) {
+    function dealDamageToEnemy(stats, enemy, damage, attackSource, isAttack = false) {
         // apply reductions
         damage = calculateFinalDamageToEnemy(damage, enemy);
 
@@ -1234,7 +1233,7 @@
         stats.player.tracking[attackSource].attacks++;
         stats.player.tracking[attackSource].hits += damage > 0;
         stats.player.tracking[attackSource].damage += damage;
-        if (playerHit && damage > 0) {
+        if (isAttack && damage > 0) {
             stats.player.inflictedDamage += damage;
             stats.player.inflictedHits++;
         }
@@ -1271,6 +1270,12 @@
 
     function checkGuardianAmuletAboveHalf(player) {
         return player.hitpoints >= player.maxHitpoints / 2 && player.guardianAmuletBelow;
+    }
+
+    function updatePlayerHPBasedEffects(stats, player) {
+        if (stats.player.activeItems.guardianAmulet) {
+            updateGuardianAmuletEffect(stats, player);
+        }
     }
 
     function updateGuardianAmuletEffect(stats, player) {
@@ -1673,11 +1678,9 @@
         player.attackSpeedBuff = stats.player.decreasedAttackSpeed;
         // summon timer
         player.summonTimer = stats.player.summoningMaxHit > 0 ? 3000 : Infinity;
-        // compute guardian amulet
-        if (stats.player.activeItems.guardianAmulet) {
-            player.guardianAmuletBelow = false;
-            updateGuardianAmuletEffect(stats, player);
-        }
+        // compute player hp based effects
+        player.guardianAmuletBelow = false;
+        updatePlayerHPBasedEffects(stats, player);
         // compute initial accuracy
         calculatePlayerEvasionRating(stats, player);
         // init
