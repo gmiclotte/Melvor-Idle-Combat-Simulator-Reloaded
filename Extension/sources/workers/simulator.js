@@ -223,14 +223,14 @@
             const enemy = {};
             let innerCount = 0;
             let tooManyActions = 0;
-            resetPlayer(stats, combatData, player);
+            resetPlayer(stats, combatData, player, enemy);
             // set slayer area effects
-            setAreaEffects(stats, combatData, player);
+            setAreaEffects(stats, combatData, player, enemy);
             // track stats.totalTime of previous kill
             let timeStamp = 0;
             while (enemyFights < trials) {
                 // Reset Timers and statuses
-                resetPlayer(stats, combatData, player);
+                resetPlayer(stats, combatData, player, enemy);
                 // regen timer is not reset ! add respawn time to regen, and regen if required
                 player.regenTimer -= enemySpawnTimer;
                 if (player.regenTimer <= 0) {
@@ -328,7 +328,7 @@
                     if (enemy.alive && player.isBurning) {
                         if (player.burnTimer <= 0) {
                             verboseLog('player burning');
-                            actorBurn(stats, player);
+                            burnTarget(stats, enemy, player);
                         }
                     }
                     if (enemy.alive && player.isRecoiling) {
@@ -340,7 +340,7 @@
                     if (enemy.alive && player.isBleeding) {
                         if (player.bleedTimer <= 0) {
                             verboseLog('player bleeding');
-                            targetBleed(stats, enemy, player);
+                            bleedTarget(stats, enemy, player);
                         }
                     }
                     if (enemy.alive && stats.player.summoningMaxHit > 0) {
@@ -365,7 +365,7 @@
                     if (enemy.alive && enemy.isBurning) {
                         if (enemy.burnTimer <= 0) {
                             verboseLog('enemy burning');
-                            actorBurn(stats, enemy);
+                            burnTarget(stats, player, enemy);
                         }
                     }
                     if (enemy.alive && enemy.isRecoiling) {
@@ -377,7 +377,7 @@
                     if (enemy.alive && enemy.isBleeding) {
                         if (enemy.bleedTimer <= 0) {
                             verboseLog('enemy bleeding');
-                            targetBleed(stats, player, enemy);
+                            bleedTarget(stats, player, enemy);
                         }
                     }
 
@@ -543,22 +543,22 @@
         actor.isRecoiling = false;
     }
 
-    function actorBurn(stats, actor) {
+    function burnTarget(stats, actor, target) {
         // TODO synergy 13, 15
         // TODO synergy 14, 15
         // reset timer
-        actor.burnTimer = actor.burnInterval;
+        target.burnTimer = target.burnInterval;
         // Check if stopped burning
-        if (actor.burnCount >= actor.burnMaxCount) {
-            actor.isBurning = false;
+        if (target.burnCount >= target.burnMaxCount) {
+            target.isBurning = false;
             return;
         }
         // Apply burn damage
-        dealDamage(stats, actor, actor.burnDamage, attackSources.burn);
-        actor.burnCount++;
+        dealDamage(stats, actor, target, target.burnDamage, attackSources.burn);
+        target.burnCount++;
     }
 
-    function targetBleed(stats, actor, target) {
+    function bleedTarget(stats, actor, target) {
         // TODO synergy 2, 14
         // reset timer
         target.bleedTimer = target.bleedInterval;
@@ -568,7 +568,7 @@
             return;
         }
         // Apply bleed damage
-        dealDamage(stats, target, target.bleedDamage, attackSources.bleed);
+        dealDamage(stats, actor, target, target.bleedDamage, attackSources.bleed);
         target.bleedCount++;
         // Elder Crown life steals bleed damage
         if (actor.isPlayer && stats.player.activeItems.elderCrown) {
@@ -929,7 +929,7 @@
         // apply damage //
         //////////////////
         const damage = enemyCalculateDamage(stats, enemy, isSpecial, currentSpecial, player);
-        dealDamage(stats, player, damage, isSpecial ? attackSources.special : attackSources.regular, isAttack);
+        dealDamage(stats, enemy, player, damage, isSpecial ? attackSources.special : attackSources.regular, isAttack);
         //////////////////
         // side effects //
         //////////////////
@@ -1145,14 +1145,14 @@
         }
     }
 
-    function dealDamage(stats, target, damage, attackSource = 0, isAttack = false) {
+    function dealDamage(stats, actor, target, damage, attackSource = 0, isAttack = false) {
         if (!target.isPlayer) {
             return dealDamageToEnemy(stats, target, damage, attackSource, isAttack);
         }
-        return dealDamageToPlayer(stats, target, damage, attackSource, isAttack);
+        return dealDamageToPlayer(stats, actor, target, damage, attackSource, isAttack);
     }
 
-    function dealDamageToPlayer(stats, player, damage, attackSource = 0, isAttack = false) {
+    function dealDamageToPlayer(stats, enemy, player, damage, attackSource = 0, isAttack = false) {
         // TODO synergy 12, 15
         // do not apply DR at this point, player DR is only applied to monster attacks, not to other damage sources
         stats.player.damageTaken += Math.floor(Math.min(damage, player.hitpoints));
@@ -1243,8 +1243,8 @@
     function checkChangedCreasedModifiers(changedModifiers, modifiers) {
         let changed = false;
         modifiers.forEach(modifier => {
-            changed ||= checkChangedModifiers(changedModifiers, 'increased' + modifier);
-            changed ||= checkChangedModifiers(changedModifiers, 'decreased' + modifier);
+            changed = checkChangedModifier(changedModifiers, 'increased' + modifier) || changed;
+            changed = checkChangedModifier(changedModifiers, 'decreased' + modifier) || changed;
         });
         return changed;
     }
@@ -1253,6 +1253,7 @@
         if (changedModifiers[modifier]) {
             delete changedModifiers[modifier];
             return true;
+        } else {
         }
         return false;
     }
@@ -1293,8 +1294,9 @@
         if (checkChangedCreasedModifiers(changedModifiers, ['DamageReduction'])) {
             // do nothing, player DR is always calculated on the fly
         }
-        if (Object.getOwnPropertyNames(changedModifiers).length > 0) {
+        if (!stats.warnedUnknownModifiers && Object.getOwnPropertyNames(changedModifiers).length > 0) {
             console.warn('Unknown enemy special attack modifiers!', {...changedModifiers});
+            stats.warnedUnknownModifiers = true;
         }
     }
 
@@ -1472,13 +1474,13 @@
         attackResult.damageToEnemy = processPlayerAttackResult(stats, attackResult, player, enemy);
         // reflect melee damage
         if (enemy.reflectMelee) {
-            dealDamage(stats, player, enemy.reflectMelee * numberMultiplier, attackSources.reflect);
+            dealDamage(stats, enemy, player, enemy.reflectMelee * numberMultiplier, attackSources.reflect);
         }
         if (enemy.reflectRanged) {
-            dealDamage(stats, player, enemy.reflectRanged * numberMultiplier, attackSources.reflect);
+            dealDamage(stats, enemy, player, enemy.reflectRanged * numberMultiplier, attackSources.reflect);
         }
         if (enemy.reflectMagic) {
-            dealDamage(stats, player, enemy.reflectMagic * numberMultiplier, attackSources.reflect);
+            dealDamage(stats, enemy, player, enemy.reflectMagic * numberMultiplier, attackSources.reflect);
         }
         ////////////////////
         // status effects //
@@ -1709,7 +1711,7 @@
         common.maxHitpoints = stats.maxHitpoints | (stats.baseMaxHitpoints * numberMultiplier);
     }
 
-    function resetPlayer(stats, combatData, player) {
+    function resetPlayer(stats, combatData, player, enemy) {
         resetCommonStats(player, stats.player);
         if (player.cache === undefined) {
             player.cache = {}
@@ -2229,7 +2231,7 @@
         return value;
     }
 
-    function setAreaEffects(stats, combatData, player) {
+    function setAreaEffects(stats, combatData, player, enemy) {
         // 0: "Penumbra" - no area effect
         // 1: "Strange Cave" - no area effect
         // 2: "High Lands" - no area effect
@@ -2257,7 +2259,7 @@
         // 10: "Dark Waters" - reduced player attack speed
         if (stats.player.slayerArea === 10) {
             combatData.modifiers.increasedPlayerAttackSpeedPercent += calculateAreaEffectValue(stats, player);
-            resetPlayer(stats, combatData, player);
+            resetPlayer(stats, combatData, player, enemy);
             calculateSpeed(player, stats.player, true);
             stats.player.attackSpeed = player.currentSpeed;
         }
