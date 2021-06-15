@@ -241,10 +241,10 @@
                     setEnemyCurseValues(enemy, stats.player.curseID, stats.player.curseData.effectValue);
                 }
                 // set action speed
-                calculateSpeed(player, stats.player);
-                player.actionTimer = player.currentSpeed;
-                calculateSpeed(enemy, stats.enemy);
-                enemy.actionTimer = enemy.currentSpeed;
+                player.recompute.speed = true;
+                player.actionTimer = getSpeed(stats, player);
+                enemy.recompute.speed = true;
+                enemy.actionTimer = getSpeed(stats, enemy);
 
                 // Simulate combat until enemy is dead or max actions has been reached
                 enemy.alive = true;
@@ -588,7 +588,7 @@
     function enemyAction(stats, player, enemy) {
         stats.enemyActions++;
         // Do enemy action
-        if (skipsTurn(enemy)) {
+        if (skipsTurn(stats, enemy)) {
             return;
         }
         stats.enemyAttackCalls++;
@@ -631,7 +631,7 @@
         }
         enemyDoAttack(stats, player, enemy, isSpecial, true);
         computeTempModifiers(stats, player, enemy, -1);
-        multiAttackTimer(enemy);
+        multiAttackTimer(stats, enemy);
         postAttack(stats, enemy, player, stats.player, stats.enemy);
     }
 
@@ -663,12 +663,12 @@
 
     function enemyContinueAction(stats, player, enemy) {
         // Do enemy multi attacks
-        if (skipsTurn(enemy)) {
+        if (skipsTurn(stats, enemy)) {
             return;
         }
         stats.enemyAttackCalls++;
         enemyDoAttack(stats, player, enemy, true, false);
-        multiAttackTimer(enemy);
+        multiAttackTimer(stats, enemy);
         postAttack(stats, enemy, player, stats.player, stats.enemy);
         if (!enemy.isAttacking && enemy.intoTheMist) {
             enemy.intoTheMist = false;
@@ -682,7 +682,7 @@
         }
     }
 
-    function multiAttackTimer(actor) {
+    function multiAttackTimer(stats, actor) {
         actor.attackCount++;
         // set up timer for next attack
         if (actor.isAttacking && actor.attackCount < actor.countMax) {
@@ -692,7 +692,7 @@
             // next attack is normal attack
             actor.isAttacking = false;
             actor.isActing = true;
-            actor.actionTimer = actor.currentSpeed;
+            actor.actionTimer = getSpeed(stats, actor);
         }
     }
 
@@ -700,7 +700,8 @@
         return target.isStunned || target.isSleeping;
     }
 
-    function applyStatus(statusEffect, damage, actorStats, target, targetStats) {
+    function applyStatus(stats, statusEffect, damage, actor, target) {
+        const targetStats = target.isPlayer ? stats.player : stats.enemy;
         ////////////
         // turned //
         ////////////
@@ -708,11 +709,11 @@
         let stunImmunity = !target.isPlayer && targetStats.passiveID.includes(0);
         // Apply Stun
         if (canApplyStatus(statusEffect.canStun, target.isStunned, statusEffect.stunChance, stunImmunity)) {
-            applyStun(statusEffect, target);
+            applyStun(stats, statusEffect, target);
         }
         // Apply Sleep
         if (canApplyStatus(statusEffect.canSleep, target.isSleeping, undefined, stunImmunity)) {
-            applySleep(statusEffect, target);
+            applySleep(stats, statusEffect, target);
         }
         ///////////
         // timed //
@@ -758,7 +759,7 @@
                 target.isSlowed = true;
                 target.attackSpeedDebuffTurns = statusEffect.attackSpeedDebuffTurns;
                 target.attackSpeedDebuff = statusEffect.attackSpeedDebuff;
-                calculateSpeed(target, targetStats);
+                target.recompute.speed = true;
             }
             // evasion debuffs
             if (statusEffect.applyDebuffs && !target.activeDebuffs) {
@@ -792,22 +793,22 @@
         return true;
     }
 
-    function applyStun(statusEffect, target) {
+    function applyStun(stats, statusEffect, target) {
         // apply new stun
         target.isStunned = true;
         target.stunTurns = statusEffect.stunTurns;
         target.isAttacking = false;
         target.isActing = true;
-        target.actionTimer = target.currentSpeed;
+        target.actionTimer = getSpeed(stats, target);
     }
 
-    function applySleep(statusEffect, target) {
+    function applySleep(stats, statusEffect, target) {
         // apply new sleep
         target.isSleeping = true;
         target.sleepTurns = statusEffect.sleepTurns;
         target.isAttacking = false;
         target.isActing = true;
-        target.actionTimer = target.currentSpeed;
+        target.actionTimer = getSpeed(stats, target);
     }
 
     function applyBleeding(statusEffect, damage, target) {
@@ -863,7 +864,7 @@
                 // set increased attack speed buff
                 if (currentSpecial.increasedAttackSpeed) {
                     enemy.increasedAttackSpeed = currentSpecial.increasedAttackSpeed;
-                    calculateSpeed(enemy, stats.enemy);
+                    enemy.recompute.speed = true;
                 }
                 // Set evasion buffs
                 if (currentSpecial.increasedMeleeEvasion) {
@@ -964,11 +965,20 @@
         }
         // status effects
         if (isSpecial) {
-            applyStatus(currentSpecial, damage, stats.enemy, player, stats.player)
+            applyStatus(stats, currentSpecial, damage, enemy, player)
         }
     }
 
-    function calculateSpeed(actor, actorStats, force = false) {
+    function getSpeed(stats, actor) {
+        if (actor.recompute.speed) {
+            calculateSpeed(stats, actor);
+            actor.recompute.speed = false;
+        }
+        return actor.currentSpeed;
+    }
+
+    function calculateSpeed(stats, actor) {
+        const actorStats = actor.isPlayer ? stats.player : stats.enemy;
         // base
         let speed = actorStats.attackSpeed;
         if (actor.isPlayer) {
@@ -1004,7 +1014,7 @@
                 actor.activeBuffs = false;
                 // Undo buffs
                 actor.increasedAttackSpeed = 0;
-                calculateSpeed(actor, actorStats)
+                actor.recompute.speed = true;
                 actor.meleeEvasionBuff = 1;
                 actor.rangedEvasionBuff = 1;
                 actor.magicEvasionBuff = 1;
@@ -1021,7 +1031,7 @@
             if (actor.attackSpeedDebuffTurns <= 0) {
                 actor.isSlowed = false;
                 actor.attackSpeedDebuff = 0;
-                calculateSpeed(actor, actorStats)
+                actor.recompute.speed = true;
             }
         }
         // Curse Tracking
@@ -1060,14 +1070,14 @@
         }
     }
 
-    function skipsTurn(actor) {
+    function skipsTurn(stats, actor) {
         // reduce stun
         if (actor.isStunned) {
             actor.stunTurns--;
             if (actor.stunTurns <= 0) {
                 actor.isStunned = false;
             }
-            actor.actionTimer = actor.currentSpeed;
+            actor.actionTimer = getSpeed(stats, actor);
             return true
         }
         // reduce sleep
@@ -1077,7 +1087,7 @@
                 actor.isSleeping = false;
                 actor.sleepTurns = 0;
             }
-            actor.actionTimer = actor.currentSpeed;
+            actor.actionTimer = getSpeed(stats, actor);
             return true
         }
     }
@@ -1085,7 +1095,7 @@
     function playerAction(stats, player, enemy) {
         // player action: reduce stun count or attack
         stats.playerActions++;
-        if (skipsTurn(player)) {
+        if (skipsTurn(stats, player)) {
             return;
         }
         // attack
@@ -1117,17 +1127,17 @@
             setupMultiAttack(player, enemy);
         }
         playerDoAttack(stats, player, enemy, isSpecial, false);
-        multiAttackTimer(player);
+        multiAttackTimer(stats, player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
 
     function playerContinueAction(stats, player, enemy) {
         // perform continued attack
-        if (skipsTurn(player)) {
+        if (skipsTurn(stats, player)) {
             return;
         }
         playerDoAttack(stats, player, enemy, true, true);
-        multiAttackTimer(player);
+        multiAttackTimer(stats, player);
         postAttack(stats, player, enemy, stats.enemy, stats.player);
     }
 
@@ -1281,7 +1291,6 @@
         // process changed modifiers
         if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
             player.recompute.speed = true;
-            calculateSpeed(player, stats.player);
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['MeleeEvasion', 'RangedEvasion', 'MagicEvasion'])) {
             enemy.recompute.accuracy = true;
@@ -1380,8 +1389,9 @@
             stats.totalHpXP += damage / numberMultiplier * 1.33;
             stats.totalPrayerXP += damage * stats.player.prayerXpPerDamage;
             stats.totalCombatXP += xpToAdd;
+            const currentSpeed = getSpeed(stats, player);
             if (stats.player.prayerXpPerDamage > 0) {
-                stats.petRolls.Prayer[player.currentSpeed] = (stats.petRolls.Prayer[player.currentSpeed] || 0) + 1;
+                stats.petRolls.Prayer[currentSpeed] = (stats.petRolls.Prayer[currentSpeed] || 0) + 1;
             }
         }
         return damage;
@@ -1461,7 +1471,8 @@
             attackHits = rollPlayerHit(stats, player, enemy, player.attackRolls);
         }
         // roll for pets
-        stats.petRolls.other[player.currentSpeed] = (stats.petRolls.other[player.currentSpeed] || 0) + 1;
+        const currentSpeed = getSpeed(stats, player);
+        stats.petRolls.other[currentSpeed] = (stats.petRolls.other[currentSpeed] || 0) + 1;
         // calculate damage
         if (!attackHits) {
             attackResult.damageToEnemy = 0;
@@ -1538,7 +1549,7 @@
         attackResult.attackHits = true;
         attackResult.statusEffect = statusEffect;
         // apply any status effects
-        applyStatus(attackResult.statusEffect, attackResult.damageToEnemy, stats.player, enemy, stats.enemy)
+        applyStatus(stats, attackResult.statusEffect, attackResult.damageToEnemy, player, enemy)
     }
 
     function enemyCalculateDamage(stats, enemy, isSpecial, currentSpecial, player) {
@@ -1749,8 +1760,6 @@
         player.attackSpeedBuff = stats.player.decreasedAttackSpeed;
         // summon timer
         player.summonTimer = stats.player.summoningMaxHit > 0 ? 3000 : Infinity;
-        // compute initial accuracy
-        calculatePlayerEvasionRating(stats, player);
         // init
         player.actionsTaken = 0;
     }
@@ -2271,8 +2280,8 @@
         if (stats.player.slayerArea === 10) {
             combatData.modifiers.increasedPlayerAttackSpeedPercent += calculateAreaEffectValue(stats, player);
             resetPlayer(stats, combatData, player, enemy);
-            calculateSpeed(player, stats.player, true);
-            stats.player.attackSpeed = player.currentSpeed;
+            player.recompute.speed = true;
+            stats.player.attackSpeed = getSpeed(stats, player);
         }
     }
 
