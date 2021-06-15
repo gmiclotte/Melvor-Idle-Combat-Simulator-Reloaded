@@ -633,7 +633,7 @@
             setupMultiAttack(enemy, player);
         }
         enemyDoAttack(stats, player, enemy, isSpecial, true);
-        computeTempModifiers(stats, player, -1);
+        computeTempModifiers(stats, player, enemy, -1);
         multiAttackTimer(enemy);
         postAttack(stats, enemy, player, stats.player, stats.enemy);
     }
@@ -784,38 +784,6 @@
         }
     }
 
-    function computeTempModifiers(stats, player, turns = 0) {
-        player.tempModifiers = {};
-        const changedModifiers = {};
-        Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).forEach(id => {
-            const modifiers = enemySpecialAttacks[id].modifiers;
-            player.activeSpecialAttacks.fromEnemy[id] -= turns;
-            Object.getOwnPropertyNames(modifiers).forEach(modifier => {
-                changedModifiers[modifier] = true;
-                if (player.activeSpecialAttacks.fromEnemy[id] <= 0) {
-                    player.activeSpecialAttacks.fromEnemy[id] = undefined;
-                } else {
-                    if (player.tempModifiers[modifier] === undefined) {
-                        player.tempModifiers[modifier] = 0;
-                    }
-                    player.tempModifiers[modifier] += modifiers[modifier];
-                }
-            });
-        });
-        let unknownModifiers = Object.getOwnPropertyNames(changedModifiers).length;
-        if (changedModifiers['increasedPlayerAttackSpeedPercent']) {
-            calculateSpeed(player, stats.player);
-            unknownModifiers--;
-        }
-        if (changedModifiers['decreasedMagicEvasion']) {
-            calculatePlayerEvasionRating(stats, player);
-            unknownModifiers--;
-        }
-        if (unknownModifiers > 0) {
-            console.warn('Unknown enemy special attack modifiers!', {...changedModifiers});
-        }
-    }
-
     function canApplyStatus(can, is, chance, immunity = false) {
         if (!can || is || immunity) {
             return false;
@@ -933,7 +901,7 @@
                 // apply the effect
                 const turnsLeft = currentSpecial.attackSpeedDebuffTurns | currentSpecial.applyDebuffTurns | 2;
                 player.activeSpecialAttacks.fromEnemy[currentSpecial.id] = {turnsLeft: turnsLeft};
-                computeTempModifiers(stats, player);
+                computeTempModifiers(stats, player, enemy);
             }
             stats.enemy.tracking[attackSources.special].attacks++;
         } else {
@@ -1264,6 +1232,39 @@
 
     function checkGuardianAmuletBelowHalf(player) {
         return player.hitpoints < player.maxHitpoints / 2 && !player.guardianAmuletBelow;
+    }
+    function computeTempModifiers(stats, player, enemy, turns = 0, changedHPBasedEffects = {}) {
+        player.tempModifiers = {};
+        const changedModifiers = {};
+        // enemy special attack modifiers
+        Object.getOwnPropertyNames(player.activeSpecialAttacks.fromEnemy).forEach(id => {
+            const modifiers = enemySpecialAttacks[id].modifiers;
+            player.activeSpecialAttacks.fromEnemy[id] -= turns;
+            Object.getOwnPropertyNames(modifiers).forEach(modifier => {
+                changedModifiers[modifier] = true;
+                if (player.activeSpecialAttacks.fromEnemy[id] <= 0) {
+                    player.activeSpecialAttacks.fromEnemy[id] = undefined;
+                } else {
+                    addTempModifier(player, modifier, modifiers[modifier])
+                }
+            });
+        });
+        // process changed modifiers
+        if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
+            calculateSpeed(player, stats.player);
+        }
+        if (checkChangedCreasedModifiers(changedModifiers, ['MeleeEvasion', 'RangedEvasion', 'MagicEvasion'])) {
+            setAccuracy(stats, enemy, player);
+        }
+        if (checkChangedCreasedModifiers(changedModifiers, ['EnemyMeleeEvasion', 'EnemyRangedEvasion', 'EnemyMagicEvasion'])) {
+            setAccuracy(stats, player, enemy);
+        }
+        if (checkChangedCreasedModifiers(changedModifiers, ['DamageReduction'])) {
+            // do nothing, player DR is always calculated on the fly
+        }
+        if (Object.getOwnPropertyNames(changedModifiers).length > 0) {
+            console.warn('Unknown enemy special attack modifiers!', {...changedModifiers});
+        }
     }
 
     function checkGuardianAmuletAboveHalf(player) {
