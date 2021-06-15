@@ -1277,6 +1277,9 @@
         if (stats.player.activeItems.guardianAmulet) {
             applyHPBasedModifiers(player, 'guardianAmuletAbove', constantModifiers.guardianAmulet, changedHPBasedEffects, changedModifiers, true);
         }
+        if (stats.combatData.modifiers.summoningSynergy_1_2) {
+            applyHPBasedModifiers(player, 'appliedSynergy_1_2', constantModifiers.occultist, changedHPBasedEffects, changedModifiers, false);
+        }
         // process changed modifiers
         if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
             calculateSpeed(player, stats.player);
@@ -1334,11 +1337,17 @@
         if (stats.player.activeItems.guardianAmulet) {
             updatePlayerHPBasedEffect(stats, player, enemy, 1 / 2, 'guardianAmuletAbove');
         }
+        if (stats.combatData.modifiers.summoningSynergy_1_2) {
+            updatePlayerHPBasedEffect(stats, player, enemy, 1, 'appliedSynergy_1_2');
+        }
     }
 
     function initPlayerHPBasedEffects(stats, player) {
         if (stats.player.activeItems.guardianAmulet) {
             player.hpBasedEffects.guardianAmuletAbove = true;
+        }
+        if (stats.combatData.modifiers.summoningSynergy_1_2) {
+            player.hpBasedEffects.appliedSynergy_1_2 = true;
         }
     }
 

@@ -150,6 +150,7 @@
                     confettiCrossbow: items[CONSTANTS.item.Confetti_Crossbow],
                     // modifiers
                     guardianAmulet: items[CONSTANTS.item.Guardian_Amulet].modifiers,
+                    occultist: items[CONSTANTS.item.Summoning_Familiar_Occultist].modifiers,
                 }
                 // Create Web workers
                 this.createWorkers();
