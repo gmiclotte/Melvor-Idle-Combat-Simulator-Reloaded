@@ -741,7 +741,9 @@
                                 break;
                             default:
                         }
-                        // TODO synergy 6, 8
+                        if (this.modifiers.summoningSynergy_6_8 && this.isSlayerTask) {
+                            this.combatStats.minHit += Math.floor(this.combatStats.maxHit * (this.modifiers.summoningSynergy_6_8 / 100));
+                        }
                     }
                 }
                 // TODO synergy 6, 12
