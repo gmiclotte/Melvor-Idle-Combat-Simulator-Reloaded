@@ -476,11 +476,19 @@
                     } else if (this.modifiers.summoningSynergy_7_8 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
                         baseStats.attackBonusRanged += this.modifiers.summoningSynergy_7_8;
                         baseStats.strengthBonusRanged += this.modifiers.summoningSynergy_7_8;
+                    } else if (this.modifiers.summoningSynergy_6_13 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Ranged) {
+                        baseStats.damageReduction += this.modifiers.summoningSynergy_6_13;
+                    } else if (this.modifiers.summoningSynergy_7_13 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
+                        baseStats.damageReduction += this.modifiers.summoningSynergy_7_13;
+                    } else if (this.modifiers.summoningSynergy_8_13 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Melee) {
+                        baseStats.damageReduction += this.modifiers.summoningSynergy_8_13;
                     }
                 }
                 // apply synergies
                 if (this.modifiers.summoningSynergy_1_8) {
                     baseStats.defenceBonusMagic += this.modifiers.summoningSynergy_1_8;
+                } else if (this.modifiers.summoningSynergy_12_13 && this.isSlayerTask) {
+                    baseStats.damageReduction += this.modifiers.summoningSynergy_12_13;
                 }
                 return baseStats;
             }
@@ -635,9 +643,7 @@
              */
             calculatePlayerDamageReduction(player = {}) {
                 let damageReduction = this.baseStats.damageReduction + MICSR.getModifierValue(this.modifiers, 'DamageReduction');
-                if (player.markOfDeath) {
-                    damageReduction = Math.floor(damageReduction / 2);
-                }
+
                 return damageReduction;
             }
 
