@@ -1477,6 +1477,10 @@
         return getAccuracy(stats, player, enemy) > roll;
     }
 
+    function addSlayerCoins(stats, player, amt) {
+        stats.scGained += Math.floor(amt * (1 + mergePlayerModifiers(player, 'SlayerCoins') / 100));
+    }
+
     function playerDoAttack(stats, player, enemy, isSpecial, isMulti) {
         stats.playerAttackCalls++;
         // Apply pre-attack special effects
@@ -1550,18 +1554,21 @@
         // TODO synergy 2, 13
         if (healPlayer > 0) {
             healDamage(stats, enemy, player, healPlayer)
-            if (!isMulti && stats.combatData.modifiers.summoningSynergy_2_12) {
-                stats.scGained += Math.floor(
-                    Math.floor(
-                        numberMultiplier
-                        * healPlayer / 10
-                        * stats.combatData.modifiers.summoningSynergy_2_12 / 100
-                    )
-                    * (1 + mergePlayerModifiers(player, 'SlayerCoins') / 100)
-                );
+            if (stats.combatData.modifiers.summoningSynergy_2_12 && !isMulti) {
+                addSlayerCoins(stats, player, Math.floor(
+                    numberMultiplier
+                    * healPlayer / 10
+                    * stats.combatData.modifiers.summoningSynergy_2_12 / 100
+                ));
             }
         }
-        // TODO synergy 8, 12
+        if (stats.combatData.modifiers.summoningSynergy_8_12 && !isMulti && stats.combatData.isSlayerTask && stats.player.isMagic) {
+            addSlayerCoins(stats, player, Math.floor(
+                numberMultiplier
+                * attackResult.damageToEnemy / 10
+                * stats.combatData.modifiers.summoningSynergy_8_12 / 100
+            ));
+        }
         // confetti crossbow
         if (stats.player.activeItems.confettiCrossbow) {
             // Add gp from this weapon
