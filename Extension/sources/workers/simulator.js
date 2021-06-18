@@ -580,7 +580,6 @@
     }
 
     function bleedTarget(stats, actor, target) {
-        // TODO synergy 2, 14
         // reset timer
         target.bleedTimer = target.bleedInterval;
         // Check if stopped bleeding
@@ -592,8 +591,17 @@
         dealDamage(stats, actor, target, target.bleedDamage, attackSources.bleed);
         target.bleedCount++;
         // Elder Crown life steals bleed damage
-        if (actor.isPlayer && stats.player.activeItems.elderCrown) {
-            healDamage(stats, target, actor, target.bleedDamage);
+        if (actor.isPlayer) {
+            let healsFor = 0;
+            if (stats.player.activeItems.elderCrown) {
+                healsFor += target.bleedDamage;
+            }
+            if (stats.combatData.modifiers.summoningSynergy_2_14) {
+                healsFor += target.bleedDamage * stats.combatData.modifiers.summoningSynergy_2_14 / 100;
+            }
+            if (healsFor > 0) {
+                healDamage(stats, target, actor, healsFor);
+            }
         }
     }
 
