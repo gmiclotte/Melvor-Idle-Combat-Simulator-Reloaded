@@ -532,7 +532,17 @@
             amt *= player.prayerBonus.vars.prayerBonusHitpoints;
         }
         // Regeneration modifiers
-        amt = applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
+        let regenModifier = mergePlayerModifiers(player, 'HitpointRegeneration');
+        if (stats.combatData.modifiers.summoningSynergy_1_14) {
+            const playerDefSum = player.maxDefRoll + player.maxRngDefRoll + player.maxMagDefRoll;
+            const enemyDefSum = enemy.maxDefRoll + enemy.maxRngDefRoll + enemy.maxMagDefRoll;
+            if (playerDefSum > enemyDefSum) {
+                regenModifier += 200;
+            }
+        } else if (stats.combatData.modifiers.summoningSynergy_13_14 && player.hitpoints < player.maxHitPoints * 0.75) {
+            regenModifier += stats.combatData.modifiers.summoningSynergy_13_14;
+        }
+        amt = applyModifier(amt, regenModifier);
         healDamage(stats, enemy, player, amt);
         // synergy 0 14
         if (stats.combatData.modifiers.summoningSynergy_0_14) {
