@@ -676,6 +676,7 @@
         }
         if (!enemy.isAttacking && player.removeMarkOfDeath) {
             player.markOfDeath = false;
+            player.recompute.damageReduction = true;
             player.removeMarkOfDeath = false;
             player.markOfDeathTurns = 0;
             player.markOfDeathStacks = 0;
@@ -735,6 +736,7 @@
         // mark of death
         if (statusEffect.markOfDeath) {
             target.markOfDeath = true;
+            target.recompute.damageReduction = true;
             target.removeMarkOfDeath = false;
             if (target.markOfDeathStacks <= 0) {
                 target.markOfDeathTurns = 3;
@@ -1167,7 +1169,7 @@
         // synergy 0, 13
         if (isAttack && stats.combatData.modifiers.summoningSynergy_0_13) {
             stats.gpGained += stats.combatData.modifiers.summoningSynergy_0_13
-                * calculatePlayerDamageReduction(player)
+                * getPlayerDR(stats, player)
                 * (1 + mergePlayerModifiers(player, 'GPGlobal') / 100);
         }
         // update alive status
@@ -1299,7 +1301,7 @@
             player.recompute.accuracy = true;
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['DamageReduction'])) {
-            // do nothing, player DR is always calculated on the fly
+            player.recompute.damageReduction = true;
         }
         if (!stats.warnedUnknownModifiers && Object.getOwnPropertyNames(changedModifiers).length > 0) {
             console.warn('Unknown enemy special attack modifiers!', {...changedModifiers});
@@ -1558,7 +1560,7 @@
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
         damage *= 1 + getEnemyDamageModifier(enemy, player) / 100;
-        damage -= Math.floor((calculatePlayerDamageReduction(player) / 100) * damage);
+        damage -= Math.floor((getPlayerDR(stats, player) / 100) * damage);
         return damage;
     }
 
@@ -1632,12 +1634,29 @@
         return dmgModifier;
     }
 
-    function calculatePlayerDamageReduction(player) {
+    function getPlayerDR(stats, player, noTriangle = false) {
+        if (player.recompute.damageReduction) {
+            setPlayerDR(stats, player, noTriangle);
+            player.recompute.damageReduction = false;
+        }
+        return player.damageReduction;
+    }
+
+    function setPlayerDR(stats, player, noTriangle) {
         let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
+        // DR cap
+        if (damageReduction > 95) {
+            damageReduction = 95;
+        }
+        // apply mark of death
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
-        damageReduction = Math.floor(damageReduction * player.reductionModifier);
-        return damageReduction;
+        // apply triangle last
+        if (!noTriangle) {
+            damageReduction = Math.floor(damageReduction * player.reductionModifier);
+        }
+        // cache
+        player.damageReduction = damageReduction;
     }
 
     function playerCalculateDamage(stats, enemy, isSpecial, player) {
@@ -1722,6 +1741,7 @@
         common.recompute = {
             speed: true,
             accuracy: true,
+            damageReduction: true,
         }
     }
 
