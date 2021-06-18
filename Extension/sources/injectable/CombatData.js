@@ -742,12 +742,18 @@
                             default:
                         }
                         if (this.modifiers.summoningSynergy_6_8 && this.isSlayerTask) {
-                            this.combatStats.minHit += Math.floor(this.combatStats.maxHit * (this.modifiers.summoningSynergy_6_8 / 100));
+                            this.combatStats.minHit += Math.floor(this.combatStats.maxHit * this.modifiers.summoningSynergy_6_8 / 100);
                         }
                     }
+                } else if (this.isMelee()) {
+                    if (this.modifiers.summoningSynergy_6_12 && this.isSlayerTask) {
+                        this.combatStats.minHit += Math.floor(this.combatStats.maxHit * this.modifiers.summoningSynergy_6_12 / 100);
+                    }
+                } else if (this.isRanged()) {
+                    if (this.modifiers.summoningSynergy_7_12 && this.isSlayerTask) {
+                        this.combatStats.minHit += Math.floor(this.combatStats.maxHit * this.modifiers.summoningSynergy_7_12 / 100);
+                    }
                 }
-                // TODO synergy 6, 12
-                // TODO synergy 7, 12
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
                     this.combatStats.minHit += this.auroraBonus.increasedMinHit;
                 }
