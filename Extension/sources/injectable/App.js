@@ -440,6 +440,7 @@
                     () => {
                         this.combatData.summoningSynergy = !this.combatData.summoningSynergy;
                         this.setSummoningSynergyText();
+                        this.updateCombatStats();
                     },
                     'Synergy locked.',
                 );
