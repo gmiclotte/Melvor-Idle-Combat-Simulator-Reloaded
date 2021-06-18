@@ -454,6 +454,9 @@
                 baseStats.strengthBonusRanged += this.equipmentStats.rangedStrengthBonus;
                 baseStats.attackBonusMagic += this.equipmentStats.magicAttackBonus;
                 baseStats.defenceBonusMagic += this.equipmentStats.magicDefenceBonus;
+                if (this.modifiers.summoningSynergy_1_8) {
+                    baseStats.defenceBonusMagic += this.modifiers.summoningSynergy_1_8;
+                }
                 baseStats.damageBonusMagic += this.equipmentStats.magicDamageBonus;
                 if (monsterID === undefined) {
                     return baseStats;
