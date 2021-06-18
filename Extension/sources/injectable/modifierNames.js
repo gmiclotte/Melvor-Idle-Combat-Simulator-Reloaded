@@ -27,7 +27,7 @@
         const MICSR = window.MICSR;
 
         /**
-         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.7, latest version can be found at:
+         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.10, latest version can be found at:
          * https://raw.githubusercontent.com/gmiclotte/melvor-scripts/master/Show-Modifiers/Show-Modifiers.js
          * TODO: instead of copying it, pull it as a required file or something? No idea how to go about that.
          */
@@ -54,6 +54,7 @@
                         HiddenSkillLevel: [],
                         PotionChargesFlat: 0,
                         SkillXP: [],
+                        SummoningChargePreservation: 0,
                     },
                     // modifiers that only relate to combat and are not classified in a finer group
                     combat: {
@@ -185,7 +186,6 @@
                     summoning: {
                         SummoningShardCost: 0,
                         SummoningCreationCharges: 0,
-                        SummoningChargePreservation: 0,
                     },
                     // modifiers that are not actually implemented in the game
                     unimplemented: {
@@ -398,6 +398,7 @@
                         CONSTANTS.skill.Hitpoints,
                         CONSTANTS.skill.Prayer,
                         CONSTANTS.skill.Slayer,
+                        CONSTANTS.skill.Summoning,
                     ],
                 };
 
@@ -419,6 +420,7 @@
                         CONSTANTS.skill.Hitpoints,
                         CONSTANTS.skill.Prayer,
                         CONSTANTS.skill.Slayer,
+                        CONSTANTS.skill.Summoning,
                     ],
                 };
 
@@ -439,6 +441,7 @@
                         CONSTANTS.skill.Hitpoints,
                         CONSTANTS.skill.Prayer,
                         CONSTANTS.skill.Slayer,
+                        CONSTANTS.skill.Summoning,
                     ],
                 };
 
@@ -459,6 +462,7 @@
                         CONSTANTS.skill.Hitpoints,
                         CONSTANTS.skill.Prayer,
                         CONSTANTS.skill.Slayer,
+                        CONSTANTS.skill.Summoning,
                     ],
                 };
 
@@ -677,6 +681,9 @@
                 const increased = modifiers['increased' + modifier];
                 const decreased = modifiers['decreased' + modifier];
                 let toPrint = [];
+                if (increased === undefined) {
+                    return [];
+                }
                 if (increased.length !== undefined) {
                     skillIDs.forEach(skillID => {
                         const increasedEntry = this.arrayModifierToSkill(increased, skillID);
