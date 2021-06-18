@@ -727,6 +727,7 @@
 
                 // max summ roll
                 this.combatStats.summoningMaxHit = this.getSMH();
+                this.summoningXPPerHit = this.getSummoningXP();
 
                 // max defence roll
                 const evasionRatings = this.calculatePlayerEvasionRating(
@@ -1043,6 +1044,33 @@
                 return Math.max(smh1, smh2);
             }
 
+            getSummoningXP() {
+                const summ1 = this.equipmentSelected[MICSR.equipmentSlot.Summon];
+                const summ2 = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
+                let xp = 0;
+                if (summ1 >= 0 && items[summ1].summoningMaxHit) {
+                    xp += getBaseSummoningXP(items[summ1].summoningID, false, 3000);
+                }
+                if (summ2 >= 0 && items[summ2].summoningMaxHit) {
+                    xp += getBaseSummoningXP(items[summ2].summoningID, false, 3000);
+                }
+                return xp;
+            }
+
+            getCurrentSynergy() {
+                if (!this.summoningSynergy) {
+                    return undefined;
+                }
+                const summLeft = this.equipmentSelected[MICSR.equipmentSlot.Summon];
+                const summRight = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
+                if (summLeft > 0 && summRight > 0 && summLeft !== summRight) {
+                    const min = Math.min(items[summLeft].summoningID, items[summRight].summoningID);
+                    const max = Math.max(items[summLeft].summoningID, items[summRight].summoningID);
+                    return SUMMONING.Synergies[min][max];
+                }
+                return undefined;
+            }
+
             getPlayerStats() {
                 /** @type {PlayerStats} */
                 const playerStats = {
@@ -1100,6 +1128,8 @@
                         manual: false,
                     },
                     foodHeal: 0,
+                    // summoning
+                    synergy: this.getCurrentSynergy(),
                 };
                 // MICSR.log({...playerStats});
 
@@ -1244,6 +1274,7 @@
                 }
                 playerStats.slayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Slayer);
                 playerStats.prayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Prayer);
+                playerStats.summoningXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Summoning);
                 return playerStats;
             }
 

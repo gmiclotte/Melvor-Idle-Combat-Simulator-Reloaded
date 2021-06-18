@@ -72,6 +72,7 @@
                 addPlotOption('HP XP per ', true, 'hpXpPerSecond', 'HP XP/');
                 addPlotOption('Prayer XP per ', true, 'prayerXpPerSecond', 'Prayer XP/');
                 addPlotOption('Slayer XP per ', true, 'slayerXpPerSecond', 'Slayer XP/');
+                addPlotOption('Summoning XP per ', true, 'summoningXpPerSecond', 'Summoning XP/');
                 // resource loss
                 addPlotOption('Prayer Points per ', true, 'ppConsumedPerSecond', 'Prayer Points/');
                 addPlotOption('Ammo per ', true, 'ammoUsedPerSecond', 'Ammo/');
@@ -392,16 +393,10 @@
                     text.textContent = 'Synergy locked';
                     return;
                 }
-                const summLeft = this.equipmentSelected[MICSR.equipmentSlot.Summon];
-                const summRight = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
-                if (summLeft > 0 && summRight > 0 && summLeft !== summRight) {
-                    const min = Math.min(items[summLeft].summoningID, items[summRight].summoningID);
-                    const max = Math.max(items[summLeft].summoningID, items[summRight].summoningID);
-                    const synergy = SUMMONING.Synergies[min][max];
-                    if (synergy) {
-                        text.textContent = synergy.description;
-                        return;
-                    }
+                const synergy = this.combatData.getCurrentSynergy();
+                if (synergy) {
+                    text.textContent = synergy.description;
+                    return;
                 }
                 text.textContent = 'No synergy possible.';
             }

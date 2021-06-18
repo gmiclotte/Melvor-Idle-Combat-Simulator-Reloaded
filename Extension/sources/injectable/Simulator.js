@@ -72,6 +72,7 @@
                         gpPerSecond: 0,
                         prayerXpPerSecond: 0,
                         slayerXpPerSecond: 0,
+                        summoningXpPerSecond: 0,
                         ppConsumedPerSecond: 0,
                         herbloreXPPerSecond: 0,
                         signetChance: 0,
@@ -522,6 +523,7 @@
                     let totXp = 0;
                     let totHpXp = 0;
                     let totPrayXP = 0;
+                    let totSummoningXP = 0;
                     let totHP = 0;
                     let totEnemyHP = 0;
                     let totPrayerPoints = 0;
@@ -546,6 +548,7 @@
                         totXp += this.monsterSimData[monsterID].xpPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totHpXp += this.monsterSimData[monsterID].hpXpPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totPrayXP += this.monsterSimData[monsterID].prayerXpPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totSummoningXP += this.monsterSimData[monsterID].summoningXpPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totHP += this.monsterSimData[monsterID].hpPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totEnemyHP += this.monsterSimData[monsterID].dmgPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totPrayerPoints += this.monsterSimData[monsterID].ppConsumedPerSecond * this.monsterSimData[monsterID].killTimeS;
@@ -568,6 +571,7 @@
                     data.xpPerHit = totXp / totalAttacksMade;
                     data.hpXpPerSecond = totHpXp / dungeonTime;
                     data.prayerXpPerSecond = totPrayXP / dungeonTime;
+                    data.summoningXpPerSecond = totSummoningXP / dungeonTime;
                     data.hpPerSecond = totHP / dungeonTime;
                     data.dmgPerSecond = totEnemyHP / dungeonTime;
                     data.avgKillTime = totTime;

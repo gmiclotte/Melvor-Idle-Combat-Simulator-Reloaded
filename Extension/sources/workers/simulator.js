@@ -1906,14 +1906,9 @@
             monsterID: stats.enemy.monsterID,
         };
 
+        simResult.verbose = gatherStatistics(stats);
         if (verbose) {
-            let verboseResult = gatherStatistics(stats);
-            verboseResult = {
-                // gathered statistics
-                ...verboseResult
-            };
-            console.log(verboseResult);
-            simResult.verbose = verboseResult;
+            console.log(simResult.verbose);
         }
 
         const successes = trials - stats.player.deaths;
@@ -1958,6 +1953,11 @@
         simResult.xpPerSecond = stats.totalCombatXP / totalTime * 1000;
         simResult.hpXpPerSecond = stats.totalHpXP / totalTime * 1000;
         simResult.prayerXpPerSecond = stats.totalPrayerXP / totalTime * 1000;
+        simResult.summoningXpPerSecond = stats.combatData.summoningXPPerHit * stats.player.tracking[attackSources.summon].attacks / totalTime * 1000;
+        if (stats.player.synergy) {
+            simResult.summoningXpPerSecond *= 2;
+        }
+        simResult.summoningXpPerSecond *= 1 + stats.player.summoningXpBonus / 100;
         // resource use
         // pp
         simResult.ppConsumedPerSecond = stats.playerAttackCalls * stats.player.prayerPointsPerAttack / totalTime * 1000;
