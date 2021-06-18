@@ -566,6 +566,9 @@
         target.burnTimer = target.burnInterval;
         // Check if stopped burning
         if (target.burnCount >= target.burnMaxCount) {
+            if (target.isPlayer && stats.combatData.modifiers.summoningSynergy_1_15) {
+                actor.recompute.accuracy;
+            }
             target.isBurning = false;
             return;
         }
@@ -740,6 +743,9 @@
         ///////////
         // Apply Burning
         if (canApplyStatus(statusEffect.burnDebuff, target.isBurning)) {
+            if (target.isPlayer && stats.combatData.modifiers.summoningSynergy_1_15) {
+                actor.recompute.accuracy;
+            }
             target.isBurning = true;
             target.burnCount = 0;
             target.burnDamage = Math.floor(target.maxHitpoints * 0.15 / target.burnMaxCount);
@@ -2262,7 +2268,11 @@
         let defenceBonus = player.baseStats.defenceBonus;
         let defenceBonusRanged = player.baseStats.defenceBonusRanged;
         let defenceBonusMagic = player.baseStats.defenceBonusMagic;
-        if (stats.combatData.modifiers.summoningSynergy_1_13) {
+        if (player.isBurning && stats.combatData.modifiers.summoningSynergy_1_15) {
+            defenceBonus += stats.combatData.modifiers.summoningSynergy_1_15;
+            defenceBonusRanged += stats.combatData.modifiers.summoningSynergy_1_15;
+            defenceBonusMagic += stats.combatData.modifiers.summoningSynergy_1_15;
+        } else if (stats.combatData.modifiers.summoningSynergy_1_13) {
             defenceBonus += getPlayerDR(stats, player, enemy, true);
             defenceBonusRanged += getPlayerDR(stats, player, enemy, true);
         }
