@@ -811,6 +811,7 @@
                 if (this.currentSim.playerStats.activeItems.stormsnap
                     || this.currentSim.playerStats.activeItems.slayerCrossbow
                     || this.currentSim.playerStats.activeItems.bigRon
+                    || modifiers.summoningSynergy_6_7
                     || modifiers.summoningSynergy_7_8) {
                     // recompute base stats
                     const baseStats = combatData.updatePlayerBaseStats(monsterID);

@@ -467,8 +467,13 @@
                     } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
                         baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
                     }
-                    // synergy 1 15
-                    if (this.modifiers.summoningSynergy_7_8 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
+                    // synergy 6 7 and synergy 7 8
+                    if (this.modifiers.summoningSynergy_6_7 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Ranged) {
+                        baseStats.attackBonus[0] += this.modifiers.summoningSynergy_6_7;
+                        baseStats.attackBonus[1] += this.modifiers.summoningSynergy_6_7;
+                        baseStats.attackBonus[2] += this.modifiers.summoningSynergy_6_7;
+                        baseStats.strengthBonus += this.modifiers.summoningSynergy_6_7;
+                    } else if (this.modifiers.summoningSynergy_7_8 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
                         baseStats.attackBonusRanged += this.modifiers.summoningSynergy_7_8;
                         baseStats.strengthBonusRanged += this.modifiers.summoningSynergy_7_8;
                     }
