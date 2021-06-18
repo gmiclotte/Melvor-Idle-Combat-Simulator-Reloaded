@@ -419,12 +419,13 @@
                     const tooltips = [];
                     row.forEach((equipmentSlot) => {
                         if (!this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]) {
-                            console.log(MICSR.equipmentSlot)
-                            console.log(this.emptyItems)
-                            console.log(this.equipmentSlotKeys)
-                            console.log(equipmentSlot)
-                            console.log(this.equipmentSlotKeys[equipmentSlot])
-                            console.log(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]])
+                            MICSR.log(MICSR.equipmentSlot);
+                            MICSR.log(this.emptyItems);
+                            MICSR.log(this.equipmentSlotKeys);
+                            MICSR.log(equipmentSlot);
+                            MICSR.log(this.equipmentSlotKeys[equipmentSlot]);
+                            MICSR.log(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]]);
+                            return;
                         }
                         rowSources.push(this.emptyItems[this.equipmentSlotKeys[equipmentSlot]].media);
                         rowIDs.push(`MCS ${this.equipmentSlotKeys[equipmentSlot]} Image`);
