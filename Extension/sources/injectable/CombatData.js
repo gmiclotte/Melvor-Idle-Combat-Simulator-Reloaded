@@ -467,6 +467,11 @@
                     } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
                         baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
                     }
+                    // synergy 1 15
+                    if (this.modifiers.summoningSynergy_7_8 && MONSTERS[monsterID].attackType === CONSTANTS.attackType.Magic) {
+                        baseStats.attackBonusRanged += this.modifiers.summoningSynergy_7_8;
+                        baseStats.strengthBonusRanged += this.modifiers.summoningSynergy_7_8;
+                    }
                 }
                 // apply synergies
                 if (this.modifiers.summoningSynergy_1_8) {

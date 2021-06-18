@@ -810,7 +810,8 @@
                 // Do preprocessing of player stats for special weapons
                 if (this.currentSim.playerStats.activeItems.stormsnap
                     || this.currentSim.playerStats.activeItems.slayerCrossbow
-                    || this.currentSim.playerStats.activeItems.bigRon) {
+                    || this.currentSim.playerStats.activeItems.bigRon
+                    || modifiers.summoningSynergy_7_8) {
                     // recompute base stats
                     const baseStats = combatData.updatePlayerBaseStats(monsterID);
                     // max attack roll
