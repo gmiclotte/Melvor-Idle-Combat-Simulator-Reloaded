@@ -145,6 +145,7 @@
                 totalHpXP: 0,
                 totalPrayerXP: 0,
                 gpGained: 0,
+                scGained: 0,
                 playerActions: 0,
                 enemyActions: 0,
                 /** @type {PetRolls} */
@@ -1544,11 +1545,21 @@
             // fervor + passive item stat
             lifeSteal += stats.player.lifesteal;
         }
+        let healPlayer = attackResult.damageToEnemy * lifeSteal / 100;
         // TODO synergy 12, 14
         // TODO synergy 2, 13
-        if (lifeSteal > 0) {
-            // TODO synergy 2, 12
-            healDamage(stats, enemy, player, attackResult.damageToEnemy * lifeSteal / 100)
+        if (healPlayer > 0) {
+            healDamage(stats, enemy, player, healPlayer)
+            if (!isMulti && stats.combatData.modifiers.summoningSynergy_2_12) {
+                stats.scGained += Math.floor(
+                    Math.floor(
+                        numberMultiplier
+                        * healPlayer / 10
+                        * stats.combatData.modifiers.summoningSynergy_2_12 / 100
+                    )
+                    * (1 + mergePlayerModifiers(player, 'SlayerCoins') / 100)
+                );
+            }
         }
         // TODO synergy 8, 12
         // confetti crossbow
@@ -2050,6 +2061,8 @@
         }
         // gp
         simResult.gpFromDamagePerSecond = stats.gpGained / totalTime * 1000;
+        // sc
+        simResult.scGainedPerSecond = stats.scGained / totalTime * 1000;
 
         // stats depending on kills
         if (tooManyActions === 0 && successes) {

@@ -601,42 +601,47 @@
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
-                        this.monsterSimData[monsterID].slayerCoinsPerSecond = 0;
+                        this.monsterSimData[monsterID].slayerCoinsPerSecond = this.monsterSimData[monsterID].scGainedPerSecond;
                     });
                     return;
                 }
 
-                const updateMonsterSlayerCoins = (monsterID) => {
-                    if (!this.monsterSimData[monsterID]) {
+                const updateMonsterSlayerCoins = (monsterID, data) => {
+                    if (!data) {
                         return;
                     }
-                    this.monsterSimData[monsterID].slayerCoinsPerSecond = 0;
+                    data.slayerCoinsPerSecond = data.scGainedPerSecond;
                     if (!this.currentSim.isSlayerTask) {
                         return;
                     }
-                    if (!this.monsterSimData[monsterID].simSuccess) {
+                    if (!data.simSuccess) {
                         return;
                     }
-                    if (!this.monsterSimData[monsterID].killTimeS) {
+                    if (!data.killTimeS) {
                         return;
                     }
                     const sc = applyModifier(
                         MONSTERS[monsterID].hitpoints,
                         MICSR.getModifierValue(this.modifiers, 'SlayerCoins')
                     );
-                    this.monsterSimData[monsterID].slayerCoinsPerSecond = sc / this.monsterSimData[monsterID].killTimeS;
+                    data.slayerCoinsPerSecond += sc / data.killTimeS;
                 };
 
                 // combat zones
                 combatAreas.forEach(area => {
-                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID));
+                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID, this.monsterSimData[monsterID]));
                 });
                 const bardID = 139;
-                updateMonsterSlayerCoins(bardID);
+                updateMonsterSlayerCoins(bardID, this.monsterSimData[bardID]);
                 // slayer areas
                 slayerAreas.forEach((area) => {
-                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID));
+                    area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID, this.monsterSimData[monsterID]));
                 });
+                // dungeon
+                for (let i = 0; i < DUNGEONS.length; i++) {
+                    const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
+                    updateMonsterSlayerCoins(monsterID, this.dungeonSimData[i]);
+                }
                 // auto slayer
                 for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
                     this.setSlayerTaskAverageDropRate('slayerCoinsPerSecond', i);
