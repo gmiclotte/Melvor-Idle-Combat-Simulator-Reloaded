@@ -531,14 +531,15 @@
         if (player.prayerBonus.vars.prayerBonusHitpoints) {
             amt *= player.prayerBonus.vars.prayerBonusHitpoints;
         }
-        // synergies
+        // Regeneration modifiers
+        amt = applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
+        healDamage(stats, enemy, player, amt);
+        // synergy 0 14
         if (stats.combatData.modifiers.summoningSynergy_0_14) {
             stats.gpGained += 1000 / numberMultiplier * amt
                 * mergePlayerModifiers(player, 'GPGlobal');
         }
-        // Regeneration modifiers
-        applyModifier(amt, mergePlayerModifiers(player, 'HitpointRegeneration'));
-        healDamage(stats, enemy, player, amt);
+        // reset timer
         player.regenTimer += hitpointRegenInterval;
         stats.player.numberOfRegens += 1;
     }
