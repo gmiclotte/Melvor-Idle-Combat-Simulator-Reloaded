@@ -1954,8 +1954,11 @@
         simResult.hpXpPerSecond = stats.totalHpXP / totalTime * 1000;
         simResult.prayerXpPerSecond = stats.totalPrayerXP / totalTime * 1000;
         simResult.summoningXpPerSecond = stats.combatData.summoningXPPerHit * stats.player.tracking[attackSources.summon].attacks / totalTime * 1000;
+        simResult.tabletsUsedPerSecond = stats.player.tracking[attackSources.summon].attacks / totalTime * 1000;
+        simResult.tabletsUsedPerSecond *= 1 - mergePlayerModifiers(player, 'SummoningChargePreservation') / 100;
         if (stats.player.synergy) {
             simResult.summoningXpPerSecond *= 2;
+            simResult.tabletsUsedPerSecond *= 2;
         }
         simResult.summoningXpPerSecond *= 1 + stats.player.summoningXpBonus / 100;
         // resource use

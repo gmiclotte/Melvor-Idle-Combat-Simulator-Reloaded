@@ -79,6 +79,7 @@
                 addPlotOption('Runes per ', true, 'runesUsedPerSecond', 'Runes/');
                 addPlotOption('Combination Runes per ', true, 'combinationRunesUsedPerSecond', 'Comb. Runes/');
                 addPlotOption('Potions per ', true, 'potionsUsedPerSecond', 'Potions/');
+                addPlotOption('Tablets per type per ', true, 'tabletsUsedPerSecond', 'Tablets per type/');
                 addPlotOption('Food per', true, 'atePerSecond', 'Food/');
                 addPlotOption('HP Loss per ', true, 'hpPerSecond', 'HP Lost/');
                 // survivability

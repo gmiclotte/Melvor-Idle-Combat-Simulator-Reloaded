@@ -535,6 +535,7 @@
                     let totalRunesUsed = 0;
                     let totalCombinationRunesUsed = 0;
                     let totalPotionsUsed = 0;
+                    let totalTabletsUsed = 0;
                     data.deathRate = 0;
                     data.highestDamageTaken = 0;
                     data.lowestHitpoints = Infinity;
@@ -559,6 +560,7 @@
                         totalRunesUsed += this.monsterSimData[monsterID].runesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalCombinationRunesUsed += this.monsterSimData[monsterID].combinationRunesUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totalPotionsUsed += this.monsterSimData[monsterID].potionsUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
+                        totalTabletsUsed += this.monsterSimData[monsterID].tabletsUsedPerSecond * this.monsterSimData[monsterID].killTimeS;
                         totTime += this.monsterSimData[monsterID].avgKillTime;
                         data.deathRate = 1 - (1 - data.deathRate) * (1 - this.monsterSimData[monsterID].deathRate);
                         data.highestDamageTaken = Math.max(data.highestDamageTaken, this.monsterSimData[monsterID].highestDamageTaken);
@@ -586,6 +588,7 @@
                     data.runesUsedPerSecond = totalRunesUsed / dungeonTime;
                     data.combinationRunesUsedPerSecond = totalCombinationRunesUsed / dungeonTime;
                     data.potionsUsedPerSecond = totalPotionsUsed / dungeonTime;
+                    data.tabletsUsedPerSecond = totalTabletsUsed / dungeonTime;
                     data.atePerSecond = totalAte / dungeonTime;
                     data.simulationTime = totalSimTime;
                 } else {
