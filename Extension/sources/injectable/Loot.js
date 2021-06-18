@@ -601,7 +601,7 @@
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
-                        this.monsterSimData[monsterID].slayerXpPerSecond = 0;
+                        this.monsterSimData[monsterID].slayerCoinsPerSecond = 0;
                     });
                     return;
                 }
