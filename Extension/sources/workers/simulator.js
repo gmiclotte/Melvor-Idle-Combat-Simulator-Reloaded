@@ -431,7 +431,7 @@
 
             // Apply XP Bonuses
             stats.totalCombatXP *= 1 + stats.player.combatXpBonus / 100;
-            stats.totalHpXP *= 1 + stats.player.combatXpBonus / 100;
+            stats.totalHpXP *= 1 + stats.player.hitpointsXpBonus / 100;
             stats.totalPrayerXP *= 1 + stats.player.prayerXpBonus / 100;
 
             // Final Result from simulation
