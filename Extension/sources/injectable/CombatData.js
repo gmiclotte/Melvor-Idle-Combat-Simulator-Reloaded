@@ -112,6 +112,7 @@
                     attackSpeed: 4000,
                     maxHit: 0,
                     minHit: 0,
+                    increasedMinHit: 0,
                     summoningMaxHit: 0,
                     maxAttackRoll: 0,
                     maxDefRoll: 0,
@@ -722,22 +723,22 @@
 
                 // min hit roll
                 this.combatStats.minHit = 0;
+                this.combatStats.increasedMinHit = 0;
                 if (this.combatStats.attackType === CONSTANTS.attackType.Magic) {
                     // Magic
                     if (this.spells.standard.isSelected) {
-                        this.combatStats.minHit = 0;
                         switch (SPELLS[this.spells.standard.selectedID].spellType) {
                             case CONSTANTS.spellType.Air:
-                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinAirSpellDmg');
+                                this.combatStats.increasedMinHit = MICSR.getModifierValue(modifiers, 'MinAirSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Water:
-                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinWaterSpellDmg');
+                                this.combatStats.increasedMinHit = MICSR.getModifierValue(modifiers, 'MinWaterSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Earth:
-                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinEarthSpellDmg');
+                                this.combatStats.increasedMinHit = MICSR.getModifierValue(modifiers, 'MinEarthSpellDmg');
                                 break;
                             case CONSTANTS.spellType.Fire:
-                                this.combatStats.minHit = MICSR.getModifierValue(modifiers, 'MinFireSpellDmg');
+                                this.combatStats.increasedMinHit = MICSR.getModifierValue(modifiers, 'MinFireSpellDmg');
                                 break;
                             default:
                         }
@@ -755,9 +756,10 @@
                     }
                 }
                 if (this.auroraBonus.increasedMinHit !== 0 && this.spells.standard.isSelected) {
-                    this.combatStats.minHit += this.auroraBonus.increasedMinHit;
+                    this.combatStats.increasedMinHit += this.auroraBonus.increasedMinHit;
                 }
-                this.combatStats.minHit *= this.numberMultiplier;
+                this.combatStats.increasedMinHit *= this.numberMultiplier;
+                this.combatStats.minHit += this.combatStats.increasedMinHit;
 
                 // max summ roll
                 this.combatStats.summoningMaxHit = this.getSMH();
@@ -1138,7 +1140,7 @@
                     isMagic: this.isMagic(),
                     maxAttackRoll: this.combatStats.maxAttackRoll,
                     maxHit: this.combatStats.maxHit,
-                    minHit: this.combatStats.minHit,
+                    increasedMinHit: this.combatStats.increasedMinHit,
                     summoningMaxHit: this.combatStats.summoningMaxHit,
                     maxDefRoll: this.combatStats.maxDefRoll,
                     maxMagDefRoll: this.combatStats.maxMagDefRoll,
