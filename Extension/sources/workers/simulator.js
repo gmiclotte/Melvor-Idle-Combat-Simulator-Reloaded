@@ -519,6 +519,14 @@
         amt = Math.floor(amt / numberMultiplier);
         // modifiers
         amt += numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
+        // flat synergies
+        if (stats.combatData.modifiers.summoningSynergy_6_14 && player.isMelee) {
+            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_6_14 / 100);
+        } else if (stats.combatData.modifiers.summoningSynergy_7_14 && player.isRanged) {
+            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_7_14 / 100);
+        } else if (stats.combatData.modifiers.summoningSynergy_8_14 && player.isMagic) {
+            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_8_14 / 100);
+        }
         // rapid heal prayer
         if (player.prayerBonus.vars.prayerBonusHitpoints) {
             amt *= player.prayerBonus.vars.prayerBonusHitpoints;
