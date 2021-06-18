@@ -1551,7 +1551,13 @@
         }
         let healPlayer = attackResult.damageToEnemy * lifeSteal / 100;
         // TODO synergy 12, 14
-        // TODO synergy 2, 13
+        if (stats.combatData.modifiers.summoningSynergy_2_13 && !isMulti) {
+            healPlayer += Math.floor(
+                getPlayerDR(stats, player, enemy)
+                * numberMultiplier/ 10
+                * stats.combatData.modifiers.summoningSynergy_2_13 / 100
+            );
+        }
         if (healPlayer > 0) {
             healDamage(stats, enemy, player, healPlayer)
             if (stats.combatData.modifiers.summoningSynergy_2_12 && !isMulti) {
