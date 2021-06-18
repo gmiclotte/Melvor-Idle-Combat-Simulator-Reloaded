@@ -607,7 +607,6 @@
 
     function summonAttack(stats, player, enemy) {
         // TODO synergy 2, 15
-        // TODO if synergy active: use 2 tablets per summon per attack, else use 1 tablet per summon per attack
         let damage = 0;
         if (rollPlayerHit(stats, player, enemy, 1)) {
             damage = stats.player.summoningMaxHit;
