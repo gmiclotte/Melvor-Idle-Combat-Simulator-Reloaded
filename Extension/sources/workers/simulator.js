@@ -534,6 +534,7 @@
         }
         // Regeneration modifiers
         let regenModifier = mergePlayerModifiers(player, 'HitpointRegeneration');
+        // TODO: synergy 1 14 matches 0.20?936 implementation, this does not match the synergy description !
         if (stats.combatData.modifiers.summoningSynergy_1_14) {
             const playerDefSum = player.maxDefRoll + player.maxRngDefRoll + player.maxMagDefRoll;
             const enemyDefSum = enemy.maxDefRoll + enemy.maxRngDefRoll + enemy.maxMagDefRoll;
@@ -1549,20 +1550,22 @@
             // fervor + passive item stat
             lifeSteal += stats.player.lifesteal;
         }
+        // TODO: synergy 12 14 matches 0.20?936 implementation, this does not match the synergy description !
         if (stats.combatData.modifiers.summoningSynergy_12_14 && !isMulti && stats.combatData.isSlayerTask) {
             lifeSteal += stats.combatData.modifiers.summoningSynergy_12_14;
         }
         let healPlayer = attackResult.damageToEnemy * lifeSteal / 100;
-        // TODO synergy 12, 14
+        // TODO: synergy 2 13 matches 0.20?936 implementation, this does not match the synergy description !
         if (stats.combatData.modifiers.summoningSynergy_2_13 && !isMulti) {
             healPlayer += Math.floor(
                 getPlayerDR(stats, player, enemy)
-                * numberMultiplier/ 10
+                * numberMultiplier / 10
                 * stats.combatData.modifiers.summoningSynergy_2_13 / 100
             );
         }
         if (healPlayer > 0) {
             healDamage(stats, enemy, player, healPlayer)
+            // TODO: synergy 2 12 matches 0.20?936 implementation, but this implementation is broken for adventure mode !
             if (stats.combatData.modifiers.summoningSynergy_2_12 && !isMulti) {
                 addSlayerCoins(stats, player, Math.floor(
                     numberMultiplier
@@ -1571,6 +1574,7 @@
                 ));
             }
         }
+        // TODO: synergy 8 12 matches 0.20?936 implementation, but this implementation is broken for adventure mode !
         if (stats.combatData.modifiers.summoningSynergy_8_12 && !isMulti && stats.combatData.isSlayerTask && stats.player.isMagic) {
             addSlayerCoins(stats, player, Math.floor(
                 numberMultiplier
