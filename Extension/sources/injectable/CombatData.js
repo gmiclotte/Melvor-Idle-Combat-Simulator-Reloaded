@@ -472,11 +472,6 @@
                 if (this.modifiers.summoningSynergy_1_8) {
                     baseStats.defenceBonusMagic += this.modifiers.summoningSynergy_1_8;
                 }
-                if (this.modifiers.summoningSynergy_1_13) {
-                    const dr = this.calculatePlayerDamageReduction()
-                    baseStats.defenceBonus += dr;
-                    baseStats.defenceBonusRanged += dr;
-                }
                 return baseStats;
             }
 
@@ -562,6 +557,13 @@
              * mimic calculatePlayerEvasionRating
              */
             calculatePlayerEvasionRating(combatStats, player) {
+                let defenceBonus = this.baseStats.defenceBonus;
+                let defenceBonusRanged = this.baseStats.defenceBonusRanged;
+                if (this.modifiers.summoningSynergy_1_13) {
+                    const dr = this.calculatePlayerDamageReduction()
+                    defenceBonus += dr;
+                    defenceBonusRanged += dr;
+                }
                 //Melee defence
                 combatStats.effectiveDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
                 if (this.combatStats.attackType === CONSTANTS.attackType.Ranged && this.attackStyle.Ranged === 2) {
@@ -570,7 +572,7 @@
                 }
                 const maximumDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     combatStats.effectiveDefenceLevel,
-                    this.baseStats.defenceBonus,
+                    defenceBonus,
                     'MeleeEvasion',
                     player.meleeEvasionBuff,
                     player.meleeEvasionDebuff,
@@ -579,7 +581,7 @@
                 combatStats.effectiveRangedDefenceLevel = Math.floor(this.playerLevels.Defence + 8 + 1 + getSkillHiddenLevels(CONSTANTS.skill.Defence));
                 const maximumRangedDefenceRoll = this.calculateGenericPlayerEvasionRating(
                     combatStats.effectiveRangedDefenceLevel,
-                    this.baseStats.defenceBonusRanged,
+                    defenceBonusRanged,
                     'RangedEvasion',
                     player.rangedEvasionBuff,
                     player.rangedEvasionDebuff,

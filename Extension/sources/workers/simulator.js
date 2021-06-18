@@ -1188,7 +1188,7 @@
         // synergy 0, 13
         if (isAttack && stats.combatData.modifiers.summoningSynergy_0_13) {
             stats.gpGained += stats.combatData.modifiers.summoningSynergy_0_13
-                * getPlayerDR(stats, player)
+                * getPlayerDR(stats, player, enemy)
                 * (1 + mergePlayerModifiers(player, 'GPGlobal') / 100);
         }
         // update alive status
@@ -1579,7 +1579,7 @@
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
         damage *= 1 + getEnemyDamageModifier(enemy, player) / 100;
-        damage -= Math.floor((getPlayerDR(stats, player) / 100) * damage);
+        damage -= Math.floor((getPlayerDR(stats, player, enemy) / 100) * damage);
         return damage;
     }
 
@@ -1653,9 +1653,9 @@
         return dmgModifier;
     }
 
-    function getPlayerDR(stats, player, noTriangle = false) {
+    function getPlayerDR(stats, player, enemy, noTriangle = false) {
         if (player.recompute.damageReduction) {
-            setPlayerDR(stats, player);
+            setPlayerDR(stats, player, enemy);
             player.recompute.damageReduction = false;
         }
         if (noTriangle) {
@@ -1664,7 +1664,7 @@
         return player.damageReduction;
     }
 
-    function setPlayerDR(stats, player) {
+    function setPlayerDR(stats, player, enemy) {
         let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
         // DR cap
         if (damageReduction > 95) {
@@ -1673,12 +1673,9 @@
         // apply mark of death
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
-        // recompute synergy 1 13 if required
+        // recompute accuracy for synergy 1 13 if dr changed
         if (stats.combatData.modifiers.summoningSynergy_1_13 && player.damageReductionNoTriangle !== damageReduction) {
-            player.baseStats.defenceBonus -= player.damageReductionNoTriangle;
-            player.baseStats.defenceBonusRanged -= player.damageReductionNoTriangle;
-            player.baseStats.defenceBonus += damageReduction;
-            player.baseStats.defenceBonusRanged += damageReduction;
+            enemy.recompute.accuracy = true;
         }
         // cache dr without triangle
         player.damageReductionNoTriangle = damageReduction;
@@ -2116,7 +2113,7 @@
         }
         // determine evasion roll
         if (target.isPlayer) {
-            calculatePlayerEvasionRating(stats, target);
+            calculatePlayerEvasionRating(stats, target, actor);
         } else {
             // Adjust ancient magick forcehit
             if (actorStats.usingAncient && (actorStats.specialData[0].forceHit || actorStats.specialData[0].checkForceHit)) {
@@ -2261,25 +2258,32 @@
     /**
      * mimic calculatePlayerEvasionRating
      */
-    function calculatePlayerEvasionRating(stats, player) {
+    function calculatePlayerEvasionRating(stats, player, enemy) {
+        let defenceBonus = player.baseStats.defenceBonus;
+        let defenceBonusRanged = player.baseStats.defenceBonusRanged;
+        let defenceBonusMagic = player.baseStats.defenceBonusMagic;
+        if (stats.combatData.modifiers.summoningSynergy_1_13) {
+            defenceBonus += getPlayerDR(stats, player, enemy, true);
+            defenceBonusRanged += getPlayerDR(stats, player, enemy, true);
+        }
         //Melee defence
         player.maxDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveDefenceLevel,
-            player.baseStats.defenceBonus,
+            defenceBonus,
             mergePlayerModifiers(player, 'MeleeEvasion'),
             player.meleeEvasionBuff,
         );
         //Ranged Defence
         player.maxRngDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveRangedDefenceLevel,
-            player.baseStats.defenceBonusRanged,
+            defenceBonusRanged,
             mergePlayerModifiers(player, 'RangedEvasion'),
             player.rangedEvasionBuff,
         );
         //Magic Defence
         player.maxMagDefRoll = calculateGenericPlayerEvasionRating(
             player.combatStats.effectiveMagicDefenceLevel,
-            player.baseStats.defenceBonusMagic,
+            defenceBonusMagic,
             mergePlayerModifiers(player, 'MagicEvasion'),
             player.magicEvasionBuff,
         );
