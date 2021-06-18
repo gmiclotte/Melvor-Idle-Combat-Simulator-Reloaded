@@ -657,6 +657,9 @@
                     this.numberMultiplier = 10;
                 }
 
+                // attack type
+                this.setAttackType();
+
                 // update modifiers
                 this.updateModifiers();
                 const modifiers = this.modifiers;
@@ -688,9 +691,6 @@
 
                 // set enemy spawn timer
                 this.enemySpawnTimer = enemySpawnTimer + MICSR.getModifierValue(modifiers, 'MonsterRespawnTimer');
-
-                // attack type
-                this.setAttackType();
 
                 // attack speed without aurora
                 this.combatStats.attackSpeed = 4000;
@@ -1014,8 +1014,14 @@
                     return {};
                 }
                 // convert summoningSynergy_x_y to modifiers
-                if (this.isSlayerTask && synergy.modifiers.summoningSynergy_1_12) {
-                    synergy.modifiers.decreasedEnemyAccuracy += summoningSynergy_1_12;
+                if (synergy.modifiers.summoningSynergy_1_12 && this.isSlayerTask) {
+                    synergy.modifiers.decreasedEnemyAccuracy += synergy.modifiers.summoningSynergy_1_12;
+                } else if (synergy.modifiers.summoningSynergy_2_6 && this.isMelee()) {
+                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_6;
+                } else if (synergy.modifiers.summoningSynergy_2_7 && this.isRanged()) {
+                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_7;
+                } else if (synergy.modifiers.summoningSynergy_2_8 && this.isMagic()) {
+                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_8;
                 }
                 // return the synergy modifiers
                 return synergy.modifiers;
@@ -1096,14 +1102,26 @@
                 return undefined;
             }
 
+            isMelee() {
+                return this.combatStats.attackType === CONSTANTS.attackType.Melee;
+            }
+
+            isRanged() {
+                return this.combatStats.attackType === CONSTANTS.attackType.Ranged;
+            }
+
+            isMagic() {
+                return this.combatStats.attackType === CONSTANTS.attackType.Magic;
+            }
+
             getPlayerStats() {
                 /** @type {PlayerStats} */
                 const playerStats = {
                     attackSpeed: this.combatStats.attackSpeed,
                     attackType: this.combatStats.attackType,
-                    isMelee: this.combatStats.attackType === CONSTANTS.attackType.Melee,
-                    isRanged: this.combatStats.attackType === CONSTANTS.attackType.Ranged,
-                    isMagic: this.combatStats.attackType === CONSTANTS.attackType.Magic,
+                    isMelee: this.isMelee(),
+                    isRanged: this.isRanged(),
+                    isMagic: this.isMagic(),
                     maxAttackRoll: this.combatStats.maxAttackRoll,
                     maxHit: this.combatStats.maxHit,
                     minHit: this.combatStats.minHit,
