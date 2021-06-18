@@ -606,13 +606,15 @@
     }
 
     function summonAttack(stats, player, enemy) {
-        // TODO synergy 2, 15
         let damage = 0;
         if (rollPlayerHit(stats, player, enemy, 1)) {
             damage = stats.player.summoningMaxHit;
             damage = Math.floor(Math.random() * damage);
         }
         dealDamageToEnemy(stats, enemy, damage, attackSources.summon);
+        if (stats.combatData.modifiers.summoningSynergy_2_15) {
+            healDamage(stats, enemy, player, damage);
+        }
         player.summonTimer = 3000;
     }
 
