@@ -1549,6 +1549,9 @@
             // fervor + passive item stat
             lifeSteal += stats.player.lifesteal;
         }
+        if (stats.combatData.modifiers.summoningSynergy_12_14 && !isMulti && stats.combatData.isSlayerTask) {
+            lifeSteal += stats.combatData.modifiers.summoningSynergy_12_14;
+        }
         let healPlayer = attackResult.damageToEnemy * lifeSteal / 100;
         // TODO synergy 12, 14
         if (stats.combatData.modifiers.summoningSynergy_2_13 && !isMulti) {
