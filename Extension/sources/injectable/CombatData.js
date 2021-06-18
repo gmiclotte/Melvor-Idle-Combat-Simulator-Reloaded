@@ -996,6 +996,11 @@
                 if (!synergy) {
                     return {};
                 }
+                // convert summoningSynergy_x_y to modifiers
+                if (this.isSlayerTask && synergy.modifiers.summoningSynergy_1_12) {
+                    synergy.modifiers.decreasedEnemyAccuracy += summoningSynergy_1_12;
+                }
+                // return the synergy modifiers
                 return synergy.modifiers;
             }
 
