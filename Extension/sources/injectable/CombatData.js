@@ -454,23 +454,28 @@
                 baseStats.strengthBonusRanged += this.equipmentStats.rangedStrengthBonus;
                 baseStats.attackBonusMagic += this.equipmentStats.magicAttackBonus;
                 baseStats.defenceBonusMagic += this.equipmentStats.magicDefenceBonus;
+                baseStats.damageBonusMagic += this.equipmentStats.magicDamageBonus;
+                if (monsterID !== undefined) {
+                    // changes for items that have different formulas in combat
+                    if (this.equipmentStats.activeItems.stormsnap) {
+                        baseStats.strengthBonusRanged += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
+                        baseStats.attackBonusRanged += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
+                    } else if (this.equipmentStats.activeItems.slayerCrossbow
+                        // && !isDungeon // TODO: implement this check by duplicating certain sims? see issue #10
+                        && (MONSTERS[monsterID].slayerXP !== undefined || this.isSlayerTask)) {
+                        baseStats.strengthBonusRanged = Math.floor(baseStats.strengthBonusRanged * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
+                    } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
+                        baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
+                    }
+                }
+                // apply synergies
                 if (this.modifiers.summoningSynergy_1_8) {
                     baseStats.defenceBonusMagic += this.modifiers.summoningSynergy_1_8;
                 }
-                baseStats.damageBonusMagic += this.equipmentStats.magicDamageBonus;
-                if (monsterID === undefined) {
-                    return baseStats;
-                }
-                // changes for items that have different formulas in combat
-                if (this.equipmentStats.activeItems.stormsnap) {
-                    baseStats.strengthBonusRanged += Math.floor(110 + (1 + (MONSTERS[monsterID].magicLevel * 6) / 33));
-                    baseStats.attackBonusRanged += Math.floor(102 * (1 + (MONSTERS[monsterID].magicLevel * 6) / 5500));
-                } else if (this.equipmentStats.activeItems.slayerCrossbow
-                    // && !isDungeon // TODO: implement this check by duplicating certain sims? see issue #10
-                    && (MONSTERS[monsterID].slayerXP !== undefined || this.isSlayerTask)) {
-                    baseStats.strengthBonusRanged = Math.floor(baseStats.strengthBonusRanged * items[CONSTANTS.item.Slayer_Crossbow].slayerStrengthMultiplier);
-                } else if (this.equipmentStats.activeItems.bigRon && MONSTERS[monsterID].isBoss) {
-                    baseStats.strengthBonus = Math.floor(baseStats.strengthBonus * items[CONSTANTS.item.Big_Ron].bossStrengthMultiplier);
+                if (this.modifiers.summoningSynergy_1_13) {
+                    const dr = this.calculatePlayerDamageReduction()
+                    baseStats.defenceBonus += dr;
+                    baseStats.defenceBonusRanged += dr;
                 }
                 return baseStats;
             }

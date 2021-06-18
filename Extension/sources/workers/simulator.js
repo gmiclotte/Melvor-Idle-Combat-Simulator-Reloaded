@@ -1636,13 +1636,16 @@
 
     function getPlayerDR(stats, player, noTriangle = false) {
         if (player.recompute.damageReduction) {
-            setPlayerDR(stats, player, noTriangle);
+            setPlayerDR(stats, player);
             player.recompute.damageReduction = false;
+        }
+        if (noTriangle) {
+            return player.damageReductionNoTriangle;
         }
         return player.damageReduction;
     }
 
-    function setPlayerDR(stats, player, noTriangle) {
+    function setPlayerDR(stats, player) {
         let damageReduction = player.baseStats.damageReduction + mergePlayerModifiers(player, 'DamageReduction');
         // DR cap
         if (damageReduction > 95) {
@@ -1651,10 +1654,17 @@
         // apply mark of death
         if (player.markOfDeath)
             damageReduction = Math.floor(damageReduction / 2);
-        // apply triangle last
-        if (!noTriangle) {
-            damageReduction = Math.floor(damageReduction * player.reductionModifier);
+        // recompute synergy 1 13 if required
+        if (stats.combatData.modifiers.summoningSynergy_1_13 && player.damageReductionNoTriangle !== damageReduction) {
+            player.baseStats.defenceBonus -= player.damageReductionNoTriangle;
+            player.baseStats.defenceBonusRanged -= player.damageReductionNoTriangle;
+            player.baseStats.defenceBonus += damageReduction;
+            player.baseStats.defenceBonusRanged += damageReduction;
         }
+        // cache dr without triangle
+        player.damageReductionNoTriangle = damageReduction;
+        // apply triangle last
+        damageReduction = Math.floor(damageReduction * player.reductionModifier);
         // cache
         player.damageReduction = damageReduction;
     }
@@ -1754,11 +1764,12 @@
         if (!player.hitpoints || player.hitpoints <= 0) {
             player.hitpoints = stats.player.maxHitpoints;
         }
-        player.damageReduction = stats.player.damageReduction;
         player.alwaysMaxHit = stats.player.minHit + 1 >= stats.player.maxHit; // Determine if player always hits for maxHit
         // copy from combatData;
         player.equipmentStats = combatData.equipmentStats;
         player.combatStats = combatData.combatStats;
+        player.damageReduction = player.combatStats.damageReduction;
+        player.damageReductionNoTriangle = player.combatStats.damageReduction;
         player.attackStyle = combatData.attackStyle;
         player.prayerBonus = combatData.prayerBonus;
         player.baseStats = combatData.baseStats;
