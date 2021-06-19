@@ -27,7 +27,7 @@
         const MICSR = window.MICSR;
 
         /**
-         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.10, latest version can be found at:
+         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.12, latest version can be found at:
          * https://raw.githubusercontent.com/gmiclotte/melvor-scripts/master/Show-Modifiers/Show-Modifiers.js
          * TODO: instead of copying it, pull it as a required file or something? No idea how to go about that.
          */
@@ -466,6 +466,17 @@
                     ],
                 };
 
+                // slayer
+                this.relevantModifiers.slayer = {
+                    names: [
+                        this.creasedModifiers.skilling,
+                        this.creasedModifiers.slayer,
+                    ],
+                    skillIDs: [
+                        CONSTANTS.skill.Slayer,
+                    ],
+                };
+
                 // gathering skills
                 this.gatheringSkills = ['Woodcutting', 'Fishing', 'Mining', 'Thieving', 'Farming', 'Agility'];
                 this.gatheringSkills.forEach(name => {
@@ -533,13 +544,16 @@
             }
 
             arrayModifierToSkill(array, skillID) {
+                if (!array) {
+                    return 0;
+                }
                 const result = array.filter(x => {
                     return x.id === skillID || x[0] === skillID
                 });
                 if (result.length === 0) {
                     return 0;
                 }
-                return result[0].value | result[0][1];
+                return result[0].value | result[0][1] | 0;
             }
 
             printPlayerModifier(modifier, value) {
@@ -678,8 +692,8 @@
                     return [this.printPlayerModifier(modifier, modifiers[modifier])];
                 }
                 // increased-decreased type modifier
-                const increased = modifiers['increased' + modifier];
-                const decreased = modifiers['decreased' + modifier];
+                const increased = modifiers['increased' + modifier] | 0;
+                const decreased = modifiers['decreased' + modifier] | 0;
                 let toPrint = [];
                 if (increased === undefined) {
                     return [];
@@ -742,6 +756,7 @@
                 passives += this.makeTagButton('melee', 'Melee', 'assets/media/skills/attack/attack.svg');
                 passives += this.makeTagButton('ranged', 'Ranged', 'assets/media/skills/ranged/ranged.svg');
                 passives += this.makeTagButton('magic', 'Combat Magic', 'assets/media/skills/combat/spellbook.svg');
+                passives += this.makeTagButton('slayer', 'Slayer', 'assets/media/skills/slayer/slayer.svg');
                 passives += '<br/>';
                 this.gatheringSkills.forEach(skill => passives += this.makeTagButton(skill, skill, `assets/media/skills/${skill.toLowerCase()}/${skill.toLowerCase()}.svg`));
                 passives += '<br/>';
