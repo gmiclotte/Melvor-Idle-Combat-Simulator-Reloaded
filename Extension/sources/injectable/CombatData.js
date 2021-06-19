@@ -1037,18 +1037,19 @@
                 if (!synergy) {
                     return {};
                 }
+                const modifiers = {...synergy.modifiers};
                 // convert summoningSynergy_x_y to modifiers
-                if (synergy.modifiers.summoningSynergy_1_12 && this.isSlayerTask) {
-                    synergy.modifiers.decreasedEnemyAccuracy += synergy.modifiers.summoningSynergy_1_12;
-                } else if (synergy.modifiers.summoningSynergy_2_6 && this.isMelee()) {
-                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_6;
-                } else if (synergy.modifiers.summoningSynergy_2_7 && this.isRanged()) {
-                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_7;
-                } else if (synergy.modifiers.summoningSynergy_2_8 && this.isMagic()) {
-                    synergy.modifiers.increasedLifesteal += synergy.modifiers.summoningSynergy_2_8;
+                if (modifiers.summoningSynergy_1_12 && this.isSlayerTask) {
+                    modifiers.decreasedEnemyAccuracy = modifiers.summoningSynergy_1_12;
+                } else if (modifiers.summoningSynergy_2_6 && this.isMelee()) {
+                    modifiers.increasedLifesteal = modifiers.summoningSynergy_2_6;
+                } else if (modifiers.summoningSynergy_2_7 && this.isRanged()) {
+                    modifiers.increasedLifesteal = modifiers.summoningSynergy_2_7;
+                } else if (modifiers.summoningSynergy_2_8 && this.isMagic()) {
+                    modifiers.increasedLifesteal = modifiers.summoningSynergy_2_8;
                 }
                 // return the synergy modifiers
-                return synergy.modifiers;
+                return modifiers;
             }
 
             /**
