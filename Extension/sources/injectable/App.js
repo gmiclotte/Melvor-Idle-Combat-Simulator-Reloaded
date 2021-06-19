@@ -1259,7 +1259,13 @@
                         && printPlayerModifier(prop, obstacle.modifiers[prop])[1] === 'text-danger') {
                         divider = 2;
                     }
-                    MICSR.showModifiersInstance.printRelevantModifiers({[prop]: obstacle.modifiers[prop] / divider}, 'combat').forEach(toPrint => {
+                    let value = obstacle.modifiers[prop];
+                    if (value.length === undefined) {
+                        value /= divider;
+                    } else {
+                        value = value.map(x => [x[0], x[1] / divider]);
+                    }
+                    MICSR.showModifiersInstance.printRelevantModifiers({[prop]: value}, 'combat').forEach(toPrint => {
                         passives += `<h5 class=\"font-w400 font-size-sm mb-1 ${toPrint[1]}\">${toPrint[0]}</h5>`;
                     });
                 }
