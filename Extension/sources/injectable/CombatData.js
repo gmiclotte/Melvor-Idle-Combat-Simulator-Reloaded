@@ -498,24 +498,26 @@
              * calculatePlayerMaxHit
              */
             calculatePlayerMaxHit(baseStats, modifiers) {
-                let maxHit = 0;
+                let maxHits = [0, 0];
                 switch (this.combatStats.attackType) {
                     case CONSTANTS.attackType.Ranged:
-                        maxHit = this.maxRangedHit(baseStats, modifiers);
+                        maxHits = this.maxRangedHit(baseStats, modifiers);
                         break;
                     case CONSTANTS.attackType.Magic:
-                        maxHit = this.maxMagicHit(baseStats, modifiers);
+                        maxHits = this.maxMagicHit(baseStats, modifiers);
                         break;
                     case CONSTANTS.attackType.Melee:
-                        maxHit = this.maxMeleeHit(baseStats, modifiers);
+                        maxHits = this.maxMeleeHit(baseStats, modifiers);
                         break;
                 }
+                const baseMaxHit = maxHits[0];
+                let maxHit = maxHits[1];
                 // max hit modifiers apply to everything except for ancient magics
                 if (this.combatStats.attackType !== CONSTANTS.attackType.Magic || !this.spells.ancient.isSelected) {
                     maxHit = applyModifier(maxHit, MICSR.getModifierValue(modifiers, 'MaxHitPercent'));
-                    maxHit += MICSR.getModifierValue(modifiers, 'MaxHitFlat');
+                    maxHit += this.numberMultiplier * MICSR.getModifierValue(modifiers, 'MaxHitFlat');
                 }
-                return maxHit
+                return [baseMaxHit, maxHit];
             }
 
             maxRangedHit(baseStats, modifiers) {
@@ -524,22 +526,23 @@
                     attackStyleBonusStrength += 3;
                 }
                 const effectiveStrengthLevel = Math.floor(this.playerLevels.Ranged + attackStyleBonusStrength + this.getSkillHiddenLevels(CONSTANTS.skill.Ranged));
-                let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640));
-                baseMaxHit = applyModifier(
+                const baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonusRanged / 80 + (effectiveStrengthLevel * baseStats.strengthBonusRanged) / 640));
+                const maxHit = applyModifier(
                     baseMaxHit,
                     MICSR.getModifierValue(modifiers, 'RangedStrengthBonus')
                 );
-                return baseMaxHit;
+                return [baseMaxHit, maxHit];
             }
 
             maxMagicHit(baseStats, modifiers) {
                 let baseMaxHit;
                 let selectedSpell = this.spells.standard.selectedID;
+                let maxHit;
                 if (!this.spells.ancient.isSelected) {
                     baseMaxHit = Math.floor(this.numberMultiplier
                         * (SPELLS[selectedSpell].maxHit + SPELLS[selectedSpell].maxHit * baseStats.damageBonusMagic / 100)
                         * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200));
-                    baseMaxHit = applyModifier(
+                    maxHit = applyModifier(
                         baseMaxHit,
                         MICSR.getModifierValue(modifiers, 'MagicDamageBonus')
                     );
@@ -559,17 +562,20 @@
                         baseMaxHit += this.auroraBonus.increasedMaxHit * this.numberMultiplier;
                     }
                 }
-                return baseMaxHit;
+                if (!maxHit) {
+                    maxHit = baseMaxHit;
+                }
+                return [baseMaxHit, maxHit];
             }
 
             maxMeleeHit(baseStats, modifiers) {
                 const effectiveStrengthLevel = Math.floor(this.playerLevels.Strength + 8 + this.getSkillHiddenLevels(CONSTANTS.skill.Strength));
-                let baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640));
-                baseMaxHit = applyModifier(
+                const baseMaxHit = Math.floor(this.numberMultiplier * (1.3 + effectiveStrengthLevel / 10 + baseStats.strengthBonus / 80 + (effectiveStrengthLevel * baseStats.strengthBonus) / 640));
+                const maxHit = applyModifier(
                     baseMaxHit,
                     MICSR.getModifierValue(modifiers, 'MeleeStrengthBonus')
                 );
-                return baseMaxHit;
+                return [baseMaxHit, maxHit];
             }
 
             /**
@@ -719,7 +725,9 @@
                 this.combatStats.maxAttackRoll = this.calculatePlayerAccuracyRating(this.combatStats, this.baseStats, modifiers);
 
                 // max hit roll
-                this.combatStats.maxHit = this.calculatePlayerMaxHit(this.baseStats, modifiers);
+                const maxHits = this.calculatePlayerMaxHit(this.baseStats, modifiers);
+                this.combatStats.baseMaxHit = maxHits[0];
+                this.combatStats.maxHit = maxHits[1];
 
                 // min hit roll
                 this.combatStats.minHit = 0;

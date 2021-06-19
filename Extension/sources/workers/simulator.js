@@ -219,7 +219,6 @@
                 player.damageModifier = combatTriangle.normal.damageModifier[stats.player.attackType][stats.enemy.attackType];
             }
             // Multiply player max hit
-            stats.player.maxHit = Math.floor(stats.player.maxHit * player.damageModifier);
             stats.player.summoningMaxHit = Math.floor(stats.player.summoningMaxHit * player.damageModifier);
             const enemy = {};
             let innerCount = 0;
@@ -504,11 +503,6 @@
     }
 
     function regen(stats, player, enemy) {
-        // TODO synergy 6, 14
-        // TODO synergy 7, 14
-        // TODO synergy 8, 14
-        // TODO synergy 1, 14
-        // TODO synergy 13, 14
         if (player.isHardcore) {
             return;
         }
@@ -522,11 +516,11 @@
         amt += numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // flat synergies
         if (stats.combatData.modifiers.summoningSynergy_6_14 && stats.player.isMelee) {
-            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_6_14 / 100);
+            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_6_14 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_7_14 && stats.player.isRanged) {
-            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_7_14 / 100);
+            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_7_14 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_8_14 && stats.player.isMagic) {
-            amt += stats.player.maxHit * (stats.combatData.modifiers.summoningSynergy_8_14 / 100);
+            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_8_14 / 100);
         }
         // rapid heal prayer
         if (player.prayerBonus.vars.prayerBonusHitpoints) {
@@ -568,10 +562,14 @@
         target.burnTimer = target.burnInterval;
         // Check if stopped burning
         if (target.burnCount >= target.burnMaxCount) {
-            if (target.isPlayer && stats.combatData.modifiers.summoningSynergy_1_15) {
-                actor.recompute.accuracy;
-            }
             target.isBurning = false;
+            if (target.isPlayer && stats.combatData.modifiers.summoningSynergy_1_15) {
+                actor.recompute.accuracy = true;
+            }
+            if (!target.isPlayer && stats.combatData.modifiers.summoningSynergy_6_15 && stats.player.isMelee && actor.hpBasedEffects.appliedSynergy_6_15) {
+                delete actor.hpBasedEffects.appliedSynergy_6_15;
+                computeTempModifiers(stats, actor, target, 0, {appliedSynergy_6_15: true});
+            }
             return;
         }
         // Apply burn damage
@@ -755,7 +753,11 @@
         // Apply Burning
         if (canApplyStatus(statusEffect.burnDebuff, target.isBurning)) {
             if (target.isPlayer && stats.combatData.modifiers.summoningSynergy_1_15) {
-                actor.recompute.accuracy;
+                actor.recompute.accuracy = true;
+            }
+            if (!target.isPlayer && stats.combatData.modifiers.summoningSynergy_6_15 && stats.player.isMelee && !actor.hpBasedEffects.appliedSynergy_6_15) {
+                actor.hpBasedEffects.appliedSynergy_6_15 = true;
+                computeTempModifiers(stats, actor, target, 0, {appliedSynergy_6_15: true});
             }
             target.isBurning = true;
             target.burnCount = 0;
@@ -1272,13 +1274,13 @@
         return Math.floor(damage);
     }
 
-    function applyHPBasedModifiers(player, prop, modifiers, changedHPBasedEffects, changedModifiers, whenBelow = false) {
-        if (whenBelow ? !player.hpBasedEffects[prop] : player.hpBasedEffects[prop]) {
+    function applyStatusBasedModifiers(player, condition, modifiers, forceChanged, changedModifiers, multiplier) {
+        if (condition) {
             for (let modifier in modifiers) {
-                addTempModifier(player, modifier, modifiers[modifier]);
+                addTempModifier(player, modifier, multiplier * modifiers[modifier]);
                 changedModifiers[modifier] = true;
             }
-        } else if (changedHPBasedEffects[prop]) {
+        } else if (forceChanged) {
             for (let modifier in modifiers) {
                 changedModifiers[modifier] = true;
             }
@@ -1321,10 +1323,13 @@
         });
         // hp based modifiers
         if (stats.player.activeItems.guardianAmulet) {
-            applyHPBasedModifiers(player, 'guardianAmuletAbove', constantModifiers.guardianAmulet, changedHPBasedEffects, changedModifiers, true);
+            applyStatusBasedModifiers(player, !player.hpBasedEffects.guardianAmuletAbove, constantModifiers.guardianAmulet, changedHPBasedEffects.guardianAmuletAbove, changedModifiers, 1);
         }
         if (stats.combatData.modifiers.summoningSynergy_1_2) {
-            applyHPBasedModifiers(player, 'appliedSynergy_1_2', constantModifiers.occultist, changedHPBasedEffects, changedModifiers, false);
+            applyStatusBasedModifiers(player, player.hpBasedEffects.appliedSynergy_1_2, constantModifiers.occultist, changedHPBasedEffects.appliedSynergy_1_2, changedModifiers, 2);
+        }
+        if (stats.combatData.modifiers.summoningSynergy_6_15) {
+            applyStatusBasedModifiers(player, player.hpBasedEffects.appliedSynergy_6_15, constantModifiers.minotaur, changedHPBasedEffects.appliedSynergy_6_15, changedModifiers, 2);
         }
         // process changed modifiers
         if (checkChangedCreasedModifiers(changedModifiers, ['PlayerAttackSpeedPercent'])) {
@@ -1335,6 +1340,12 @@
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['EnemyMeleeEvasion', 'EnemyRangedEvasion', 'EnemyMagicEvasion'])) {
             player.recompute.accuracy = true;
+        }
+        if (checkChangedCreasedModifiers(changedModifiers, ['MeleeAccuracyBonus', 'RangedAccuracyBonus', 'MagicAccuracyBonus'])) {
+            player.recompute.accuracy = true;
+        }
+        if (checkChangedCreasedModifiers(changedModifiers, ['MeleeStrengthBonus', 'RangedStrengthBonus', 'MagicStrengthBonus'])) {
+            player.recompute.maxHit = true;
         }
         if (checkChangedCreasedModifiers(changedModifiers, ['DamageReduction'])) {
             player.recompute.damageReduction = true;
@@ -1395,6 +1406,9 @@
         }
         if (stats.combatData.modifiers.summoningSynergy_1_2) {
             player.hpBasedEffects.appliedSynergy_1_2 = true;
+        }
+        if (stats.combatData.modifiers.summoningSynergy_6_15) {
+            // start undefined
         }
     }
 
@@ -1542,7 +1556,7 @@
         }
         let statusEffect = {...player.currentSpecial};
         // Fighter amulet stun overrides special attack stun
-        if (stats.player.activeItems.fighterAmulet && stats.player.isMelee && attackResult.damageToEnemy >= stats.player.maxHit * 0.70) {
+        if (stats.player.activeItems.fighterAmulet && stats.player.isMelee && attackResult.damageToEnemy >= player.maxHit * 0.70) {
             statusEffect.canStun = true;
             statusEffect.stunChance = undefined;
             statusEffect.stunTurns = 1;
@@ -1810,6 +1824,7 @@
             speed: true,
             accuracy: true,
             damageReduction: true,
+            maxHit: true,
         }
     }
 
@@ -1937,11 +1952,7 @@
     }
 
     function gatherStatistics(stats) {
-        const result = {
-            // max dmg stats
-            maxHit: stats.player.maxHit,
-            maxAttackRoll: stats.player.maxAttackRoll,
-        };
+        const result = {};
 
         // kill time statistics
         stats.killTimes = stats.killTimes.map(t => t + enemySpawnTimer);
@@ -2236,8 +2247,8 @@
      * @returns {number} damage
      */
     function rollForDamage(stats, player, isMulti) {
+        const maxHit = getPlayerMaxHit(stats, player);
         const minHit = getPlayerMinHit(stats, player, isMulti);
-        const maxHit = getPlayerMaxHit(stats);
         // if min is equal to or larger than max, roll max
         if (minHit + 1 >= maxHit) {
             return maxHit;
@@ -2248,24 +2259,43 @@
 
     function getPlayerMinHit(stats, player, isMulti) {
         let minHit = 0;
-        minHit += Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
-        minHit -= Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
+        minHit += Math.floor(player.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
+        minHit -= Math.floor(player.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
         if (isMulti) {
             // synergies 6 8, 6 12, and 7 12, do not apply to later hits of a multi-hit attack
         } else if (stats.combatData.modifiers.summoningSynergy_6_8 && stats.combatData.isSlayerTask && stats.player.isMagic) {
-            minHit += Math.floor(stats.player.maxHit * stats.combatData.summoningSynergy_6_8 / 100);
+            minHit += Math.floor(player.maxHit * stats.combatData.summoningSynergy_6_8 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_6_12 && stats.combatData.isSlayerTask && stats.player.isMelee) {
-            minHit += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
+            minHit += Math.floor(player.maxHit * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_7_12 && stats.combatData.isSlayerTask && stats.player.isRanged) {
-            minHit += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
+            minHit += Math.floor(player.maxHit * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
         }
         // static min hit increase (magic gear and Charged aurora)
         minHit += stats.player.increasedMinHit;
         return minHit;
     }
 
-    function getPlayerMaxHit(stats) {
-        return stats.player.maxHit;
+    function getPlayerMaxHit(stats, player) {
+        if (player.recompute.maxHit) {
+            setPlayerMaxHit(stats, player);
+            player.recompute.maxHit = false;
+        }
+        return player.maxHit;
+    }
+
+    function setPlayerMaxHit(stats, player) {
+        let maxHit = 0;
+        if (stats.player.isMelee) {
+            const baseMaxHit = player.combatStats.baseMaxHit;
+            maxHit = baseMaxHit * (1 + mergePlayerModifiers(player, 'MeleeStrengthBonus') / 100);
+        } else {
+            maxHit = stats.player.maxHit;
+        }
+        if (!stats.player.isMagic || !stats.player.usingAncient) {
+            maxHit *= 1 + mergePlayerModifiers(player, 'MaxHitPercent') / 100;
+            maxHit += mergePlayerModifiers(player, 'MaxHitFlat') * numberMultiplier;
+        }
+        player.maxHit = Math.floor(maxHit * player.damageModifier);
     }
 
     /**

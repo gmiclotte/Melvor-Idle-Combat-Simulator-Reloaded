@@ -152,6 +152,7 @@
                     // modifiers
                     guardianAmulet: items[CONSTANTS.item.Guardian_Amulet].modifiers,
                     occultist: items[CONSTANTS.item.Summoning_Familiar_Occultist].modifiers,
+                    minotaur: items[CONSTANTS.item.Summoning_Familiar_Minotaur].modifiers,
                 }
                 // Create Web workers
                 this.createWorkers();
@@ -818,7 +819,9 @@
                     // max attack roll
                     combatStats.maxAttackRoll = combatData.calculatePlayerAccuracyRating(combatStats, baseStats, modifiers);
                     // max hit roll
-                    combatStats.maxHit = combatData.calculatePlayerMaxHit(baseStats, modifiers);
+                    const maxHits = combatData.calculatePlayerMaxHit(baseStats, modifiers);
+                    combatStats.baseMaxHit = maxHits[0];
+                    combatStats.maxHit = maxHits[1];
                     // update player stats
                     this.currentSim.playerStats = combatData.getPlayerStats();
                 }
