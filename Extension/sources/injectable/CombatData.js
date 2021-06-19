@@ -1047,6 +1047,8 @@
                     modifiers.increasedLifesteal = modifiers.summoningSynergy_2_7;
                 } else if (modifiers.summoningSynergy_2_8 && this.isMagic()) {
                     modifiers.increasedLifesteal = modifiers.summoningSynergy_2_8;
+                } else if (modifiers.summoningSynergy_7_15 && this.isRanged()) {
+                    modifiers.increasedChanceToApplyBurn = modifiers.summoningSynergy_7_15;
                 }
                 // return the synergy modifiers
                 return modifiers;
