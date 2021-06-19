@@ -1325,6 +1325,17 @@
             }
 
             /**
+             * Filter by combat summon
+             * @return {boolean}
+             */
+            filterCombatSummon(item, combat) {
+                if (item.itemID === 0) {
+                    return true;
+                }
+                return item.summoningMaxHit > 0 === combat;
+            }
+
+            /**
              * Filter by returning all elements
              * @return {boolean}
              */
@@ -1425,8 +1436,10 @@
                     equipmentSelectCard.addSectionTitle('Other');
                     this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterRemainingPassive(item), 'name');
                 } else if (equipmentSlot === MICSR.equipmentSlot.Summon || equipmentSlot === MICSR.equipmentSlot.SummonRight) {
-                    equipmentSelectCard.addSectionTitle('Familiars')
-                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.returnTrue(item), 'itemID');
+                    equipmentSelectCard.addSectionTitle('Combat Familiars')
+                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterCombatSummon(item, true), 'summoningLevel');
+                    equipmentSelectCard.addSectionTitle('Non-Combat Familiars')
+                    this.addEquipmentMultiButton(equipmentSelectCard, equipmentSlot, (item) => this.filterCombatSummon(item, false), 'summoningLevel');
                 } else {
                     throw Error(`Invalid equipmentSlot: ${equipmentSlot}`);
                 }
