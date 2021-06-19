@@ -1610,7 +1610,7 @@
         }
         // burn
         if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn')) {
-            attackResult.statusEffect.burnDebuff = 15;
+            statusEffect.burnDebuff = 15;
         }
         // return the result of the attack
         attackResult.attackHits = true;
