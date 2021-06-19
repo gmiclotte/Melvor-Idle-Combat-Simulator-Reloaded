@@ -556,7 +556,6 @@
     }
 
     function burnTarget(stats, actor, target) {
-        // TODO synergy 13, 15
         // TODO synergy 14, 15
         // reset timer
         target.burnTimer = target.burnInterval;
@@ -571,6 +570,9 @@
                 computeTempModifiers(stats, actor, target, 0, {appliedSynergy_6_15: true});
             }
             return;
+        }
+        if (stats.combatData.modifiers.summoningSynergy_13_15 && target.isPlayer) {
+            target.burnDamage = 0;
         }
         // Apply burn damage
         dealDamage(stats, actor, target, target.burnDamage, attackSources.burn);
