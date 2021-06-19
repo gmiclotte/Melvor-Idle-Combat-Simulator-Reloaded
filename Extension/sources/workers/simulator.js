@@ -1736,11 +1736,7 @@
         // Calculate attack Damage
         if (damage === undefined) {
             // roll hit based on max hit, max hit already takes cb triangle into account !
-            if (player.alwaysMaxHit) {
-                damage = stats.player.maxHit;
-            } else {
-                damage = rollForDamage(stats, player, isMulti);
-            }
+            damage = rollForDamage(stats, player, isMulti);
         }
         // special attack damage multiplier
         if (isSpecial && player.currentSpecial.damageMultiplier) {
@@ -1826,7 +1822,6 @@
         if (!player.hitpoints || player.hitpoints <= 0) {
             player.hitpoints = stats.player.maxHitpoints;
         }
-        player.alwaysMaxHit = stats.player.increasedMinHit + 1 >= stats.player.maxHit; // Determine if player always hits for maxHit
         // copy from combatData;
         player.equipmentStats = combatData.equipmentStats;
         player.combatStats = combatData.combatStats;
@@ -2241,26 +2236,36 @@
      * @returns {number} damage
      */
     function rollForDamage(stats, player, isMulti) {
-        let minHitIncrease = 0;
-        minHitIncrease += Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
-        minHitIncrease -= Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
+        const minHit = getPlayerMinHit(stats, player, isMulti);
+        const maxHit = getPlayerMaxHit(stats);
+        // if min is equal to or larger than max, roll max
+        if (minHit + 1 >= maxHit) {
+            return maxHit;
+        }
+        // roll between min and max
+        return Math.ceil(Math.random() * (maxHit - minHit)) + minHit;
+    }
+
+    function getPlayerMinHit(stats, player, isMulti) {
+        let minHit = 0;
+        minHit += Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
+        minHit -= Math.floor(stats.player.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
         if (isMulti) {
             // synergies 6 8, 6 12, and 7 12, do not apply to later hits of a multi-hit attack
         } else if (stats.combatData.modifiers.summoningSynergy_6_8 && stats.combatData.isSlayerTask && stats.player.isMagic) {
-            minHitIncrease += Math.floor(stats.player.maxHit * stats.combatData.summoningSynergy_6_8 / 100);
+            minHit += Math.floor(stats.player.maxHit * stats.combatData.summoningSynergy_6_8 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_6_12 && stats.combatData.isSlayerTask && stats.player.isMelee) {
-            minHitIncrease += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
+            minHit += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_7_12 && stats.combatData.isSlayerTask && stats.player.isRanged) {
-            minHitIncrease += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
+            minHit += Math.floor(stats.player.maxHit * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
         }
         // static min hit increase (magic gear and Charged aurora)
-        minHitIncrease += stats.player.increasedMinHit;
-        // if min is equal to or larger than max, roll max
-        if (minHitIncrease + 1 >= stats.player.maxHit) {
-            return stats.player.maxHit;
-        }
-        // roll between min and max
-        return Math.ceil(Math.random() * (stats.player.maxHit - stats.player.minHit)) + stats.player.minHit;
+        minHit += stats.player.increasedMinHit;
+        return minHit;
+    }
+
+    function getPlayerMaxHit(stats) {
+        return stats.player.maxHit;
     }
 
     /**
