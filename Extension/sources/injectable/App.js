@@ -1271,6 +1271,9 @@
             }
 
             filterMagicDamage(item) {
+                if (item.itemID === 0) {
+                    return true;
+                }
                 if (item.modifiers === undefined) {
                     return false;
                 }
@@ -1281,6 +1284,9 @@
             }
 
             filterSlayer(item) {
+                if (item.itemID === 0) {
+                    return true;
+                }
                 if (item.modifiers === undefined) {
                     return false;
                 }
@@ -1295,6 +1301,9 @@
             }
 
             filterRemainingPassive(item) {
+                if (item.itemID === 0) {
+                    return true;
+                }
                 return !this.filterMagicDamage(item) && !this.filterSlayer(item)
             }
 
