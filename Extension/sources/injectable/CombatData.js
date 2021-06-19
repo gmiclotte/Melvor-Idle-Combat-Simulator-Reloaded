@@ -912,7 +912,17 @@
                 this.modifiers = this.copyModifierTemplate();
 
                 // mimic calculateEquippedItemModifiers // passives
-                const equipmentList = this.equipmentSelected.filter(x => x > 0).map(x => items[x]);
+                const duplicateCheck = {};
+                const equipmentList = this.equipmentSelected.filter(x => {
+                    if (x <= 0) {
+                        return false;
+                    }
+                    if (duplicateCheck[x]) {
+                        return false
+                    }
+                    duplicateCheck[x] = true;
+                    return true;
+                }).map(x => items[x]);
                 this.itemModifiers = this.computeModifiers(equipmentList);
                 this.mergeModifiers(this.itemModifiers, this.modifiers);
 
