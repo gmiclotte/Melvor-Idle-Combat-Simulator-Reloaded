@@ -402,29 +402,18 @@
                 this.app.combatData.course.fill(-1);
                 this.app.combatData.courseMastery.fill(false);
                 // import settings
-                course.forEach((o, i) => {
-                    this.app.combatData.course[i] = o
-                    if (masteries[o]) {
-                        this.app.combatData.courseMastery[i] = true;
+                this.app.combatData.course.forEach((_, category) => {
+                    let obstacleID = course[category];
+                    if (obstacleID === undefined) {
+                        obstacleID = -1;
+                    }
+                    this.app.selectObstacle(category, this.app.agilityObstacles[obstacleID + 1]);
+                    if (masteries[obstacleID]) {
+                        this.app.combatData.courseMastery[category] = true;
+                        this.app.updateAgilityTooltips(category);
                     }
                 });
                 this.app.combatData.pillar = pillar;
-                // set dropdowns
-                this.app.combatData.course.forEach((o, i) => {
-                    const elt = document.getElementById(`MICSR Agility Obstacle ${i} Dropdown`);
-
-                    // Checks that this element exists before trying to iterate on it
-                    if (elt) {
-                        for (let index = 0; elt[index] !== undefined; index++) {
-                            const tmp = elt[index].value;
-                            if (tmp === "" + o) {
-                                elt.selectedIndex = index;
-                                return;
-                            }
-                        }
-                    }
-                })
-                document.getElementById(`MICSR Agility Pillar Dropdown`).selectedIndex = this.app.combatData.pillar + 1;
                 // set image selection
                 this.app.combatData.courseMastery.forEach((m, i) => {
                     const elt = document.getElementById(`MCS Agility Mastery ${i} Toggle Button`);

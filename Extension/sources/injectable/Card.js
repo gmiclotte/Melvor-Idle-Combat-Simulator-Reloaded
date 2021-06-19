@@ -186,8 +186,10 @@
              * @param {HTMLElement} popups
              * @param {string[]} tooltips The tooltip contents
              */
-            addMultiPopupMenu(sources, elIds, popups, tooltips) {
-                const newCCContainer = document.createElement('div');
+            addMultiPopupMenu(sources, elIds, popups, tooltips, newCCContainer = undefined) {
+                if (!newCCContainer) {
+                    newCCContainer = document.createElement('div');
+                }
                 newCCContainer.className = 'mcsEquipmentImageContainer';
                 for (let i = 0; i < sources.length; i++) {
                     const containerDiv = document.createElement('div');
@@ -206,6 +208,7 @@
                     this.registerPopupMenu(containerDiv, popups[i]);
                 }
                 this.container.appendChild(newCCContainer);
+                return newCCContainer;
             }
 
             /**
@@ -466,7 +469,8 @@
                 this.container.appendChild(container);
             }
 
-            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25, callBack = () => {}) {
+            addToggleRadio(labelText, radioName, object, flag, initialYes = false, height = 25, callBack = () => {
+            }) {
                 const yesToggle = () => {
                     object[flag] = true;
                     callBack();
