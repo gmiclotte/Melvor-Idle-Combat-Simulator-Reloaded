@@ -27,7 +27,7 @@
         const MICSR = window.MICSR;
 
         /**
-         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.12, latest version can be found at:
+         * class ShowModifiers is copied from Melvor Show Modifiers v0.0.14, latest version can be found at:
          * https://raw.githubusercontent.com/gmiclotte/melvor-scripts/master/Show-Modifiers/Show-Modifiers.js
          * TODO: instead of copying it, pull it as a required file or something? No idea how to go about that.
          */
@@ -692,20 +692,20 @@
                     return [this.printPlayerModifier(modifier, modifiers[modifier])];
                 }
                 // increased-decreased type modifier
-                const increased = modifiers['increased' + modifier] | 0;
-                const decreased = modifiers['decreased' + modifier] | 0;
+                const increased = modifiers['increased' + modifier];
+                const decreased = modifiers['decreased' + modifier];
                 let toPrint = [];
-                if (increased === undefined) {
+                if (increased === undefined && decreased === undefined) {
                     return [];
                 }
-                if (increased.length !== undefined) {
+                if ((increased && increased.length !== undefined) || (decreased && decreased.length !== undefined)) {
                     skillIDs.forEach(skillID => {
-                        const increasedEntry = this.arrayModifierToSkill(increased, skillID);
-                        const decreasedEntry = this.arrayModifierToSkill(decreased, skillID);
+                        const increasedEntry = this.arrayModifierToSkill(increased !== undefined ? increased : [], skillID);
+                        const decreasedEntry = this.arrayModifierToSkill(decreased !== undefined ? decreased : [], skillID);
                         toPrint = toPrint.concat(this.printDiffModifier(modifier, increasedEntry, decreasedEntry, skillID));
                     });
                 } else {
-                    toPrint = toPrint.concat(this.printDiffModifier(modifier, increased, decreased));
+                    toPrint = toPrint.concat(this.printDiffModifier(modifier, increased | 0, decreased | 0));
                 }
                 return toPrint;
             }
