@@ -1638,6 +1638,12 @@
         if (damage === undefined) {
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
+        if (stats.combatData.modifiers.summoningSynergy_12_15) {
+            const specID = currentSpecial.id;
+            if (specID === 2 || specID === 31 || specID === 53) {
+                damage *= 1 - stats.combatData.modifiers.summoningSynergy_12_15 / 100;
+            }
+        }
         damage *= 1 + getEnemyDamageModifier(enemy, player) / 100;
         damage -= Math.floor((getPlayerDR(stats, player, enemy) / 100) * damage);
         return damage;
