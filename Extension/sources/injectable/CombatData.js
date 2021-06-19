@@ -1117,10 +1117,10 @@
                 const summ2 = this.equipmentSelected[MICSR.equipmentSlot.SummonRight];
                 let xp = 0;
                 if (summ1 >= 0 && items[summ1].summoningMaxHit) {
-                    xp += getBaseSummoningXP(items[summ1].summoningID, false, 3000);
+                    xp += getBaseSummoningXP(items[summ1].summoningID, true, 3000);
                 }
                 if (summ2 >= 0 && items[summ2].summoningMaxHit) {
-                    xp += getBaseSummoningXP(items[summ2].summoningID, false, 3000);
+                    xp += getBaseSummoningXP(items[summ2].summoningID, true, 3000);
                 }
                 return xp;
             }
