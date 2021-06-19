@@ -556,7 +556,6 @@
     }
 
     function burnTarget(stats, actor, target) {
-        // TODO synergy 14, 15
         // reset timer
         target.burnTimer = target.burnInterval;
         // Check if stopped burning
@@ -573,6 +572,9 @@
         }
         if (stats.combatData.modifiers.summoningSynergy_13_15 && target.isPlayer) {
             target.burnDamage = 0;
+        }
+        if (stats.combatData.modifiers.summoningSynergy_14_15 && !target.isPlayer) {
+            healDamage(stats, target, actor, target.burnDamage);
         }
         // Apply burn damage
         dealDamage(stats, actor, target, target.burnDamage, attackSources.burn);
@@ -1202,7 +1204,6 @@
     }
 
     function dealDamageToPlayer(stats, enemy, player, damage, attackSource = 0, isAttack = false) {
-        // TODO synergy 12, 15
         // do not apply DR at this point, player DR is only applied to monster attacks, not to other damage sources
         stats.player.damageTaken += Math.floor(Math.min(damage, player.hitpoints));
         player.hitpoints -= Math.floor(damage);
