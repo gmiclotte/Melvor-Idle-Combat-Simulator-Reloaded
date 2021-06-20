@@ -393,9 +393,9 @@
             }
 
             showRelevantModifiers(modifiers, text) {
-                let passives = `<h5 class=\"font-w600 font-size-sm mb-1 text-combat-smoke\">${text}</h5><h5 class=\"font-w600 font-size-sm mb-3 text-warning\"></h5>`;
+                let passives = `<h5 class="font-w600 font-size-sm mb-1 text-combat-smoke">${text}</h5>`;
                 MICSR.showModifiersInstance.printRelevantModifiers(modifiers, 'combat').forEach(toPrint => {
-                    passives += `<h5 class=\"font-w400 font-size-sm mb-1 ${toPrint[1]}\">${toPrint[0]}</h5>`;
+                    passives += `<h5 class="font-w400 font-size-sm mb-1 ${toPrint[1]}" style="text-align: left;">${toPrint[0]}</h5>`;
                 });
                 Swal.fire({
                     html: passives,
@@ -1265,7 +1265,7 @@
             }
 
             getObstacleTooltip(category, obstacle) {
-                let passives = `<h5 class=\"font-w600 font-size-sm mb-1 text-combat-smoke\">${obstacle.name}</h5><h5 class=\"font-w600 font-size-sm mb-3 text-warning\"></h5>`;
+                let passives = `<div class="text-center">${obstacle.name}</div>`;
                 for (let prop in obstacle.modifiers) {
                     let divider = 1;
                     if (this.combatData.courseMastery[category]
@@ -1279,7 +1279,7 @@
                         value = value.map(x => [x[0], x[1] / divider]);
                     }
                     MICSR.showModifiersInstance.printRelevantModifiers({[prop]: value}, 'combat').forEach(toPrint => {
-                        passives += `<h5 class=\"font-w400 font-size-sm mb-1 ${toPrint[1]}\">${toPrint[0]}</h5>`;
+                        passives += `<div class="${toPrint[1]}">${toPrint[0]}</div>`;
                     });
                 }
                 return passives;
