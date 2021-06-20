@@ -177,8 +177,6 @@
                 this.equipmentStats = {};
                 // combat stats
                 this.combatStats = {};
-                // apply stun sleep damage modifier on enemy attacks
-                this.applyEnemyStunSleepDamage = true;
                 // enable summoning synergy
                 this.summoningSynergy = true;
                 // selected item drop

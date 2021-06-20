@@ -97,7 +97,6 @@
                     course: chosenAgilityObstacles,
                     courseMastery: MASTERY[CONSTANTS.skill.Agility].xp.map(x => x > 13034431),
                     pillar: agilityPassivePillarActive,
-                    applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,
                     summoningSynergy: this.app.combatData.summoningSynergy, // TODO: import mark levels
                 };
 
@@ -152,7 +151,6 @@
                     useCombinationRunes: this.app.combatData.useCombinationRunes,
                     courseMastery: courseMastery,
                     pillar: this.app.combatData.pillar,
-                    applyEnemyStunSleepDamage: this.app.combatData.applyEnemyStunSleepDamage,
                     summoningSynergy: this.app.combatData.summoningSynergy,
                 }
             }
@@ -172,7 +170,6 @@
                 this.importAdventure(settings.isAdventure);
                 this.importUseCombinationRunes(settings.useCombinationRunes);
                 this.importAgilityCourse(settings.course, settings.courseMastery, settings.pillar);
-                this.importApplyEnemyStunSleepDamage(settings.applyEnemyStunSleepDamage);
                 this.importSummoningSynergy(settings.summoningSynergy);
             }
 
@@ -351,17 +348,6 @@
                 } else {
                     this.app.combatData.isHardcore = false;
                     document.getElementById('MCS Hardcore Mode Radio No').checked = true;
-                }
-            }
-
-            importApplyEnemyStunSleepDamage(applyEnemyStunSleepDamage) {
-                // Update applyEnemyStunSleepDamage
-                if (applyEnemyStunSleepDamage) {
-                    this.app.combatData.applyEnemyStunSleepDamage = true;
-                    document.getElementById('MCS Apply Enemy Stun Dmg Radio Yes').checked = true;
-                } else {
-                    this.app.combatData.applyEnemyStunSleepDamage = false;
-                    document.getElementById('MCS Apply Enemy Stun Dmg Radio No').checked = true;
                 }
             }
 

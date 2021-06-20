@@ -37,7 +37,6 @@
             case 'START_SIMULATION':
                 const startTime = performance.now();
                 numberMultiplier = event.data.combatData.numberMultiplier;
-                applyEnemyStunSleepDamage = event.data.combatData.applyEnemyStunSleepDamage;
                 enemySpawnTimer = event.data.combatData.enemySpawnTimer;
                 verbose = event.data.verbose;
                 veryVerbose = event.data.veryVerbose;
@@ -72,7 +71,6 @@
     let enemySpawnTimer;
     let hitpointRegenInterval;
     let CURSEIDS;
-    let applyEnemyStunSleepDamage;
     let constantModifiers;
 
     const attackSources = {
@@ -1708,9 +1706,6 @@
     // get stun and sleep enemy damage modifiers
     function getEnemyDamageModifier(enemy, player) {
         let dmgModifier = 0;
-        if (!applyEnemyStunSleepDamage) {
-            return dmgModifier;
-        }
         // stun
         if (player.isStunned) {
             dmgModifier += 30;
