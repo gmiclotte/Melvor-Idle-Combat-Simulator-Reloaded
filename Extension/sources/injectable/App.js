@@ -908,10 +908,15 @@
                     );
                     obstacleSelectionContainer.lastChild.className += ' col-3';
                     // label
-                    const label = this.agilitySelectCard.createLabel('None', '');
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'col-6';
+                    labelDiv.style = 'display: table; text-align: center;';
+                    const label = document.createElement('label');
                     label.id = `MICSR Obstacle ${category} Label`;
-                    label.className += ' col-6';
-                    obstacleSelectionContainer.appendChild(label);
+                    label.textContent = 'None';
+                    label.style = 'display: table-cell; vertical-align: middle;';
+                    labelDiv.appendChild(label);
+                    obstacleSelectionContainer.appendChild(labelDiv);
                     // add selection container to card
                     this.agilitySelectCard.container.appendChild(obstacleSelectionContainer);
                 }
