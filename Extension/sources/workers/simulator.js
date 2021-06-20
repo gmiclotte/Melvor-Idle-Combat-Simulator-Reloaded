@@ -1626,7 +1626,7 @@
             );
         }
         // burn
-        if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn')) {
+        if (Math.random() < mergePlayerModifiers(player, 'ChanceToApplyBurn') / 100) {
             statusEffect.burnDebuff = 15;
         }
         // return the result of the attack
