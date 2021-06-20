@@ -1355,7 +1355,7 @@
                 playerStats.slayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Slayer);
                 playerStats.prayerXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Prayer);
                 playerStats.summoningXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Summoning);
-                playerStats.hitpointsXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Hitpoins);
+                playerStats.hitpointsXpBonus = globalXpBonus + MICSR.getModifierValue(this.modifiers, 'SkillXP', CONSTANTS.skill.Hitpoints);
                 return playerStats;
             }
 
