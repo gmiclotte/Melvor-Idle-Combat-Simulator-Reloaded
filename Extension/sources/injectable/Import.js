@@ -414,6 +414,7 @@
                     }
                 });
                 this.app.combatData.pillar = pillar;
+                this.app.selectObstacle(this.app.agilityCategories, this.app.agilityPillars[pillar + 1]);
                 // set image selection
                 this.app.combatData.courseMastery.forEach((m, i) => {
                     const elt = document.getElementById(`MCS Agility Mastery ${i} Toggle Button`);
