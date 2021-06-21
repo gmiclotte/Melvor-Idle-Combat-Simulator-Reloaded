@@ -384,32 +384,7 @@
             }
 
             importAgilityCourse(course, masteries, pillar) {
-                // clear current values
-                this.app.combatData.course.fill(-1);
-                this.app.combatData.courseMastery.fill(false);
-                // import settings
-                this.app.combatData.course.forEach((_, category) => {
-                    let obstacleID = course[category];
-                    if (obstacleID === undefined) {
-                        obstacleID = -1;
-                    }
-                    this.app.selectObstacle(category, this.app.agilityObstacles[obstacleID + 1]);
-                    if (masteries[obstacleID]) {
-                        this.app.combatData.courseMastery[category] = true;
-                        this.app.updateAgilityTooltips(category);
-                    }
-                });
-                this.app.combatData.pillar = pillar;
-                this.app.selectObstacle(this.app.agilityCategories, this.app.agilityPillars[pillar + 1]);
-                // set image selection
-                this.app.combatData.courseMastery.forEach((m, i) => {
-                    const elt = document.getElementById(`MCS Agility Mastery ${i} Toggle Button`);
-                    if (m) {
-                        this.app.selectButton(elt);
-                    } else {
-                        this.app.unselectButton(elt);
-                    }
-                });
+                this.app.agilityCourse.importAgilityCourse(course, masteries, pillar);
             }
         }
     }

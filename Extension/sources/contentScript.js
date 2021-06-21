@@ -71,6 +71,7 @@ function injectScripts() {
         'statNames',
         'modifierNames',
         // class files
+        'AgilityCourse',
         'Card',
         'CombatData',
         'Import',

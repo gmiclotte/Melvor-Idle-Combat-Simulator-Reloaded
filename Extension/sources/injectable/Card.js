@@ -183,7 +183,7 @@
              * Creates a multiple button popup menu (Equip grid)
              * @param {string[]} sources
              * @param {string[]} elIds
-             * @param {HTMLElement} popups
+             * @param {HTMLElement[]} popups
              * @param {string[]} tooltips The tooltip contents
              */
             addMultiPopupMenu(sources, elIds, popups, tooltips, newCCContainer = undefined) {

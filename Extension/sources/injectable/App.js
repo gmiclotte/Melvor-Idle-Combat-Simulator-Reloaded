@@ -22,6 +22,7 @@
     const reqs = [
         'util',
         'statNames',
+        'AgilityCourse',
         'Card',
         'CombatData',
         'Import',
@@ -251,33 +252,6 @@
                 this.botContent.className = 'mcsTabContent';
                 this.botContent.style.flexWrap = 'nowrap';
                 this.botContent.style.minHeight = '452px';
-
-                // copy obstacles
-                this.agilityCategories = 10;
-                const noObstacle = {
-                    category: -1,
-                    cost: {},
-                    description: '',
-                    media: this.media.stamina,
-                    modifiers: {},
-                    name: 'None',
-                    requirements: {},
-                }
-                this.agilityObstacles = [noObstacle, ...agilityObstacles.map((x, id) => {
-                    return {
-                        ...x,
-                        id: id,
-                        combat: MICSR.showModifiersInstance.printRelevantModifiers(x.modifiers, 'combat').length > 0,
-                    }
-                })];
-                this.agilityPillars = [noObstacle, ...agilityPassivePillars.map((x, id) => {
-                    return {
-                        ...x,
-                        id: id,
-                        media: [this.media.combat, this.media.statistics, this.media.gp][id],
-                        combat: MICSR.showModifiersInstance.printRelevantModifiers(x.modifiers, 'combat').length > 0,
-                    }
-                })];
 
                 // Plotter Object
                 this.plotter = new MICSR.Plotter(this, urls.crossedOut);
@@ -838,78 +812,22 @@
                 this.petSelectCard.addImage(PETS[4].media, 100, 'MCS Rock').style.display = 'none';
             }
 
-            agilityMasteryOnClick(event, category) {
-                // toggle
-                if (this.combatData.courseMastery[category]) {
-                    this.combatData.courseMastery[category] = false;
-                    this.unselectButton(event.currentTarget);
-                } else {
-                    this.combatData.courseMastery[category] = true;
-                    this.selectButton(event.currentTarget);
-                }
-                // update tool tips
-                this.updateAgilityTooltips(category);
-                // update combat stats
-                this.updateCombatStats();
-            }
-
-            updateAgilityTooltips(category) {
-                this.agilityObstacles.forEach(obstacle => {
-                    if (obstacle.category !== category) {
-                        return;
-                    }
-                    const button = document.getElementById(`MCS ${obstacle.name} Button`);
-                    button._tippy.setContent(this.getObstacleTooltip(category, obstacle));
-                });
-                const obstacle = this.agilityObstacles[this.combatData.course[category] + 1];
-                const img = document.getElementById(`MICSR Obstacle ${category} Image`);
-                img._tippy.setContent(this.getObstacleTooltip(category, obstacle));
-            }
-
             createAgilitySelectCard() {
                 if (!this.agilitySelectCard) {
                     this.agilitySelectCard = this.mainTabCard.addTab('Agility', this.media.agility, '', '100px');
+                    this.agilityCourse = new MICSR.AgilityCourse(
+                        this,
+                        this.combatData,
+                        [{tag: 'combat', text: 'Combat', media: this.media.combat}],
+                    );
                 } else {
                     this.agilitySelectCard.clearContainer();
                 }
-                this.agilitySelectCard.addSectionTitle('Agility Course');
+                this.agilityCourse.createAgilityCourseContainer(this.agilitySelectCard, this.agilityCourse.filters[0]);
+            }
 
-                let i = 0;
-                for (; i <= this.agilityCategories; i++) {
-                    const category = i;
-                    const obstacleSelectionContainer = this.agilitySelectCard.createCCContainer();
-                    // mastery button
-                    if (category < this.agilityCategories) {
-                        const masteryButton = this.agilitySelectCard.createImageButton(this.media.mastery, `Agility Mastery ${category} Toggle`, (event) => this.agilityMasteryOnClick(event, category), 'Small', '99 Mastery');
-                        masteryButton.className += ' col-3';
-                        obstacleSelectionContainer.appendChild(masteryButton);
-                    } else {
-                        const emptyDiv = document.createElement('div');
-                        emptyDiv.className += ' col-3';
-                        obstacleSelectionContainer.appendChild(emptyDiv);
-                    }
-                    // popup
-                    this.agilitySelectCard.addMultiPopupMenu(
-                        [this.media.stamina],
-                        [`MICSR Obstacle ${category} Image`],
-                        [this.createAgilityPopup(category)],
-                        ['None'],
-                        obstacleSelectionContainer,
-                    );
-                    obstacleSelectionContainer.lastChild.className += ' col-3';
-                    // label
-                    const labelDiv = document.createElement('div');
-                    labelDiv.className = 'col-6';
-                    labelDiv.style = 'display: table; text-align: center;';
-                    const label = document.createElement('label');
-                    label.id = `MICSR Obstacle ${category} Label`;
-                    label.textContent = 'None';
-                    label.style = 'display: table-cell; vertical-align: middle;';
-                    labelDiv.appendChild(label);
-                    obstacleSelectionContainer.appendChild(labelDiv);
-                    // add selection container to card
-                    this.agilitySelectCard.container.appendChild(obstacleSelectionContainer);
-                }
+            agilityCourseCallback() {
+                this.updateCombatStats();
             }
 
             createLootOptionsCard() {
@@ -1233,85 +1151,6 @@
                 const buttonCallbacks = menuItems.map((item) => () => this.equipItem(equipmentSlot, item.itemID));
                 const tooltips = menuItems.map((item) => this.getEquipmentTooltip(equipmentSlot, item));
                 card.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, '100%');
-            }
-
-            /** Adds a multi-button with agility obstacle to the agility obstacle select popup
-             * @param {Card} card The parent card
-             * @param {number} category The obstacle index
-             */
-            addObstacleMultiButton(card, title, category, isCombat) {
-                const menuItems = category === this.agilityCategories
-                    ? this.agilityPillars
-                    : this.agilityObstacles.filter(x => x.category === -1 || (x.combat === isCombat && x.category === category));
-                if (menuItems.length <= 1) {
-                    return;
-                }
-                const buttonMedia = menuItems.map(obstacle => obstacle.media);
-                const buttonIds = menuItems.map(obstacle => obstacle.name);
-                const buttonCallbacks = menuItems.map(obstacle => () => this.selectObstacle(category, obstacle));
-                const tooltips = menuItems.map(obstacle => this.getObstacleTooltip(category, obstacle));
-                card.addSectionTitle(title);
-                card.addImageButtons(buttonMedia, buttonIds, 'Small', buttonCallbacks, tooltips, '100%');
-            }
-
-            getObstacleTooltip(category, obstacle) {
-                let passives = `<div class="text-center">${obstacle.name}</div>`;
-                for (let prop in obstacle.modifiers) {
-                    let divider = 1;
-                    if (this.combatData.courseMastery[category]
-                        && printPlayerModifier(prop, obstacle.modifiers[prop])[1] === 'text-danger') {
-                        divider = 2;
-                    }
-                    let value = obstacle.modifiers[prop];
-                    if (value.length === undefined) {
-                        value /= divider;
-                    } else {
-                        value = value.map(x => [x[0], x[1] / divider]);
-                    }
-                    MICSR.showModifiersInstance.printRelevantModifiers({[prop]: value}, 'combat').forEach(toPrint => {
-                        passives += `<div class="${toPrint[1]}">${toPrint[0]}</div>`;
-                    });
-                }
-                return passives;
-            }
-
-            createAgilityPopup(category) {
-                const obstacleSelectPopup = document.createElement('div');
-                obstacleSelectPopup.className = 'mcsPopup';
-                obstacleSelectPopup.style = 'width:350px;';
-                const obstacleSelectCard = new MICSR.Card(obstacleSelectPopup, '', '600px');
-                if (category === this.agilityCategories) {
-                    this.addObstacleMultiButton(obstacleSelectCard, 'Pillars', category, true);
-                } else {
-                    this.addObstacleMultiButton(obstacleSelectCard, 'Combat Obstacles', category, true);
-                    this.addObstacleMultiButton(obstacleSelectCard, 'Non-Combat Obstacles', category, false);
-                }
-                return obstacleSelectPopup;
-            }
-
-            selectObstacle(category, obstacle) {
-                const label = document.getElementById(`MICSR Obstacle ${category} Label`);
-                label.textContent = obstacle.name;
-                this.setObstacleImage(category, obstacle);
-                if (category === this.agilityCategories) {
-                    this.combatData.pillar = obstacle.id;
-                } else {
-                    if (obstacle.category === -1) {
-                        this.combatData.course[category] = -1;
-                    } else {
-                        this.combatData.course[category] = obstacle.id;
-                    }
-                }
-                this.updateCombatStats();
-            }
-
-            /**
-             * Change the obstacle image
-             */
-            setObstacleImage(category, obstacle) {
-                const img = document.getElementById(`MICSR Obstacle ${category} Image`);
-                img.src = obstacle.media;
-                img._tippy.setContent(this.getObstacleTooltip(category, obstacle));
             }
 
             /**
