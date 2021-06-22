@@ -1,3 +1,7 @@
+v1.4.1
+    Changes:
+    - Fix settings compatibility with v1.3.x
+
 v1.4.0
     Update for 0.20
     Changes:
