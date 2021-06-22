@@ -1765,6 +1765,10 @@
         if (isSpecial && player.currentSpecial.damageMultiplier) {
             damage *= player.currentSpecial.damageMultiplier;
         }
+        // special attack damage multiplier
+        if (isSpecial && player.currentSpecial.extraDamage) {
+            damage += numberMultiplier * player.currentSpecial.extraDamage;
+        }
         // common modifiers
         if (!stats.player.isMagic || !stats.player.usingAncient) {
             damage = damage * (1 + getPlayerDamageModifier(player, enemy) / 100)
