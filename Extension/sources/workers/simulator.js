@@ -1635,7 +1635,7 @@
     }
 
     function enemyCalculateDamage(stats, enemy, isSpecial, currentSpecial, player) {
-        let damage = setDamage(enemy, stats.enemy, player, stats.player, isSpecial, currentSpecial);
+        let damage = setDamage(stats, enemy, stats.enemy, player, stats.player, isSpecial, currentSpecial);
         if (damage === undefined) {
             damage = Math.floor(Math.random() * enemy.maxHit) + 1;
         }
@@ -1650,7 +1650,7 @@
         return damage;
     }
 
-    function setDamage(actor, actorStats, target, targetStats, isSpecial, currentSpecial) {
+    function setDamage(stats, actor, actorStats, target, targetStats, isSpecial, currentSpecial) {
         if (!isSpecial) {
             return undefined;
         }
@@ -1665,7 +1665,8 @@
             }
             damage = Math.floor(Math.random() * (setHPDamage - setHPDamageMinimum) + setHPDamageMinimum);
         } else if (currentSpecial.customDamageModifier !== undefined) {
-            damage = Math.floor(targetStats.maxHit * (1 - currentSpecial.customDamageModifier / 100));
+            const targetMaxHit = target.isPlayer ? getPlayerMaxHit(stats, target) : targetStats.maxHit;
+            damage = Math.floor(targetMaxHit * (1 - currentSpecial.customDamageModifier / 100));
         } else if (currentSpecial.setDamage !== null && currentSpecial.setDamage !== undefined) {
             damage = currentSpecial.setDamage * numberMultiplier;
         } else if (isSpecial && currentSpecial.maxHit) {
@@ -1754,7 +1755,7 @@
     }
 
     function playerCalculateDamage(stats, enemy, isSpecial, player, isMulti) {
-        let damage = setDamage(player, stats.player, enemy, stats.enemy, isSpecial, player.currentSpecial);
+        let damage = setDamage(stats, player, stats.player, enemy, stats.enemy, isSpecial, player.currentSpecial);
         // Calculate attack Damage
         if (damage === undefined) {
             // roll hit based on max hit, max hit already takes cb triangle into account !
