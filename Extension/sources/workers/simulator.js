@@ -1745,6 +1745,10 @@
         player.damageReductionNoTriangle = damageReduction;
         // apply triangle last
         damageReduction = Math.floor(damageReduction * player.reductionModifier);
+        // apply DR cap again
+        if (damageReduction > 95) {
+            damageReduction = 95;
+        }
         // cache
         player.damageReduction = damageReduction;
     }
