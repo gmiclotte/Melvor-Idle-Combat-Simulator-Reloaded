@@ -2268,7 +2268,7 @@
         if (isMulti) {
             // synergies 6 8, 6 12, and 7 12, do not apply to later hits of a multi-hit attack
         } else if (stats.combatData.modifiers.summoningSynergy_6_8 && stats.combatData.isSlayerTask && stats.player.isMagic) {
-            minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.summoningSynergy_6_8 / 100);
+            minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_6_8 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_6_12 && stats.combatData.isSlayerTask && stats.player.isMelee) {
             minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_7_12 && stats.combatData.isSlayerTask && stats.player.isRanged) {
