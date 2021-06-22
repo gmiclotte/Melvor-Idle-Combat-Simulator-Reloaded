@@ -514,11 +514,11 @@
         amt += numberMultiplier * mergePlayerModifiers(player, 'HPRegenFlat');
         // flat synergies
         if (stats.combatData.modifiers.summoningSynergy_6_14 && stats.player.isMelee) {
-            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_6_14 / 100);
+            amt += getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_6_14 / 100;
         } else if (stats.combatData.modifiers.summoningSynergy_7_14 && stats.player.isRanged) {
-            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_7_14 / 100);
+            amt += getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_7_14 / 100;
         } else if (stats.combatData.modifiers.summoningSynergy_8_14 && stats.player.isMagic) {
-            amt += player.maxHit * (stats.combatData.modifiers.summoningSynergy_8_14 / 100);
+            amt += getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_8_14 / 100;
         }
         // rapid heal prayer
         if (player.prayerBonus.vars.prayerBonusHitpoints) {
@@ -1557,7 +1557,7 @@
         }
         let statusEffect = {...player.currentSpecial};
         // Fighter amulet stun overrides special attack stun
-        if (stats.player.activeItems.fighterAmulet && stats.player.isMelee && attackResult.damageToEnemy >= player.maxHit * 0.70) {
+        if (stats.player.activeItems.fighterAmulet && stats.player.isMelee && attackResult.damageToEnemy >= getPlayerMaxHit(stats, player) * 0.70) {
             statusEffect.canStun = true;
             statusEffect.stunChance = undefined;
             statusEffect.stunTurns = 1;
@@ -2263,16 +2263,16 @@
 
     function getPlayerMinHit(stats, player, isMulti) {
         let minHit = 0;
-        minHit += Math.floor(player.maxHit * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
-        minHit -= Math.floor(player.maxHit * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
+        minHit += Math.floor(getPlayerMaxHit(stats, player) * mergePlayerModifiers(player, 'increasedMinHitBasedOnMaxHit', false) / 100);
+        minHit -= Math.floor(getPlayerMaxHit(stats, player) * mergePlayerModifiers(player, 'decreasedMinHitBasedOnMaxHit', false) / 100);
         if (isMulti) {
             // synergies 6 8, 6 12, and 7 12, do not apply to later hits of a multi-hit attack
         } else if (stats.combatData.modifiers.summoningSynergy_6_8 && stats.combatData.isSlayerTask && stats.player.isMagic) {
-            minHit += Math.floor(player.maxHit * stats.combatData.summoningSynergy_6_8 / 100);
+            minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.summoningSynergy_6_8 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_6_12 && stats.combatData.isSlayerTask && stats.player.isMelee) {
-            minHit += Math.floor(player.maxHit * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
+            minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_6_12 / 100);
         } else if (stats.combatData.modifiers.summoningSynergy_7_12 && stats.combatData.isSlayerTask && stats.player.isRanged) {
-            minHit += Math.floor(player.maxHit * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
+            minHit += Math.floor(getPlayerMaxHit(stats, player) * stats.combatData.modifiers.summoningSynergy_7_12 / 100);
         }
         // static min hit increase (magic gear and Charged aurora)
         minHit += stats.player.increasedMinHit;
