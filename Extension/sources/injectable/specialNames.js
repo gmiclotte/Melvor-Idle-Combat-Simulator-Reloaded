@@ -63,6 +63,7 @@
             damageMultiplier: {implemented: true},
             maxHit: {implemented: true},
             extraDamage: {implemented: true},
+            extraBleedDmg: {implemented: true},
 
             // bleed
             bleedChance: {implemented: true},

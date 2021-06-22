@@ -771,14 +771,14 @@
         // end of ShowModifiers copy
 
         // equipment stats are non-passive stats that apply to combat
-        // commented modifiers are not relevant yet or not implemented in the game
         MICSR.modifierNames = {
             // general modifiers
             ChanceToDoubleItemsGlobal: {implemented: true},
             ChanceToPreservePotionCharge: {implemented: true},
-            GPFromSales: {implemented: false},
+            SummoningChargePreservation: {implemented: true},
+            GPFromSales: {implemented: false}, // kind of iffy to implement, you might change setup to sell items
             GPGlobal: {implemented: true},
-            GPOnEnemyHit: {implemented: false},
+            GPOnEnemyHit: {implemented: true},
             GlobalSkillXP: {implemented: true},
             HiddenSkillLevel: {implemented: true},
             PotionChargesFlat: {implemented: true},
@@ -800,8 +800,8 @@
             MonsterRespawnTimer: {implemented: true},
             PlayerAttackSpeed: {implemented: true},
             PlayerAttackSpeedPercent: {implemented: true},
-            EnemyAccuracy: {implemented: false},
-            ChanceToApplyBurn: {implemented: false},
+            EnemyAccuracy: {implemented: false}, // not implemented in game
+            ChanceToApplyBurn: {implemented: true},
             // modifiers that relate to healing
             AutoEatEfficiency: {implemented: true},
             AutoEatHPLimit: {implemented: true},
@@ -809,22 +809,22 @@
             FoodHealingValue: {implemented: true},
             HPRegenFlat: {implemented: true},
             HitpointRegeneration: {implemented: true},
-            Lifesteal: {implemented: false},
+            Lifesteal: {implemented: false}, // not implemented in game
             // modifiers that relate to defence
             DamageReduction: {implemented: true},
             MagicEvasion: {implemented: true},
             MeleeEvasion: {implemented: true},
             RangedEvasion: {implemented: true},
-            ReflectDamage: {implemented: false},
+            ReflectDamage: {implemented: false}, // not implemented in game
             // modifiers that relate to using melee attacks
             MeleeAccuracyBonus: {implemented: true},
             MeleeStrengthBonus: {implemented: true},
-            EnemyMeleeEvasion: {implemented: false},
+            EnemyMeleeEvasion: {implemented: true},
             // modifiers that relate to using ranged attacks
             AmmoPreservation: {implemented: true},
             RangedAccuracyBonus: {implemented: true},
             RangedStrengthBonus: {implemented: true},
-            EnemyRangedEvasion: {implemented: false},
+            EnemyRangedEvasion: {implemented: true},
             // modifiers that relate to using magic attacks
             MagicAccuracyBonus: {implemented: true},
             MagicDamageBonus: {implemented: true},
@@ -833,13 +833,13 @@
             MinFireSpellDmg: {implemented: true},
             MinWaterSpellDmg: {implemented: true},
             RunePreservation: {implemented: true},
-            EnemyMagicEvasion: {implemented: false},
+            EnemyMagicEvasion: {implemented: true},
             // modifiers that relate to slayer tasks, areas, or monsters
             DamageToSlayerAreaMonsters: {implemented: true},
             DamageToSlayerTasks: {implemented: true},
             SlayerAreaEffectNegationFlat: {implemented: true},
-            SlayerCoins: {implemented: false},
-            SlayerTaskLength: {implemented: false},
+            SlayerCoins: {implemented: true},
+            SlayerTaskLength: {implemented: true},
             // modifiers that relate to prayer
             ChanceToPreservePrayerPoints: {implemented: true},
             FlatPrayerCostReduction: {implemented: true},

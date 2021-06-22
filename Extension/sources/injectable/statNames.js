@@ -181,14 +181,7 @@
             prayerCostReduction: {implemented: true},
 
             // summoning
-            summoningDescription: {implemented: false},
-            summoningID: {implemented: false},
-            summoningReq: {implemented: false},
-            summoningQty: {implemented: false},
-            summoningXP: {implemented: false},
-            summoningTier: {implemented: false},
-            summoningSkills: {implemented: false},
-            summoningMaxHit: {implemented: false},
+            summoningMaxHit: {implemented: true},
         };
 
         // requirements to wear gear
@@ -227,12 +220,21 @@
         MICSR.irrelevantStatNames = {
 
             // this does nothing
-            prayerBonus: {implemented: false},
-            slayerAreaEffectNegationPercent: {implemented: false},
-            increasedMinAirSpellDmg: {implemented: false},
-            increasedMinEarthSpellDmg: {implemented: false},
-            increasedMinFireSpellDmg: {implemented: false},
-            increasedMinWaterSpellDmg: {implemented: false},
+            prayerBonus: {},
+            slayerAreaEffectNegationPercent: {},
+            increasedMinAirSpellDmg: {},
+            increasedMinEarthSpellDmg: {},
+            increasedMinFireSpellDmg: {},
+            increasedMinWaterSpellDmg: {},
+
+            // summoning
+            summoningDescription: {},
+            summoningID: {},
+            summoningQty: {},
+            summoningReq: {},
+            summoningSkills: {},
+            summoningTier: {},
+            summoningXP: {},
 
             // crafting
             craftingID: {},
