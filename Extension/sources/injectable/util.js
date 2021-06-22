@@ -24,10 +24,51 @@
 
     const setup = () => {
 
+        // global combat simulator object
         const MICSR = window.MICSR;
 
-        MICSR.version = 'v1.4.0-3';
+        // combat sim version
+        MICSR.majorVersion = 1;
+        MICSR.minorVersion = 4;
+        MICSR.patchVersion = 0;
+        MICSR.preReleaseVersion = 3;
+        MICSR.version = `v${MICSR.majorVersion}.${MICSR.minorVersion}.${MICSR.patchVersion}`;
+        if (MICSR.preReleaseVersion !== undefined) {
+            MICSR.version = `${MICSR.version}-${MICSR.preReleaseVersion}`;
+        }
+
+        MICSR.versionCheck = (exact, major, minor, patch, prerelease) => {
+            // check exact version match
+            if (exact) {
+                return major === MICSR.majorVersion
+                    && minor === MICSR.minorVersion
+                    && patch === MICSR.patchVersion
+                    && prerelease === MICSR.preReleaseVersion;
+            }
+            // check minimal version match
+            if (major > MICSR.majorVersion) {
+                return false;
+            }
+            if (minor > MICSR.minorVersion) {
+                return false;
+            }
+            if (patch > MICSR.patchVersion) {
+                return false;
+            }
+            if (MICSR.preReleaseVersion !== undefined) {
+                if (prerelease === undefined) {
+                    return false;
+                } else if (prerelease > MICSR.preReleaseVersion) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // compatible game version
         MICSR.gameVersion = 'Alpha v0.20';
+
+        // simulation settings
         MICSR.maxActions = 300;
         MICSR.trials = 10000;
 
