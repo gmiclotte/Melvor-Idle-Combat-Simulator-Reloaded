@@ -864,7 +864,7 @@
         // base bleed
         if (statusEffect.totalBleedHP > 0) {
             let totalBleedHP = statusEffect.totalBleedHP;
-            if (!target.isPlayer && statusEffect.id === 28 && target.hitpoints >= target.maxHitpoints) {
+            if (!target.isPlayer && statusEffect.id === 28 && target.hitpoints < target.maxHitpoints) {
                 // Rend
                 totalBleedHP = 2.5;
             }
