@@ -363,7 +363,7 @@
                 // Saving and loading of Gear Sets
                 this.gearSets = [];
                 // slayer sim is off by default, so toggle auto slayer off
-                this.toggleSlayerSims();
+                this.toggleSlayerSims(!this.slayerToggleState, false);
             }
 
             showRelevantModifiers(modifiers, text) {
@@ -1920,16 +1920,20 @@
              */
             slayerTaskRadioOnChange(event, newState) {
                 this.combatData.isSlayerTask = newState;
-                // toggle dungeon sims off if slayer task is on
-                if (this.combatData.isSlayerTask && this.dungeonToggleState) {
-                    this.toggleDungeonSims(true);
-                }
-                // toggle auto slayer sims off if slayer task is off
-                if (!this.combatData.isSlayerTask && this.slayerToggleState) {
-                    this.toggleSlayerSims(true);
-                }
+                this.slayerTaskSimsToggle();
                 this.updatePlotForSlayerXP();
                 this.updatePlotForSlayerCoins();
+            }
+
+            slayerTaskSimsToggle() {
+                // toggle dungeon sims off if slayer task is on
+                if (this.combatData.isSlayerTask) {
+                    this.toggleDungeonSims(false, true);
+                }
+                // toggle auto slayer sims off if slayer task is off
+                if (!this.combatData.isSlayerTask) {
+                    this.toggleSlayerSims(false, true);
+                }
             }
 
             /**
@@ -2063,7 +2067,7 @@
             notify(message, type = 'success') {
                 let img = this.media.combat;
                 Toastify({
-                    text: `<div class=text-center><img class=notification-img src=${img}><span class=badge badge-${type}>${message}</span></div>`,
+                    text: `<div class=text-center><img class="notification-img" src="${img}"><span class="badge badge-${type}">${message}</span></div>`,
                     duration: 2000,
                     gravity: 'bottom',
                     position: 'center',
@@ -2197,20 +2201,20 @@
                 }
                 let newState;
                 if (this.barIsDungeon(imageID)) {
-                    this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]] = !this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]];
-                    newState = this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]];
+                    newState = !this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]];
                     if (newState && this.combatData.isSlayerTask) {
-                        this.notify('no dungeon simulation on slayer task')
-                        return;
+                        this.notify('no dungeon simulation on slayer task', 'danger');
+                        newState = false;
                     }
+                    this.simulator.dungeonSimFilter[this.barMonsterIDs[imageID]] = newState;
                 } else if (this.barIsTask(imageID)) {
                     const taskID = this.barMonsterIDs[imageID] - DUNGEONS.length;
-                    this.simulator.slayerSimFilter[taskID] = !this.simulator.slayerSimFilter[taskID];
-                    newState = this.simulator.slayerSimFilter[taskID];
+                    newState = !this.simulator.slayerSimFilter[taskID];
                     if (newState && !this.combatData.isSlayerTask) {
-                        this.notify('no auto slayer simulation off slayer task');
-                        return;
+                        this.notify('no auto slayer simulation off slayer task', 'danger');
+                        newState = false;
                     }
+                    this.simulator.slayerSimFilter[taskID] = newState;
                 } else {
                     this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]] = !this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]];
                     newState = this.simulator.monsterSimFilter[this.barMonsterIDs[imageID]];
@@ -2233,13 +2237,12 @@
             /**
              * Callback to toggle the simulation of dungeons
              */
-            toggleDungeonSims(silent = false) {
-                const newState = !this.dungeonToggleState;
+            toggleDungeonSims(newState, silent) {
                 if (newState && this.combatData.isSlayerTask) {
                     if (!silent) {
-                        this.notify('no dungeon simulation on slayer task')
+                        this.notify('no dungeon simulation on slayer task', 'danger')
                     }
-                    return;
+                    newState = false;
                 }
                 this.dungeonToggleState = newState;
                 for (let i = 0; i < DUNGEONS.length; i++) {
@@ -2252,13 +2255,12 @@
             /**
              * Callback to toggle the simulation of dungeons
              */
-            toggleSlayerSims(silent = false) {
-                const newState = !this.slayerToggleState;
+            toggleSlayerSims(newState, silent) {
                 if (newState && !this.combatData.isSlayerTask) {
                     if (!silent) {
-                        this.notify('no auto slayer simulation off slayer task');
+                        this.notify('no auto slayer simulation off slayer task', 'danger');
                     }
-                    return;
+                    newState = false;
                 }
                 this.slayerToggleState = newState;
                 for (let i = 0; i < this.slayerTasks.length; i++) {

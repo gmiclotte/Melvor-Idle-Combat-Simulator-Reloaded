@@ -256,10 +256,10 @@
                     this.parent.toggleMonsterSims();
                 });
                 this.toggleDungeonButton = card.addButton('Toggle Dungeons', () => {
-                    this.parent.toggleDungeonSims();
+                    this.parent.toggleDungeonSims(!this.parent.dungeonToggleState, false);
                 });
                 this.toggleSlayerButton = card.addButton('Toggle Auto Slayer', () => {
-                    this.parent.toggleSlayerSims();
+                    this.parent.toggleSlayerSims(!this.parent.slayerToggleState, false);
                 });
             }
 

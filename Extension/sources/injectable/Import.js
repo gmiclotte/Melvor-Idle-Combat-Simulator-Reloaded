@@ -338,6 +338,7 @@
                     this.app.combatData.isSlayerTask = false;
                     document.getElementById('MCS Slayer Task Radio No').checked = true;
                 }
+                this.app.slayerTaskSimsToggle();
             }
 
             importHardCore(isHardcore) {
