@@ -1,5 +1,12 @@
 v1.4.0
-    WIP
+    Update for 0.20
+    Changes:
+    - Add Summoning
+    - Add loot interface
+    - Rewrite Agility course interface
+    - Add new modifiers
+    - Implement various small balance changes
+    - Fix various bugs
 
 v1.3.14
     Changes:
