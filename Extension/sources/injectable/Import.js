@@ -185,7 +185,7 @@
 
             importEquipment(equipment) {
                 this.app.equipmentSlotKeys.forEach((key, i) => {
-                    const itemID = equipment[i];
+                    const itemID = equipment[i] | 0;
                     this.app.equipmentSelected[i] = itemID;
                     this.app.setEquipmentImage(i, itemID);
                 });
