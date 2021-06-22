@@ -170,7 +170,7 @@
                 // equipmentSlotKeys
                 this.equipmentSlotKeys = equipmentSlotKeys;
                 // player modifiers
-                this.modifiers = this.copyModifierTemplate();
+                this.modifiers = MICSR.copyModifierTemplate();
                 // base stats
                 this.baseStats = this.resetPlayerBaseStats();
                 // equipment stats
@@ -794,17 +794,6 @@
             }
 
             /**
-             * compute a modifier object from a list
-             */
-            computeModifiers(list) {
-                const modifiers = {};
-                for (const object of list) {
-                    this.addModifiers(object.modifiers, modifiers);
-                }
-                return modifiers;
-            }
-
-            /**
              * Computes the prayer bonuses for the selected prayers
              */
             computePrayerBonus() {
@@ -812,7 +801,7 @@
                 for (let i = 0; i < this.prayerSelected.length; i++) {
                     if (this.prayerSelected[i]) {
                         if (PRAYER[i].modifiers !== undefined) {
-                            this.addModifiers(PRAYER[i].modifiers, this.prayerBonus.modifiers);
+                            MICSR.addModifiers(PRAYER[i].modifiers, this.prayerBonus.modifiers);
                         }
                         if (PRAYER[i].vars !== undefined) {
                             let j = 0;
@@ -844,70 +833,12 @@
             }
 
             /**
-             * Add modifiers in source to target
-             * @param source
-             * @param target
-             */
-            addModifiers(source, target) {
-                for (const modifier in source) {
-                    if (source[modifier].length) {
-                        if (this.verbose) {
-                            MICSR.log(source, modifier, source[modifier]);
-                        }
-                        for (const value of source[modifier]) {
-                            this.updateKeyValuePair(target, modifier, value);
-                        }
-                    } else {
-                        this.updateKeyValuePair(target, modifier, source[modifier]);
-                    }
-                }
-            }
-
-            mergeModifiers(source, target) {
-                for (const modifier in source) {
-                    if (source[modifier].length) {
-                        if (this.verbose) {
-                            MICSR.log(source, modifier, source[modifier]);
-                        }
-                        for (const value of source[modifier]) {
-                            this.updateKeyValuePair(target, modifier, [value.id, value.value]);
-                        }
-                    } else {
-                        this.updateKeyValuePair(target, modifier, source[modifier]);
-                    }
-                }
-            }
-
-            updateKeyValuePair(array, key, value, verbose) {
-                if (this.verbose) {
-                    MICSR.log(array + " / " + key + " / " + value);
-                }
-                updateKeyValuePair(array, key, value);
-            }
-
-            /**
-             * Create new modifiers object
-             * @returns {{}}
-             */
-            copyModifierTemplate() {
-                const modifiers = {}
-                for (const prop in playerModifiersTemplate) {
-                    if (playerModifiersTemplate[prop].length || !Number.isInteger(playerModifiersTemplate[prop])) {
-                        modifiers[prop] = [];
-                    } else {
-                        modifiers[prop] = 0;
-                    }
-                }
-                return modifiers;
-            }
-
-            /**
              * Update this.modifiers
              * mimics updateAllPlayerModifiers
              */
             updateModifiers(selectedCombatArea = "") {
                 // reset
-                this.modifiers = this.copyModifierTemplate();
+                this.modifiers = MICSR.copyModifierTemplate();
 
                 // mimic calculateEquippedItemModifiers // passives
                 const duplicateCheck = {};
@@ -921,20 +852,20 @@
                     duplicateCheck[x] = true;
                     return true;
                 }).map(x => items[x]);
-                this.itemModifiers = this.computeModifiers(equipmentList);
-                this.mergeModifiers(this.itemModifiers, this.modifiers);
+                this.itemModifiers = MICSR.computeModifiers(equipmentList);
+                MICSR.mergeModifiers(this.itemModifiers, this.modifiers);
 
                 // mimic calculateCombatAreaEffectModifiers(selectedCombatArea)
                 // TODO: implement this
 
                 // mimic calculatePetModifiers
                 const petList = this.petIds.filter(id => this.petOwned[id]).map(id => PETS[id]);
-                this.petModifiers = this.computeModifiers(petList);
-                this.mergeModifiers(this.petModifiers, this.modifiers);
+                this.petModifiers = MICSR.computeModifiers(petList);
+                MICSR.mergeModifiers(this.petModifiers, this.modifiers);
 
                 // mimic calculatePrayerModifiers
                 this.computePrayerBonus();
-                this.mergeModifiers(this.prayerBonus.modifiers, this.modifiers);
+                MICSR.mergeModifiers(this.prayerBonus.modifiers, this.modifiers);
 
                 // mimic calculateAgilityModifiers
                 const obstacles = [];
@@ -965,30 +896,30 @@
                     }
                     obstacles.push({modifiers: modifiers});
                 }
-                this.agilityModifiers = this.computeModifiers(obstacles);
+                this.agilityModifiers = MICSR.computeModifiers(obstacles);
                 if (fullCourse && this.pillar > -1) {
-                    this.mergeModifiers(agilityPassivePillars[this.pillar].modifiers, this.agilityModifiers);
+                    MICSR.mergeModifiers(agilityPassivePillars[this.pillar].modifiers, this.agilityModifiers);
                 }
-                this.mergeModifiers(this.agilityModifiers, this.modifiers);
+                MICSR.mergeModifiers(this.agilityModifiers, this.modifiers);
 
                 // mimic calculateSummoningSynergyModifiers
                 this.synergyModifiers = this.computeSynergyBonus();
-                this.mergeModifiers(this.synergyModifiers, this.modifiers);
+                MICSR.mergeModifiers(this.synergyModifiers, this.modifiers);
 
                 // mimic calculateShopModifiers
                 // implement other parts of this if they ever are relevant
                 this.autoEatModifiers = {};
                 for (let i = 0; i <= this.autoEatTier; i++) {
-                    this.mergeModifiers(this.autoEatData[i].contains.modifiers, this.autoEatModifiers);
+                    MICSR.mergeModifiers(this.autoEatData[i].contains.modifiers, this.autoEatModifiers);
                 }
-                this.mergeModifiers(this.autoEatModifiers, this.modifiers);
+                MICSR.mergeModifiers(this.autoEatModifiers, this.modifiers);
 
                 // mimic calculateMiscModifiers
                 // implement this if it ever is relevant
 
                 // potion modifiers
                 this.computePotionBonus();
-                this.mergeModifiers(this.herbloreModifiers, this.modifiers);
+                MICSR.mergeModifiers(this.herbloreModifiers, this.modifiers);
 
                 // TODO: SPECIAL ATTACKS, MASTERY
                 //  when they get made into modifiers in the game

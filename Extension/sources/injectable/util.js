@@ -209,6 +209,63 @@
         MICSR.averageDoubleMultiplier = (modifier) => {
             return 1 + modifier / 100
         }
+
+
+        /**
+         * compute a modifier object from a list
+         */
+        MICSR.computeModifiers = (list) => {
+            const modifiers = {};
+            for (const object of list) {
+                MICSR.addModifiers(object.modifiers, modifiers);
+            }
+            return modifiers;
+        }
+
+        /**
+         * Add modifiers in source to target
+         * @param source
+         * @param target
+         */
+        MICSR.addModifiers = (source, target) => {
+            for (const modifier in source) {
+                if (source[modifier].length) {
+                    for (const value of source[modifier]) {
+                        updateKeyValuePair(target, modifier, value);
+                    }
+                } else {
+                    updateKeyValuePair(target, modifier, source[modifier]);
+                }
+            }
+        }
+
+        MICSR.mergeModifiers = (source, target) => {
+            for (const modifier in source) {
+                if (source[modifier].length) {
+                    for (const value of source[modifier]) {
+                        updateKeyValuePair(target, modifier, [value.id, value.value]);
+                    }
+                } else {
+                    updateKeyValuePair(target, modifier, source[modifier]);
+                }
+            }
+        }
+
+        /**
+         * Create new modifiers object
+         * @returns {{}}
+         */
+        MICSR.copyModifierTemplate = () => {
+            const modifiers = {}
+            for (const prop in playerModifiersTemplate) {
+                if (playerModifiersTemplate[prop].length || !Number.isInteger(playerModifiersTemplate[prop])) {
+                    modifiers[prop] = [];
+                } else {
+                    modifiers[prop] = 0;
+                }
+            }
+            return modifiers;
+        }
     }
 
     let loadCounter = 0;
