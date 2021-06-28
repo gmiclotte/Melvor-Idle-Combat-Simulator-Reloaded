@@ -508,14 +508,12 @@
                         maxHits = this.maxMeleeHit(baseStats, modifiers);
                         break;
                 }
-                const baseMaxHit = maxHits[0];
-                let maxHit = maxHits[1];
                 // max hit modifiers apply to everything except for ancient magics
                 if (this.combatStats.attackType !== CONSTANTS.attackType.Magic || !this.spells.ancient.isSelected) {
-                    maxHit = applyModifier(maxHit, MICSR.getModifierValue(modifiers, 'MaxHitPercent'));
-                    maxHit += this.numberMultiplier * MICSR.getModifierValue(modifiers, 'MaxHitFlat');
+                    maxHits.maxHit = applyModifier(maxHits.maxHit, MICSR.getModifierValue(modifiers, 'MaxHitPercent'));
+                    maxHits.maxHit += this.numberMultiplier * MICSR.getModifierValue(modifiers, 'MaxHitFlat');
                 }
-                return [baseMaxHit, maxHit];
+                return maxHits;
             }
 
             maxRangedHit(baseStats, modifiers) {
@@ -529,41 +527,42 @@
                     baseMaxHit,
                     MICSR.getModifierValue(modifiers, 'RangedStrengthBonus')
                 );
-                return [baseMaxHit, maxHit];
+                return {maxHit: maxHit}
             }
 
             maxMagicHit(baseStats, modifiers) {
-                let baseMaxHit;
-                let selectedSpell = this.spells.standard.selectedID;
                 let maxHit;
+                let selectedSpell = this.spells.standard.selectedID;
                 if (!this.spells.ancient.isSelected) {
-                    baseMaxHit = Math.floor(this.numberMultiplier
-                        * (SPELLS[selectedSpell].maxHit + SPELLS[selectedSpell].maxHit * baseStats.damageBonusMagic / 100)
-                        * (1 + (this.playerLevels.Magic + 1 + this.getSkillHiddenLevels(CONSTANTS.skill.Magic)) / 200));
+                    const effectiveMagicLevel = 1 + this.playerLevels.Magic + this.getSkillHiddenLevels(CONSTANTS.skill.Magic);
+                    maxHit = Math.floor(this.numberMultiplier
+                        * SPELLS[selectedSpell].maxHit * (1 + baseStats.damageBonusMagic / 100)
+                        * (1 + effectiveMagicLevel / 2 / 100));
                     maxHit = applyModifier(
-                        baseMaxHit,
+                        maxHit,
                         MICSR.getModifierValue(modifiers, 'MagicDamageBonus')
                     );
                 } else {
                     selectedSpell = this.spells.ancient.selectedID;
-                    baseMaxHit = ANCIENT[selectedSpell].maxHit;
+                    maxHit = ANCIENT[selectedSpell].maxHit;
                 }
+                // flat bonus max hit
+                let flatBonus = 0;
                 // apply cloud burst effect to normal water spells
                 if (!this.spells.ancient.isSelected
                     && this.equipmentSelected.includes(CONSTANTS.item.Cloudburst_Staff)
                     && SPELLS[selectedSpell].spellType === CONSTANTS.spellType.Water) {
-                    baseMaxHit += this.getNumberMultiplierValue(items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage);
+                    flatBonus += this.getNumberMultiplierValue(items[CONSTANTS.item.Cloudburst_Staff].increasedWaterSpellDamage);
                 }
                 // Apply Fury aurora
-                if (this.auroraBonus.increasedMaxHit !== undefined && !this.spells.ancient.isSelected) {
+                if (!this.spells.ancient.isSelected && this.auroraBonus.increasedMaxHit !== undefined) {
                     if (this.auroraBonus.increasedMaxHit !== null) {
-                        baseMaxHit += this.auroraBonus.increasedMaxHit * this.numberMultiplier;
+                        flatBonus += this.auroraBonus.increasedMaxHit * this.numberMultiplier;
                     }
                 }
-                if (!maxHit) {
-                    maxHit = baseMaxHit;
-                }
-                return [baseMaxHit, maxHit];
+                // apply flat bonus
+                maxHit += flatBonus
+                return {maxHit: maxHit};
             }
 
             maxMeleeHit(baseStats, modifiers) {
@@ -573,7 +572,7 @@
                     baseMaxHit,
                     MICSR.getModifierValue(modifiers, 'MeleeStrengthBonus')
                 );
-                return [baseMaxHit, maxHit];
+                return {baseMeleeMaxHit: baseMaxHit, maxHit: maxHit};
             }
 
             /**
@@ -724,8 +723,8 @@
 
                 // max hit roll
                 const maxHits = this.calculatePlayerMaxHit(this.baseStats, modifiers);
-                this.combatStats.baseMaxHit = maxHits[0];
-                this.combatStats.maxHit = maxHits[1];
+                this.combatStats.baseMeleeMaxHit = maxHits.baseMeleeMaxHit;
+                this.combatStats.maxHit = maxHits.maxHit;
 
                 // min hit roll
                 this.combatStats.minHit = 0;

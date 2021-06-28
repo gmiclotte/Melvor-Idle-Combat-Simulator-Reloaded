@@ -2297,10 +2297,9 @@
     }
 
     function setPlayerMaxHit(stats, player) {
-        let maxHit = 0;
+        let maxHit;
         if (stats.player.isMelee) {
-            const baseMaxHit = player.combatStats.baseMaxHit;
-            maxHit = baseMaxHit * (1 + mergePlayerModifiers(player, 'MeleeStrengthBonus') / 100);
+            maxHit = player.combatStats.baseMeleeMaxHit * (1 + mergePlayerModifiers(player, 'MeleeStrengthBonus') / 100);
         } else {
             maxHit = stats.player.maxHit;
         }
