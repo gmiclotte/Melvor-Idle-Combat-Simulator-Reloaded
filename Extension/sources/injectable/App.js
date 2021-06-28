@@ -964,7 +964,7 @@
                     });
                 }
                 // sort by name
-                return [-1, ...lootList.sort((a, b) => items[a].name > items[b].name)];
+                return [-1, ...lootList.sort((a, b) => items[a].name > items[b].name ? 1 : -1)];
             }
 
             dropChanceOnChange(event) {
