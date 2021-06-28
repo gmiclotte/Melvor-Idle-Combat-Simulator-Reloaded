@@ -313,6 +313,13 @@
                 }
                 // Queue simulation of monsters in slayer areas
                 slayerAreas.forEach((area) => {
+                    if (!this.parent.combatData.canAccessArea(area)) {
+                        const tryToSim = area.monsters.reduce((sim, monsterID) => (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) || sim, false);
+                        if (tryToSim) {
+                            this.parent.notify(`Can't access ${area.areaName}`, 'danger');
+                        }
+                        return;
+                    }
                     area.monsters.forEach((monsterID) => {
                         if (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) {
                             this.monsterSimData[monsterID].inQueue = true;
