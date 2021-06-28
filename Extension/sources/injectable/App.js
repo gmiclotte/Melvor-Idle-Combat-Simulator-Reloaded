@@ -635,6 +635,8 @@
                 this.infoPlaceholder = this.zoneInfoCard.addInfoText('Click on a bar for detailed information on a Monster/Dungeon!');
                 this.subInfoCard = new MICSR.Card(this.zoneInfoCard.container, '', '80px');
                 this.subInfoCard.addImage(this.media.combat, 48, 'MCS Info Image');
+                this.failureLabel = this.subInfoCard.addInfoText('');
+                this.failureLabel.style.color = 'red';
                 const zoneInfoLabelNames = [];
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     if (this.plotTypes[i].isTime) {
@@ -2205,12 +2207,23 @@
              * Updates the bars in the plot to the currently selected plot type
              */
             updatePlotData() {
-                this.plotter.updateBarData(this.simulator.getDataSet(this.plotter.plotType));
+                this.plotter.updateBarData(this.simulator.getDataSet(this.plotter.plotType), this.simulator.getRawData());
+            }
+
+            getSimFailureText(data) {
+                if (data.simSuccess) {
+                    return '';
+                }
+                if (!data.reason) {
+                    return 'Simulation failed.';
+                }
+                return `Simulation failed: ${data.reason}.`;
             }
 
             setZoneInfoCard(title, id, media, data) {
                 document.getElementById('MCS Zone Info Title').textContent = `${title} (id ${id})`;
                 document.getElementById('MCS Info Image').src = media;
+                this.failureLabel.textContent = this.getSimFailureText(data);
                 const updateInfo = data.simSuccess;
                 for (let i = 0; i < this.plotTypes.length; i++) {
                     const dataKey = this.plotTypes[i].value;

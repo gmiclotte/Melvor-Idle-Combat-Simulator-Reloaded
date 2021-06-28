@@ -283,7 +283,7 @@
              * Changes the displayed data
              * @param {number[]} barData The new data to diplay
              */
-            updateBarData(barData) {
+            updateBarData(barData, rawData) {
                 const enterSet = this.parent.simulator.getEnterSet();
                 let barMax = 0;
                 for (let i = 0; i < this.bars.length; i++) {
@@ -363,7 +363,11 @@
                             barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
                         }
                     }
-                    this.bars[barIndex]._tippy.setContent(`<div class="text-center">${barName}<br><span class="text-info">${tooltipText}</span></div>`);
+                    let tooltip = `<div class="text-center">${barName}<br><span class="text-info">${tooltipText}</span></div>`;
+                    if (tooltipText === 'N/A') {
+                        tooltip = `<div class="text-center">${barName}<br><span style="color:red;">${this.parent.getSimFailureText(rawData[dataIndex])}</span></div>`;
+                    }
+                    this.bars[barIndex]._tippy.setContent(tooltip);
                 }
                 for (let i = 0; i < 20; i++) {
                     if (i < (Ndivs - 1)) {

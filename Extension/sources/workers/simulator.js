@@ -251,7 +251,7 @@
                     innerCount++
                     // Check Cancellation every 100000th loop
                     if (innerCount % 100000 === 0 && await this.isCanceled()) {
-                        return {simSuccess: false, reason: 'cancelled'};
+                        return {simSuccess: false, reason: 'simulation cancelled'};
                     }
                     // check player action limit
                     if (player.actionsTaken > maxActions) {
@@ -267,7 +267,7 @@
                     if (timeStep <= 0) {
                         return {
                             simSuccess: false,
-                            reason: 'invalid time step: ' + timeStep,
+                            reason: `invalid time step: ${timeStep}`,
                             playerActing: player.isActing,
                             playerActionTimer: player.actionTimer,
                             playerAttacking: player.isAttacking,
@@ -391,7 +391,7 @@
                 if (isNaN(player.hitpoints) || isNaN(enemy.hitpoints)) {
                     return {
                         simSuccess: false,
-                        reason: 'bogus player or enemy hp',
+                        reason: 'invalid player or enemy hp',
                         monsterID: stats.enemy.monsterID,
                         playerStats: {...stats.player},
                         player: {...player},
