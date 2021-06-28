@@ -540,8 +540,8 @@
                         }
                     }
                     // slayer tasks
-                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        this.setSlayerTaskAverageDropRate('gpPerSecond', i);
+                    for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                        this.setMonsterListAverageDropRate('gpPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
                     }
                 }
             }
@@ -587,8 +587,8 @@
                     area.monsters.forEach(monsterID => updateMonsterSlayerXP(monsterID));
                 });
                 // auto slayer
-                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                    this.setSlayerTaskAverageDropRate('slayerXpPerSecond', i);
+                for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                    this.setMonsterListAverageDropRate('slayerXpPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
                 }
             }
 
@@ -643,8 +643,8 @@
                     updateMonsterSlayerCoins(monsterID, this.dungeonSimData[i]);
                 }
                 // auto slayer
-                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                    this.setSlayerTaskAverageDropRate('slayerCoinsPerSecond', i);
+                for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                    this.setMonsterListAverageDropRate('slayerCoinsPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
                 }
             }
 
@@ -679,8 +679,8 @@
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach((monsterID) => updateMonsterHerbloreXP(monsterID));
                     });
-                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        this.setSlayerTaskAverageDropRate('herbloreXPPerSecond', i);
+                    for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                        this.setMonsterListAverageDropRate('herbloreXPPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
                     }
                 }
             }
@@ -701,12 +701,9 @@
                         if (!data) {
                             return;
                         }
-                        const dropRateResult = this.getDropRate(monsterID);
-                        const dropRate = dropRateResult.lootChance;
-                        // On average, an item with up to `n` drops will drop `(n + 1) / 2` items
-                        const dropCount = Math.max((dropRateResult.maxDropAmt + 1) / 2, 1);
+                        const dropCount = this.getAverageDropAmt(monsterID);
                         const itemDoubleChance = this.currentSim.lootBonus;
-                        data.dropChance = (dropRate * dropCount * itemDoubleChance) / data.killTimeS;
+                        data.dropChance = (dropCount * itemDoubleChance) / data.killTimeS;
                     };
 
                     // Set data for monsters in combat zones
@@ -719,57 +716,121 @@
                         area.monsters.forEach(monsterID => updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]));
                     });
                     // compute dungeon drop rates
-                    for (let i = 0; i < DUNGEONS.length; i++) {
-                        const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
-                        updateMonsterDropChance(monsterID, this.dungeonSimData[i]);
+                    for (let dungeonID = 0; dungeonID < DUNGEONS.length; dungeonID++) {
+                        const monsterList = DUNGEONS[dungeonID].monsters;
+                        if (godDungeonID.includes(dungeonID)) {
+                            DUNGEONS[dungeonID].monsters.forEach(monsterID => {
+                                updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]);
+                            });
+                            this.setMonsterListAverageDropRate('dropChance', this.dungeonSimData[dungeonID], monsterList);
+                        } else {
+                            const monsterID = monsterList[monsterList.length - 1];
+                            updateMonsterDropChance(monsterID, this.dungeonSimData[dungeonID]);
+                        }
                     }
                     // compute auto slayer drop rates
-                    for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                        this.setSlayerTaskAverageDropRate('dropChance', i);
+                    for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                        this.setMonsterListAverageDropRate('dropChance', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
                     }
                 }
             }
 
-            setSlayerTaskAverageDropRate(property, taskID) {
+            setMonsterListAverageDropRate(property, simData, monsterList) {
                 let drops = 0;
                 let killTime = 0;
-                for (const monsterID of this.slayerTaskMonsters[taskID]) {
+                for (const monsterID of monsterList) {
                     drops += this.monsterSimData[monsterID][property] * this.monsterSimData[monsterID].killTimeS;
                     killTime += this.monsterSimData[monsterID].killTimeS;
                 }
-                this.slayerSimData[taskID][property] = drops / killTime;
+                simData[property] = drops / killTime;
             }
 
-            getDropRate(monsterId) {
-                const monsterData = MONSTERS[monsterId];
-                const lootChance = monsterData.lootChance ? monsterData.lootChance / 100 : 1;
+            addChestLoot(chestID, chestChance, chestAmt) {
+                const dropTable = items[chestID].dropTable;
+                let chestItemChance = 0;
+                let chestItemAmt = 0;
+                if (dropTable) {
+                    const chestSum = dropTable.reduce((acc, x) => acc + x[1], 0);
+                    dropTable.forEach((x, i) => {
+                        const chestItemId = x[0];
+                        if (chestItemId === this.app.combatData.dropSelected) {
+                            const weight = x[1];
+                            chestItemChance += chestAmt * chestChance * weight / chestSum;
+                            chestItemAmt += items[chestID].dropQty[i];
+                        }
+                    });
+                }
+                return {
+                    chance: chestItemChance,
+                    amt: chestItemAmt,
+                };
+            }
+
+            getAverageRegularDropAmt(monsterId) {
                 let totalChances = 0;
                 let selectedChance = 0;
-                let selectedCount = 0;
+                let selectedAmt = 0;
+                const monsterData = MONSTERS[monsterId];
+                if (!monsterData.lootTable) {
+                    return 0;
+                }
                 monsterData.lootTable.forEach(drop => {
                     const itemId = drop[0];
-                    totalChances += drop[1];
+                    const chance = drop[1];
+                    totalChances += chance;
+                    const amt = drop[2];
                     if (itemId === this.app.combatData.dropSelected) {
-                        selectedChance += drop[1];
-                        selectedCount += drop[2];
+                        selectedChance += chance;
+                        selectedAmt += amt;
                     }
-                    const dropTable = items[itemId].dropTable;
-                    if (dropTable) {
-                        const chestSum = dropTable.reduce((acc, x) => acc + x[1], 0);
-                        dropTable.forEach((x, i) => {
-                            const chestItemId = x[0];
-                            if (chestItemId === this.app.combatData.dropSelected) {
-                                const weight = x[1];
-                                selectedChance += drop[1] * weight / chestSum;
-                                selectedCount += drop[2] * items[itemId].dropQty[i];
-                            }
-                        });
-                    }
+                    const chest = this.addChestLoot(itemId, chance, amt);
+                    selectedChance += chest.chance;
+                    selectedAmt += chest.amt;
                 })
-                return {
-                    lootChance: lootChance * selectedChance / totalChances,
-                    maxDropAmt: selectedCount,
-                };
+                // compute drop rate based on monster loot chance, and drop table weights
+                const lootChance = monsterData.lootChance ? monsterData.lootChance / 100 : 1;
+                const dropRate = lootChance * selectedChance / totalChances;
+                // On average, an item with up to `n` drops will drop `(n + 1) / 2` items
+                const averageDropAmt = Math.max((selectedAmt + 1) / 2, 1);
+                // multiply drop rate with drop amount
+                return dropRate * averageDropAmt;
+            }
+
+            getAverageBoneDropAmt(monsterId) {
+                const monsterData = MONSTERS[monsterId];
+                const boneID = monsterData.bones;
+                if (boneID === undefined || boneID === null) {
+                    return 0;
+                }
+                const amt = monsterData.boneQty ? monsterData.boneQty : 1;
+                if (boneID === this.app.combatData.dropSelected) {
+                    return amt;
+                }
+                const upgradeID = items[boneID].trimmedItemID;
+                if (upgradeID === undefined || upgradeID === null) {
+                    return 0;
+                }
+                const upgradeCost = items[items[boneID].trimmedItemID].itemsRequired.filter(x => x[0] === boneID)[0][1];
+                const upgradeAmt = amt;
+                if (upgradeID === this.app.combatData.dropSelected) {
+                    return upgradeAmt / upgradeCost;
+                }
+                const chest = this.addChestLoot(upgradeID, 1, upgradeAmt);
+                // compute drop rate based on chest table weights
+                const dropRate = chest.chance / upgradeCost;
+                // On average, an item with up to `n` drops will drop `(n + 1) / 2` items
+                const averageDropAmt = Math.max((chest.amt + 1) / 2, 1);
+                // multiply drop rate with drop amount
+                return dropRate * averageDropAmt;
+            }
+
+            getAverageDropAmt(monsterId) {
+                let averageDropAmt = 0;
+                // regular drops
+                averageDropAmt += this.getAverageRegularDropAmt(monsterId);
+                // bone drops
+                averageDropAmt += this.getAverageBoneDropAmt(monsterId);
+                return averageDropAmt;
             }
 
             /**

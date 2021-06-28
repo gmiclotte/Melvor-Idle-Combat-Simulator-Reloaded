@@ -936,6 +936,17 @@
                             }
                         });
                     }
+                    if (monster.bones) {
+                        lootMap[monster.bones] = true;
+                        const upgradeID = items[monster.bones].trimmedItemID;
+                        if (upgradeID) {
+                            lootMap[upgradeID] = true;
+                            const dropTable = items[upgradeID].dropTable;
+                            if (dropTable) {
+                                dropTable.forEach(x => lootMap[x[0]] = true);
+                            }
+                        }
+                    }
                 };
                 if (this.dropListFilters.selectedMonster) {
                     if (!this.isViewingDungeon) {
@@ -951,6 +962,10 @@
                         } else {
                             addToLootMap(MONSTERS[this.barMonsterIDs[this.selectedBar]]);
                         }
+                    } else if (godDungeonID.includes(this.viewedDungeonID)) {
+                        const selection = this.getMonsterList(this.viewedDungeonID);
+                        const monsterID = selection[this.selectedBar + selection.length - this.plotter.bars.length];
+                        addToLootMap(MONSTERS[monsterID]);
                     }
                 } else {
                     MONSTERS.forEach(monster => addToLootMap(monster));
