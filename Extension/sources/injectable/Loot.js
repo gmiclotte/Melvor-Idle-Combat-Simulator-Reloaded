@@ -666,9 +666,15 @@
             }
 
             setMonsterListAverageDropRate(property, simData, monsterList) {
+                if (!simData) {
+                    return;
+                }
                 let drops = 0;
                 let killTime = 0;
                 for (const monsterID of monsterList) {
+                    if (!this.monsterSimData[monsterID]) {
+                        return;
+                    }
                     drops += this.monsterSimData[monsterID][property] * this.monsterSimData[monsterID].killTimeS;
                     killTime += this.monsterSimData[monsterID].killTimeS;
                 }
