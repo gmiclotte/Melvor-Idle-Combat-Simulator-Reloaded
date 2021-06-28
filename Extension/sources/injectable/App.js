@@ -98,9 +98,7 @@
                 addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
                 addPlotOption('Slayer Coins per ', true, 'slayerCoinsPerSecond', 'Slayer Coins/');
                 // unsorted
-                addPlotOption('XP per Attack', false, 'xpPerHit', 'XP/attack');
                 addPlotOption('Damage per ', true, 'dmgPerSecond', 'Damage/');
-                addPlotOption('Damage per Attack', false, 'avgHitDmg', 'Damage/attack');
                 addPlotOption('Attacks Made per ', true, 'attacksMadePerSecond', 'Attacks Made/');
                 addPlotOption('Attacks Taken per ', true, 'attacksTakenPerSecond', 'Attacks Taken/');
                 // addPlotOption('Simulation Time', false, 'simulationTime', 'Sim Time');
