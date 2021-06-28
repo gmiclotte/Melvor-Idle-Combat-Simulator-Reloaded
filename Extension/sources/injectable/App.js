@@ -626,7 +626,8 @@
                 this.combatStatCard.addSectionTitle('Plot Options');
                 this.plotter.addToggles(this.combatStatCard);
                 this.combatStatCard.addSectionTitle('');
-                this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick());
+                this.combatStatCard.addButton('Simulate', () => this.simulateButtonOnClick(false));
+                this.combatStatCard.addButton('Simulate Selected', () => this.simulateButtonOnClick(true));
             }
 
             createIndividualInfoCard() {
@@ -1864,7 +1865,7 @@
              * Callback for when the simulate button is clicked
              * @param {MouseEvent} event The onclick event for a button
              */
-            simulateButtonOnClick() {
+            simulateButtonOnClick(single) {
                 if (((items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].type === 'Ranged Weapon') || items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].isRanged) && (items[this.equipmentSelected[MICSR.equipmentSlot.Weapon]].ammoTypeRequired !== items[this.equipmentSelected[MICSR.equipmentSlot.Quiver]].ammoType)) {
                     notifyPlayer(CONSTANTS.skill.Ranged, 'Incorrect Ammo type equipped for weapon.', 'danger');
                 } else {
@@ -1875,7 +1876,8 @@
                         simButton.textContent = 'Cancelling...';
                     }
                     if (!this.simulator.simInProgress && this.simulator.simulationWorkers.length === this.simulator.maxThreads) {
-                        this.simulator.simulateCombat();
+                        document.getElementById('MCS Simulate Selected Button').style.display = 'none';
+                        this.simulator.simulateCombat(single);
                     }
                 }
             }
@@ -2709,6 +2711,7 @@
                 }
                 document.getElementById('MCS Simulate Button').disabled = false;
                 document.getElementById('MCS Simulate Button').textContent = 'Simulate';
+                document.getElementById('MCS Simulate Selected Button').style.display = 'block';
             }
 
             destroy() {

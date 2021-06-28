@@ -169,7 +169,7 @@
                 this.testCount = 0;
                 this.isTestMode = true;
                 this.testMax = numSims;
-                this.simulateCombat();
+                this.simulateCombat(false);
             }
 
             /**
@@ -241,8 +241,8 @@
             /**
              * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
              */
-            simulateCombat() {
-                this.setupCurrentSim();
+            simulateCombat(single) {
+                this.setupCurrentSim(single);
                 // Start simulation workers
                 document.getElementById('MCS Simulate Button').textContent = `Cancel (0/${this.simulationQueue.length})`;
                 this.initializeSimulationJobs();
@@ -294,25 +294,105 @@
                 Object.assign(currentSim.virtualLevels, combatData.virtualLevels);
             }
 
-            resetSimulationData() {
+            pushMonsterToQueue(monsterID) {
+                if (!this.monsterSimData[monsterID].inQueue) {
+                    this.monsterSimData[monsterID].inQueue = true;
+                    this.simulationQueue.push({monsterID: monsterID});
+                }
+            }
+
+            resetSingleSimulation() {
+                if (!this.parent.barSelected) {
+                    return;
+                }
+                // area monster
+                if (!this.parent.isViewingDungeon && this.parent.barIsMonster(this.parent.selectedBar)) {
+                    const monsterID = this.parent.barMonsterIDs[this.parent.selectedBar];
+                    if (this.monsterSimFilter[monsterID]) {
+                        this.pushMonsterToQueue(monsterID);
+                        return;
+                    }
+                }
+                // dungeon
+                let dungeonID = undefined;
+                if (!this.parent.isViewingDungeon && this.parent.barIsDungeon(this.parent.selectedBar)) {
+                    dungeonID = this.parent.barMonsterIDs[this.parent.selectedBar];
+                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
+                    dungeonID = this.parent.viewedDungeonID;
+                }
+                if (dungeonID !== undefined) {
+                    if (this.dungeonSimFilter[dungeonID]) {
+                        DUNGEONS[dungeonID].monsters.forEach(monsterID => {
+                            this.pushMonsterToQueue(monsterID);
+                        });
+                    }
+                    return;
+                }
+                // slayer area
+                let taskID = undefined;
+                if (!this.parent.isViewingDungeon && this.parent.barIsTask(this.parent.selectedBar)) {
+                    taskID = this.parent.barMonsterIDs[this.parent.selectedBar] - DUNGEONS.length;
+                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID >= DUNGEONS.length) {
+                    taskID = this.parent.viewedDungeonID - DUNGEONS.length;
+                }
+                if (taskID !== undefined) {
+                    if (this.slayerSimFilter[taskID]) {
+                        this.queueSlayerTask(taskID);
+                    }
+                }
+            }
+
+            queueSlayerTask(i) {
+                const task = this.parent.slayerTasks[i];
+                this.slayerTaskMonsters[i] = [];
+                if (!this.slayerSimFilter[i]) {
+                    return;
+                }
+                const minLevel = task.minLevel;
+                const maxLevel = task.maxLevel === -1 ? 6969 : task.maxLevel;
+                for (let monsterID = 0; monsterID < MONSTERS.length; monsterID++) {
+                    // check if it is a slayer monster
+                    if (!MONSTERS[monsterID].canSlayer) {
+                        continue;
+                    }
+                    // check if combat level fits the current task type
+                    const cbLevel = MICSR.getMonsterCombatLevel(monsterID, true);
+                    if (cbLevel < minLevel || cbLevel > maxLevel) {
+                        continue;
+                    }
+                    // check if the area is accessible, this only works for auto slayer
+                    // without auto slayer you can get some tasks for which you don't wear/own the gear
+                    let area = findEnemyArea(monsterID, false);
+                    if (area[0] === 1 && !this.parent.combatData.canAccessArea(slayerAreas[area[1]])) {
+                        continue;
+                    }
+                    // all checks passed
+                    this.pushMonsterToQueue(monsterID);
+                    this.slayerTaskMonsters[i].push(monsterID);
+                }
+            }
+
+            resetSimulationData(single) {
                 // Reset the simulation status of all enemies
                 this.resetSimDone();
                 // Set up simulation queue
                 this.simulationQueue = [];
+                if (single) {
+                    this.resetSingleSimulation();
+                    return;
+                }
                 // Queue simulation of monsters in combat areas
                 combatAreas.forEach((area) => {
                     area.monsters.forEach((monsterID) => {
-                        if (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) {
-                            this.monsterSimData[monsterID].inQueue = true;
-                            this.simulationQueue.push({monsterID: monsterID});
+                        if (this.monsterSimFilter[monsterID]) {
+                            this.pushMonsterToQueue(monsterID);
                         }
                     });
                 });
                 // Wandering Bard
                 const bardID = 139;
-                if (this.monsterSimFilter[bardID] && !this.monsterSimData[bardID].inQueue) {
-                    this.monsterSimData[bardID].inQueue = true;
-                    this.simulationQueue.push({monsterID: bardID});
+                if (this.monsterSimFilter[bardID]) {
+                    this.pushMonsterToQueue(bardID);
                 }
                 // Queue simulation of monsters in slayer areas
                 slayerAreas.forEach((area) => {
@@ -324,9 +404,8 @@
                         return;
                     }
                     area.monsters.forEach((monsterID) => {
-                        if (this.monsterSimFilter[monsterID] && !this.monsterSimData[monsterID].inQueue) {
-                            this.monsterSimData[monsterID].inQueue = true;
-                            this.simulationQueue.push({monsterID: monsterID});
+                        if (this.monsterSimFilter[monsterID]) {
+                            this.pushMonsterToQueue(monsterID);
                         }
                     });
                 });
@@ -335,52 +414,20 @@
                     if (this.dungeonSimFilter[i]) {
                         for (let j = 0; j < DUNGEONS[i].monsters.length; j++) {
                             const monsterID = DUNGEONS[i].monsters[j];
-                            if (!this.monsterSimData[monsterID].inQueue) {
-                                this.monsterSimData[monsterID].inQueue = true;
-                                this.simulationQueue.push({monsterID: monsterID});
-                            }
+                            this.pushMonsterToQueue(monsterID);
                         }
                     }
                 }
                 // Queue simulation of monsters in slayer tasks
-                for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
-                    const task = this.parent.slayerTasks[i];
-                    this.slayerTaskMonsters[i] = [];
-                    if (!this.slayerSimFilter[i]) {
-                        continue;
-                    }
-                    const minLevel = task.minLevel;
-                    const maxLevel = task.maxLevel === -1 ? 6969 : task.maxLevel;
-                    for (let monsterID = 0; monsterID < MONSTERS.length; monsterID++) {
-                        // check if it is a slayer monster
-                        if (!MONSTERS[monsterID].canSlayer) {
-                            continue;
-                        }
-                        // check if combat level fits the current task type
-                        const cbLevel = MICSR.getMonsterCombatLevel(monsterID, true);
-                        if (cbLevel < minLevel || cbLevel > maxLevel) {
-                            continue;
-                        }
-                        // check if the area is accessible, this only works for auto slayer
-                        // without auto slayer you can get some tasks for which you don't wear/own the gear
-                        let area = findEnemyArea(monsterID, false);
-                        if (area[0] === 1 && !this.parent.combatData.canAccessArea(slayerAreas[area[1]])) {
-                            continue;
-                        }
-                        // all checks passed
-                        if (!this.monsterSimData[monsterID].inQueue) {
-                            this.monsterSimData[monsterID].inQueue = true;
-                            this.simulationQueue.push({monsterID: monsterID});
-                        }
-                        this.slayerTaskMonsters[i].push(monsterID);
-                    }
+                for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
+                    this.queueSlayerTask(taskID);
                 }
             }
 
             /**
              * Setup currentsim variables
              */
-            setupCurrentSim() {
+            setupCurrentSim(single) {
                 this.simStartTime = performance.now();
                 this.simCancelled = false;
                 this.currentSim = this.initCurrentSim();
@@ -399,7 +446,7 @@
                 };
 
                 // reset and setup sim data
-                this.resetSimulationData()
+                this.resetSimulationData(single);
 
                 // An attempt to sort jobs by relative complexity so they go from highest to lowest.
                 this.simulationQueue = this.simulationQueue.sort((jobA, jobB) => {
@@ -815,7 +862,7 @@
                         if (this.isTestMode) {
                             this.testCount++;
                             if (this.testCount < this.testMax) {
-                                this.simulateCombat();
+                                this.simulateCombat(false);
                             } else {
                                 this.isTestMode = false;
                             }
