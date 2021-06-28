@@ -54,18 +54,6 @@
                 this.convertShards = false;
                 this.setSaleListToDefault();
 
-
-                /** Herblore XP for Lucky Herb Potions */
-                this.xpPerHerb = {
-                    527: 10, // Garum
-                    528: 14, // Sourweed
-                    529: 33, // Mantalyme
-                    530: 41, // Lemontyle
-                    531: 53, // Oxilyme
-                    532: 85, // Poraxx
-                    533: 112, // Pigtayle
-                    534: 160, // Barrentoe
-                };
                 /** Number of hours to farm for signet ring */
                 this.signetFarmTime = 1;
             }
@@ -398,26 +386,6 @@
             }
 
             /**
-             * Computes the average amount of potional herblore xp from killing a monster
-             * @param {number} monsterID Index of MONSTERS
-             * @param {number} convertChance The chance to convert seeds into herbs
-             * @return {number}
-             */
-            computeMonsterHerbXP(monsterID, convertChance) {
-                let herbWeight = 0;
-                let totalWeight = 0;
-                for (let i = 0; i < MONSTERS[monsterID].lootTable.length; i++) {
-                    const itemID = MONSTERS[monsterID].lootTable[i][0];
-                    if (items[itemID].tier === 'Herb' && items[itemID].type === 'Seeds') {
-                        const avgQty = (1 + MONSTERS[monsterID].lootTable[i][2]) / 2 + 3;
-                        herbWeight += MONSTERS[monsterID].lootTable[i][1] * this.xpPerHerb[itemID] * convertChance * avgQty;
-                    }
-                    totalWeight += MONSTERS[monsterID].lootTable[i][1];
-                }
-                return herbWeight / totalWeight * this.computeLootChance(monsterID) * this.currentSim.lootBonus;
-            }
-
-            /**
              * Computes the average amount of GP earned when completing a dungeon, respecting the loot sell settings
              * @param {number} dungeonID
              * @return {number}
@@ -473,7 +441,6 @@
                     this.slayerTaskMonsters = slayerTaskMonsters;
                 }
                 this.updateGPData();
-                this.updateHerbloreXP();
                 this.updateSignetChance();
                 this.updateDropChance();
                 this.updateSlayerXP();
@@ -645,43 +612,6 @@
                 // auto slayer
                 for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
                     this.setMonsterListAverageDropRate('slayerCoinsPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
-                }
-            }
-
-            /**
-             * Updates the potential herblore xp for all monsters
-             */
-            updateHerbloreXP() {
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
-                        if (!this.monsterSimData[monsterID]) {
-                            return;
-                        }
-                        this.monsterSimData[monsterID].herbloreXPPerSecond = 0;
-                    });
-                } else {
-                    const updateMonsterHerbloreXP = (monsterID) => {
-                        if (!this.monsterSimData[monsterID]) {
-                            return;
-                        }
-                        if (this.monsterSimData[monsterID].simSuccess && this.monsterSimData[monsterID].tooManyActions === 0) {
-                            this.monsterSimData[monsterID].herbloreXPPerSecond = this.computeMonsterHerbXP(monsterID, this.currentSim.herbConvertChance) / this.monsterSimData[monsterID].killTimeS;
-                        } else {
-                            this.monsterSimData[monsterID].herbloreXPPerSecond = 0;
-                        }
-                    };
-                    // Set data for monsters in combat zones
-                    combatAreas.forEach((area) => {
-                        area.monsters.forEach((monsterID) => updateMonsterHerbloreXP(monsterID));
-                    });
-                    const bardID = 139;
-                    updateMonsterHerbloreXP(bardID);
-                    slayerAreas.forEach((area) => {
-                        area.monsters.forEach((monsterID) => updateMonsterHerbloreXP(monsterID));
-                    });
-                    for (let taskID = 0; taskID < this.slayerTaskMonsters.length; taskID++) {
-                        this.setMonsterListAverageDropRate('herbloreXPPerSecond', this.slayerSimData[taskID], this.slayerTaskMonsters[taskID]);
-                    }
                 }
             }
 

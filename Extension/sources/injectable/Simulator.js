@@ -74,7 +74,6 @@
                         slayerXpPerSecond: 0,
                         summoningXpPerSecond: 0,
                         ppConsumedPerSecond: 0,
-                        herbloreXPPerSecond: 0,
                         signetChance: 0,
                         gpFromDamagePerSecond: 0,
                         attacksTakenPerSecond: 0,

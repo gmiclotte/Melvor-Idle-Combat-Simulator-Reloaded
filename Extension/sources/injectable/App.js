@@ -95,7 +95,6 @@
                 addPlotOption('Drops per', true, 'dropChance', 'Drops/');
                 addPlotOption('Chance for Signet Part B(%)', false, 'signetChance', 'Signet Chance (%)');
                 addPlotOption('Pet Chance per ', true, 'petChance', ' Pet Chance/');
-                addPlotOption('Potential Herblore XP per ', true, 'herbloreXPPerSecond', 'Potential Herb XP/');
                 addPlotOption('Slayer Coins per ', true, 'slayerCoinsPerSecond', 'Slayer Coins/');
                 // unsorted
                 addPlotOption('Damage per ', true, 'dmgPerSecond', 'Damage/');
