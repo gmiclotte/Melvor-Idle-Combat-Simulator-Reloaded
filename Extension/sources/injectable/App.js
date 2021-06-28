@@ -266,7 +266,6 @@
                 this.createPetSelectCard();
                 this.createAgilitySelectCard();
                 this.createLootOptionsCard();
-                this.createGPOptionsCard();
                 this.createEquipmentStatCard();
                 this.createSimulationAndExportCard();
                 this.createCompareCard();
@@ -342,10 +341,8 @@
                 this.tippySingleton = tippy.createSingleton(this.tippyInstances, {delay: [0, 200], ...tippyOptions});
 
                 // Setup the default state of the UI
-                this.gpOptionsCard.container.style.display = 'none';
                 this.exportOptionsCard.outerContainer.style.display = 'none';
                 this.plotter.timeDropdown.selectedIndex = this.initialTimeUnitIndex;
-                document.getElementById('MCS Edit Subset Button').style.display = 'none';
                 this.subInfoCard.container.style.display = 'none';
                 this.plotter.petSkillDropdown.style.display = 'none';
                 document.getElementById(`MCS  Pet Chance/${this.timeShorthand[this.initialTimeUnitIndex]} Label`).textContent = this.skillShorthand[this.loot.petSkill] + ' Pet Chance/' + this.selectedTimeShorthand;
@@ -877,46 +874,28 @@
                 // gp options
                 this.lootSelectCard.addSectionTitle('');
                 this.lootSelectCard.addSectionTitle('GP/s Options');
-                this.lootSelectCard.addRadio('Sell Bones', 25, 'sellBones', ['Yes', 'No'], [(e) => this.sellBonesRadioOnChange(e, true), (e) => this.sellBonesRadioOnChange(e, false)], 1);
-                this.lootSelectCard.addRadio('Convert Shards', 25, 'convertShards', ['Yes', 'No'], [(e) => this.convertShardsRadioOnChange(e, true), (e) => this.convertShardsRadioOnChange(e, false)], 1);
-                this.lootSelectCard.addDropdown('Sell Loot', ['All', 'Subset', 'None'], ['All', 'Subset', 'None'], (e) => this.sellLootDropdownOnChange(e));
-                this.lootSelectCard.addButton('Edit Subset', (e) => this.editSubsetButtonOnClick(e));
-                // show or hide "edit subset" button
-                this.setEditSubsetDisplay();
-            }
-
-            createGPOptionsCard() {
-                // GP/s options card
-                this.gpOptionsCard = new MICSR.Card(this.lootSelectCard.container, '', '200px');
-                this.gpOptionsCard.addSectionTitle('Item Subset Selection');
-                this.gpOptionsCard.addMultiButton(['Set Default', 'Set Discovered'], [(e) => this.setDefaultOnClick(e), (e) => this.setDiscoveredOnClick(e)]);
-                this.gpOptionsCard.addMultiButton(['Cancel', 'Save'], [(e) => this.cancelSubsetOnClick(e), (e) => this.saveSubsetOnClick(e)]);
-                this.gpOptionsCard.addTextInput('Search', '', (e) => this.searchInputOnInput(e));
-                // Top labels
-                const labelCont = document.createElement('div');
-                labelCont.className = 'mcsMultiButtonContainer';
-                labelCont.style.borderBottom = 'solid thin';
-                const lab1 = document.createElement('div');
-                lab1.className = 'mcsMultiHeader';
-                lab1.style.borderRight = 'solid thin';
-                lab1.textContent = 'Item';
-                lab1.style.width = '218px';
-                labelCont.appendChild(lab1);
-                const lab2 = document.createElement('div');
-                lab2.className = 'mcsMultiHeader';
-                lab2.textContent = 'Sell';
-                lab2.style.width = '124px';
-                labelCont.appendChild(lab2);
-                this.gpOptionsCard.container.appendChild(labelCont);
-                this.gpSearchResults = new MICSR.Card(this.gpOptionsCard.container, '130px', '100px');
-                for (let i = 0; i < this.loot.lootList.length; i++) {
-                    this.gpSearchResults.addRadio(this.loot.lootList[i].name, 20, `${this.loot.lootList[i].name}-radio`, ['Yes', 'No'], [(e) => this.lootListRadioOnChange(e, i, true), (e) => this.lootListRadioOnChange(e, i, false)], 1);
-                }
-                this.gpSearchResults.container.style.width = '100%';
-                this.gpSearchResults.container.style.overflowY = 'scroll';
-                this.gpSearchResults.container.style.overflowX = 'hidden';
-                this.gpSearchResults.container.style.marginRight = '0px';
-                this.gpSearchResults.container.style.marginBottom = '5px';
+                this.lootSelectCard.addRadio(
+                    'Sell Bones',
+                    25,
+                    'sellBones',
+                    ['Yes', 'No'],
+                    [
+                        (e) => this.sellBonesRadioOnChange(e, true),
+                        (e) => this.sellBonesRadioOnChange(e, false),
+                    ],
+                    1,
+                );
+                this.lootSelectCard.addRadio(
+                    'Convert Shards',
+                    25,
+                    'convertShards',
+                    ['Yes', 'No'],
+                    [
+                        (e) => this.convertShardsRadioOnChange(e, true),
+                        (e) => this.convertShardsRadioOnChange(e, false),
+                    ],
+                    1,
+                );
             }
 
             buildItemDropList() {
@@ -1949,89 +1928,6 @@
             }
 
             /**
-             * Callback for when the sell loot dropdown is changed
-             * @param {Event} event The onchange event for a dropdown
-             */
-            sellLootDropdownOnChange(event) {
-                this.loot.sellLoot = event.currentTarget.value;
-                this.setEditSubsetDisplay();
-                this.updatePlotForGP();
-            }
-
-            setEditSubsetDisplay() {
-                const button = document.getElementById('MCS Edit Subset Button');
-                if (!button) {
-                    return;
-                }
-                if (this.loot.sellLoot === 'Subset') {
-                    button.style.display = 'block';
-                } else {
-                    button.style.display = 'none';
-                }
-            }
-
-            /**
-             * The callback for when the edit subset button is clicked
-             */
-            editSubsetButtonOnClick() {
-                this.loot.setLootListToSaleList();
-                this.updateLootListRadios();
-                this.gpOptionsCard.container.style.display = 'flex';
-                this.gpOptionsCard.container.style.flexDirection = 'column';
-            }
-
-            // Callback Functions for the GP Options Card
-            /**
-             * The callback for when the set sale list to default button is clicked
-             */
-            setDefaultOnClick() {
-                this.loot.setLootListToDefault();
-                this.updateLootListRadios();
-            }
-
-            /**
-             * The callback for when the set sale list to discovered button is clicked
-             */
-            setDiscoveredOnClick() {
-                this.loot.setLootListToDiscovered();
-                this.updateLootListRadios();
-            }
-
-            /**
-             * The callback for when cancelling the changes to the sale list
-             */
-            cancelSubsetOnClick() {
-                this.gpOptionsCard.container.style.display = 'none';
-            }
-
-            /**
-             * The callback for when saving the changes to the sale list
-             */
-            saveSubsetOnClick() {
-                this.loot.setSaleListToLootList();
-                this.updatePlotForGP();
-                this.gpOptionsCard.container.style.display = 'none';
-            }
-
-            /**
-             * The callback for when the sale list search field is changed
-             * @param {InputEvent} event The input event
-             */
-            searchInputOnInput(event) {
-                this.updateGPSubset(event.currentTarget.value);
-            }
-
-            /**
-             * The callback for when an item is toggled for sale
-             * @param {Event} event The onchange event for a radio
-             * @param {number} llID Loot list index
-             * @param {boolean} newState The new value of the option
-             */
-            lootListRadioOnChange(event, llID, newState) {
-                this.loot.lootList[llID].sell = newState;
-            }
-
-            /**
              * The callback for when the signet farm time is changed
              * @param {Event} event The change event for an input
              */
@@ -2602,42 +2498,10 @@
              * @returns {string} The tooltip content
              */
             getPotionTooltip(potion) {
-                return `<div class="text-center">${potion.name}<small>
-      <br><span class='text-info'>${potion.description.replace(/\.$/, '')}</span>
-      <br><span class='text-warning'>${potion.potionCharges} Potion Charges</span>
-      </small></div>`;
-            }
-
-            /**
-             * Updates the display of the sale list radio options depending on what the user has searched
-             * @param {string} searchString The search query
-             */
-            updateGPSubset(searchString) {
-                searchString = searchString.toLowerCase();
-                let lootname;
-                this.loot.lootList.forEach((loot) => {
-                    lootname = loot.name.toLowerCase();
-                    if (lootname.includes(searchString)) {
-                        document.getElementById(`MCS ${loot.name} Radio Container`).style.display = 'flex';
-                    } else {
-                        document.getElementById(`MCS ${loot.name} Radio Container`).style.display = 'none';
-                    }
-                });
-            }
-
-            /**
-             * Updates the display of sale list radios to match the internal state
-             */
-            updateLootListRadios() {
-                this.loot.lootList.forEach((item) => {
-                    if (item.sell) {
-                        document.getElementById(`MCS ${item.name} Radio Yes`).checked = true;
-                        document.getElementById(`MCS ${item.name} Radio No`).checked = false;
-                    } else {
-                        document.getElementById(`MCS ${item.name} Radio Yes`).checked = false;
-                        document.getElementById(`MCS ${item.name} Radio No`).checked = true;
-                    }
-                });
+                return `<div class="text-center">${potion.name}<small>`
+                    + `<br><span class='text-info'>${potion.description.replace(/\.$/, '')}</span>`
+                    + `<br><span class='text-warning'>${potion.potionCharges} Potion Charges</span>`
+                    + `</small></div>`;
             }
 
             // Functions for dungeon display

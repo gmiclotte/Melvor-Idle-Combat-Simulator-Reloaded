@@ -47,12 +47,7 @@
                 this.petSkill = 'Attack';
                 // Options for GP/s calculations
                 this.sellBones = false; // True or false
-                this.sellLoot = 'All'; // Options 'All','Subset','None'
-                this.saleList = this.getSaleList();
-                this.lootList = this.getLootList(); // List of items with id: X and sell: true/false
-                this.defaultSaleKeep = [403, 247, 248, 366, 249, 383, 368, 246, 367, 348, 443, 350, 349, 351, 347, 430, 429, 427, 428, 137, 136, 139, 314, 313, 312, 134, 296, 138, 141, 140, 434, 142, 135, 426, 425, 423, 424, 418, 417, 415, 416, 340, 405, 344, 406, 361, 414, 413, 411, 412, 372, 378, 371, 374, 369, 373, 380, 376, 375, 377, 379, 370, 407, 341, 365, 364, 422, 421, 419, 420, 120, 404];
                 this.convertShards = false;
-                this.setSaleListToDefault();
 
                 /** Number of hours to farm for signet ring */
                 this.signetFarmTime = 1;
@@ -91,237 +86,26 @@
              */
             computeDropTableValue(monsterID) {
                 // lootTable[x][0]: Item ID, [x][1]: Weight [x][2]: Max Qty
-                if (MONSTERS[monsterID].lootTable && this.sellLoot !== 'None') {
+                if (MONSTERS[monsterID].lootTable) {
                     let gpWeight = 0;
                     let totWeight = 0;
-                    if (this.sellLoot === 'All') {
-                        MONSTERS[monsterID].lootTable.forEach((x) => {
-                            const itemID = x[0];
-                            let avgQty = (x[2] + 1) / 2;
-                            if (items[itemID].canOpen) {
-                                gpWeight += this.computeChestOpenValue(itemID) * avgQty;
-                            } else {
-                                if (this.currentSim.herbConvertChance && (items[itemID].tier === 'Herb' && items[itemID].type === 'Seeds')) {
-                                    avgQty += 3;
-                                    gpWeight += (items[itemID].sellsFor * (1 - this.currentSim.herbConvertChance) + items[items[itemID].grownItemID].sellsFor * this.currentSim.herbConvertChance) * x[1] * avgQty;
-                                } else {
-                                    gpWeight += items[itemID].sellsFor * x[1] * avgQty;
-                                }
-                            }
-                            totWeight += x[1];
-                        });
-                    } else {
-                        MONSTERS[monsterID].lootTable.forEach((x) => {
-                            const itemID = x[0];
-                            let avgQty = (x[2] + 1) / 2;
-                            if (items[itemID].canOpen) {
-                                gpWeight += this.computeChestOpenValue(itemID) * avgQty;
-                            } else {
-                                if (this.currentSim.herbConvertChance && (items[itemID].tier === 'Herb' && items[itemID].type === 'Seeds')) {
-                                    const herbItem = items[itemID].grownItemID;
-                                    avgQty += 3;
-                                    gpWeight += (items[itemID].sellsFor * (1 - this.currentSim.herbConvertChance) * ((this.shouldSell(itemID)) ? 1 : 0) + items[herbItem].sellsFor * this.currentSim.herbConvertChance * ((this.shouldSell(herbItem)) ? 1 : 0)) * x[1] * avgQty;
-                                } else {
-                                    gpWeight += ((this.shouldSell(itemID)) ? items[itemID].sellsFor : 0) * x[1] * avgQty;
-                                }
-                            }
-                            totWeight += x[1];
-                        });
-                    }
-                    return gpWeight / totWeight * this.currentSim.lootBonus;
-                } else {
-                    return 0;
-                }
-            }
-
-            /**
-             * Determines if an itemID should be sold and turns true/false
-             * @param {number} itemID
-             * @return {boolean}
-             */
-            shouldSell(itemID) {
-                return this.saleList[itemID].sell;
-            }
-
-            /**
-             * Gets an object array equal in length to the items array that determines if a particular item should be sold or kept
-             * @return {Object[]}
-             */
-            getSaleList() {
-                const saleList = [];
-                for (let i = 0; i < items.length; i++) {
-                    saleList.push({
-                        id: i,
-                        name: this.app.getItemName(i),
-                        sell: true,
-                        onLootList: false,
-                        lootlistID: -1,
-                    });
-                }
-                return saleList;
-            }
-
-            /**
-             * Gets an object array containing only items that are obtainable from combatAreas/Dungeons
-             * @return {Object[]}
-             */
-            getLootList() {
-                const getLoot = (lootTable) => {
-                    lootTable.forEach(loot => {
-                        const lootID = loot[0] || loot;
-                        if (items[lootID].canOpen) {
-                            items[lootID].dropTable.forEach((loot2) => {
-                                if (!this.saleList[loot2[0]].onLootList) {
-                                    lootList.push({
-                                        id: loot2[0],
-                                        name: this.app.getItemName(loot2[0]),
-                                        sell: false,
-                                    });
-                                    this.saleList[loot2[0]].onLootList = true;
-                                }
-                            });
+                    MONSTERS[monsterID].lootTable.forEach((x) => {
+                        const itemID = x[0];
+                        let avgQty = (x[2] + 1) / 2;
+                        if (items[itemID].canOpen) {
+                            gpWeight += this.computeChestOpenValue(itemID) * avgQty;
                         } else {
-                            if (!this.saleList[lootID].onLootList) {
-                                lootList.push({
-                                    id: lootID,
-                                    name: this.app.getItemName(lootID),
-                                    sell: false,
-                                });
-                                this.saleList[lootID].onLootList = true;
-                            }
-                            // TODO: what does this do
-                            if (items[lootID].tier === 'Herb' && items[lootID].type === 'Seeds') {
-                                const herbItem = items[lootID].grownItemID;
-                                if (!this.saleList[herbItem].onLootList) {
-                                    lootList.push({
-                                        id: herbItem,
-                                        name: this.app.getItemName(herbItem),
-                                        sell: false,
-                                    });
-                                    this.saleList[herbItem].onLootList = true;
-                                }
+                            if (this.currentSim.herbConvertChance && (items[itemID].tier === 'Herb' && items[itemID].type === 'Seeds')) {
+                                avgQty += 3;
+                                gpWeight += (items[itemID].sellsFor * (1 - this.currentSim.herbConvertChance) + items[items[itemID].grownItemID].sellsFor * this.currentSim.herbConvertChance) * x[1] * avgQty;
+                            } else {
+                                gpWeight += items[itemID].sellsFor * x[1] * avgQty;
                             }
                         }
+                        totWeight += x[1];
                     });
+                    return gpWeight / totWeight * this.currentSim.lootBonus;
                 }
-                const lootList = [];
-                const specialDrops = [CONSTANTS.item.Signet_Ring_Half_B, CONSTANTS.item.Air_Shard, CONSTANTS.item.Water_Shard, CONSTANTS.item.Earth_Shard, CONSTANTS.item.Fire_Shard];
-                specialDrops.forEach((itemID) => {
-                    lootList.push({
-                        id: itemID,
-                        name: this.app.getItemName(itemID),
-                        sell: false,
-                    });
-                });
-                this.saleList[CONSTANTS.item.Signet_Ring_Half_B].onLootList = true;
-                // normal monster loot
-                combatAreas.forEach(area => area.monsters.forEach(monsterID => getLoot(MONSTERS[monsterID].lootTable)));
-                // wandering bard
-                const bardID = 139;
-                getLoot(MONSTERS[bardID].lootTable);
-                // slayer loot
-                slayerAreas.forEach(area => area.monsters.forEach(monsterID => getLoot(MONSTERS[monsterID].lootTable)));
-                // dungeon loot
-                DUNGEONS.forEach(dungeon => getLoot(dungeon.rewards));
-                const elementalChests = [CONSTANTS.item.Air_Chest, CONSTANTS.item.Water_Chest, CONSTANTS.item.Earth_Chest, CONSTANTS.item.Fire_Chest];
-                elementalChests.forEach((chest) => {
-                    items[chest].dropTable.forEach((loot2) => {
-                        if (!this.saleList[loot2[0]].onLootList) {
-                            lootList.push({
-                                id: loot2[0],
-                                name: this.app.getItemName(loot2[0]),
-                                sell: false,
-                            });
-                            this.saleList[loot2[0]].onLootList = true;
-                        }
-                    });
-                });
-                // Alphabetize loot list
-                lootList.sort((a, b) => {
-                    const nameA = a.name.toUpperCase(); // ignore upper and lowercase
-                    const nameB = b.name.toUpperCase(); // ignore upper and lowercase
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-                    // names must be equal
-                    return 0;
-                });
-                // Set Salelist IDs
-                for (let i = 0; i < lootList.length; i++) {
-                    this.saleList[lootList[i].id].lootlistID = i;
-                }
-                return lootList;
-            }
-
-            /**
-             * Sets the lootlist to the current sale list
-             */
-            setLootListToSaleList() {
-                this.saleList.forEach((item) => {
-                    if (item.lootlistID !== -1) {
-                        this.lootList[item.lootlistID].sell = item.sell;
-                    }
-                });
-            }
-
-            /**
-             * Sets the salelist to the loot list
-             */
-            setSaleListToLootList() {
-                this.lootList.forEach((item) => {
-                    this.saleList[item.id].sell = item.sell;
-                });
-            }
-
-            /**
-             * Prints out the current loot list to the console
-             */
-            printLootList() {
-                let outStr = 'ID\tName\tSell\n';
-                this.lootList.forEach((item) => {
-                    outStr += `${item.id}\t${item.name}\t${item.sell}\n`;
-                });
-                MICSR.log(outStr);
-            }
-
-            /**
-             * Sets the sale list to the default setting of combat uniques
-             */
-            setSaleListToDefault() {
-                for (let i = 0; i < this.saleList.length; i++) {
-                    this.saleList[i].sell = true;
-                }
-                this.defaultSaleKeep.forEach((itemID) => {
-                    this.saleList[itemID].sell = false;
-                });
-            }
-
-            /**
-             * Sets the loot list to sell only items that have been discovered by the player
-             */
-            setLootListToDiscovered() {
-                for (let i = 0; i < itemStats.length; i++) {
-                    if (this.saleList[i].onLootList) {
-                        this.lootList[this.saleList[i].lootlistID].sell = (itemStats[i].timesFound > 0);
-                    }
-                }
-            }
-
-            /**
-             * Sets the loot list to default settings
-             */
-            setLootListToDefault() {
-                for (let i = 0; i < this.lootList.length; i++) {
-                    this.lootList[i].sell = true;
-                }
-                this.defaultSaleKeep.forEach((itemID) => {
-                    if (this.saleList[itemID].onLootList) {
-                        this.lootList[this.saleList[itemID].lootlistID].sell = false;
-                    }
-                });
             }
 
             /**
@@ -330,35 +114,19 @@
              * @return {number}
              */
             computeChestOpenValue(chestID) {
-                if (this.sellLoot !== 'None') {
-                    let gpWeight = 0;
-                    let totWeight = 0;
-                    let avgQty;
-                    if (this.sellLoot === 'All') {
-                        for (let i = 0; i < items[chestID].dropTable.length; i++) {
-                            if ((items[chestID].dropQty !== undefined) && (items[chestID].dropQty[i] !== undefined)) {
-                                avgQty = (items[chestID].dropQty[i] + 1) / 2;
-                            } else {
-                                avgQty = 1;
-                            }
-                            gpWeight += avgQty * items[items[chestID].dropTable[i][0]].sellsFor * items[chestID].dropTable[i][1];
-                            totWeight += items[chestID].dropTable[i][1];
-                        }
+                let gpWeight = 0;
+                let totWeight = 0;
+                let avgQty;
+                for (let i = 0; i < items[chestID].dropTable.length; i++) {
+                    if ((items[chestID].dropQty !== undefined) && (items[chestID].dropQty[i] !== undefined)) {
+                        avgQty = (items[chestID].dropQty[i] + 1) / 2;
                     } else {
-                        for (let i = 0; i < items[chestID].dropTable.length; i++) {
-                            if (items[chestID].dropQty) {
-                                avgQty = (items[chestID].dropQty[i] + 1) / 2;
-                            } else {
-                                avgQty = 1;
-                            }
-                            gpWeight += ((this.shouldSell(items[chestID].dropTable[i][0])) ? items[items[chestID].dropTable[i][0]].sellsFor : 0) * avgQty * items[chestID].dropTable[i][1];
-                            totWeight += items[chestID].dropTable[i][1];
-                        }
+                        avgQty = 1;
                     }
-                    return gpWeight / totWeight;
-                } else {
-                    return 0;
+                    gpWeight += avgQty * items[items[chestID].dropTable[i][0]].sellsFor * items[chestID].dropTable[i][1];
+                    totWeight += items[chestID].dropTable[i][1];
                 }
+                return gpWeight / totWeight;
             }
 
             /**
@@ -371,7 +139,7 @@
 
                 // loot and signet are affected by loot chance
                 monsterValue += this.computeDropTableValue(monsterID);
-                if (this.currentSim.canTopazDrop && this.shouldSell(CONSTANTS.item.Signet_Ring_Half_B)) {
+                if (this.currentSim.canTopazDrop) {
                     monsterValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(monsterID) / 500000;
                 }
                 monsterValue *= this.computeLootChance(monsterID);
@@ -392,36 +160,30 @@
              */
             computeDungeonValue(dungeonID) {
                 let dungeonValue = 0;
-                if (this.sellLoot !== 'None') {
-                    // TODO: should double everything that appears in the droptable of the boss monster, not just chests
-                    DUNGEONS[dungeonID].rewards.forEach((reward) => {
-                        if (items[reward].canOpen) {
-                            dungeonValue += this.computeChestOpenValue(reward) * this.currentSim.lootBonus;
-                        } else {
-                            if (this.sellLoot === 'All') {
-                                dungeonValue += items[reward].sellsFor;
-                            } else {
-                                dungeonValue += ((this.shouldSell(reward)) ? items[reward].sellsFor : 0);
-                            }
-                        }
+                // TODO: should double everything that appears in the droptable of the boss monster, not just chests
+                DUNGEONS[dungeonID].rewards.forEach((reward) => {
+                    if (items[reward].canOpen) {
+                        dungeonValue += this.computeChestOpenValue(reward) * this.currentSim.lootBonus;
+                    } else {
+                        dungeonValue += items[reward].sellsFor;
+                    }
+                });
+                // Shards
+                if (godDungeonID.includes(dungeonID)) {
+                    let shardCount = 0;
+                    const shardID = MONSTERS[DUNGEONS[dungeonID].monsters[0]].bones;
+                    DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
+                        shardCount += MONSTERS[monsterID].boneQty || 1;
                     });
-                    // Shards
-                    if (godDungeonID.includes(dungeonID)) {
-                        let shardCount = 0;
-                        const shardID = MONSTERS[DUNGEONS[dungeonID].monsters[0]].bones;
-                        DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
-                            shardCount += MONSTERS[monsterID].boneQty || 1;
-                        });
-                        shardCount *= this.currentSim.lootBonus;
-                        if (this.convertShards) {
-                            const chestID = items[shardID].trimmedItemID;
-                            dungeonValue += shardCount / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
-                        } else {
-                            dungeonValue += this.shouldSell(shardID) ? shardCount * items[shardID].sellsFor : 0;
-                        }
+                    shardCount *= this.currentSim.lootBonus;
+                    if (this.convertShards) {
+                        const chestID = items[shardID].trimmedItemID;
+                        dungeonValue += shardCount / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
+                    } else {
+                        dungeonValue += shardCount * items[shardID].sellsFor;
                     }
                 }
-                if (this.currentSim.canTopazDrop && this.shouldSell(CONSTANTS.item.Signet_Ring_Half_B)) {
+                if (this.currentSim.canTopazDrop) {
                     dungeonValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1]) / 500000;
                 }
                 dungeonValue += this.computeAverageCoins(DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1]);
@@ -466,7 +228,7 @@
                                 if (this.convertShards) {
                                     const chestID = items[shardID].trimmedItemID;
                                     gpPerKill += boneQty * this.currentSim.lootBonus / items[chestID].itemsRequired[0][1] * this.computeChestOpenValue(chestID);
-                                } else if (this.shouldSell(shardID)) {
+                                } else {
                                     gpPerKill += boneQty * this.currentSim.lootBonus * items[shardID].sellsFor;
                                 }
                             }
