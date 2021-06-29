@@ -306,7 +306,6 @@
                     }
                 }
 
-                let division;
                 let Ndivs;
                 let divMax;
                 let divPower;
@@ -325,14 +324,13 @@
                         closestRatio = 0.1;
                     }
                     divPower = Math.floor(Math.log10(barMax));
-                    division = closestRatio * Math.pow(10, divPower);
+                    const division = closestRatio * Math.pow(10, divPower);
                     Ndivs = Math.ceil(barMax / division);
                     divMax = Ndivs * division;
                 } else {
                     divMax = 1;
                     divPower = 0;
                     Ndivs = 10;
-                    division = 0.1;
                     closestRatio = 0.1;
                 }
                 // Modify in reverse
