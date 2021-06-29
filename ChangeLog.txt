@@ -1,3 +1,15 @@
+v1.4.2
+    Changes:
+    - Remove placeholder monsters from ITM, resolves #14
+    - Implement Ahrenia affliction, progresses #14
+    - Add "Simulate Selected" button, implements #47
+    - Show reason for simulation failure
+    - Remove "per item" loot sell options, resolves #45
+    - Remove superfluous plot options
+    - Add god dungeon shard drops to the loot interface, implements #48
+    - Fix loot dropdown sorting
+    - Fix Cloudburst staff max hit increase, fixes #49
+
 v1.4.1
     Changes:
     - Fix settings compatibility with v1.3.x
