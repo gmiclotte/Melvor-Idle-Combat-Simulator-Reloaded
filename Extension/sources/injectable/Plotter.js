@@ -78,11 +78,11 @@
                 }
 
                 this.barBottomNames.push('Dungeons');
-                this.barBottomLength.push(DUNGEONS.length);
-                totBars += DUNGEONS.length;
-                for (let i = 0; i < DUNGEONS.length; i++) {
+                this.barBottomLength.push(MICSR.dungeons.length);
+                totBars += MICSR.dungeons.length;
+                for (let i = 0; i < MICSR.dungeons.length; i++) {
                     this.barNames.push(this.parent.getDungeonName(i));
-                    this.barImageSrc.push(DUNGEONS[i].media);
+                    this.barImageSrc.push(MICSR.dungeons[i].media);
                 }
 
                 this.barBottomNames.push('Auto Slayer');
@@ -354,9 +354,9 @@
                         barName = MONSTERS[monsterID].name;
                     } else {
                         if (this.parent.barIsDungeon(barIndex)) {
-                            barName = DUNGEONS[this.parent.barMonsterIDs[barIndex]].name;
+                            barName = MICSR.dungeons[this.parent.barMonsterIDs[barIndex]].name;
                         } else if (this.parent.barIsTask(barIndex)) {
-                            barName = this.parent.slayerTasks[this.parent.barMonsterIDs[barIndex] - DUNGEONS.length].display;
+                            barName = this.parent.slayerTasks[this.parent.barMonsterIDs[barIndex] - MICSR.dungeons.length].display;
                         } else {
                             barName = MONSTERS[this.parent.barMonsterIDs[barIndex]].name;
                         }
@@ -422,7 +422,7 @@
 
             /**
              * Changes the plot display to individual dungeon monsters
-             * @param {number} dungeonID The index of DUNGEONS
+             * @param {number} dungeonID The index of MICSR.dungeons
              */
             displayDungeon(dungeonID) {
                 // Loop through each bar and enable/disable as required
@@ -510,7 +510,7 @@
                         this.xAxisCrosses[i].style.display = '';
                     } else if (this.parent.barIsDungeon(i) && !this.parent.simulator.dungeonSimFilter[this.parent.barMonsterIDs[i]]) {
                         this.xAxisCrosses[i].style.display = '';
-                    } else if (this.parent.barIsTask(i) && !this.parent.simulator.slayerSimFilter[this.parent.barMonsterIDs[i] - DUNGEONS.length]) {
+                    } else if (this.parent.barIsTask(i) && !this.parent.simulator.slayerSimFilter[this.parent.barMonsterIDs[i] - MICSR.dungeons.length]) {
                         this.xAxisCrosses[i].style.display = '';
                     } else {
                         this.xAxisCrosses[i].style.display = 'none';

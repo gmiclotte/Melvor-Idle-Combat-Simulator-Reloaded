@@ -98,7 +98,7 @@
                 }
                 /** @type {MonsterSimResult[]} */
                 this.dungeonSimData = [];
-                for (let i = 0; i < DUNGEONS.length; i++) {
+                for (let i = 0; i < MICSR.dungeons.length; i++) {
                     this.dungeonSimData.push(newSimData(false));
                     this.dungeonSimFilter.push(true);
                 }
@@ -239,7 +239,7 @@
             }
 
             /**
-             * Iterate through all the combatAreas and DUNGEONS to create a set of monsterSimData and dungeonSimData
+             * Iterate through all the combatAreas and MICSR.dungeons to create a set of monsterSimData and dungeonSimData
              */
             simulateCombat(single) {
                 this.setupCurrentSim(single);
@@ -317,12 +317,12 @@
                 let dungeonID = undefined;
                 if (!this.parent.isViewingDungeon && this.parent.barIsDungeon(this.parent.selectedBar)) {
                     dungeonID = this.parent.barMonsterIDs[this.parent.selectedBar];
-                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < DUNGEONS.length) {
+                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID < MICSR.dungeons.length) {
                     dungeonID = this.parent.viewedDungeonID;
                 }
                 if (dungeonID !== undefined) {
                     if (this.dungeonSimFilter[dungeonID]) {
-                        DUNGEONS[dungeonID].monsters.forEach(monsterID => {
+                        MICSR.dungeons[dungeonID].monsters.forEach(monsterID => {
                             this.pushMonsterToQueue(monsterID);
                         });
                     }
@@ -331,9 +331,9 @@
                 // slayer area
                 let taskID = undefined;
                 if (!this.parent.isViewingDungeon && this.parent.barIsTask(this.parent.selectedBar)) {
-                    taskID = this.parent.barMonsterIDs[this.parent.selectedBar] - DUNGEONS.length;
-                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID >= DUNGEONS.length) {
-                    taskID = this.parent.viewedDungeonID - DUNGEONS.length;
+                    taskID = this.parent.barMonsterIDs[this.parent.selectedBar] - MICSR.dungeons.length;
+                } else if (this.parent.isViewingDungeon && this.parent.viewedDungeonID >= MICSR.dungeons.length) {
+                    taskID = this.parent.viewedDungeonID - MICSR.dungeons.length;
                 }
                 if (taskID !== undefined) {
                     if (this.slayerSimFilter[taskID]) {
@@ -410,10 +410,10 @@
                     });
                 });
                 // Queue simulation of monsters in dungeons
-                for (let i = 0; i < DUNGEONS.length; i++) {
+                for (let i = 0; i < MICSR.dungeons.length; i++) {
                     if (this.dungeonSimFilter[i]) {
-                        for (let j = 0; j < DUNGEONS[i].monsters.length; j++) {
-                            const monsterID = DUNGEONS[i].monsters[j];
+                        for (let j = 0; j < MICSR.dungeons[i].monsters.length; j++) {
+                            const monsterID = MICSR.dungeons[i].monsters[j];
                             this.pushMonsterToQueue(monsterID);
                         }
                     }
@@ -762,8 +762,8 @@
                 this.computeAllRuneUsage();
                 this.computePotionUsage(this.currentSim.combatData, this.monsterSimData);
                 // Perform calculation of dungeon stats
-                for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
-                    this.computeAverageSimData(this.dungeonSimFilter[dungeonId], this.dungeonSimData[dungeonId], DUNGEONS[dungeonId].monsters);
+                for (let dungeonId = 0; dungeonId < MICSR.dungeons.length; dungeonId++) {
+                    this.computeAverageSimData(this.dungeonSimFilter[dungeonId], this.dungeonSimData[dungeonId], MICSR.dungeons[dungeonId].monsters);
                 }
                 for (let slayerTaskID = 0; slayerTaskID < this.slayerTaskMonsters.length; slayerTaskID++) {
                     this.computeAverageSimData(this.slayerSimFilter[slayerTaskID], this.slayerSimData[slayerTaskID], this.slayerTaskMonsters[slayerTaskID]);
@@ -1028,7 +1028,7 @@
                         });
                     });
                     // Perform simulation of monsters in dungeons
-                    for (let i = 0; i < DUNGEONS.length; i++) {
+                    for (let i = 0; i < MICSR.dungeons.length; i++) {
                         if (isKillTime) dataMultiplier = this.dungeonSimData[i].killTimeS;
                         dataSet.push((this.dungeonSimFilter[i] && this.dungeonSimData[i].simSuccess) ? this.dungeonSimData[i][keyValue] * dataMultiplier : NaN);
                     }
@@ -1037,11 +1037,11 @@
                         if (isKillTime) dataMultiplier = this.slayerSimData[i].killTimeS;
                         dataSet.push((this.slayerSimFilter[i] && this.slayerSimData[i].simSuccess) ? this.slayerSimData[i][keyValue] * dataMultiplier : NaN);
                     }
-                } else if (this.parent.viewedDungeonID < DUNGEONS.length) {
+                } else if (this.parent.viewedDungeonID < MICSR.dungeons.length) {
                     // dungeons
                     const dungeonID = this.parent.viewedDungeonID;
                     const isSignet = keyValue === 'signetChance';
-                    DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
+                    MICSR.dungeons[dungeonID].monsters.forEach((monsterID) => {
                         if (!isSignet) {
                             if (isKillTime) dataMultiplier = this.monsterSimData[monsterID].killTimeS;
                             dataSet.push((this.monsterSimData[monsterID].simSuccess) ? this.monsterSimData[monsterID][keyValue] * dataMultiplier : NaN);
@@ -1050,12 +1050,12 @@
                         }
                     });
                     if (isSignet) {
-                        const bossId = DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1];
+                        const bossId = MICSR.dungeons[dungeonID].monsters[MICSR.dungeons[dungeonID].monsters.length - 1];
                         dataSet[dataSet.length - 1] = (this.monsterSimData[bossId].simSuccess) ? this.monsterSimData[bossId][keyValue] * dataMultiplier : NaN;
                     }
                 } else {
                     // slayer tasks
-                    const taskID = this.parent.viewedDungeonID - DUNGEONS.length;
+                    const taskID = this.parent.viewedDungeonID - MICSR.dungeons.length;
                     const isSignet = keyValue === 'signetChance';
                     this.slayerTaskMonsters[taskID].forEach(monsterID => {
                         if (!isSignet) {
@@ -1088,22 +1088,22 @@
                         });
                     });
                     // Perform simulation of monsters in dungeons
-                    for (let i = 0; i < DUNGEONS.length; i++) {
+                    for (let i = 0; i < MICSR.dungeons.length; i++) {
                         dataSet.push(this.dungeonSimData[i]);
                     }
                     // Perform simulation of monsters in slayer tasks
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
                         dataSet.push(this.slayerSimData[i]);
                     }
-                } else if (this.parent.viewedDungeonID < DUNGEONS.length) {
+                } else if (this.parent.viewedDungeonID < MICSR.dungeons.length) {
                     // dungeons
                     const dungeonID = this.parent.viewedDungeonID;
-                    DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
+                    MICSR.dungeons[dungeonID].monsters.forEach((monsterID) => {
                         dataSet.push(this.monsterSimData[monsterID]);
                     });
                 } else {
                     // slayer tasks
-                    const taskID = this.parent.viewedDungeonID - DUNGEONS.length;
+                    const taskID = this.parent.viewedDungeonID - MICSR.dungeons.length;
                     this.slayerTaskMonsters[taskID].forEach(monsterID => {
                         dataSet.push(this.monsterSimData[monsterID]);
                     });
@@ -1181,13 +1181,13 @@
                     area.monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, this.monsterSimFilter, this.monsterSimData)));
                 });
                 // Dungeons
-                for (let dungeonId = 0; dungeonId < DUNGEONS.length; dungeonId++) {
+                for (let dungeonId = 0; dungeonId < MICSR.dungeons.length; dungeonId++) {
                     // dungeon
                     exportString.push(this.exportEntity(exportOptions, dungeonId, this.dungeonSimFilter, this.dungeonSimData, false, this.parent.getDungeonName(dungeonId)));
                     // dungeon monsters
                     if (exportOptions.dungeonMonsters) {
-                        const dungeonMonsterFilter = Object.fromEntries(DUNGEONS[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
-                        DUNGEONS[dungeonId].monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, dungeonMonsterFilter, this.monsterSimData, true)));
+                        const dungeonMonsterFilter = Object.fromEntries(MICSR.dungeons[dungeonId].monsters.map((id) => [id, this.dungeonSimFilter[dungeonId]]));
+                        MICSR.dungeons[dungeonId].monsters.forEach(monsterID => exportString.push(this.exportEntity(exportOptions, monsterID, dungeonMonsterFilter, this.monsterSimData, true)));
                     }
                 }
                 // TODO: export for auto slayer
@@ -1222,7 +1222,7 @@
                     }
                 }
                 // Perform simulation of monsters in dungeons and auto slayer
-                for (let i = 0; i < DUNGEONS.length; i++) {
+                for (let i = 0; i < MICSR.dungeons.length; i++) {
                     enterSet.push(true);
                 }
                 for (let i = 0; i < this.slayerTaskMonsters.length; i++) {

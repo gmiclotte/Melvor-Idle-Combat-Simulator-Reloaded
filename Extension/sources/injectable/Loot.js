@@ -161,7 +161,7 @@
             computeDungeonValue(dungeonID) {
                 let dungeonValue = 0;
                 // TODO: should double everything that appears in the droptable of the boss monster, not just chests
-                DUNGEONS[dungeonID].rewards.forEach((reward) => {
+                MICSR.dungeons[dungeonID].rewards.forEach((reward) => {
                     if (items[reward].canOpen) {
                         dungeonValue += this.computeChestOpenValue(reward) * this.currentSim.lootBonus;
                     } else {
@@ -171,8 +171,8 @@
                 // Shards
                 if (godDungeonID.includes(dungeonID)) {
                     let shardCount = 0;
-                    const shardID = MONSTERS[DUNGEONS[dungeonID].monsters[0]].bones;
-                    DUNGEONS[dungeonID].monsters.forEach((monsterID) => {
+                    const shardID = MONSTERS[MICSR.dungeons[dungeonID].monsters[0]].bones;
+                    MICSR.dungeons[dungeonID].monsters.forEach((monsterID) => {
                         shardCount += MONSTERS[monsterID].boneQty || 1;
                     });
                     shardCount *= this.currentSim.lootBonus;
@@ -184,9 +184,9 @@
                     }
                 }
                 if (this.currentSim.canTopazDrop) {
-                    dungeonValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1]) / 500000;
+                    dungeonValue += items[CONSTANTS.item.Signet_Ring_Half_B].sellsFor * MICSR.getMonsterCombatLevel(MICSR.dungeons[dungeonID].monsters[MICSR.dungeons[dungeonID].monsters.length - 1]) / 500000;
                 }
-                dungeonValue += this.computeAverageCoins(DUNGEONS[dungeonID].monsters[DUNGEONS[dungeonID].monsters.length - 1]);
+                dungeonValue += this.computeAverageCoins(MICSR.dungeons[dungeonID].monsters[MICSR.dungeons[dungeonID].monsters.length - 1]);
                 return dungeonValue;
             }
 
@@ -215,8 +215,8 @@
              */
             updateGPData() {
                 // Set data for monsters in combat zones
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < MICSR.dungeons.length) {
+                    MICSR.dungeons[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
@@ -259,7 +259,7 @@
                         area.monsters.forEach(monsterID => updateMonsterGP(monsterID));
                     });
                     // Dungeons
-                    for (let i = 0; i < DUNGEONS.length; i++) {
+                    for (let i = 0; i < MICSR.dungeons.length; i++) {
                         if (!this.dungeonSimData[i]) {
                             return;
                         }
@@ -279,8 +279,8 @@
              * Updates the amount of slayer xp earned when killing monsters
              */
             updateSlayerXP() {
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < MICSR.dungeons.length) {
+                    MICSR.dungeons[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
@@ -325,8 +325,8 @@
              * Updates the amount of slayer coins earned when killing monsters
              */
             updateSlayerCoins() {
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < MICSR.dungeons.length) {
+                    MICSR.dungeons[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
@@ -367,8 +367,8 @@
                     area.monsters.forEach(monsterID => updateMonsterSlayerCoins(monsterID, this.monsterSimData[monsterID]));
                 });
                 // dungeon
-                for (let i = 0; i < DUNGEONS.length; i++) {
-                    const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
+                for (let i = 0; i < MICSR.dungeons.length; i++) {
+                    const monsterID = MICSR.dungeons[i].monsters[MICSR.dungeons[i].monsters.length - 1];
                     updateMonsterSlayerCoins(monsterID, this.dungeonSimData[i]);
                 }
                 // auto slayer
@@ -381,8 +381,8 @@
              * Updates the chance to receive your selected loot when killing monsters
              */
             updateDropChance() {
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < MICSR.dungeons.length) {
+                    MICSR.dungeons[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
@@ -408,10 +408,10 @@
                         area.monsters.forEach(monsterID => updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]));
                     });
                     // compute dungeon drop rates
-                    for (let dungeonID = 0; dungeonID < DUNGEONS.length; dungeonID++) {
-                        const monsterList = DUNGEONS[dungeonID].monsters;
+                    for (let dungeonID = 0; dungeonID < MICSR.dungeons.length; dungeonID++) {
+                        const monsterList = MICSR.dungeons[dungeonID].monsters;
                         if (godDungeonID.includes(dungeonID)) {
-                            DUNGEONS[dungeonID].monsters.forEach(monsterID => {
+                            MICSR.dungeons[dungeonID].monsters.forEach(monsterID => {
                                 updateMonsterDropChance(monsterID, this.monsterSimData[monsterID]);
                             });
                             this.setMonsterListAverageDropRate('dropChance', this.dungeonSimData[dungeonID], monsterList);
@@ -535,8 +535,8 @@
              * Updates the chance to receive signet when killing monsters
              */
             updateSignetChance() {
-                if (this.app.isViewingDungeon && this.app.viewedDungeonID < DUNGEONS.length) {
-                    DUNGEONS[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
+                if (this.app.isViewingDungeon && this.app.viewedDungeonID < MICSR.dungeons.length) {
+                    MICSR.dungeons[this.app.viewedDungeonID].monsters.forEach((monsterID) => {
                         if (!this.monsterSimData[monsterID]) {
                             return;
                         }
@@ -562,8 +562,8 @@
                     slayerAreas.forEach((area) => {
                         area.monsters.forEach(monsterID => updateMonsterSignetChance(monsterID, this.monsterSimData[monsterID]));
                     });
-                    for (let i = 0; i < DUNGEONS.length; i++) {
-                        const monsterID = DUNGEONS[i].monsters[DUNGEONS[i].monsters.length - 1];
+                    for (let i = 0; i < MICSR.dungeons.length; i++) {
+                        const monsterID = MICSR.dungeons[i].monsters[MICSR.dungeons[i].monsters.length - 1];
                         updateMonsterSignetChance(monsterID, this.dungeonSimData[i]);
                     }
                     for (let i = 0; i < this.slayerTaskMonsters.length; i++) {
@@ -630,14 +630,14 @@
                         }, 1);
                         simResult.petChance *= 100;
                     });
-                    DUNGEONS.forEach((_, dungeonId) => {
+                    MICSR.dungeons.forEach((_, dungeonId) => {
                         const dungeonResult = this.dungeonSimData[dungeonId];
                         if (!dungeonResult.simSuccess || this.petSkill === 'Slayer') {
                             dungeonResult.petChance = 0;
                             return;
                         }
                         const timePeriod = (this.app.timeMultiplier === -1) ? dungeonResult.killTimeS : this.app.timeMultiplier;
-                        dungeonResult.petChance = 1 - DUNGEONS[dungeonId].monsters.reduce((cumChanceToNotGet, monsterID) => {
+                        dungeonResult.petChance = 1 - MICSR.dungeons[dungeonId].monsters.reduce((cumChanceToNotGet, monsterID) => {
                             const monsterResult = this.monsterSimData[monsterID];
                             const timeRatio = monsterResult.killTimeS / dungeonResult.killTimeS;
                             const petRolls = monsterResult.petRolls[this.petSkill] || monsterResult.petRolls.other;

@@ -79,6 +79,10 @@
         //  but other than that it should be fine
         MICSR.equipmentSlot.SummonRight = Object.keys(MICSR.equipmentSlot).length;
 
+        MICSR.dungeons = [];
+        DUNGEONS.forEach(dungeon => MICSR.dungeons.push({...dungeon}));
+        MICSR.dungeons[CONSTANTS.dungeon.Into_the_Mist].monsters = [147, 148, 149];
+
         /**
          }
          * Formats a number with the specified number of sigfigs, Addings suffixes as required
