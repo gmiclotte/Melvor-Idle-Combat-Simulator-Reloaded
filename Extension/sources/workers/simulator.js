@@ -644,7 +644,7 @@
             // if selected special has active buff without turns, disable any active buffs
             if (enemy.currentSpecial.activeBuffs && enemy.currentSpecial.activeBuffTurns === undefined) {
                 enemy.buffTurns = 0;
-                postAttack(stats, enemy, player, stats.player, stats.enemy);
+                postAttack(stats, enemy, player);
             }
             // don't stack active buffs
             if (enemy.activeBuffs && enemy.currentSpecial.activeBuffs) {
@@ -665,7 +665,7 @@
         enemyDoAttack(stats, player, enemy, isSpecial, true);
         computeTempModifiers(stats, player, enemy, -1);
         multiAttackTimer(stats, enemy);
-        postAttack(stats, enemy, player, stats.player, stats.enemy);
+        postAttack(stats, enemy, player);
     }
 
     function setupMultiAttack(actor, target) {
@@ -702,7 +702,7 @@
         stats.enemyAttackCalls++;
         enemyDoAttack(stats, player, enemy, true, false);
         multiAttackTimer(stats, enemy);
-        postAttack(stats, enemy, player, stats.player, stats.enemy);
+        postAttack(stats, enemy, player);
         if (!enemy.isAttacking && enemy.intoTheMist) {
             enemy.intoTheMist = false;
             enemy.increasedDamageReduction = 0;
@@ -1044,7 +1044,7 @@
         actor.currentSpeed = speed;
     }
 
-    function postAttack(stats, actor, target, targetStats, actorStats) {
+    function postAttack(stats, actor, target) {
         if (actor.isAttacking && actor.attackCount < actor.countMax) {
             // next attack is part of multi attack, so don't advance timers
             return;
@@ -1170,7 +1170,7 @@
         }
         playerDoAttack(stats, player, enemy, isSpecial, false);
         multiAttackTimer(stats, player);
-        postAttack(stats, player, enemy, stats.enemy, stats.player);
+        postAttack(stats, player, enemy);
     }
 
     function playerContinueAction(stats, player, enemy) {
@@ -1180,7 +1180,7 @@
         }
         playerDoAttack(stats, player, enemy, true, true);
         multiAttackTimer(stats, player);
-        postAttack(stats, player, enemy, stats.enemy, stats.player);
+        postAttack(stats, player, enemy);
     }
 
     function healDamage(stats, actor, target, damage) {
