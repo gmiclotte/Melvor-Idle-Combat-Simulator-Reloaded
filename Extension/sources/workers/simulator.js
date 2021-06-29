@@ -666,6 +666,10 @@
         computeTempModifiers(stats, player, enemy, -1);
         multiAttackTimer(stats, enemy);
         postAttack(stats, enemy, player);
+        if ([147, 148, 149].includes(stats.enemy.monsterID) && player.afflictedStacks < 50 && Math.random() < 0.70) {
+            player.afflictedStacks++;
+            setPlayerMaxHitPoints(stats, player);
+        }
     }
 
     function setupMultiAttack(actor, target) {
@@ -1830,8 +1834,6 @@
         common.meleeEvasionDebuff = 0;
         common.rangedEvasionDebuff = 0;
         common.decreasedAccuracy = 0;
-        // hp
-        common.maxHitpoints = stats.maxHitpoints | (stats.baseMaxHitpoints * numberMultiplier);
         // recompute flags
         common.recompute = {
             speed: true,
@@ -1876,6 +1878,9 @@
         player.attackSpeedBuff = stats.player.decreasedAttackSpeed;
         // summon timer
         player.summonTimer = stats.player.summoningMaxHit > 0 ? 3000 : Infinity;
+        // ITM affliction stacks
+        player.afflictedStacks = 0;
+        setPlayerMaxHitPoints(stats, player);
         // init
         player.actionsTaken = 0;
     }
@@ -1944,6 +1949,8 @@
         resetCommonStats(enemy, stats.enemy);
         enemy.isPlayer = false;
         enemy.monsterID = stats.enemy.monsterID;
+        // hp
+        enemy.maxHitpoints = stats.enemy.baseMaxHitpoints * numberMultiplier;
         enemy.hitpoints = enemy.maxHitpoints;
         enemy.damageReduction = 0;
         enemy.reflectMelee = 0;
@@ -2308,6 +2315,18 @@
             maxHit += mergePlayerModifiers(player, 'MaxHitFlat') * numberMultiplier;
         }
         player.maxHit = Math.floor(maxHit * player.damageModifier);
+    }
+
+    function setPlayerMaxHitPoints(stats, player) {
+        let maxHitpoints = stats.player.maxHitpoints;
+        if (player.afflictedStacks > 0) {
+            maxHitpoints = Math.floor(maxHitpoints * (1 - player.afflictedStacks / 100));
+        }
+        if (maxHitpoints < numberMultiplier) {
+            maxHitpoints = numberMultiplier;
+        }
+        player.maxHitpoints = maxHitpoints;
+        player.hitpoints = Math.min(player.hitpoints, player.maxHitpoints);
     }
 
     /**

@@ -787,9 +787,10 @@
                 this.combatStats.damageReduction = this.calculatePlayerDamageReduction();
 
                 // Max Hitpoints
-                this.combatStats.maxHitpoints = this.playerLevels.Hitpoints;
-                this.combatStats.maxHitpoints += MICSR.getModifierValue(modifiers, 'MaxHitpoints');
-                this.combatStats.maxHitpoints *= this.numberMultiplier;
+                this.combatStats.baseMaxHitpoints = this.playerLevels.Hitpoints;
+                this.combatStats.baseMaxHitpoints += this.getSkillHiddenLevels(CONSTANTS.skill.Hitpoints);
+                this.combatStats.baseMaxHitpoints += MICSR.getModifierValue(modifiers, 'MaxHitpoints');
+                this.combatStats.maxHitpoints = this.combatStats.baseMaxHitpoints * this.numberMultiplier;
             }
 
             /**
