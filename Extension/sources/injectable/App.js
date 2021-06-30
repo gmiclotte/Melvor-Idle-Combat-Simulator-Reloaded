@@ -954,7 +954,7 @@
                 // apply undiscovered filter
                 if (this.dropListFilters.onlyUndiscovered) {
                     lootList = lootList.filter(itemID => {
-                        return itemStats[itemID].stats[CONSTANTS.itemStats.timesFound] === 0;
+                        return itemStats[itemID].stats[Stats.TimesFound] === 0;
                     });
                 }
                 // sort by name
